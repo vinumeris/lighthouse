@@ -1,0 +1,18 @@
+import "extended-bip70.proto";
+
+option java_package = "lighthouse.wallet";
+option java_outer_classname = "LHWalletProtos";
+
+message Extension {
+    repeated lighthouse.Pledge pledges = 1;
+    repeated lighthouse.Project projects = 2;
+
+    // We store the pledges we revoked, both for auditing reasons and so we can recognise a (possibly) scrubbed
+    // copy coming back to us.
+    //
+    // We can see revoked pledges when:
+    // (1) The pledge file is hanging around on disk somewhere we can see it.
+    // (2) Our pledge was handed back to us by a remote server, in case the server didn't notice the revocation tx
+    //     yet (e.g. it was not confirmed or we are racing the broadcast).
+    repeated lighthouse.Pledge revoked_pledges = 3;
+}

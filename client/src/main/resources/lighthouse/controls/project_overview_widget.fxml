@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1" fx:id="rootPane" onDragDetected="#dragDetected" onDragDone="#dragDone" maxWidth="650.0" styleClass="project-overview-widget" type="javafx.scene.layout.HBox" xmlns="http://javafx.com/javafx/8">
+    <children>
+        <VBox fx:id="vbox" HBox.hgrow="ALWAYS">
+            <children>
+                <StackPane fx:id="coverArea" alignment="BOTTOM_CENTER" minHeight="240">
+                    <ImageView fx:id="coverImage" fitHeight="240" fitWidth="650"/>
+                    <Pane maxHeight="50.0" maxWidth="1.7976931348623157E308" minWidth="-Infinity" styleClass="text-scrim-bottom" />
+                    <HBox fx:id="titleHBox" alignment="BOTTOM_CENTER">
+                        <children>
+                            <Label fx:id="titleLabel" maxWidth="Infinity" styleClass="project-title-label, drop-shadow-label" text="Project title goes here" HBox.hgrow="ALWAYS" />
+                            <Label fx:id="ownershipIcon" style="-fx-text-fill: white" text="" minWidth="40" alignment="CENTER_RIGHT">
+                                <tooltip>
+                                    <Tooltip styleClass="default-font" text="You created this project" />
+                                </tooltip>
+                            </Label>
+                        </children>
+                        <padding>
+                            <Insets bottom="10.0" left="10.0" right="10.0" top="0.0" />
+                        </padding>
+                    </HBox>
+
+                    <!-- max width here doesn't internationalize properly: need something that refuses to be resized beyond its max size -->
+                    <HBox spacing="15" alignment="CENTER_RIGHT" StackPane.alignment="TOP_RIGHT" fx:id="loadingIndicator" maxWidth="50" maxHeight="50" styleClass="project-overview-loading-indicator">
+                        <children>
+                            <Text text="Loading ..." fill="white"/>
+                            <ProgressIndicator progress="-1" minWidth="35" maxHeight="35"/>
+                        </children>
+                        <padding>
+                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                        </padding>
+                        <StackPane.margin>
+                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                        </StackPane.margin>
+                    </HBox>
+
+                </StackPane>
+                <Line fx:id="progressLine" startX="3.0" endX="${rootPane.width - 70}" startY="${coverArea.height}" endY="${coverArea.height}" managed="false" styleClass="progress-line" />
+                <Circle fx:id="progressCircle" centerY="${coverArea.height}" centerX="${rootPane.width - 58}" radius="8" styleClass="progress-line" fill="transparent" managed="false"/>
+                <HBox prefWidth="200.0">
+                    <children>
+                        <TextFlow fx:id="blurbFlow" maxWidth="Infinity" lineSpacing="5">
+                            <children>
+                                <Label text="Some blah description"/>
+                            </children>
+                        </TextFlow>
+                    </children>
+                    <padding>
+                        <Insets bottom="10" left="10" right="10" top="15"/>
+                    </padding>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</fx:root>

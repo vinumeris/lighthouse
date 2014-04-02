@@ -1,0 +1,227 @@
+.cc-root {
+    -fx-background-color: white;
+}
+
+.currency-type-label {
+    -fx-font-weight: bold;
+}
+
+.balance-label {
+    -fx-font-size: 35;
+}
+
+.drag-drop-box {
+    -fx-fill: #ffffff;
+    -fx-stroke: #cccccc;
+    -fx-stroke-width: 4;
+    -fx-stroke-dash-array: 10 20;
+    -fx-stroke-type: inside;
+}
+
+.pledge-revoke-button:focused {
+    -fx-text-fill: black;
+    -fx-underline: true;
+}
+
+#contentScrollPane {
+    -fx-background-color: transparent;
+}
+
+.content-vbox {
+    -fx-background-color: transparent;
+    -fx-padding: 15 0 0 0;
+}
+
+.gradient-pane {
+    -fx-background-color: #3c777b;
+    -fx-background-image: url("low-point-lighthouse-darkgreen.jpg");
+    -fx-background-position: bottom right;
+    -fx-background-repeat: no-repeat;
+}
+
+.non-editable-textarea {
+    -fx-border-width: 0;
+    -fx-background-color: transparent;
+}
+
+.selected-slice {
+    -fx-border-color: black;
+    -fx-border-width: 2;
+}
+
+.project-title-label {
+    -fx-font-size: 30;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.project-overview-widget:hover .project-title-label {
+    -fx-underline: true;
+}
+
+.project-overview-widget {
+    -fx-cursor: hand;
+    -fx-border-color: derive(-vn-darkgreen, -40%);
+    -fx-background-color: #ffffffff;
+    -fx-effect: dropshadow(gaussian, grey, 3, 0.1, 1, 1);
+}
+
+.text-scrim-bottom {
+    -fx-background-color: linear-gradient(transparent, black);
+}
+
+.text-scrim-top {
+    -fx-background-color: linear-gradient(black, transparent);
+}
+
+.dotted-line {
+    -fx-stroke-dash-array: 1 2;
+    -fx-stroke: darkgrey;
+}
+
+.progress-line {
+    -fx-stroke: cornflowerblue;
+    -fx-stroke-width: 6;
+    -fx-fill: white;
+}
+
+.drop-shadow-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(one-pass-box, black, 8.5, 0.5, 0, 0);
+}
+
+.drop-shadow-labels Label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 19;
+    -fx-effect: dropshadow(one-pass-box, black, 8.5, 0.5, 0, 0);
+}
+
+.back-button {
+    -fx-background-color: #000000cc;
+    -fx-cursor: hand;
+}
+
+.back-button > .awesome {
+    -fx-text-fill: #ffffff;
+}
+
+.back-button:hover {
+    -fx-background-color: #ffffffbb;
+}
+
+.back-button:hover > .awesome {
+    -fx-text-fill: black;
+}
+
+
+.pledges-piechart .chart-pie {
+    -fx-border-width: 0;
+}
+
+#ownershipIcon > .awesome {
+    -fx-text-fill: white;
+}
+
+.image-overlay-label {
+    -fx-text-fill: white;
+    -fx-font-size: 13;
+    -fx-padding: 15;
+    -fx-background-color: #000000aa;
+    -fx-background-radius: 30;
+}
+
+.image-overlay-label:hover {
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.btc-label-block {
+    -fx-background-color: #426464;
+    -fx-padding: 7;
+    -fx-background-radius: 5;
+    -fx-text-fill: white;
+}
+
+.add-project-pane {
+    /*-fx-background-color: black, white;
+    -fx-background-insets: -1, 0;
+    -fx-background-radius: 6, 5;*/
+    -fx-border-radius: 6;
+    -fx-border-color: lightgray;
+    -fx-border-style: dashed;
+    -fx-padding: 30;
+}
+
+.add-project-pane > Label {
+    -fx-text-fill: white;
+}
+
+.add-project-pane > Button:cancel {
+    -fx-text-fill: darkslategrey;
+}
+
+/*.project-view-right-pane {*/
+    /*-fx-border-color: lightgray;*/
+    /*-fx-border-width: 0 0 0 1;*/
+/*}*/
+
+.project-info-area {
+    -fx-background-color: #3c777b;
+}
+
+.project-info-area Label {
+    -fx-text-fill: white;
+}
+
+.project-goal-area .pledged-label {
+    -fx-font-size: 16pt;
+    -fx-text-fill: lightgoldenrodyellow;
+}
+
+.project-goal-area .of-goal-label {
+    -fx-font-size: 10pt;
+}
+
+.extra-info-label {
+    -fx-font-size: 16pt;
+    -fx-font-weight: bold;
+}
+
+.project-pledgers-area {
+    -fx-border-width: 1 1 0 0;
+    -fx-border-color: black;
+}
+
+.project-funded-area {
+    -fx-border-width: 1 0 0 0;
+    -fx-border-color: black;
+}
+
+.project-view {
+    -fx-border-color: darkslategray;
+}
+
+.pledges-list, .pledged-list:focused {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+}
+
+.network-indicator {
+    -fx-background-color: grey;
+    -fx-font-size: 12;
+    -fx-background-radius: 3;
+    -fx-padding: 2 5 2 5;
+    -fx-text-fill: white;
+}
+
+#coverArea {
+    /* This only matters when the cover image is blurred for loading */
+    -fx-background-color: #3c777b;
+}
+
+.project-overview-loading-indicator {
+    -fx-background-color: #000000aa;
+    -fx-background-radius: 10;
+}

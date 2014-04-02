@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="828.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.AddProjectWindow">
+    <center>
+        <VBox>
+            <children>
+                <GridPane fx:id="createPane" hgap="45.0" maxWidth="1.7976931348623157E308" styleClass="window-pane" vgap="15.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
+                    </rowConstraints>
+                    <BorderPane.margin>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </BorderPane.margin>
+                    <children>
+                        <Label text="Project name" GridPane.rowIndex="1" />
+                        <Label alignment="TOP_CENTER" text="Description" GridPane.rowIndex="2" />
+                        <TextField fx:id="titleEdit" promptText="Example: Building a lighthouse" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextArea fx:id="descriptionEdit" prefWidth="200.0" styleClass="create-project-textarea" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label text="Goal amount" GridPane.rowIndex="3" />
+                        <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                            <children>
+                                <TextField fx:id="goalAmountEdit" alignment="CENTER_RIGHT" style="-fx-graphic: url('icon.png')" text="0.0" HBox.hgrow="ALWAYS" />
+                                <Label styleClass="btc-label-block" text="BTC" />
+                            </children>
+                        </HBox>
+                        <Label text="Server name" GridPane.rowIndex="5" />
+                        <TextField fx:id="serverNameEdit" promptText="(optional) Example: myserver.com" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label text="Address" GridPane.rowIndex="4" />
+                        <TextField fx:id="addressEdit" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <StackPane onDragDropped="#imageSelectorDropped" onDragOver="#imageSelectorDragOver" onMouseClicked="#imageSelectorClicked" GridPane.columnIndex="1">
+                            <children>
+                                <ImageView fx:id="coverImageView" fitHeight="160.0" fitWidth="432.0" pickOnBounds="true" styleClass="cover-image">
+                                    <image>
+                                        <Image url="@../default-cover-image.png" />
+                                    </image>
+                                </ImageView>
+                                <Label fx:id="coverImageLabel" styleClass="image-overlay-label" text="Drop a custom image or click here to open" />
+                                <Label fx:id="coverPhotoSiteLink" onMouseClicked="#openCoverPhotoFinder" style="-fx-padding: 10; -fx-background-color: #ffffffdd" styleClass="link-label" text="coverphotoz.com" StackPane.alignment="BOTTOM_RIGHT" />
+                            </children>
+                        </StackPane>
+                        <Label text="Cover image" />
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </VBox.margin>
+                </GridPane>
+            </children>
+            <BorderPane.margin>
+                <Insets />
+            </BorderPane.margin>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="10.0" styleClass="fat-buttons" BorderPane.alignment="CENTER">
+            <children>
+                <Button mnemonicParsing="false" onAction="#importClicked" text="Import from file" />
+                <Pane HBox.hgrow="ALWAYS" />
+                <Button cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
+                <Button fx:id="saveButton" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#saveClicked" text="Save" />
+            </children>
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+        </HBox>
+    </bottom>
+</BorderPane>

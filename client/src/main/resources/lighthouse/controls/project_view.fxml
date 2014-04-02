@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root prefHeight="522.0" prefWidth="846.0" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox fx:id="root" maxHeight="Infinity" maxWidth="Infinity" minWidth="-Infinity" prefHeight="565.0" prefWidth="595.0" style="-fx-background-color: white;" HBox.hgrow="ALWAYS">
+          <children>
+              <!-- Top image area: height is empirical on a Mac, other platforms may need tweaks -->
+              <VBox fillWidth="true" minHeight="162.0" AnchorPane.LeftAnchor="0" AnchorPane.RightAnchor="0" AnchorPane.TopAnchor="0">
+                  <children>
+                      <StackPane alignment="BOTTOM_CENTER" minHeight="162.0">
+                          <children>
+                              <Pane fx:id="coverImage" />
+                              <Pane maxHeight="100" styleClass="text-scrim-bottom" />
+                              <HBox>
+                                  <children>
+                                      <!-- Text within the image area -->
+                                      <VBox layoutX="14.0" layoutY="14.0" prefHeight="95.0" prefWidth="619.0" spacing="10.0" HBox.hgrow="ALWAYS">
+                                          <children>
+                                              <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                                  <children>
+                                                      <Button fx:id="backButton" mnemonicParsing="false" onAction="#backClicked" styleClass="back-button" text="" />
+                                                      <Label fx:id="projectTitle" styleClass="project-title-label, drop-shadow-label" text="A really really really really long title for a project that's kind of self indulgent" wrapText="true" HBox.hgrow="ALWAYS">
+                                                          <font>
+                                                              <Font size="25.0" />
+                                                          </font>
+                                                          <effect>
+                                                              <DropShadow height="10.0" radius="4.5" width="10.0" />
+                                                          </effect>
+                                                      </Label>
+                                                  </children>
+                                              </HBox>
+                                          </children>
+                                          <padding>
+                                              <Insets left="14" right="14" top="14" />
+                                          </padding>
+                                      </VBox>
+                                  </children>
+                              </HBox>
+                          </children>
+                      </StackPane>
+                      <!-- Drop shadow between image and rest of content area -->
+                      <Pane minHeight="8" mouseTransparent="true">
+                          <children>
+                              <Rectangle height="8.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="${root.width}">
+                                  <fill>
+                                      <LinearGradient endX="0.5432692307692308" endY="1.0" startX="0.5432692307692307">
+                                          <stops>
+                                              <Stop color="black" />
+                                              <Stop color="white" offset="0.8283761899119165" />
+                                              <Stop color="white" offset="1.0" />
+                                          </stops>
+                                      </LinearGradient>
+                                  </fill>
+                              </Rectangle>
+                          </children>
+                      </Pane>
+                  </children>
+              </VBox>
+      
+              <!-- Main content area -->
+              <HBox fx:id="bottomArea" prefHeight="378.0" prefWidth="595.0" spacing="20" style="-fx-padding: 15 15 15 15" VBox.vgrow="ALWAYS">
+                  <children>
+                      <VBox fx:id="rightVBox" spacing="10.0" HBox.hgrow="ALWAYS">
+                          <children>
+                              <TextFlow style="-fx-text-fill: black; -fx-padding: 5 0 0 0" lineSpacing="5" fx:id="description">
+                                  <children>
+                                      <Text text="Sample description" textAlignment="JUSTIFY" />
+                                  </children>
+                              </TextFlow>
+                              <!--<Line endX="${rightVBox.width}" startX="0.0" styleClass="dotted-line" />-->
+                              <PieChart fx:id="pieChart" labelLineLength="10.0" labelsVisible="false" legendVisible="false" prefHeight="100.0" prefWidth="100.0" startAngle="90" styleClass="pledges-piechart" VBox.vgrow="ALWAYS">
+                                  <effect>
+                                      <DropShadow color="#000000bb" />
+                                  </effect>
+                              </PieChart>
+                          </children>
+                      </VBox>
+                  </children>
+              </HBox>
+          </children>
+      </VBox>
+      <VBox fx:id="rightPane" fillWidth="true" styleClass="project-view-right-pane" HBox.hgrow="NEVER">
+         <children>
+            <VBox fx:id="projectGoalVBox">
+               <children>
+                  <HBox alignment="CENTER">
+                     <children>
+                        <Label fx:id="raisedAmountLabel" maxWidth="Infinity" style="-fx-font-weight: bold;" styleClass="pledged-label" text="0.13" />
+                        <Label styleClass="pledged-label" text=" BTC" />
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </HBox>
+                  <Label fx:id="goalAmountLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" styleClass="of-goal-label" text="PLEDGED OF %S BTC GOAL" />
+               </children>
+               <padding>
+                  <Insets bottom="15.0" />
+               </padding>
+               <styleClass>
+                  <String fx:value="project-goal-area" />
+                  <String fx:value="project-info-area" />
+               </styleClass>
+            </VBox>
+            <HBox styleClass="project-info-area">
+               <children>
+                  <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" styleClass="project-pledgers-area" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="numPledgersLabel" styleClass="extra-info-label" text="2" />
+                        <Label text="PLEDGERS" />
+                     </children>
+                     <padding>
+                        <Insets bottom="20.0" top="20.0" />
+                     </padding>
+                  </VBox>
+                  <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" styleClass="project-funded-area" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label fx:id="percentFundedLabel" styleClass="extra-info-label" text="74%" />
+                        <Label text="FUNDED" />
+                     </children>
+                     <padding>
+                        <Insets bottom="20.0" top="20.0" />
+                     </padding>
+                  </VBox>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+             <!-- Drop shadow between image and rest of content area -->
+             <Pane minHeight="8" mouseTransparent="true">
+                 <children>
+                     <Rectangle height="8.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="${rightPane.width}">
+                         <fill>
+                             <LinearGradient endX="0.5432692307692308" endY="1.0" startX="0.5432692307692307">
+                                 <stops>
+                                     <Stop color="#3c777b" />
+                                     <Stop color="white" offset="0.8283761899119165" />
+                                     <Stop color="white" offset="1.0" />
+                                 </stops>
+                             </LinearGradient>
+                         </fill>
+                     </Rectangle>
+                 </children>
+             </Pane>
+            <VBox style="-fx-background-color: white; -fx-border-color: lightgray; -fx-border-width: 0 0 0 1;" styleClass="fat-buttons">
+               <children>
+                  <Button fx:id="actionButton" defaultButton="true" maxWidth="Infinity" minHeight="50" mnemonicParsing="false" onAction="#actionClicked" prefHeight="46.0">
+                     <VBox.margin>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                     </VBox.margin>
+                  </Button>
+                  <StackPane minWidth="250.0">
+                     <children>
+                        <ListView fx:id="pledgesList" layoutX="14.0" layoutY="113.0" prefHeight="450.0" prefWidth="300.0" styleClass="pledges-list" />
+                        <VBox alignment="CENTER" fillWidth="true" mouseTransparent="true" prefHeight="285.0" prefWidth="250.0" spacing="10">
+                           <children>
+                              <Label fx:id="noPledgesLabel" text="No pledges yet!" />
+                              <ProgressIndicator fx:id="pledgeDownloadIndicator" visible="false" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </StackPane>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+</fx:root>

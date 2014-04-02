@@ -1,0 +1,202 @@
+/*
+ * Styles that are generic and not lighthouse specific, for any JavaFX app that looks a bit like a modern web app.
+ * Based on Modena. May do weird things if combined with other skins like AquaFX.
+ */
+
+
+
+/* Hack around the Modena theme that makes all scroll panes grey by default */
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.root {
+    -fx-font-family: NanumGothic;
+    -fx-font-size: 15;
+
+    -vn-darkgreen: #3c777b;
+}
+
+/********************************************************************************************************************
+ *
+ * Buttons
+ *
+ */
+
+.flat-button {
+    -fx-background-color: white;
+    -fx-padding: 0 0 0 0;
+    -fx-font-size: 10pt;
+}
+
+.flat-button:hover {
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.flat-button:focused {
+    -fx-font-weight: bold;
+}
+
+.fat-buttons Button {
+    -fx-padding: 10 15 10 15;
+    -fx-min-width: 100;
+    -fx-font-weight: bold;
+    -fx-base: whitesmoke;
+}
+
+.fat-buttons Button:default {
+    -fx-base: orange;
+    -fx-text-fill: white;
+}
+
+.fat-buttons Button:cancel {
+    -fx-background-color: white;
+    -fx-background-insets: 1;
+    -fx-border-color: lightgray;
+    -fx-border-radius: 3;
+    -fx-text-fill: black;
+}
+
+.fat-buttons Button:cancel:hover {
+    -fx-base: white;
+    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-text-fill: black;
+}
+
+/** take out the focus ring */
+.no-focus-button:focused {
+    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
+    -fx-background-radius: 3px, 3px, 2px, 1px;
+}
+
+.blue-button {
+    -fx-base: lightblue;
+    -fx-text-fill: darkslategrey;
+}
+.blue-button:disabled {
+    -fx-text-fill: white;
+}
+
+.green-button {
+    -fx-base: #62c462;
+    -fx-text-fill: darkslategrey;
+}
+.green-button:disabled {
+    -fx-text-fill: white;
+}
+
+/********************************************************************************************************************
+ *
+ * Text validation
+ *
+ */
+
+.text-field.validation_error, .text-area.validation_error .content, .date-picker.validation_error > .text-field {
+    -fx-background-color: red,
+    linear-gradient(
+            to bottom,
+            derive(#ff8986,40%) 5%,
+            derive(#ff8986,70%) 40%
+    );
+}
+
+
+/********************************************************************************************************************
+ *
+ * Windows
+ *
+ */
+
+
+/** Grey labels, more padded edits */
+.windows-root Label {
+    -fx-text-fill: grey;
+    -fx-font-weight: bold;
+}
+
+.windows-root TextField, .windows-root PasswordField, .windows-root .text-area .content {
+    -fx-padding: 7 7 7 7;
+}
+
+.windows-root {
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-font-family: NanumGothic;
+    -fx-font-size: 15;
+    -fx-effect: dropshadow(three-pass-box, black, 10, 0.0, 0, 0);
+}
+
+.windows-root > .titlebar {
+    -fx-background-color: -vn-darkgreen;
+    -fx-background-radius: 5 5 0 0;
+    -fx-padding: 10px 20px 10px 20px;
+}
+
+.windows-root > .titlebar > .title {
+    -fx-text-fill: white;
+    -fx-font-weight: normal;
+    -fx-font-size: 24;
+}
+
+.windows-x {
+    -fx-text-fill: black;
+    -fx-font-weight: normal;
+    -fx-font-size: 30;
+    -fx-font-family: FontAwesome;
+}
+.windows-x:hover {
+    -fx-cursor: hand;
+}
+
+.mnemonic-area *.text {
+    -fx-text-alignment: center;
+}
+
+.title-banner {
+    -fx-background-color: #b3fbc4;
+}
+
+.title-label {
+    -fx-background-color: darkseagreen;
+    -fx-text-fill: white;
+}
+
+.link-label {
+    -fx-text-fill: blue;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+/********************************************************************************************************************
+ *
+ * Info bar at the bottom of the screen.
+ *
+ */
+
+.info-bar {
+    -fx-background-color: linear-gradient(to bottom, black, darkslategray);
+}
+.info-bar > .notification-bar-item {
+    -fx-padding: 10;
+}
+.info-bar > .notification-bar-item > Label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13;
+}
+.info-bar > .notification-bar-item > .progress-bar > .bar {
+    -fx-padding: 8;
+}
+.info-bar > .notification-bar-item > .progress-bar > .track {
+    -fx-opacity: 0.0;
+}
+.info-bar > .notification-bar-item > .button {
+    -fx-base: orange;
+    -fx-font-weight: bold;
+    -fx-font-size: 12;
+    -fx-text-fill: white;
+    -fx-background-insets: 1;
+    -fx-background-radius: 5;
+}

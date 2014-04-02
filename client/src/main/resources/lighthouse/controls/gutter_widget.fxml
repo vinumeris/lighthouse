@@ -1,0 +1,39 @@
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+
+<?import javafx.scene.control.ProgressIndicator?>
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      prefWidth="Infinity" alignment="CENTER" styleClass="gutter-widget">
+    <children>
+        <HBox alignment="CENTER_RIGHT">
+            <children>
+                <Label text="by you" styleClass="pledged-by-label" maxWidth="Infinity"
+                       alignment="CENTER_LEFT" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="byYouValue" text="XX"/>
+                <Label fx:id="byYouValueBTC" text="BTC" styleClass="currency-type-label"/>
+            </children>
+        </HBox>
+        <HBox alignment="CENTER_RIGHT" fx:id="allValueBox">
+            <children>
+                <Label text="all" styleClass="pledged-by-label" maxWidth="Infinity"
+                       alignment="CENTER_LEFT" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="allValue" text="XX"/>
+                <Label fx:id="allBTC" text="BTC" styleClass="currency-type-label"/>
+                <ProgressIndicator fx:id="allLoading" prefHeight="20" prefWidth="20"/>
+            </children>
+        </HBox>
+        <HBox alignment="CENTER_RIGHT">
+            <children>
+                <Label text="goal" styleClass="pledged-by-label" maxWidth="Infinity"
+                       alignment="CENTER_LEFT" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="goalValue" text="XX"/>
+                <Label text="BTC" styleClass="currency-type-label"/>
+            </children>
+        </HBox>
+    </children>
+    <padding>
+        <Insets right="15" left="15"/>
+    </padding>
+</VBox>

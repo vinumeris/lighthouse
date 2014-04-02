@@ -1,0 +1,133 @@
+/*
+ * Authors: Mike Hearn
+ */
+
+//
+// Simple Bitcoin Payment Protocol messages
+//
+// Use fields 100+ for extensions;
+// to avoid conflicts, register extensions at:
+// https://en.bitcoin.it/wiki/Payment_Request
+//
+
+package lighthouse;
+
+option java_package = "lighthouse.protocol";
+
+option java_outer_classname = "LHProtos";
+
+// A Project is wire compatible with a BIP 70 PaymentRequest, and a Pledge is wire compatible with Payment.
+// However they are not identical and will not be properly handled by other programs: the similarity is for
+// convenience and to allow code reuse.
+
+message Output {
+    optional uint64 amount = 1 [default = 0]; // amount is integer-number-of-satoshis
+    required bytes script = 2; // usually one of the standard Script forms
+}
+
+// Stuff specific to Lighthouse
+message ProjectExtraDetails {
+    required string title = 1;
+
+    // If missing, a default image is used. If set, should be a JPEG file that looks good with a ratio of 650:200
+    // although actual pixel density should be larger than that.
+    optional bytes cover_image = 2;
+
+    // a secp256k1 public key that can be used as a lightweight way to prove ownership of this project. This is
+    // slightly redundant with the BIP70 signing mechanism except that this key is not connected to any form of
+    // identity: it's used only for telling the server to reveal un-scrubbed pledges so the client can claim.
+    // Usually this is initialised to a wallet key when the project is created.
+    optional bytes auth_key = 3;
+
+    // TODO: Contact details.
+}
+
+// Data used only by the owner. This format may change arbitrarily between Lighthouse versions or be totally different
+// if this protocol is implemented by another app. Clients should not attempt to interpret it unless they created it.
+message OwnerData {
+    // If auth_key might not be easily located by the project owner because it's beyond the lookahead zone that's
+    // pre-calculated when a wallet is restored from seed words, we stash the index here. It results in a minor
+    // privacy leak: for people who created bajillions of projects out of the same wallet it leaks how many they've
+    // created so far. However it means people can restore ownership of a project from the same file they made public
+    // and the seed words, making it more robust against data loss. For most users who don't create many projects it
+    // will be missing and thus not pose any privacy issues.
+    optional uint32 auth_key_index = 1;
+}
+
+message ProjectDetails {
+    optional string network = 1 [default = "main"]; // "main" or "test"
+    repeated Output outputs = 2; // Where payment should be sent
+    required uint64 time = 3; // Timestamp; when payment request created
+    optional uint64 expires = 4; // Timestamp; when this request should be considered invalid in seconds since the epoch
+    optional string memo = 5; // Human-readable description of request for the customer
+    optional string payment_url = 6; // URL to send Pledge and get PaymentACK
+    optional bytes merchant_data = 7;   // If present, serialized OwnerData.
+
+    required ProjectExtraDetails extra_details = 101;
+}
+
+message Project {
+    optional uint32 payment_details_version = 1 [default = 1];
+    optional string pki_type = 2 [default = "none"]; // none / x509+sha256 / x509+sha1
+    optional bytes pki_data = 3; // depends on pki_type
+    required bytes serialized_payment_details = 4; // PaymentDetails
+    optional bytes signature = 5; // pki-dependent signature
+}
+
+message X509Certificates {
+    repeated bytes certificate = 1; // DER-encoded X.509 certificate chain
+}
+
+message Pledge {
+    optional bytes merchant_data = 1; // Unused in Lighthouse.
+
+    // The pledge should come last. Dependencies that come beforehand will be broadcasted by the server, in server
+    // assisted mode. When not using a server the app broadcasts dependencies itself. Delegating dep broadcast to the
+    // server solves a race condition whereby your uploaded pledge might be seen as invalid because the server didn't
+    // see the dependency yet.
+    repeated bytes transactions = 2;
+
+
+    // TODO: Move this stuff to a submessage.
+    // NEW! This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+    required uint64 total_input_value = 101;
+    required string project_id = 102;
+    required uint64 timestamp = 103;
+    // Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+    // pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+    // twice, and check if it was already revoked in case the server didn't catch up yet.
+    optional bytes orig_hash = 104;
+    // In future: contact details.
+
+    // Ignored
+    repeated Output refund_to = 3;
+
+    optional string memo = 4; // Human-readable message for the project owner.
+
+}
+
+message PledgeACK {
+    required Pledge payment = 1; // Payment message that triggered this ACK
+    optional string memo = 2; // human-readable message for customer
+}
+
+// Something only returned in the interactive server use case.
+message ProjectStatus {
+    required string id = 1;
+
+    // Timestamp in seconds since the epoch when the status was vended.
+    required uint64 timestamp = 2;
+    required uint64 value_pledged_so_far = 3;
+
+    // Pledges with transaction data removed.
+    // TODO: Allow the project creator to decide that pledges should be public (implies anyone can close the contract
+    // when it's completed).
+    repeated Pledge pledges = 4;
+
+    // If present, contains tx hash of the contract transaction. Note that the client can often already detect this
+    // by simply watching the block chain for a payment to the project outputs, but when set this overrides the
+    // clients heuristics. All it's used for is creating a "View in block explorer" button in the UI.
+    optional bytes claimed_by = 5;
+
+    // TODO: Consider signing this BIP70 style so it can be used to form an audit trail.
+}

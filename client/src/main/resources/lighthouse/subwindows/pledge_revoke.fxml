@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.PledgeRevokeWindow">
+   <center>
+      <VBox alignment="CENTER" spacing="30.0">
+         <children>
+            <Label maxWidth="1.7976931348623157E308" text="Revoking a pledge returns the money to your wallet. This incurs a small miners fee because it requires making a Bitcoin transaction." textAlignment="JUSTIFY" wrapText="true" BorderPane.alignment="CENTER" />
+            <ProgressBar fx:id="revokeProgress" maxWidth="1.7976931348623157E308" prefWidth="200.0" progress="0.0" />
+         </children>
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </VBox>
+   </center>
+   <bottom>
+      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="15.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
+            <Button fx:id="confirmBtn" defaultButton="true" mnemonicParsing="false" onAction="#confirmClicked" text="Confirm" />
+         </children>
+         <BorderPane.margin>
+            <Insets left="30.0" right="30.0" />
+         </BorderPane.margin>
+      </HBox>
+   </bottom>
+</BorderPane>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.PledgeWindow">
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
+            <children>
+                <Button cancelButton="true" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
+                <Button fx:id="confirmButton" defaultButton="true" mnemonicParsing="false" onAction="#confirmClicked" text="Confirm" />
+            </children>
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
+        </HBox>
+    </bottom>
+    <center>
+        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="5" BorderPane.alignment="CENTER">
+            <children>
+                <Pane VBox.vgrow="ALWAYS" />
+                <Label style="-fx-font-size: 40;" text="Amount">
+                    <font>
+                        <Font size="31.0" />
+                    </font>
+                </Label>
+                <TextField fx:id="amountEdit" alignment="CENTER" promptText="44.0">
+                    <font>
+                        <Font size="44.0" />
+                    </font>
+                </TextField>
+                <Label fx:id="allMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#allMoneyClicked" styleClass="link-label" text="Maximum amount possible" />
+                <Pane VBox.vgrow="ALWAYS" />
+                <TextFlow>
+                    <children>
+                        <Text>Please note that a Bitcoin miner fee may need to be included to make a pledge.</Text>
+                    </children>
+                </TextFlow>
+            </children>
+            <padding>
+                <Insets left="30.0" right="30.0" />
+            </padding>
+        </VBox>
+    </center>
+</BorderPane>
