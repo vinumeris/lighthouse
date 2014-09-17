@@ -3,9 +3,8 @@
 set -e
 
 # Extract the version number.
-# ver=$( sed -n 's/^.*final int VERSION = //p' client/src/main/java/lighthouse/Main.java )
-# ver="${ver:0:${#ver}-1}"
-ver=1
+ver=$( sed -n 's/^.*final int VERSION = //p' client/src/main/java/lighthouse/Main.java )
+ver="${ver:0:${#ver}-1}"
 build=updates/builds/$ver.jar
 
 if [ ! -e "$build" ]; then
@@ -13,7 +12,7 @@ if [ ! -e "$build" ]; then
   exit 1
 fi
 
-jh=/Library/Java/JavaVirtualMachines/jdk1.8.0_20.jdk/Contents/Home/
+jh=$(/usr/libexec/java_home -v 1.8)
 $jh/bin/javapackager -deploy \
     -BappVersion=$ver \
     -Bmac.CFBundleIdentifier=com.vinumeris.lighthouse \
