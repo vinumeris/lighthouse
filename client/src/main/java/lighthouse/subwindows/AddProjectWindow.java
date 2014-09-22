@@ -216,8 +216,8 @@ public class AddProjectWindow {
     public void imageSelectorClicked(MouseEvent event) {
         log.info("Image selector clicked");
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select a JPEG file");
-        chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("JPEG images", "*.jpg", "*.jpeg", "*.png"));
+        chooser.setTitle("Select an image file");
+        chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Images (JPG/PNG/GIF)", "*.jpg", "*.jpeg", "*.png", "*.gif"));
         platformFiddleChooser(chooser);
         File result = chooser.showOpenDialog(Main.instance.mainStage);
         if (result == null) return;
