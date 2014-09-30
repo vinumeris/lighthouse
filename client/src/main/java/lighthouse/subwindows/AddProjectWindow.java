@@ -1,6 +1,6 @@
 package lighthouse.subwindows;
 
-import com.google.bitcoin.core.Address;
+import org.bitcoinj.core.Address;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HostAndPort;

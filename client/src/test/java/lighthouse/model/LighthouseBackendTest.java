@@ -1,11 +1,11 @@
 package lighthouse.model;
 
-import com.google.bitcoin.core.*;
-import com.google.bitcoin.store.BlockStoreException;
-import com.google.bitcoin.testing.FakeTxBuilder;
-import com.google.bitcoin.testing.InboundMessageQueuer;
-import com.google.bitcoin.testing.TestWithPeerGroup;
-import com.google.bitcoin.utils.BriefLogFormatter;
+import org.bitcoinj.core.*;
+import org.bitcoinj.store.BlockStoreException;
+import org.bitcoinj.testing.FakeTxBuilder;
+import org.bitcoinj.testing.InboundMessageQueuer;
+import org.bitcoinj.testing.TestWithPeerGroup;
+import org.bitcoinj.utils.BriefLogFormatter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -50,7 +50,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.google.bitcoin.testing.FakeTxBuilder.createFakeBlock;
+import static org.bitcoinj.testing.FakeTxBuilder.createFakeBlock;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static lighthouse.LighthouseBackend.Mode.CLIENT;
 import static lighthouse.LighthouseBackend.Mode.SERVER;
@@ -378,7 +378,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertEquals(Coin.COIN.value / 2, pledge2.getTotalInputValue());
 
         // New block: let's pretend this block contains a revocation transaction. LighthouseBackend should recheck.
-        Block newBlock = com.google.bitcoin.testing.FakeTxBuilder.makeSolvedTestBlock(blockStore, new ECKey().toAddress(params));
+        Block newBlock = FakeTxBuilder.makeSolvedTestBlock(blockStore, new ECKey().toAddress(params));
         inbound(p1, newBlock);
         // TODO: Replace this with just watching for revocations using the Bloom filter.
         getutxos = (GetUTXOsMessage) waitForOutbound(p2);

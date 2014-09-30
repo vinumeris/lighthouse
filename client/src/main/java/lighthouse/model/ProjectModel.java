@@ -1,9 +1,9 @@
 package lighthouse.model;
 
-import com.google.bitcoin.core.Address;
-import com.google.bitcoin.core.AddressFormatException;
-import com.google.bitcoin.core.Coin;
-import com.google.bitcoin.script.ScriptBuilder;
+import org.bitcoinj.core.Address;
+import org.bitcoinj.core.AddressFormatException;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.script.ScriptBuilder;
 import com.google.protobuf.ByteString;
 import javafx.beans.property.*;
 import lighthouse.protocol.LHProtos;

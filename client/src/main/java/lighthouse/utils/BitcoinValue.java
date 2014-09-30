@@ -1,6 +1,6 @@
 package lighthouse.utils;
 
-import com.google.bitcoin.core.NetworkParameters;
+import org.bitcoinj.core.NetworkParameters;
 
 import java.math.BigDecimal;
 

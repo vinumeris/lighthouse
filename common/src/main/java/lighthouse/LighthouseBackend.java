@@ -1,7 +1,7 @@
 package lighthouse;
 
-import com.google.bitcoin.core.*;
-import com.google.bitcoin.params.RegTestParams;
+import org.bitcoinj.core.*;
+import org.bitcoinj.params.RegTestParams;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;

@@ -1,8 +1,8 @@
 package lighthouse.protocol;
 
-import com.google.bitcoin.core.TransactionOutPoint;
-import com.google.bitcoin.core.TransactionOutput;
-import com.google.bitcoin.core.Utils;
+import org.bitcoinj.core.TransactionOutPoint;
+import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.core.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

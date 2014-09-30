@@ -1,6 +1,6 @@
 package lighthouse.controls;
 
-import com.google.bitcoin.utils.MonetaryFormat;
+import org.bitcoinj.utils.MonetaryFormat;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.beans.binding.DoubleBinding;

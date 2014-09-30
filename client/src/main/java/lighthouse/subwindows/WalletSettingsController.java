@@ -1,7 +1,7 @@
 package lighthouse.subwindows;
 
-import com.google.bitcoin.crypto.MnemonicCode;
-import com.google.bitcoin.wallet.DeterministicSeed;
+import org.bitcoinj.crypto.MnemonicCode;
+import org.bitcoinj.wallet.DeterministicSeed;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.util.concurrent.Service;
@@ -157,7 +157,7 @@ public class WalletSettingsController {
         //Main.instance.controller.restoreFromSeedAnimation();
 
         long birthday = datePicker.getValue().atStartOfDay().toEpochSecond(ZoneOffset.UTC);
-        DeterministicSeed seed = new DeterministicSeed(Splitter.on(' ').splitToList(wordsArea.getText()), "", birthday);
+        DeterministicSeed seed = new DeterministicSeed(Splitter.on(' ').splitToList(wordsArea.getText()), null, "", birthday);
         // Shut down bitcoinj and restart it with the new seed.
         Main.bitcoin.addListener(new Service.Listener() {
             @Override

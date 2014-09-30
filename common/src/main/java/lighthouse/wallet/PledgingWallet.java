@@ -1,14 +1,14 @@
 package lighthouse.wallet;
 
-import com.google.bitcoin.core.*;
-import com.google.bitcoin.crypto.*;
-import com.google.bitcoin.params.UnitTestParams;
-import com.google.bitcoin.script.Script;
-import com.google.bitcoin.script.ScriptBuilder;
-import com.google.bitcoin.store.UnreadableWalletException;
-import com.google.bitcoin.store.WalletProtobufSerializer;
-import com.google.bitcoin.utils.ListenerRegistration;
-import com.google.bitcoin.wallet.*;
+import org.bitcoinj.core.*;
+import org.bitcoinj.crypto.*;
+import org.bitcoinj.params.UnitTestParams;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
+import org.bitcoinj.store.UnreadableWalletException;
+import org.bitcoinj.store.WalletProtobufSerializer;
+import org.bitcoinj.utils.ListenerRegistration;
+import org.bitcoinj.wallet.*;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;

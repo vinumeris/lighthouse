@@ -1,10 +1,10 @@
 package lighthouse.controls;
 
-import com.google.bitcoin.core.Coin;
-import com.google.bitcoin.core.InsufficientMoneyException;
-import com.google.bitcoin.core.Sha256Hash;
-import com.google.bitcoin.core.Transaction;
-import com.google.bitcoin.params.TestNet3Params;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.InsufficientMoneyException;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.params.TestNet3Params;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import de.jensd.fx.fontawesome.AwesomeDude;

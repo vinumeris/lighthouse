@@ -1,11 +1,11 @@
 package lighthouse.protocol;
 
-import com.google.bitcoin.core.*;
-import com.google.bitcoin.crypto.DeterministicKey;
-import com.google.bitcoin.protocols.payments.PaymentProtocolException;
-import com.google.bitcoin.protocols.payments.PaymentSession;
-import com.google.bitcoin.script.Script;
-import com.google.bitcoin.script.ScriptBuilder;
+import org.bitcoinj.core.*;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.protocols.payments.PaymentProtocolException;
+import org.bitcoinj.protocols.payments.PaymentSession;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;

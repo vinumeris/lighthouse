@@ -1,19 +1,19 @@
 package lighthouse.protocol;
 
-import com.google.bitcoin.core.*;
-import com.google.bitcoin.crypto.TransactionSignature;
-import com.google.bitcoin.params.UnitTestParams;
-import com.google.bitcoin.script.ScriptBuilder;
-import com.google.bitcoin.store.BlockStoreException;
-import com.google.bitcoin.store.MemoryBlockStore;
-import com.google.bitcoin.testing.FakeTxBuilder;
-import com.google.bitcoin.testing.MockTransactionBroadcaster;
+import org.bitcoinj.core.*;
+import org.bitcoinj.crypto.TransactionSignature;
+import org.bitcoinj.params.UnitTestParams;
+import org.bitcoinj.script.ScriptBuilder;
+import org.bitcoinj.store.BlockStoreException;
+import org.bitcoinj.store.MemoryBlockStore;
+import org.bitcoinj.testing.FakeTxBuilder;
+import org.bitcoinj.testing.MockTransactionBroadcaster;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.bitcoin.core.Coin;
+import org.bitcoinj.core.Coin;
 import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkArgument;

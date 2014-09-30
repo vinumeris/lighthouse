@@ -1,8 +1,8 @@
 package lighthouse.protocol;
 
-import com.google.bitcoin.core.Peer;
-import com.google.bitcoin.core.TransactionOutPoint;
-import com.google.bitcoin.core.UTXOsMessage;
+import org.bitcoinj.core.Peer;
+import org.bitcoinj.core.TransactionOutPoint;
+import org.bitcoinj.core.UTXOsMessage;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;

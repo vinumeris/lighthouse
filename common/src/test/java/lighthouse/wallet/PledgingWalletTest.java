@@ -1,12 +1,12 @@
 package lighthouse.wallet;
 
-import com.google.bitcoin.core.*;
-import com.google.bitcoin.params.UnitTestParams;
-import com.google.bitcoin.store.UnreadableWalletException;
-import com.google.bitcoin.store.WalletProtobufSerializer;
-import com.google.bitcoin.testing.MockTransactionBroadcaster;
-import com.google.bitcoin.utils.BriefLogFormatter;
-import com.google.bitcoin.utils.Threading;
+import org.bitcoinj.core.*;
+import org.bitcoinj.params.UnitTestParams;
+import org.bitcoinj.store.UnreadableWalletException;
+import org.bitcoinj.store.WalletProtobufSerializer;
+import org.bitcoinj.testing.MockTransactionBroadcaster;
+import org.bitcoinj.utils.BriefLogFormatter;
+import org.bitcoinj.utils.Threading;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -22,7 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static com.google.bitcoin.core.Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
+import static org.bitcoinj.core.Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.*;
 

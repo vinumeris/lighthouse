@@ -1,7 +1,7 @@
 package lighthouse.protocol;
 
-import com.google.bitcoin.core.TransactionOutPoint;
-import com.google.bitcoin.core.TransactionOutput;
+import org.bitcoinj.core.TransactionOutPoint;
+import org.bitcoinj.core.TransactionOutput;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

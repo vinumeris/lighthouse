@@ -1,6 +1,6 @@
 package lighthouse.utils;
 
-import com.google.bitcoin.core.Coin;
+import org.bitcoinj.core.Coin;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
 import javafx.animation.*;

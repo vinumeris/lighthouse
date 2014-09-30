@@ -1,9 +1,9 @@
 package lighthouse.protocol;
 
-import com.google.bitcoin.core.*;
-import com.google.bitcoin.crypto.TransactionSignature;
-import com.google.bitcoin.params.UnitTestParams;
-import com.google.bitcoin.script.ScriptBuilder;
+import org.bitcoinj.core.*;
+import org.bitcoinj.crypto.TransactionSignature;
+import org.bitcoinj.params.UnitTestParams;
+import org.bitcoinj.script.ScriptBuilder;
 import com.google.protobuf.ByteString;
 import org.javatuples.Triplet;
 

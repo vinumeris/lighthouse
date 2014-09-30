@@ -1,6 +1,6 @@
 package lighthouse;
 
-import com.google.bitcoin.protocols.payments.PaymentProtocolException;
+import org.bitcoinj.protocols.payments.PaymentProtocolException;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.Project;
 

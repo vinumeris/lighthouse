@@ -1,6 +1,6 @@
 package lighthouse.server;
 
-import com.google.bitcoin.core.Sha256Hash;
+import org.bitcoinj.core.Sha256Hash;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;

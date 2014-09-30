@@ -1,12 +1,12 @@
 package lighthouse.protocol;
 
-import com.google.bitcoin.core.*;
-import com.google.bitcoin.crypto.TransactionSignature;
-import com.google.bitcoin.params.UnitTestParams;
-import com.google.bitcoin.script.Script;
-import com.google.bitcoin.script.ScriptBuilder;
-import com.google.bitcoin.script.ScriptOpCodes;
-import com.google.bitcoin.utils.BriefLogFormatter;
+import org.bitcoinj.core.*;
+import org.bitcoinj.crypto.TransactionSignature;
+import org.bitcoinj.params.UnitTestParams;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
+import org.bitcoinj.script.ScriptOpCodes;
+import org.bitcoinj.utils.BriefLogFormatter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.ByteString;
@@ -17,8 +17,8 @@ import org.junit.Test;
 import java.security.SignatureException;
 import java.util.List;
 
-import static com.google.bitcoin.testing.FakeTxBuilder.createFakeTx;
-import static com.google.bitcoin.testing.FakeTxBuilder.roundTripTransaction;
+import static org.bitcoinj.testing.FakeTxBuilder.createFakeTx;
+import static org.bitcoinj.testing.FakeTxBuilder.roundTripTransaction;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static lighthouse.protocol.LHUtils.checkedGet;
 import static org.junit.Assert.assertEquals;

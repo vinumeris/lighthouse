@@ -1,6 +1,6 @@
 package lighthouse.protocol;
 
-import com.google.bitcoin.core.*;
+import org.bitcoinj.core.*;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;

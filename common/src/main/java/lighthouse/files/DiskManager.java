@@ -1,8 +1,8 @@
 package lighthouse.files;
 
-import com.google.bitcoin.core.Sha256Hash;
-import com.google.bitcoin.core.Transaction;
-import com.google.bitcoin.protocols.payments.PaymentProtocolException;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.protocols.payments.PaymentProtocolException;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import javafx.beans.InvalidationListener;

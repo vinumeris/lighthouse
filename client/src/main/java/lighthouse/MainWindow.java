@@ -1,10 +1,10 @@
 package lighthouse;
 
-import com.google.bitcoin.core.Coin;
-import com.google.bitcoin.params.MainNetParams;
-import com.google.bitcoin.params.RegTestParams;
-import com.google.bitcoin.params.TestNet3Params;
-import com.google.bitcoin.utils.MonetaryFormat;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.RegTestParams;
+import org.bitcoinj.params.TestNet3Params;
+import org.bitcoinj.utils.MonetaryFormat;
 import com.google.protobuf.ByteString;
 import com.subgraph.orchid.TorClient;
 import com.subgraph.orchid.TorInitializationListener;
