@@ -43,4 +43,8 @@ public class Ex extends RuntimeException {
             this.amount = amount;
         }
     }
+
+    public static class NonStandardInput extends Ex {}
+
+    public static class P2SHPledge extends Ex {}
 }

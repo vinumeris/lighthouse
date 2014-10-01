@@ -36,6 +36,7 @@ public class ProjectTest {
     private static class TxData {
         Transaction pledge;
         Transaction fakeStub;
+        ECKey key;
     }
 
     private TxData makePledge(LHProtos.ProjectDetails.Builder details, double percentage) {
@@ -46,11 +47,10 @@ public class ProjectTest {
             txData.pledge.addOutput(Coin.valueOf(output.getAmount()), new Script(output.getScript().toByteArray()));
             total += output.getAmount();
         }
-        ECKey key = new ECKey();
+        txData.key = new ECKey();
         final long pledgeSatoshis = (long) (total * percentage);
-        txData.fakeStub = createFakeTx(params, Coin.valueOf(pledgeSatoshis), key.toAddress(params));
-        txData.pledge.addSignedInput(new TransactionOutPoint(params, 0, txData.fakeStub),
-                txData.fakeStub.getOutput(0).getScriptPubKey(), key, Transaction.SigHash.ALL, true);
+        txData.fakeStub = createFakeTx(params, Coin.valueOf(pledgeSatoshis), txData.key.toAddress(params));
+        txData.pledge.addSignedInput(txData.fakeStub.getOutput(0), txData.key, Transaction.SigHash.ALL, true);
         txData.pledge = roundTripTransaction(params, txData.pledge);
         return txData;
     }
@@ -130,12 +130,8 @@ public class ProjectTest {
     @Test(expected = ScriptException.class)
     public void badSignature() throws Exception {
         TxData pledgeTX = makePledge(details, 0.1);
-        pledgeTX.pledge.getInput(0).setScriptSig(ScriptBuilder.createInputScript(TransactionSignature.dummy()));
-        LHProtos.Pledge.Builder pledge = LHProtos.Pledge.newBuilder();
-        pledge.addTransactions(ByteString.copyFrom(pledgeTX.pledge.bitcoinSerialize()));
-        pledge.setTotalInputValue(0);
-        pledge.setTimestamp(Utils.currentTimeSeconds());
-        pledge.setProjectId("abc");
+        pledgeTX.pledge.getInput(0).setScriptSig(ScriptBuilder.createInputScript(TransactionSignature.dummy(), pledgeTX.key));
+        LHProtos.Pledge.Builder pledge = pledgeToBuilder(pledgeTX, false);
         Project project = new Project(projectBuilder.build());
         List<TransactionOutput> outputs = ImmutableList.of(pledgeTX.fakeStub.getOutput(0).duplicateDetached());
         checkedGet(project.verifyPledge(outPoints -> completedFuture(outputs), pledge.build()));
@@ -164,16 +160,16 @@ public class ProjectTest {
         // message in a way that says it was validated and not have to look up UTXOs again in future, or wrap it
         // with extra data.
         TxData pledgeTX = makePledge(details, 0.1);
-        LHProtos.Pledge.Builder pledge = pledgeToBuilder(pledgeTX);
+        LHProtos.Pledge.Builder pledge = pledgeToBuilder(pledgeTX, true);
         Project project = new Project(projectBuilder.build());
         List<TransactionOutput> outputs = ImmutableList.of(pledgeTX.fakeStub.getOutput(0).duplicateDetached());
         checkedGet(project.verifyPledge(outPoints -> completedFuture(outputs), pledge.build()));
     }
 
-    private LHProtos.Pledge.Builder pledgeToBuilder(TxData pledgeTX) {
+    private LHProtos.Pledge.Builder pledgeToBuilder(TxData pledgeTX, boolean valueMismatch) {
         LHProtos.Pledge.Builder pledge = LHProtos.Pledge.newBuilder();
         pledge.addTransactions(ByteString.copyFrom(pledgeTX.pledge.bitcoinSerialize()));
-        pledge.setTotalInputValue((long) (Coin.COIN.longValue() * 0.2));  // Mismatch.
+        pledge.setTotalInputValue((long) (Coin.COIN.longValue() * (valueMismatch ? 0.2 : 0.1)));  // Mismatch.
         pledge.setTimestamp(Utils.currentTimeSeconds());
         pledge.setProjectId("abc");
         return pledge;
@@ -186,22 +182,46 @@ public class ProjectTest {
         TxData pledgeTX = makePledge(details, 0.1);
         pledgeTX.pledge.addInput(pledgeTX.pledge.getInput(0).duplicateDetached());
         Project project = new Project(projectBuilder.build());
-        project.fastSanityCheck(pledgeToBuilder(pledgeTX).build());
+        project.fastSanityCheck(pledgeToBuilder(pledgeTX, true).build());
     }
 
-    @Test
-    public void nonStandardInput() throws Exception {
-        // TODO: Check for pledges that'd make our claim non-standard and reject.
+    @Test(expected = Ex.NonStandardInput.class)
+    public void nonStandardInputRegularOutput() throws Exception {
+        // Unconsumed stack items are not allowed.
+        TxData pledgeTX = makePledge(details, 0.1);
+        TransactionInput input = pledgeTX.pledge.getInput(0);
+        input.setScriptSig(
+                new ScriptBuilder(input.getScriptSig())
+                        .data(0, new byte[]{})
+                        .build()
+        );
+        LHProtos.Pledge.Builder pledge = pledgeToBuilder(pledgeTX, false);
+        Project project = new Project(projectBuilder.build());
+        List<TransactionOutput> outputs = ImmutableList.of(pledgeTX.fakeStub.getOutput(0).duplicateDetached());
+        checkedGet(project.verifyPledge(outPoints -> completedFuture(outputs), pledge.build()));
+    }
+
+    @Test(expected = Ex.NonStandardInput.class)
+    public void nonStandardInputP2SHOutput() throws Exception {
+        // Unconsumed stack items are not allowed.
+        TxData pledgeTX = makePledge(details, 0.1);
+        TransactionInput input = pledgeTX.pledge.getInput(0);
+        TransactionOutput origOutput = pledgeTX.fakeStub.getOutput(0);
+        Script p2shPK = ScriptBuilder.createP2SHOutputScript(origOutput.getScriptPubKey());
+        Script p2shSS = new ScriptBuilder(input.getScriptSig()).data(origOutput.getScriptBytes()).data(0, new byte[]{}).build();
+        input.setScriptSig(p2shSS);
+        pledgeTX.fakeStub.clearOutputs();
+        pledgeTX.fakeStub.addOutput(origOutput.getValue(), p2shPK);
+        LHProtos.Pledge.Builder pledge = pledgeToBuilder(pledgeTX, false);
+        Project project = new Project(projectBuilder.build());
+        List<TransactionOutput> outputs = ImmutableList.of(pledgeTX.fakeStub.getOutput(0).duplicateDetached());
+        checkedGet(project.verifyPledge(outPoints -> completedFuture(outputs), pledge.build()));
     }
 
     @Test
     public void okPledge() throws Exception {
         TxData pledgeTX = makePledge(details, 0.1);
-        LHProtos.Pledge.Builder pledge = LHProtos.Pledge.newBuilder();
-        pledge.addTransactions(ByteString.copyFrom(pledgeTX.pledge.bitcoinSerialize()));
-        pledge.setTotalInputValue((long) (Coin.COIN.longValue() * 0.1));
-        pledge.setTimestamp(Utils.currentTimeSeconds());
-        pledge.setProjectId("abc");
+        LHProtos.Pledge.Builder pledge = pledgeToBuilder(pledgeTX, false);
         Project project = new Project(projectBuilder.build());
         List<TransactionOutput> outputs = ImmutableList.of(pledgeTX.fakeStub.getOutput(0).duplicateDetached());
         checkedGet(project.verifyPledge(outPoints -> completedFuture(outputs), pledge.build()));

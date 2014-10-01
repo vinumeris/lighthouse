@@ -1,17 +1,19 @@
 package lighthouse.protocol;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
+import lighthouse.files.DiskManager;
+import lighthouse.wallet.PledgingWallet;
+import org.bitcoin.protocols.payments.Protos;
 import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.protocols.payments.PaymentProtocolException;
 import org.bitcoinj.protocols.payments.PaymentSession;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
-import lighthouse.files.DiskManager;
-import lighthouse.wallet.PledgingWallet;
-import org.bitcoin.protocols.payments.Protos;
+import org.bitcoinj.wallet.DefaultRiskAnalysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.params.KeyParameter;
@@ -22,6 +24,7 @@ import java.net.*;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.time.Instant;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -236,15 +239,70 @@ public class Project {
             // thus the provided output must match.
             final Script scriptPubKey = result.get(i).getScriptPubKey();
             if (isSafeToCrossCheck(scriptPubKey)) {
+                TransactionInput input = tx.getInput(i);
+                // Try to stop some idiot/troll from giving us a non-standard input, thus making us think we've raised
+                // our funds but actually cannot easily claim the money.
+                DefaultRiskAnalysis.RuleViolation violation = isInputStandard(input, scriptPubKey);
+                if (violation != DefaultRiskAnalysis.RuleViolation.NONE) {
+                    log.error("TX input {} is non-standard due to rule {}", violation);
+                    throw new Ex.NonStandardInput();
+                }
                 try {
-                    tx.getInput(i).verify(result.get(i));
+                    input.verify(result.get(i));
                 } catch (VerificationException e) {
-                    log.error("TX input {} failed with scriptSig {}    scriptPubKey {}", i, tx.getInput(i).getScriptSig(), result.get(0).getScriptPubKey());
+                    log.error("TX input {} failed with scriptSig {}    scriptPubKey {}", i, input.getScriptSig(), result.get(0).getScriptPubKey());
                     throw e;
                 }
             } else
                 throw new VerificationException("Unexpected script form returned by peer: " + scriptPubKey);
         }
+    }
+
+    // TODO: Move this into bitcoinj post-0.12
+    private DefaultRiskAnalysis.RuleViolation isInputStandard(TransactionInput input, Script scriptPubKey) {
+        DefaultRiskAnalysis.RuleViolation violation = input.isStandard();
+        if (violation != DefaultRiskAnalysis.RuleViolation.NONE)
+            return violation;
+        Script scriptSig = input.getScriptSig();
+        int args = getNumExpectedScriptSigArgs(scriptPubKey);
+        LinkedList<byte[]> stack = Lists.newLinkedList();
+        // This is fast and cannot execute any signature checks, because we already verified with the previous
+        // isStandard() call that it only contains data pushes.
+        Script.executeScript(null, -1, scriptSig, stack, true);
+        if (scriptPubKey.isPayToScriptHash()) {
+            Script redeemScript = null;
+            try {
+                if (stack.isEmpty())
+                    throw new VerificationException("Empty stack");   // Should never happen: can't have empty scripts.
+                redeemScript = new Script(stack.getLast());
+                args += getNumExpectedScriptSigArgs(redeemScript);
+            } catch (VerificationException e) {
+                // We can get here if the redeem script is corrupted or unparseable in some way, or if the script type
+                // simply isn't recognised by getNumExpected... - Bitcoin Core appears to simply treat any garbage
+                // script as non-standard.
+                //
+                // Regardless, a non-recognised script is always treated as OK if it has 15 or fewer sigops, even if
+                // it were to leave extra stuff on the stack.
+                if (redeemScript != null && Script.getSigOpCount(stack.getLast()) <= Script.MAX_P2SH_SIGOPS)
+                    return DefaultRiskAnalysis.RuleViolation.NONE;
+            }
+        }
+        if (stack.size() != args)
+            return DefaultRiskAnalysis.RuleViolation.NONEMPTY_STACK;
+        return DefaultRiskAnalysis.RuleViolation.NONE;
+    }
+
+    private int getNumExpectedScriptSigArgs(Script scriptPubKey) {
+        if (scriptPubKey.isSentToAddress())
+            return 2;
+        else if (scriptPubKey.isSentToRawPubKey())
+            return 1;
+        else if (scriptPubKey.isSentToMultiSig())
+            return scriptPubKey.getChunks().get(0).decodeOpN();
+        else if (scriptPubKey.isPayToScriptHash())
+            return 1;   // Doesn't include the args needed by the script itself.
+        else
+            throw new VerificationException("Unknown scriptPubKey type");
     }
 
     private boolean isSafeToCrossCheck(Script scriptPubKey) {
