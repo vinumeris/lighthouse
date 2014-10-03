@@ -30,10 +30,11 @@
                     </HBox>
 
                     <!-- max width here doesn't internationalize properly: need something that refuses to be resized beyond its max size -->
-                    <HBox spacing="15" alignment="CENTER_RIGHT" StackPane.alignment="TOP_RIGHT" fx:id="loadingIndicator" maxWidth="50" maxHeight="50" styleClass="project-overview-loading-indicator">
+                    <HBox spacing="15" alignment="CENTER_RIGHT" StackPane.alignment="TOP_RIGHT" fx:id="loadingIndicatorArea"
+                          maxWidth="50" maxHeight="50" styleClass="project-overview-loading-indicator">
                         <children>
                             <Text text="Loading ..." fill="white"/>
-                            <ProgressIndicator progress="-1" minWidth="35" maxHeight="35"/>
+                            <ProgressIndicator progress="-1" minWidth="35" maxHeight="35" fx:id="loadingIndicator"/>
                         </children>
                         <padding>
                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
@@ -42,7 +43,6 @@
                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                         </StackPane.margin>
                     </HBox>
-
                 </StackPane>
                 <Line fx:id="progressLine" startX="3.0" endX="${rootPane.width - 70}" startY="${coverArea.height}" endY="${coverArea.height}" managed="false" styleClass="progress-line" />
                 <Circle fx:id="progressCircle" centerY="${coverArea.height}" centerX="${rootPane.width - 58}" radius="8" styleClass="progress-line" fill="transparent" managed="false"/>

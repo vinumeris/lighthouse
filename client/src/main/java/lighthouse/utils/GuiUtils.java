@@ -308,7 +308,6 @@ public class GuiUtils {
             @Override
             public void handle(long l) {
                 frames++;
-                System.err.println("frame!");
                 if (frames > 2) {
                     stop();
                     runnable.run();
@@ -340,9 +339,10 @@ public class GuiUtils {
         view.setClip(clipRect);
     }
 
-    private static class AnimatedBindInfo {
+    public static class AnimatedBindInfo {
         @Nullable public Timeline timeline;
         public NumberBinding bindFrom;
+        public Runnable onAnimFinish;
     }
 
     public static AnimatedBindInfo animatedBind(Node node, WritableDoubleValue bindTo, NumberBinding bindFrom) {
@@ -352,7 +352,11 @@ public class GuiUtils {
             if (info.timeline != null)
                 info.timeline.stop();
             info.timeline = new Timeline(new KeyFrame(UI_ANIMATION_TIME, new KeyValue(bindTo, cur)));
-            info.timeline.setOnFinished(ev -> ((AnimatedBindInfo)node.getUserData()).timeline = null);
+            info.timeline.setOnFinished(ev -> {
+                ((AnimatedBindInfo) node.getUserData()).timeline = null;
+                if (info.onAnimFinish != null)
+                    info.onAnimFinish.run();
+            });
             info.timeline.play();
         });
         // We must pin bindFrom into the object graph, otherwise something like:

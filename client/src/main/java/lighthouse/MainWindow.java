@@ -308,8 +308,11 @@ public class MainWindow {
         bitcoinUIModel.syncProgressProperty().addListener(x -> {
             if (bitcoinUIModel.syncProgressProperty().get() >= 1.0) {
                 if (syncItem != null) {
-                    syncItem.cancel();
-                    syncItem = null;
+                    // Hack around JFX progress animator leak bug.
+                    GuiUtils.runOnGuiThreadAfter(500, () -> {
+                        syncItem.cancel();
+                        syncItem = null;
+                    });
                 }
             } else if (syncItem == null) {
                 showBitcoinSyncMessage();

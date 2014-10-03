@@ -1,6 +1,5 @@
 package lighthouse.controls;
 
-import org.bitcoinj.utils.MonetaryFormat;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.beans.binding.DoubleBinding;
@@ -12,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
@@ -30,6 +30,7 @@ import lighthouse.protocol.Project;
 import lighthouse.subwindows.ExportWindow;
 import lighthouse.utils.GuiUtils;
 import lighthouse.utils.ReactiveCoinFormatter;
+import org.bitcoinj.utils.MonetaryFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,8 @@ public class ProjectOverviewWidget extends HBox {
     @FXML Circle progressCircle;
     @FXML Line progressLine;
     @FXML ImageView coverImage;
-    @FXML Node loadingIndicator;
+    @FXML Node loadingIndicatorArea;
+    @FXML ProgressIndicator loadingIndicator;
 
     private Project project;
     private final SimpleBooleanProperty isLoading;
@@ -85,7 +87,13 @@ public class ProjectOverviewWidget extends HBox {
         animatedBind(coverImage, blur.radiusProperty(), when(isLoading).then(10).otherwise(0.0));
         coverImage.setImage(image);
         coverImage.setEffect(blur);
-        animatedBind(loadingIndicator, loadingIndicator.opacityProperty(), when(isLoading).then(1.0).otherwise(0.0));
+
+        animatedBind(loadingIndicatorArea, loadingIndicatorArea.opacityProperty(), when(isLoading).then(1.0).otherwise(0.0));
+        // Hack around a bug in jfx: progress indicator leaks the spinner animation even if it's invisible so we have
+        // to forcibly end the animation here to avoid burning cpu.
+        loadingIndicator.progressProperty().bind(
+                when(loadingIndicatorArea.opacityProperty().greaterThan(0.0)).then(-1).otherwise(0)
+        );
 
         // Make the progress line+circle follow the pledged amount and disappear if there are no pledges yet.
         //
