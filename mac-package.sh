@@ -13,6 +13,9 @@ if [ ! -e "$build" ]; then
 fi
 
 jh=$(/usr/libexec/java_home -v 1.8)
+if [ -e ../min-jdk ]; then
+  jh=`pwd`/../min-jdk/Contents/Home
+fi
 $jh/bin/javapackager -deploy \
     -BappVersion=$ver \
     -Bmac.CFBundleIdentifier=com.vinumeris.lighthouse \
