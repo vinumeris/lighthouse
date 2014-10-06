@@ -57,13 +57,14 @@ public class DiskManager {
     private final List<Path> projectsDirs;
     private DirectoryWatcher directoryWatcher;
     private final ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;
+    private final boolean autoLoadProjects;
 
     /**
      * Creates a disk manager that reloads data from disk when a new project path is added or the directories change.
      * This object should be owned by the thread backing owningExecutor: changes will all be queued onto this
      * thread.
      */
-    public DiskManager(AffinityExecutor owningExecutor) {
+    public DiskManager(AffinityExecutor owningExecutor, boolean autoLoadProjects) {
         // Initialize projects by selecting files matching the right name pattern and then trying to load, ignoring
         // failures (nulls).
         executor = owningExecutor;
@@ -75,6 +76,7 @@ public class DiskManager {
         pledges = new HashMap<>();
         projectFiles = new ArrayList<>();
         projectsDirs = new ArrayList<>();
+        this.autoLoadProjects = autoLoadProjects;
         // Use execute() rather than executeASAP() so that if we're being invoked from the owning thread, the caller
         // has a chance to set up observers and the like before the thread event loops and starts loading stuff. That
         // way the observers will run for the newly loaded data.
@@ -115,7 +117,7 @@ public class DiskManager {
         boolean isCreate = kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY;
         boolean isDelete = kind == StandardWatchEventKinds.ENTRY_DELETE || kind == StandardWatchEventKinds.ENTRY_MODIFY;
 
-        if (isProject) {
+        if (isProject && autoLoadProjects) {
             if (isDelete) {
                 log.info("Project file deleted/modified: {}", path);
                 Project project = projectsByPath.get(path);

@@ -120,7 +120,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
 
     public LighthouseBackend(Mode mode, PeerGroup peerGroup, AbstractBlockChain chain, PledgingWallet wallet, AffinityExecutor executor) {
-        this(mode, peerGroup, chain, wallet, new DiskManager(executor), executor);
+        // The disk manager should only auto load projects in server mode where we install/change them by dropping them
+        // into the server directory. But in client mode we always want explicit import.
+        this(mode, peerGroup, chain, wallet, new DiskManager(executor, mode == Mode.SERVER), executor);
     }
 
     public LighthouseBackend(Mode mode, PeerGroup peerGroup, AbstractBlockChain chain, PledgingWallet wallet, DiskManager diskManager, AffinityExecutor executor) {
