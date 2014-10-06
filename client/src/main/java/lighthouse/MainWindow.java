@@ -48,7 +48,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
+import static com.google.common.base.Preconditions.checkState;
 import static lighthouse.threading.AffinityExecutor.UI_THREAD;
 
 /**
@@ -235,7 +239,15 @@ public class MainWindow {
     }
 
     public static void importProject(File file) {
-        Main.backend.addProjectFile(file.toPath());
+        try {
+            checkState(file.exists());
+            Path toPath = AppDirectory.dir().resolve(file.toPath().getFileName());
+            Files.copy(file.toPath(), toPath);
+            Main.backend.addProjectFile(toPath);
+        } catch (IOException e) {
+            GuiUtils.informationalAlert("Failed to import project",
+                    "Could not read project file: " + e);
+        }
     }
 
     private static boolean firstTime = true;
