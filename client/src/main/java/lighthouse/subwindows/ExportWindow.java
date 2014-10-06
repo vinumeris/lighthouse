@@ -83,6 +83,7 @@ public class ExportWindow {
 
     private DragData dragData;
 
+    @FXML
     public void dragDetected(MouseEvent event) {
         // Create a temp directory so the file can have a nice name, and then we will delete it a few seconds
         // after the drag operation has finished.
@@ -122,6 +123,7 @@ public class ExportWindow {
         }
     }
 
+    @FXML
     public void dragDone(DragEvent event) {
         dragData.done();
         if (pledge != null)
@@ -129,6 +131,7 @@ public class ExportWindow {
         overlayUI.done();
     }
 
+    @FXML
     public void saveClicked() {
         // runLater: shitty hack around RT-37821 (consider upgrading to 8u40 when available and/or applying fix locally)
         // otherwise pressing enter can cause a crash here when we open a new window with a default button
@@ -158,6 +161,7 @@ public class ExportWindow {
         });
     }
 
+    @FXML
     public void closeWidgetClicked(MouseEvent event) {
         overlayUI.done();
     }

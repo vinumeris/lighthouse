@@ -2,6 +2,7 @@ import "extended-bip70.proto";
 
 option java_package = "lighthouse.wallet";
 option java_outer_classname = "LHWalletProtos";
+option optimize_for = SPEED;   // for ProGuard, as it doesn't use reflection
 
 message Extension {
     repeated lighthouse.Pledge pledges = 1;

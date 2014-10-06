@@ -75,6 +75,7 @@ public class WalletPasswordController {
         fadeOut(buttonsBox);
     }
 
+    @FXML
     public void cancelClicked(ActionEvent event) {
         overlayUI.done();
     }

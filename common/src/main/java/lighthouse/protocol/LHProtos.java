@@ -9342,8 +9342,8 @@ public final class LHProtos {
       ".Pledge\022\014\n\004memo\030\002 \001(\t\"\205\001\n\rProjectStatus\022" +
       "\n\n\002id\030\001 \002(\t\022\021\n\ttimestamp\030\002 \002(\004\022\034\n\024value_" +
       "pledged_so_far\030\003 \002(\004\022#\n\007pledges\030\004 \003(\0132\022." +
-      "lighthouse.Pledge\022\022\n\nclaimed_by\030\005 \001(\014B\037\n" +
-      "\023lighthouse.protocolB\010LHProtos"
+      "lighthouse.Pledge\022\022\n\nclaimed_by\030\005 \001(\014B!\n" +
+      "\023lighthouse.protocolB\010LHProtosH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

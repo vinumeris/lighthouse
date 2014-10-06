@@ -59,6 +59,7 @@ public class PledgeWindow extends InnerWindow {
         amountEdit.setPromptText("e.g. " + max.toPlainString());
     }
 
+    @FXML
     public void confirmClicked() {
         log.info("Confirm pledge clicked: {}", amountEdit.getText());
 
@@ -96,6 +97,7 @@ public class PledgeWindow extends InnerWindow {
         }
     }
 
+    @FXML
     public void allMoneyClicked(MouseEvent event) {
         log.info("Maximum amount possible clicked");
         amountEdit.setText(max.toPlainString());

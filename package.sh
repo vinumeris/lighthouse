@@ -12,7 +12,12 @@ mvn -q -U clean package -DskipTests
 
 dest=updates/builds/$ver.jar
 
-cp client/target/client-0.1-SNAPSHOT-bundled.jar $dest
+echo "Running ProGuard to delete dead code and shrink JAR ..."
+java -jar ~/.m2/repository/net/sf/proguard/proguard-base/5.0/proguard-base-5.0.jar @client/proguard.pro
+
+du -h client/target/client-0.1-SNAPSHOT-bundled.jar client/target/lighthouse.jar
+
+cp client/target/lighthouse.jar $dest
 echo "Copied build as version $ver to $dest"
 
 echo "Generating online update site"

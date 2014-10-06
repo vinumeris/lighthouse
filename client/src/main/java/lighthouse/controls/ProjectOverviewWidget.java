@@ -121,11 +121,13 @@ public class ProjectOverviewWidget extends HBox {
 
     private ExportWindow.DragData dragData;
 
+    @FXML
     public void dragDetected(MouseEvent event) {
         dragData = ExportWindow.startDrag(project.getSuggestedFileName(), project.getProto(),
                 ExportWindow.PROJECT_MIME_TYPE, this);
     }
 
+    @FXML
     public void dragDone(DragEvent event) {
         log.info("Drag of project done");
         dragData.done();

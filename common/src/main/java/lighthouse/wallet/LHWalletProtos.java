@@ -1740,8 +1740,8 @@ public final class LHWalletProtos {
       ".proto\"\204\001\n\tExtension\022#\n\007pledges\030\001 \003(\0132\022." +
       "lighthouse.Pledge\022%\n\010projects\030\002 \003(\0132\023.li" +
       "ghthouse.Project\022+\n\017revoked_pledges\030\003 \003(" +
-      "\0132\022.lighthouse.PledgeB#\n\021lighthouse.wall" +
-      "etB\016LHWalletProtos"
+      "\0132\022.lighthouse.PledgeB%\n\021lighthouse.wall" +
+      "etB\016LHWalletProtosH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

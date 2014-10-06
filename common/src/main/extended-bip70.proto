@@ -13,8 +13,8 @@
 package lighthouse;
 
 option java_package = "lighthouse.protocol";
-
 option java_outer_classname = "LHProtos";
+option optimize_for = SPEED;   // for ProGuard, as it doesn't use reflection
 
 // A Project is wire compatible with a BIP 70 PaymentRequest, and a Pledge is wire compatible with Payment.
 // However they are not identical and will not be properly handled by other programs: the similarity is for

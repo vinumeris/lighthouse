@@ -148,6 +148,7 @@ public class AddProjectWindow {
         }
     }
 
+    @FXML
     public void saveClicked(ActionEvent event) {
         final LHProtos.ProjectDetails detailsProto = model.getDetailsProto().build();
         log.info("Saving: {}", detailsProto.getExtraDetails().getTitle());
@@ -200,6 +201,7 @@ public class AddProjectWindow {
         }
     }
 
+    @FXML
     public void importClicked(ActionEvent event) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Select a bitcoin project file to import");
@@ -213,6 +215,7 @@ public class AddProjectWindow {
         overlayUI.done();
     }
 
+    @FXML
     public void imageSelectorClicked(MouseEvent event) {
         log.info("Image selector clicked");
         FileChooser chooser = new FileChooser();
@@ -294,6 +297,7 @@ public class AddProjectWindow {
         }
     }
 
+    @FXML
     public void imageSelectorDropped(DragEvent event) {
         log.info("Drop: {}", event);
         if (event.getDragboard().getFiles().size() == 1) {
@@ -303,12 +307,14 @@ public class AddProjectWindow {
         }
     }
 
+    @FXML
     public void openCoverPhotoFinder(MouseEvent event) {
         log.info("cover photo URL clicked");
         Main.instance.getHostServices().showDocument(String.format("http://%s/", COVERPHOTO_SITE));
         event.consume();
     }
 
+    @FXML
     public void cancelClicked(ActionEvent event) {
         overlayUI.done();
     }

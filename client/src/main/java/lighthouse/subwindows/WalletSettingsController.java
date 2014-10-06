@@ -128,10 +128,12 @@ public class WalletSettingsController {
         });
     }
 
+    @FXML
     public void closeClicked(ActionEvent event) {
         overlayUI.done();
     }
 
+    @FXML
     public void restoreClicked(ActionEvent event) {
         // Don't allow a restore unless this wallet is presently empty. We don't want to end up with two wallets, too
         // much complexity, even though WalletAppKit will keep the current one as a backup file in case of disaster.
@@ -169,7 +171,7 @@ public class WalletSettingsController {
         Main.bitcoin.stopAsync();
     }
 
-
+    @FXML
     public void passwordButtonClicked(ActionEvent event) {
         if (aesKey == null) {
             Main.instance.overlayUI("subwindows/wallet_set_password.fxml", "Set password");

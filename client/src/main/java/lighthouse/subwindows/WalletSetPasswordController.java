@@ -1,5 +1,6 @@
 package lighthouse.subwindows;
 
+import javafx.fxml.FXML;
 import org.bitcoinj.crypto.KeyCrypterScrypt;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
@@ -32,6 +33,7 @@ public class WalletSetPasswordController {
         progressMeter.setOpacity(0);
     }
 
+    @FXML
     public void setPasswordClicked(ActionEvent event) {
         if (!pass1.getText().equals(pass2.getText())) {
             informationalAlert("Passwords do not match", "Try re-typing your chosen passwords.");
@@ -71,6 +73,7 @@ public class WalletSetPasswordController {
         tasks.start();
     }
 
+    @FXML
     public void closeClicked(ActionEvent event) {
         overlayUI.done();
     }

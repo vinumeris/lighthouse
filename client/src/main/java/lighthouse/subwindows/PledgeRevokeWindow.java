@@ -36,6 +36,7 @@ public class PledgeRevokeWindow {
 
     @FXML ProgressBar revokeProgress;
 
+    @FXML
     public void confirmClicked(ActionEvent event) {
         // runLater: shitty hack around RT-37821 (consider upgrading to 8u40 when available and/or applying fix locally)
         // otherwise pressing enter can cause a crash here when we open a new window with a default button
@@ -91,6 +92,7 @@ public class PledgeRevokeWindow {
         }
     }
 
+    @FXML
     public void cancelClicked(ActionEvent event) {
         overlayUI.done();
     }

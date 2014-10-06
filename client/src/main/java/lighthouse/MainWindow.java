@@ -1,10 +1,5 @@
 package lighthouse;
 
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.RegTestParams;
-import org.bitcoinj.params.TestNet3Params;
-import org.bitcoinj.utils.MonetaryFormat;
 import com.google.protobuf.ByteString;
 import com.subgraph.orchid.TorClient;
 import com.subgraph.orchid.TorInitializationListener;
@@ -23,6 +18,7 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
@@ -42,6 +38,11 @@ import lighthouse.subwindows.WalletSettingsController;
 import lighthouse.utils.GuiUtils;
 import lighthouse.utils.easing.EasingMode;
 import lighthouse.utils.easing.ElasticInterpolator;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.RegTestParams;
+import org.bitcoinj.params.TestNet3Params;
+import org.bitcoinj.utils.MonetaryFormat;
 import org.fxmisc.easybind.EasyBind;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,14 +204,17 @@ public class MainWindow {
         return info == null ? LighthouseBackend.ProjectState.OPEN : info.state;
     }
 
+    @FXML
     public void addProjectClicked(ActionEvent event) {
         Main.instance.overlayUI("subwindows/add_project.fxml", "Create/import");
     }
 
+    @FXML
     public void backToOverview(ActionEvent event) {
         switchView(Views.OVERVIEW);
     }
 
+    @FXML
     public void dragOver(DragEvent event) {
         boolean accept = true;
         for (File file : event.getDragboard().getFiles()) {
@@ -223,6 +227,7 @@ public class MainWindow {
             event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
     }
 
+    @FXML
     public void dragDropped(DragEvent event) {
         log.info("Drop: {}", event);
         for (File file : event.getDragboard().getFiles())
@@ -373,7 +378,7 @@ public class MainWindow {
         syncItem = Main.instance.notificationBar.displayNewItem("Synchronising with the Bitcoin network", bitcoinUIModel.syncProgressProperty());
     }
 
-    public Animation scrollToTop() {
+    private Animation scrollToTop() {
         Animation animation = new Timeline(
                 new KeyFrame(GuiUtils.UI_ANIMATION_TIME,
                         new KeyValue(contentScrollPane.vvalueProperty(), contentScrollPane.getVmin(), Interpolator.EASE_BOTH)
@@ -384,11 +389,13 @@ public class MainWindow {
     }
 
     //region Generic Bitcoin wallet related code
+    @FXML
     public void sendMoneyOut(ActionEvent event) {
         // Hide this UI and show the send money UI. This UI won't be clickable until the user dismisses send_money.
         Main.instance.overlayUI("subwindows/send_money.fxml", "Send money");
     }
 
+    @FXML
     public void setupWalletClicked(ActionEvent event) {
         Main.OverlayUI<WalletSettingsController> screen = Main.instance.overlayUI("subwindows/wallet_settings.fxml", "Wallet settings");
         screen.controller.initialize(null);

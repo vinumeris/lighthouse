@@ -100,10 +100,12 @@ public class InnerWindow {
         currentTabIndex.set(0);
     }
 
+    @FXML
     public void cancelClicked(ActionEvent event) {
         overlayUI.done();
     }
 
+    @FXML
     public void closeWidgetClicked(MouseEvent event) {
         overlayUI.done();
     }

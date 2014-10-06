@@ -1,5 +1,6 @@
 package lighthouse.subwindows;
 
+import javafx.fxml.FXML;
 import org.bitcoinj.core.*;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -33,10 +34,12 @@ public class SendMoneyController {
         new BitcoinAddressValidator(Main.params, address, sendBtn);
     }
 
+    @FXML
     public void cancel(ActionEvent event) {
         overlayUI.done();
     }
 
+    @FXML
     public void send(@Nullable ActionEvent event) {
         // Address exception cannot happen as we validated it beforehand.
         try {

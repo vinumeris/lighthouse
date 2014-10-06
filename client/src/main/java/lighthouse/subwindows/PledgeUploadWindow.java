@@ -108,6 +108,7 @@ public class PledgeUploadWindow {
         thread.start();
     }
 
+    @FXML
     public void cancelClicked(ActionEvent event) {
         uploadTask.cancel(true);
         overlayUI.done();

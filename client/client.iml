@@ -25,7 +25,6 @@
     <orderEntry type="library" name="Maven: org.bitcoinj:orchid:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.6" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-jdk14:1.7.6" level="project" />
-    <orderEntry type="library" name="Maven: com.aquafx-project:aquafx:0.1" level="project" />
     <orderEntry type="library" name="Maven: de.jensd:fontawesomefx:8.0.6" level="project" />
     <orderEntry type="library" name="Maven: net.glxn:qrgen:1.3" level="project" />
     <orderEntry type="library" name="Maven: com.google.zxing:javase:2.0" level="project" />
@@ -35,6 +34,7 @@
     <orderEntry type="library" name="Maven: com.vinumeris:updatefx:1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: net.sf.trove4j:trove4j:3.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.51" level="project" />
+    <orderEntry type="library" name="Maven: net.sf.proguard:proguard-base:5.0" level="project" />
   </component>
 </module>
 

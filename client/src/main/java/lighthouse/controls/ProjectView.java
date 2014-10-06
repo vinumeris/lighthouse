@@ -468,14 +468,17 @@ public class ProjectView extends HBox {
         this.project.set(project);
     }
 
+    @FXML
     public ObjectProperty<EventHandler<ActionEvent>> onBackClickedProperty() {
         return onBackClickedProperty;
     }
 
+    @FXML
     public void setOnBackClicked(EventHandler<ActionEvent> value) {
         onBackClickedProperty.set(value);
     }
 
+    @FXML
     public EventHandler<ActionEvent> getOnBackClicked() {
         return onBackClickedProperty.get();
     }
