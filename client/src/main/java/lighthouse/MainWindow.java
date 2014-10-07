@@ -221,6 +221,8 @@ public class MainWindow {
     @FXML
     public void dragOver(DragEvent event) {
         boolean accept = true;
+        if (event.getGestureSource() != null)
+            return;   // Coming from us.
         for (File file : event.getDragboard().getFiles()) {
             if (!file.toString().endsWith(".lighthouse-project")) {
                 accept = false;
