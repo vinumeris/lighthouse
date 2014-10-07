@@ -258,6 +258,9 @@ public class ProjectView extends HBox {
                 msg = "Server error: 404 Not Found: project is not known";
             else if (status.error instanceof Ex.InconsistentUTXOAnswers)
                 msg = "Bitcoin P2P network returned inconsistent answers, please contact support";
+            else //noinspection ConstantConditions
+                if (msg == null)
+                    msg = "Internal error: " + status.error.getClass().getName();
             else
                 msg = "Server error: " + msg;
             notifyBarItem = Main.instance.notificationBar.displayNewItem(msg);
