@@ -1,7 +1,5 @@
 package lighthouse.controls;
 
-import org.bitcoinj.core.Address;
-import org.bitcoinj.uri.BitcoinURI;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.beans.binding.StringExpression;
@@ -10,6 +8,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
@@ -26,6 +25,8 @@ import lighthouse.Main;
 import lighthouse.utils.GuiUtils;
 import net.glxn.qrgen.QRCode;
 import net.glxn.qrgen.image.ImageType;
+import org.bitcoinj.core.Address;
+import org.bitcoinj.uri.BitcoinURI;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
@@ -57,9 +58,11 @@ public class ClickableBitcoinAddress extends AnchorPane {
             loader.setClassLoader(getClass().getClassLoader());
             loader.load();
 
+            copyWidget.setCursor(Cursor.HAND);
             AwesomeDude.setIcon(copyWidget, AwesomeIcon.COPY);
             Tooltip.install(copyWidget, new Tooltip("Copy address to clipboard"));
 
+            qrCode.setCursor(Cursor.HAND);
             AwesomeDude.setIcon(qrCode, AwesomeIcon.QRCODE);
             Tooltip.install(qrCode, new Tooltip("Show a barcode scannable with a mobile phone for this address"));
 
