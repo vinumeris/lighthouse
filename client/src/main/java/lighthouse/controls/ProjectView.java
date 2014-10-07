@@ -308,19 +308,8 @@ public class ProjectView extends HBox {
         } else {
             if (Main.wallet.getPledgedAmountFor(project) > 0)
                 mode = Mode.PLEDGED;
-            if (value >= project.getGoalAmount().value) {
-                if (project.getPaymentURL() == null) {
-                    // In serverless mode anyone can claim even if they didn't create the project.
-                    mode = Mode.CAN_CLAIM;
-                } else {
-                    // In server-assisted mode, we need to introduce a notion ownership that the server recognises so it
-                    // will give us back un-scrubbed pledges that we can then use to claim. So check if we have unscrubbed
-                    // pledges here.
-                    if (!pledges.stream().anyMatch(pledge -> pledge.getTransactionsCount() == 0)) {
-                        mode = Mode.CAN_CLAIM;
-                    }
-                }
-            }
+            if (value >= project.getGoalAmount().value && (project.getPaymentURL() == null || Main.wallet.isProjectMine(project)))
+                mode = Mode.CAN_CLAIM;   // In serverless mode anyone can claim even if they didn't create the project.
         }
         log.info("Mode is {}", mode);
         if (priorMode == null) priorMode = mode;

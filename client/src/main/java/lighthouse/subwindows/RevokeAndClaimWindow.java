@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.params.KeyParameter;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -89,6 +90,8 @@ public class RevokeAndClaimWindow {
                 checkGuiThread();
                 Main.OverlayUI<RevokeAndClaimWindow> screen = Main.instance.overlayUI("subwindows/revoke_and_claim.fxml", "Revoke pledge");
                 screen.controller.pledgeToRevoke = pledgeToRevoke;
+                screen.controller.projectToClaim = projectToClaim;
+                screen.controller.pledgesToClaim = pledgesToClaim;
                 screen.controller.onSuccess = onSuccess;
                 screen.controller.go(cur);
             });
@@ -110,7 +113,8 @@ public class RevokeAndClaimWindow {
 
     private void claim(@Nullable KeyParameter key) {
         try {
-            PledgingWallet.CompletionProgress progress = Main.wallet.completeContractWithFee(projectToClaim, pledgesToClaim);
+            log.info("Attempting to claim");
+            PledgingWallet.CompletionProgress progress = Main.wallet.completeContractWithFee(projectToClaim, pledgesToClaim, key);
             double total = Main.bitcoin.peerGroup().getMinBroadcastConnections() * 2;  // two transactions.
             progress.peersSeen = seen -> {
                 if (seen == -1) {
@@ -126,6 +130,23 @@ public class RevokeAndClaimWindow {
                     onSuccess.run();
                 }
                 overlayUI.done();
+                return null;
+            }, Platform::runLater);
+        } catch (Ex.NoTransactionData e) {
+            // We were encrypted when the server request was made, so we didn't authenticate and didn't get the tx
+            // data required to make the claim. Re-request the status and try again.
+            checkState(key != null);
+            log.info("No tx data, wallet was encrypted so we must retry");
+            progressBar.setProgress(-1);
+            projectToClaim.getStatus(Main.wallet, key).handleAsync((status, ex) -> {
+                if (ex != null) {
+                    log.error("Unable to fetch project status", ex);
+                    informationalAlert("Unable to claim", "Could not fetch project status from server: %s", ex);
+                } else {
+                    log.info("Retrying claim ...");
+                    pledgesToClaim = new HashSet<>(status.getPledgesList());
+                    claim(key);
+                }
                 return null;
             }, Platform::runLater);
         } catch (Ex.ValueMismatch e) {

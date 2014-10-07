@@ -233,7 +233,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             case PENDING:
                 int seenBy = t.getConfidence().numBroadcastPeers();
                 log.info("Claim seen by {} peers", seenBy);
-                if (seenBy < peerGroup.getMinBroadcastConnections())
+                if (seenBy < peerGroup.getMinBroadcastConnections() || wallet.getParams().equals(RegTestParams.get()))
                     break;
                 // Fall through ...
             case BUILDING:
@@ -526,7 +526,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         CompletableFuture<Void> future = new CompletableFuture<>();
         executor.execute(() -> {
             markAsInProgress(project);
-            project.getStatus(wallet).whenCompleteAsync((status, ex) -> {
+            project.getStatus(wallet, null).whenCompleteAsync((status, ex) -> {
                 if (ex != null) {
                     markAsErrored(project, ex);
                     future.completeExceptionally(ex);

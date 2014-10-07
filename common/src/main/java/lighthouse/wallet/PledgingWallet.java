@@ -450,7 +450,7 @@ public class PledgingWallet extends Wallet {
      * creating and broadcasting a tx to create an output of the right size first (as we cannot add change outputs
      * to an assurance contract). The returned future completes once both dependency and contract are broadcast OK.
      */
-    public CompletionProgress completeContractWithFee(Project project, Set<LHProtos.Pledge> pledges) throws InsufficientMoneyException {
+    public CompletionProgress completeContractWithFee(Project project, Set<LHProtos.Pledge> pledges, @Nullable KeyParameter aesKey) throws InsufficientMoneyException {
         // The chances of having a fee shaped output are minimal, so we always create a dependency tx here.
         final Coin feeSize = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
         log.info("Completing contract with fee: sending dependency tx");
@@ -470,7 +470,9 @@ public class PledgingWallet extends Wallet {
             }
         };
         Transaction contract = project.completeContract(pledges);
-        Wallet.SendResult result = sendCoins(vTransactionBroadcaster, freshReceiveKey().toAddress(params), feeSize);
+        Wallet.SendRequest request = Wallet.SendRequest.to(freshReceiveKey().toAddress(params), feeSize);
+        request.aesKey = aesKey;
+        Wallet.SendResult result = sendCoins(vTransactionBroadcaster, request);
         // The guava API is better for this than what the Java 8 guys produced, sigh.
         ListenableFuture<Transaction> future = Futures.transform(result.broadcastComplete, (AsyncFunction<Transaction, Transaction>) tx -> {
             // Runs on a bitcoinj thread when the dependency was broadcast.
@@ -480,7 +482,9 @@ public class PledgingWallet extends Wallet {
                     .filter(output -> output.getValue().equals(feeSize)).findAny().get();
             contract.addInput(feeOut);
             // Sign the final output we added.
-            signTransaction(Wallet.SendRequest.forTx(contract));
+            SendRequest req = SendRequest.forTx(contract);
+            req.aesKey = aesKey;
+            signTransaction(req);
             log.info("Prepared final contract: {}", contract);
             contract.getConfidence().addEventListener(broadcastListener);
             return vTransactionBroadcaster.broadcastTransaction(contract);
@@ -488,6 +492,10 @@ public class PledgingWallet extends Wallet {
         result.tx.getConfidence().addEventListener(broadcastListener);
         progress.txFuture = convertFuture(future);
         return progress;
+    }
+
+    public boolean isProjectMine(Project project) {
+        return getAuthKeyFromIndexOrPubKey(project.getAuthKey(),  project.getAuthKeyIndex()) != null;
     }
 
     public void addOnPledgeHandler(OnPledgeHandler onPledgeHandler, Executor executor) {
@@ -571,6 +579,7 @@ public class PledgingWallet extends Wallet {
      * project file and use it here to find the right key in case the user restored from wallet seed words and thus
      * we cannot find pubkey in our hashmaps.
      */
+    @Nullable
     public DeterministicKey getAuthKeyFromIndexOrPubKey(byte[] pubkey, int index) {
         DeterministicKey key = (DeterministicKey) findKeyFromPubKey(pubkey);
         if (key == null) {

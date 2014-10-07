@@ -364,14 +364,14 @@ public class Project {
     }
 
     /** Returns a future for the project status that completes when successfully downloaded via HTTP. */
-    public CompletableFuture<LHProtos.ProjectStatus> getStatus(PledgingWallet wallet) {
+    public CompletableFuture<LHProtos.ProjectStatus> getStatus(PledgingWallet wallet, @Nullable KeyParameter key) {
         final URI paymentURL = getPaymentURL();
         if (paymentURL == null)
             return null;
         CompletableFuture<LHProtos.ProjectStatus> future = new CompletableFuture<>();
         Thread thread = new Thread(() -> {
             try {
-                URLConnection connection = getServerQueryURL(wallet).openConnection();
+                URLConnection connection = getServerQueryURL(wallet, key).openConnection();
                 connection.setDoOutput(true);
                 connection.setConnectTimeout(10 * 1000);
                 connection.addRequestProperty("User-Agent", "Lighthouse/1.0");
@@ -389,7 +389,7 @@ public class Project {
         return future;
     }
 
-    private URL getServerQueryURL(PledgingWallet wallet) {
+    private URL getServerQueryURL(PledgingWallet wallet, @Nullable KeyParameter key) {
         // It's ludicrous that Java has two URI/URL classes and both of them suck. How hard can this be, people?!
         URI uri = checkNotNull(getPaymentURL(), "Not a server assisted project");
         String path = uri.getPath();
@@ -397,7 +397,7 @@ public class Project {
         // Communication with the server absolutely should be protected by SSL, in which case we have confidentiality
         // so replay attacks aren't a concern.
         String msg = getID();
-        String rawSig = signAsOwner(wallet, msg, null);
+        String rawSig = signAsOwner(wallet, msg, key);
         if (rawSig == null)
             return unchecked(uri::toURL);
         String signature = unchecked(() -> URLEncoder.encode(rawSig, "UTF-8"));
@@ -446,13 +446,21 @@ public class Project {
     @Nullable
     public String signAsOwner(PledgingWallet wallet, String message, @Nullable KeyParameter aesKey) {
         DeterministicKey realKey = wallet.getAuthKeyFromIndexOrPubKey(authKey, authKeyIndex);
-        if (realKey == null)
+        if (realKey == null || (aesKey == null && realKey.isEncrypted()))
             return null;
         return realKey.signMessage(message, aesKey);
     }
 
     public void authenticateOwner(String message, String signatureBase64) throws SignatureException {
         ECKey.fromPublicOnly(authKey).verifyMessage(message, signatureBase64);
+    }
+
+    public byte[] getAuthKey() {
+        return authKey;
+    }
+
+    public int getAuthKeyIndex() {
+        return authKeyIndex;
     }
 
     public NetworkParameters getParams() {

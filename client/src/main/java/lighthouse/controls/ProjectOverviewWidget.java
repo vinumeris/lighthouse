@@ -71,7 +71,7 @@ public class ProjectOverviewWidget extends HBox {
         Text text = new Text(project.getMemo());
         blurbFlow.getChildren().setAll(text);
 
-        if (Main.wallet.maybeGetTag(project.ownedTag()) != null) {
+        if (Main.wallet.isProjectMine(project)) {
             AwesomeDude.setIcon(ownershipIcon, AwesomeIcon.HOME, "25");
         } else {
             titleHBox.getChildren().remove(ownershipIcon);
