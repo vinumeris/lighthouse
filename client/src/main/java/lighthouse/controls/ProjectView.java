@@ -308,8 +308,8 @@ public class ProjectView extends HBox {
         } else {
             if (Main.wallet.getPledgedAmountFor(project) > 0)
                 mode = Mode.PLEDGED;
-            if (value >= project.getGoalAmount().value && (project.getPaymentURL() == null || Main.wallet.isProjectMine(project)))
-                mode = Mode.CAN_CLAIM;   // In serverless mode anyone can claim even if they didn't create the project.
+            if (value >= project.getGoalAmount().value && Main.wallet.isProjectMine(project))
+                mode = Mode.CAN_CLAIM;
         }
         log.info("Mode is {}", mode);
         if (priorMode == null) priorMode = mode;
