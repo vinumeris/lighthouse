@@ -84,7 +84,7 @@ public class ProjectOverviewWidget extends HBox {
         colorAdjust.saturationProperty().bind(when(equal(state, LighthouseBackend.ProjectState.CLAIMED)).then(-0.9).otherwise(0.0));
         GaussianBlur blur = new GaussianBlur();
         blur.setInput(colorAdjust);
-        animatedBind(coverImage, blur.radiusProperty(), when(isLoading).then(10).otherwise(0.0));
+        animatedBind(coverImage, blur.radiusProperty(), when(isLoading).then(25).otherwise(0.0));
         coverImage.setImage(image);
         coverImage.setEffect(blur);
 
