@@ -22,6 +22,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import lighthouse.LighthouseBackend;
@@ -86,6 +87,7 @@ public class ProjectOverviewWidget extends HBox {
         blur.setInput(colorAdjust);
         animatedBind(coverImage, blur.radiusProperty(), when(isLoading).then(25).otherwise(0.0));
         coverImage.setImage(image);
+        coverImage.setClip(new Rectangle(coverImage.getFitWidth(), coverImage.getFitHeight()));
         coverImage.setEffect(blur);
 
         animatedBind(loadingIndicatorArea, loadingIndicatorArea.opacityProperty(), when(isLoading).then(1.0).otherwise(0.0));
