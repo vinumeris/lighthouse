@@ -1,12 +1,6 @@
 package lighthouse.server;
 
-import org.bitcoinj.core.GetUTXOsMessage;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.kits.WalletAppKit;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.RegTestParams;
-import org.bitcoinj.params.TestNet3Params;
-import org.bitcoinj.utils.BriefLogFormatter;
+import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 import joptsimple.OptionParser;
@@ -17,6 +11,13 @@ import lighthouse.files.AppDirectory;
 import lighthouse.protocol.LHUtils;
 import lighthouse.threading.AffinityExecutor;
 import lighthouse.wallet.PledgingWallet;
+import org.bitcoinj.core.GetUTXOsMessage;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.kits.WalletAppKit;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.RegTestParams;
+import org.bitcoinj.params.TestNet3Params;
+import org.bitcoinj.utils.BriefLogFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,7 @@ public class PledgeServer {
                 return;
         }
 
-        HttpsServer server = createServer(portFlag, keystoreFlag, options);
+        HttpServer server = createServer(portFlag, keystoreFlag, options);
 
         // Where will we store our projects and received pledges?
         if (options.has(dirFlag))
@@ -112,21 +113,25 @@ public class PledgeServer {
         server.start();
     }
 
-    private static HttpsServer createServer(OptionSpec<Short> portFlag, OptionSpec<String> keystoreFlag, OptionSet options) throws Exception {
-        // The amount of boilerplate this supposedly lightweight HTTPS server requires is stupid.
-        KeyStore keyStore = KeyStore.getInstance("JKS");
-        char[] password = "changeit".toCharArray();
-        try (FileInputStream stream = new FileInputStream(options.valueOf(keystoreFlag))) {
-            keyStore.load(stream, password);
+    private static HttpServer createServer(OptionSpec<Short> portFlag, OptionSpec<String> keystoreFlag, OptionSet options) throws Exception {
+        if (options.has(keystoreFlag)) {
+            // The amount of boilerplate this supposedly lightweight HTTPS server requires is stupid.
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            char[] password = "changeit".toCharArray();
+            try (FileInputStream stream = new FileInputStream(options.valueOf(keystoreFlag))) {
+                keyStore.load(stream, password);
+            }
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+            kmf.init(keyStore, password);
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+            tmf.init(keyStore);
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+            HttpsServer server = HttpsServer.create(new InetSocketAddress(portFlag.value(options)), 0);
+            server.setHttpsConfigurator(new HttpsConfigurator(sslContext));
+            return server;
+        } else {
+            return HttpServer.create(new InetSocketAddress(portFlag.value(options)), 0);
         }
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-        kmf.init(keyStore, password);
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-        tmf.init(keyStore);
-        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
-        HttpsServer server = HttpsServer.create(new InetSocketAddress(portFlag.value(options)), 0);
-        server.setHttpsConfigurator(new HttpsConfigurator(sslContext));
-        return server;
     }
 }
