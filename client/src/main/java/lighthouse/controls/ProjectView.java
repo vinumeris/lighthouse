@@ -1,10 +1,5 @@
 package lighthouse.controls;
 
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.InsufficientMoneyException;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.params.TestNet3Params;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import de.jensd.fx.fontawesome.AwesomeDude;
@@ -42,12 +37,15 @@ import lighthouse.protocol.Ex;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
-import lighthouse.subwindows.PledgeRevokeWindow;
 import lighthouse.subwindows.PledgeWindow;
+import lighthouse.subwindows.RevokeAndClaimWindow;
 import lighthouse.threading.AffinityExecutor;
 import lighthouse.utils.ConcatenatingList;
 import lighthouse.utils.GuiUtils;
 import lighthouse.utils.MappedList;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.params.TestNet3Params;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,14 +54,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.concurrent.CompletableFuture;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static javafx.beans.binding.Bindings.*;
 import static javafx.collections.FXCollections.singletonObservableList;
 import static lighthouse.utils.GuiUtils.getResource;
-import static lighthouse.utils.GuiUtils.informationalAlert;
 import static lighthouse.utils.MoreBindings.bindSetToList;
 import static lighthouse.utils.MoreBindings.mergeSets;
 
@@ -416,39 +412,11 @@ public class ProjectView extends HBox {
 
     private void claimPledges(Project p) {
         log.info("Claim button clicked for {}", p);
-        try {
-            CompletableFuture<Transaction> tx = Main.wallet.completeContractWithFee(p, pledges);
-            tx.handle((t, ex) -> {
-                if (ex != null) {
-                    GuiUtils.crashAlert(ex);
-                } else {
-                    informationalAlert("Pledges claimed",
-                            "The contract has been successfully closed and the " +
-                                    "money should appear at the project's destination address shortly."
-                    );
-                }
-                return null;
-            });
-        } catch (Ex.ValueMismatch e) {
-            // TODO: Solve value mismatch errors. We have a few options.
-            // 1) Try taking away pledges to see if we can get precisely to the target value, e.g. this can
-            //    help if everyone agrees up front to pledge 1 BTC exactly, and the goal is 10, but nobody
-            //    knows how many people will pledge so we might end up with 11 or 12 BTC. In this situation
-            //    we can just randomly drop pledges until we get to the right amount (or allow the user to choose).
-            // 2) Find a way to extend the Bitcoin protocol so the additional money can be allocated to the
-            //    project owner and not miners. For instance by allowing new SIGHASH modes that control which
-            //    parts of which outputs are signed. This would require a Script 2.0 effort though.
-            informationalAlert("Too much money",
-                    "You have gathered pledges that add up to more than the goal. The excess cannot be " +
-                    "redeemed in the current version of the software and would end up being paid completely " +
-                    "to miners fees. Please remove some pledges and try to hit the goal amount exactly. " +
-                    "There is %s too much.", Coin.valueOf(e.byAmount).toFriendlyString());
-        } catch (InsufficientMoneyException e) {
-            informationalAlert("Cannot claim pledges",
-                    "Closing the contract requires paying Bitcoin network fees, but you don't have enough " +
-                    "money in the wallet. Add more money and try again."
-            );
-        }
+        Main.OverlayUI<RevokeAndClaimWindow> overlay = RevokeAndClaimWindow.openForClaim(p, pledges);
+        overlay.controller.onSuccess = () -> {
+            mode = Mode.OPEN_FOR_PLEDGES;
+            updateGUIForState();
+        };
     }
 
     private void revokePledge(Project project) {
@@ -456,12 +424,11 @@ public class ProjectView extends HBox {
         LHProtos.Pledge pledge = Main.wallet.getPledgeFor(project);
         checkNotNull(pledge, "UI invariant violation");   // Otherwise our UI is really messed up.
 
-        Main.OverlayUI<PledgeRevokeWindow> overlay = Main.instance.overlayUI("subwindows/pledge_revoke.fxml", "Revoke pledge");
+        Main.OverlayUI<RevokeAndClaimWindow> overlay = RevokeAndClaimWindow.openForRevoke(pledge);
         overlay.controller.onSuccess = () -> {
             mode = Mode.OPEN_FOR_PLEDGES;
             updateGUIForState();
         };
-        overlay.controller.pledgeToRevoke = pledge;
     }
 
     public void setProject(Project project) {

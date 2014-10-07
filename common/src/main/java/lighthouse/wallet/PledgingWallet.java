@@ -1,17 +1,9 @@
 package lighthouse.wallet;
 
-import org.bitcoinj.core.*;
-import org.bitcoinj.crypto.*;
-import org.bitcoinj.params.UnitTestParams;
-import org.bitcoinj.script.Script;
-import org.bitcoinj.script.ScriptBuilder;
-import org.bitcoinj.store.UnreadableWalletException;
-import org.bitcoinj.store.WalletProtobufSerializer;
-import org.bitcoinj.utils.ListenerRegistration;
-import org.bitcoinj.wallet.*;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -20,6 +12,21 @@ import com.google.protobuf.ByteString;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.Project;
 import net.jcip.annotations.GuardedBy;
+import org.bitcoinj.core.*;
+import org.bitcoinj.crypto.ChildNumber;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDUtils;
+import org.bitcoinj.crypto.TransactionSignature;
+import org.bitcoinj.params.UnitTestParams;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
+import org.bitcoinj.store.UnreadableWalletException;
+import org.bitcoinj.store.WalletProtobufSerializer;
+import org.bitcoinj.utils.ListenerRegistration;
+import org.bitcoinj.wallet.CoinSelection;
+import org.bitcoinj.wallet.DefaultCoinSelector;
+import org.bitcoinj.wallet.KeyChain;
+import org.bitcoinj.wallet.KeyChainGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.params.KeyParameter;
@@ -29,6 +36,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.*;
@@ -364,7 +372,7 @@ public class PledgingWallet extends Wallet {
      * Given a pledge protobuf, double spends the stub so the pledge can no longer be claimed. The pledge is
      * removed from the wallet once the double spend propagates successfully.
      *
-     * @throws com.google.bitcoin.core.InsufficientMoneyException if we can't afford the double spend tx fee.
+     * @throws org.bitcoinj.core.InsufficientMoneyException if we can't afford to revoke.
      */
     public Revocation revokePledge(LHProtos.Pledge proto, @Nullable KeyParameter aesKey) throws InsufficientMoneyException {
         TransactionOutput stub;
@@ -421,15 +429,46 @@ public class PledgingWallet extends Wallet {
         projects.inverse().remove(proto);
     }
 
+    public static class CompletionProgress {
+        public volatile Consumer<Integer> peersSeen;   // or -1 for mined/dead.
+        public CompletableFuture<Transaction> txFuture;
+        private int lastPeersSeen;
+
+        private CompletionProgress() {
+        }
+
+        private void setPeersSeen(int value) {
+            if (value != lastPeersSeen) {
+                lastPeersSeen = value;
+                peersSeen.accept(value);
+            }
+        }
+    }
+
     /**
      * Runs completeContract to get a feeless contract, then attaches an extra input of size MIN_FEE, potentially
      * creating and broadcasting a tx to create an output of the right size first (as we cannot add change outputs
      * to an assurance contract). The returned future completes once both dependency and contract are broadcast OK.
      */
-    public CompletableFuture<Transaction> completeContractWithFee(Project project, Set<LHProtos.Pledge> pledges) throws InsufficientMoneyException {
+    public CompletionProgress completeContractWithFee(Project project, Set<LHProtos.Pledge> pledges) throws InsufficientMoneyException {
         // The chances of having a fee shaped output are minimal, so we always create a dependency tx here.
         final Coin feeSize = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
         log.info("Completing contract with fee: sending dependency tx");
+        CompletionProgress progress = new CompletionProgress();
+        TransactionConfidence.Listener broadcastListener = new TransactionConfidence.Listener() {
+            private Set<PeerAddress> addrs = new HashSet<>();
+
+            @Override
+            public void onConfidenceChanged(Transaction tx, ChangeReason reason) {
+                // tx can be different.
+                if (reason == TransactionConfidence.Listener.ChangeReason.SEEN_PEERS) {
+                    addrs.addAll(Sets.newHashSet(tx.getConfidence().getBroadcastBy()));
+                    progress.setPeersSeen(addrs.size());
+                } else if (reason == ChangeReason.TYPE) {
+                    progress.setPeersSeen(-1);
+                }
+            }
+        };
         Transaction contract = project.completeContract(pledges);
         Wallet.SendResult result = sendCoins(vTransactionBroadcaster, freshReceiveKey().toAddress(params), feeSize);
         // The guava API is better for this than what the Java 8 guys produced, sigh.
@@ -443,9 +482,12 @@ public class PledgingWallet extends Wallet {
             // Sign the final output we added.
             signTransaction(Wallet.SendRequest.forTx(contract));
             log.info("Prepared final contract: {}", contract);
+            contract.getConfidence().addEventListener(broadcastListener);
             return vTransactionBroadcaster.broadcastTransaction(contract);
         });
-        return convertFuture(future);
+        result.tx.getConfidence().addEventListener(broadcastListener);
+        progress.txFuture = convertFuture(future);
+        return progress;
     }
 
     public void addOnPledgeHandler(OnPledgeHandler onPledgeHandler, Executor executor) {
