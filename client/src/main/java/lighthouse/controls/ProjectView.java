@@ -2,8 +2,6 @@ package lighthouse.controls;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import de.jensd.fx.fontawesome.AwesomeDude;
-import de.jensd.fx.fontawesome.AwesomeIcon;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -112,7 +110,6 @@ public class ProjectView extends HBox {
     public ProjectView() {
         // Don't try and access Main.backend here in case you race with startup.
         setupFXML();
-        AwesomeDude.setIcon(backButton, AwesomeIcon.ARROW_CIRCLE_LEFT, "30");
         pledgesList.setCellFactory(pledgeListView -> new PledgeListCell());
         project.addListener(x -> updateForProject());
     }
@@ -425,21 +422,6 @@ public class ProjectView extends HBox {
 
     public void setProject(Project project) {
         this.project.set(project);
-    }
-
-    @FXML
-    public ObjectProperty<EventHandler<ActionEvent>> onBackClickedProperty() {
-        return onBackClickedProperty;
-    }
-
-    @FXML
-    public void setOnBackClicked(EventHandler<ActionEvent> value) {
-        onBackClickedProperty.set(value);
-    }
-
-    @FXML
-    public EventHandler<ActionEvent> getOnBackClicked() {
-        return onBackClickedProperty.get();
     }
 
     // Should we show revoked pledges crossed out?

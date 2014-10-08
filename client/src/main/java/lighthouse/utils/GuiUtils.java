@@ -355,12 +355,17 @@ public class GuiUtils {
     }
 
     public static AnimatedBindInfo animatedBind(Node node, WritableDoubleValue bindTo, NumberBinding bindFrom) {
+        return animatedBind(node, bindTo, bindFrom, null);
+    }
+
+    public static AnimatedBindInfo animatedBind(Node node, WritableDoubleValue bindTo, NumberBinding bindFrom, @Nullable Interpolator interpolator) {
         bindTo.set(bindFrom.doubleValue());   // Initialise.
         bindFrom.addListener((o, prev, cur) -> {
             AnimatedBindInfo info = (AnimatedBindInfo) node.getUserData();
             if (info.timeline != null)
                 info.timeline.stop();
-            info.timeline = new Timeline(new KeyFrame(UI_ANIMATION_TIME, new KeyValue(bindTo, cur)));
+            info.timeline = new Timeline(new KeyFrame(UI_ANIMATION_TIME,
+                    interpolator != null ? new KeyValue(bindTo, cur, interpolator) : new KeyValue(bindTo, cur)));
             info.timeline.setOnFinished(ev -> {
                 ((AnimatedBindInfo) node.getUserData()).timeline = null;
                 if (info.onAnimFinish != null)

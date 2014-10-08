@@ -11,6 +11,7 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
@@ -54,7 +55,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static com.google.common.base.Preconditions.checkState;
+import static javafx.beans.binding.Bindings.when;
 import static lighthouse.threading.AffinityExecutor.UI_THREAD;
+import static lighthouse.utils.GuiUtils.animatedBind;
 import static lighthouse.utils.GuiUtils.platformFiddleChooser;
 
 /**
@@ -64,22 +67,23 @@ import static lighthouse.utils.GuiUtils.platformFiddleChooser;
 public class MainWindow {
     private static final Logger log = LoggerFactory.getLogger(MainWindow.class);
 
-    public Label balance;
-    public Button sendMoneyOutBtn, setupWalletBtn;
-    public ClickableBitcoinAddress addressControl;
-
-    public HBox balanceArea;
-    public VBox projectsVBox;
-    public HBox topBox;
-    public VBox root;
-    public HBox contentHBox;
-    public ScrollPane contentScrollPane;
-    public ProjectView projectView;
-    public StackPane projectViewContainer;
-    public VBox overviewVbox;
-    public VBox contentStack;
-    public Label addProjectIcon;
-    public Label networkIndicatorLabel;
+    @FXML HBox topBoxLeftArea;
+    @FXML Label balance;
+    @FXML Button sendMoneyOutBtn, setupWalletBtn;
+    @FXML ClickableBitcoinAddress addressControl;
+    @FXML HBox balanceArea;
+    @FXML VBox projectsVBox;
+    @FXML HBox topBox;
+    @FXML VBox root;
+    @FXML HBox contentHBox;
+    @FXML ScrollPane contentScrollPane;
+    @FXML ProjectView projectView;
+    @FXML StackPane projectViewContainer;
+    @FXML VBox overviewVbox;
+    @FXML VBox contentStack;
+    @FXML Label addProjectIcon;
+    @FXML Label networkIndicatorLabel;
+    @FXML Button backButton;
 
     // These are read-only mirrors of sets maintained by the backend. Changes made by LighthouseBackend are propagated
     // into the UI thread and applied there asynchronously, thus it is safe to connect them directly to UI widgets.
@@ -91,6 +95,8 @@ public class MainWindow {
     // A map indicating the status of checking each project against the network (downloading, found an error, done, etc)
     // This is mirrored into the UI thread from the backend.
     private ObservableMap<Project, LighthouseBackend.CheckStatus> checkStates;
+
+    private SimpleBooleanProperty inProjectView = new SimpleBooleanProperty();
 
     enum Views {
         OVERVIEW,
@@ -104,6 +110,11 @@ public class MainWindow {
         AwesomeDude.setIcon(setupWalletBtn, AwesomeIcon.LOCK, "12pt", ContentDisplay.LEFT);
         Tooltip.install(setupWalletBtn, new Tooltip("Make paper backup and encrypt your wallet"));
         AwesomeDude.setIcon(addProjectIcon, AwesomeIcon.FILE_ALT, "50pt; -fx-text-fill: white" /* lame hack */);
+
+        // Slide back button in/out.
+        AwesomeDude.setIcon(backButton, AwesomeIcon.ARROW_CIRCLE_LEFT, "30");
+        animatedBind(topBoxLeftArea, topBoxLeftArea.translateXProperty(), when(inProjectView).then(0).otherwise(-45),
+                Interpolator.EASE_OUT);
 
         // Avoid duplicate add errors.
         contentStack.getChildren().remove(projectViewContainer);
@@ -143,11 +154,13 @@ public class MainWindow {
                 contentStack.getChildren().remove(projectViewContainer);
                 contentStack.getChildren().add(overviewVbox);
                 projectView.updateForVisibility(false, null);
+                inProjectView.set(false);
                 break;
             case PROJECT:
                 contentStack.getChildren().remove(overviewVbox);
                 contentStack.getChildren().add(projectViewContainer);
                 projectView.updateForVisibility(true, checkStates);
+                inProjectView.set(true);
                 break;
             default: throw new IllegalStateException();
         }
@@ -212,7 +225,7 @@ public class MainWindow {
 
     @FXML
     public void addProjectClicked(ActionEvent event) {
-        Main.instance.overlayUI("subwindows/add_project.fxml", "Create/import");
+        Main.instance.overlayUI("subwindows/add_project.fxml", "Create new project");
     }
 
     @FXML

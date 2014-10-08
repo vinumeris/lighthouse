@@ -99,19 +99,11 @@
 }
 
 .back-button {
-    -fx-background-color: #000000cc;
+    -fx-background-color: #ffffffbb;
     -fx-cursor: hand;
 }
 
 .back-button > .awesome {
-    -fx-text-fill: #ffffff;
-}
-
-.back-button:hover {
-    -fx-background-color: #ffffffbb;
-}
-
-.back-button:hover > .awesome {
     -fx-text-fill: black;
 }
 

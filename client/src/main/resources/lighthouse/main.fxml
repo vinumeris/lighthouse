@@ -8,32 +8,40 @@
 <?import javafx.scene.layout.*?>
 <?import lighthouse.controls.ClickableBitcoinAddress?>
 <?import lighthouse.controls.ProjectView?>
+<?import javafx.scene.Group?>
 <VBox id="root" fx:id="root" alignment="CENTER" styleClass="cc-root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.MainWindow">
     <children>
         <HBox fx:id="topBox" minHeight="100" alignment="CENTER" styleClass="topbox">
             <children>
-                <ImageView fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@icon.jpg"/>
-                </ImageView>
-                <VBox alignment="CENTER_LEFT" prefHeight="80.0">
-                    <children>
-                        <HBox spacing="15">
-                            <Label text="YOUR ADDRESS" style="-fx-font-weight: bold"/>
-                            <Label fx:id="networkIndicatorLabel" text="testnet" styleClass="network-indicator" visible="false"/>
-                        </HBox>
-                        <ClickableBitcoinAddress fx:id="addressControl"/>
-                        <HBox spacing="20" styleClass="control-buttons">
-                            <children>
-                                <Button text="Set up wallet" fx:id="setupWalletBtn" onAction="#setupWalletClicked" styleClass="no-focus-button"/>
-                                <Button text="Empty wallet" fx:id="sendMoneyOutBtn" onAction="#sendMoneyOut" />
-                            </children>
-                            <padding>
-                                <Insets top="10"/>
-                            </padding>
-                        </HBox>
-                    </children>
-                    <padding><Insets left="20"/></padding>
-                </VBox>
+                <HBox alignment="CENTER" fx:id="topBoxLeftArea">
+
+                    <Button fx:id="backButton" mnemonicParsing="false" onAction="#backToOverview" styleClass="back-button" text="">
+                        <padding><Insets right="15"/></padding>
+                    </Button>
+                    <ImageView fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@icon.jpg"/>
+                    </ImageView>
+                    <VBox alignment="CENTER_LEFT" prefHeight="80.0">
+                        <children>
+                            <HBox spacing="15">
+                                <Label text="YOUR ADDRESS" style="-fx-font-weight: bold"/>
+                                <Label fx:id="networkIndicatorLabel" text="testnet" styleClass="network-indicator" visible="false"/>
+                            </HBox>
+                            <ClickableBitcoinAddress fx:id="addressControl"/>
+                            <HBox spacing="20" styleClass="control-buttons">
+                                <children>
+                                    <Button text="Set up wallet" fx:id="setupWalletBtn" onAction="#setupWalletClicked" styleClass="no-focus-button"/>
+                                    <Button text="Empty wallet" fx:id="sendMoneyOutBtn" onAction="#sendMoneyOut" />
+                                </children>
+                                <padding>
+                                    <Insets top="10"/>
+                                </padding>
+                            </HBox>
+                        </children>
+                        <padding><Insets left="20"/></padding>
+                    </VBox>
+                </HBox>
+
                 <Pane HBox.hgrow="ALWAYS"/>
                 <VBox alignment="CENTER_RIGHT">
                     <Label text="YOUR BALANCE" style="-fx-font-weight: bold"/>
@@ -64,7 +72,7 @@
                 <content>
                     <VBox fx:id="contentStack" minHeight="${root.height - topBox.height - 5}">
                         <StackPane fx:id="projectViewContainer" style="-fx-padding: 40" VBox.vgrow="ALWAYS">
-                            <ProjectView fx:id="projectView" onBackClicked="#backToOverview" styleClass="project-view">
+                            <ProjectView fx:id="projectView" styleClass="project-view">
                                 <effect>
                                     <DropShadow/>
                                 </effect>

@@ -28,7 +28,6 @@
                                           <children>
                                               <HBox alignment="CENTER_LEFT" spacing="10.0">
                                                   <children>
-                                                      <Button fx:id="backButton" mnemonicParsing="false" onAction="#backClicked" styleClass="back-button" text="" />
                                                       <Label fx:id="projectTitle" styleClass="project-title-label, drop-shadow-label" text="A really really really really long title for a project that's kind of self indulgent" wrapText="true" HBox.hgrow="ALWAYS">
                                                           <font>
                                                               <Font size="25.0" />
