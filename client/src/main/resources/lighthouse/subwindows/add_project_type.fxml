@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="603.0" prefWidth="708.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.AddProjectTypeWindow">
+   <bottom>
+      <HBox alignment="CENTER_RIGHT" prefHeight="81.0" prefWidth="750.0" spacing="10.0" styleClass="fat-buttons" BorderPane.alignment="CENTER">
+         <children>
+            <Pane HBox.hgrow="ALWAYS" />
+            <Button cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
+            <Button fx:id="saveButton" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#saveClicked" text="Save" />
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </HBox>
+   </bottom>
+   <center>
+      <VBox spacing="20.0" styleClass="server-type-selbox">
+         <BorderPane.margin>
+            <Insets bottom="20.0" left="40.0" right="20.0" top="20.0" />
+         </BorderPane.margin>
+         <children>
+            <RadioButton fx:id="serverAssisted" mnemonicParsing="false" selected="true" text="Server assisted">
+               <VBox.margin>
+                  <Insets left="-27.0" />
+               </VBox.margin>
+               <toggleGroup>
+                  <ToggleGroup fx:id="a" />
+               </toggleGroup>
+            </RadioButton>
+            <TextFlow lineSpacing="5.0" prefWidth="200.0">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <children>
+                  <Text lineSpacing="15.0" strokeType="OUTSIDE" strokeWidth="0.0" text="This style of project involves a server that gathers pledges and keeps track of them for you. You need to either run a server yourself, or submit your project to someone else who runs one.&#10;&#10;If you have a server to use, enter its domain name here, and then upload the project file to it." />
+               </children>
+            </TextFlow>
+            <HBox alignment="CENTER_LEFT" fillHeight="false" spacing="15.0">
+               <children>
+                  <Label text="Server address" />
+                  <TextField fx:id="serverNameEdit" maxWidth="1.7976931348623157E308" prefHeight="26.0" promptText="e.g. vinumeris.com" HBox.hgrow="ALWAYS" />
+               </children>
+               <VBox.margin>
+                  <Insets bottom="60.0" />
+               </VBox.margin>
+            </HBox>
+            <RadioButton fx:id="fullyDecentralised" mnemonicParsing="false" onAction="#fullyDecentralisedPress" text="Fully decentralised" toggleGroup="$a">
+               <VBox.margin>
+                  <Insets left="-27.0" />
+               </VBox.margin>
+            </RadioButton>
+            <TextFlow lineSpacing="5.0" prefHeight="200.0" prefWidth="200.0">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="This style of project does not require any server. Instead people who pledge will be given a pledge file that they must get back to you via e.g. email, shared folder or instant messaging. Additionally, other people will not be able to see how much money was raised so far unless they download the pledge files themselves.&#10;&#10;Fully decentralised can be an appropriate choice when you are fund raising from a group of friends or will be managing the pledges in some other way. It's less convenient for pledgors but doesn't require any infrastructure." />
+               </children>
+            </TextFlow>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

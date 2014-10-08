@@ -1,9 +1,6 @@
 package lighthouse.subwindows;
 
-import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
-import com.google.common.net.HostAndPort;
-import com.google.common.net.InternetDomainName;
 import com.google.protobuf.ByteString;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -22,13 +19,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import lighthouse.Main;
 import lighthouse.model.ProjectModel;
-import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.LHUtils;
-import lighthouse.protocol.Project;
 import lighthouse.utils.DownloadProgress;
 import lighthouse.utils.ValidationLink;
 import org.bitcoinj.core.Address;
@@ -36,10 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static lighthouse.protocol.LHUtils.unchecked;
 import static lighthouse.utils.GuiUtils.*;
@@ -58,9 +52,8 @@ public class AddProjectWindow {
     @FXML TextField addressEdit;
     @FXML TextField goalAmountEdit;
     @FXML TextField titleEdit;
-    @FXML TextField serverNameEdit;
     @FXML TextArea descriptionEdit;
-    @FXML Button saveButton;
+    @FXML Button nextButton;
     @FXML Pane createPane;
 
     public Main.OverlayUI<InnerWindow> overlayUI;
@@ -86,22 +79,13 @@ public class AddProjectWindow {
         coverPhotoSiteLink.setText(COVERPHOTO_SITE);
 
         ValidationLink goalValid = new ValidationLink(goalAmountEdit, str -> !LHUtils.didThrow(() -> valueOrThrow(str)));
-        ValidationLink serverNameValid = new ValidationLink(serverNameEdit, this::isServerNameValid);
-        ValidationLink.autoDisableButton(saveButton,
+        ValidationLink.autoDisableButton(nextButton,
                 goalValid,
-                new ValidationLink(titleEdit, str -> !str.isEmpty()),
-                serverNameValid);
+                new ValidationLink(titleEdit, str -> !str.isEmpty()));
 
         goalAmountEdit.textProperty().addListener((obj, prev, cur) -> {
             if (goalValid.isValid.get())
                 this.model.goalAmount.set(valueOrThrow(cur).value);
-        });
-        serverNameEdit.textProperty().addListener(o -> {
-            // Note that the validation link is updated AFTER this runs, so we must test directly.
-            final String text = serverNameEdit.getText();
-            if (isServerNameValid(text)) {
-                this.model.serverName.set(text);
-            }
         });
         roundCorners(coverImageView, 10);
         setupDefaultCoverImage();
@@ -134,70 +118,9 @@ public class AddProjectWindow {
         }
     }
 
-    private boolean isServerNameValid(String str) {
-        try {
-            if (str.isEmpty() || str.equals("localhost")) return true;
-            HostAndPort hostAndPort = HostAndPort.fromString(str);
-            if ((InternetDomainName.isValid(hostAndPort.getHostText()) && InternetDomainName.from(hostAndPort.getHostText()).isUnderPublicSuffix()))
-                return true;
-            else
-                return false;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-
     @FXML
-    public void saveClicked(ActionEvent event) {
-        final LHProtos.ProjectDetails detailsProto = model.getDetailsProto().build();
-        log.info("Saving: {}", detailsProto.getExtraDetails().getTitle());
-        try {
-            Project project;
-            if (!detailsProto.hasPaymentUrl()) {
-                // Request directory first then save, so the animations are right.
-                DirectoryChooser chooser = new DirectoryChooser();
-                chooser.setTitle("Select a directory to store the project and pledges");
-                platformFiddleChooser(chooser);
-                File dir = chooser.showDialog(Main.instance.mainStage);
-                if (dir == null)
-                    return;
-                final Path dirPath = dir.toPath();
-                project = model.getProject();
-                // Make sure we don't try and run too many animations simultaneously.
-                final Project fp = project;
-                overlayUI.runAfterFade(ev -> {
-                    saveAndWatchDirectory(fp, dirPath);
-                });
-                overlayUI.done();
-            } else {
-                // User has to explicitly export it somewhere (not watched) so they can get it to the server.
-                project = Main.backend.saveProject(model.getProject());
-                ExportWindow.openForProject(project);
-            }
-            // Mark this project as being created by us in the wallet. We have to record this explicitly because
-            // the target address might not actually be one of ours, e.g. if it's being paid directly to a TREZOR.
-            Main.wallet.setTag("com.vinumeris.cc:owned:" + project.getID(), ByteString.EMPTY);
-        } catch (IOException e) {
-            informationalAlert("Could not save project",
-                    "An error was encountered whilst trying to save the project: %s",
-                    Throwables.getRootCause(e).getMessage());
-        }
-    }
-
-    private void saveAndWatchDirectory(Project project, Path dirPath) {
-        try {
-            // Write to tmp file and then rename, otherwise it's possible that the Linux kernel delivers directory
-            // change events to the DiskManager whilst the file is partially written.
-            Path file = dirPath.resolve(project.getSuggestedFileName() + ".tmp");
-            try (OutputStream stream = new BufferedOutputStream(Files.newOutputStream(file))) {
-                project.getProto().writeTo(stream);
-            }
-            Path realPath = dirPath.resolve(project.getSuggestedFileName());
-            Files.move(file, realPath);
-            Main.backend.addProjectFile(realPath);
-        } catch (IOException e) {
-            crashAlert(e);
-        }
+    public void nextClicked(ActionEvent event) {
+        AddProjectTypeWindow.open(model);
     }
 
     @FXML

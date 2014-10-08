@@ -84,7 +84,9 @@ public class Project {
         if (this.projectReq.hasPaymentUrl()) {
             try {
                 url = new URI(this.projectReq.getPaymentUrl());
-            } catch (URISyntaxException e) {
+                if (url.getHost() == null)
+                    throw new Exception();
+            } catch (Exception e) {
                 throw new PaymentProtocolException("Invalid URL: " + this.projectReq.getPaymentUrl());
             }
         } else {
@@ -171,7 +173,7 @@ public class Project {
     /** Returns the URL (if any) to which the pledge should be submitted, or null if none specified. */
     @Nullable
     public URI getPaymentURL() {
-        if (url != null && url.getHost().equals("localhost")) {
+        if (url != null && "localhost".equals(url.getHost())) {
             // Switch port for easier local testing (vs the default of port 80).
             URI newUrl = unchecked(() -> new URI(String.format("http://%s:%d%s", url.getHost(), LHUtils.HTTP_LOCAL_TEST_PORT, url.getPath())));
             log.info("Switched URL to {}", newUrl);

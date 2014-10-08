@@ -56,7 +56,10 @@ public class ProjectModel {
 
         serverName.addListener(o -> {
             final String name = serverName.get();
-            proto.setPaymentUrl(LHUtils.makeServerPath(name, LHUtils.titleToUrlString(title.get())));
+            if (name.isEmpty())
+                proto.clearPaymentUrl();
+            else
+                proto.setPaymentUrl(LHUtils.makeServerPath(name, LHUtils.titleToUrlString(title.get())));
         });
 
         Address addr = project.getOutputs().get(0).getAddressFromP2PKHScript(project.getParams());

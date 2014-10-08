@@ -22,7 +22,6 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
                     </rowConstraints>
                     <BorderPane.margin>
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -39,8 +38,6 @@
                                 <Label styleClass="btc-label-block" text="BTC" />
                             </children>
                         </HBox>
-                        <Label text="Server name" GridPane.rowIndex="5" />
-                        <TextField fx:id="serverNameEdit" promptText="(optional) Example: myserver.com" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                         <Label text="Address" GridPane.rowIndex="4" />
                         <TextField fx:id="addressEdit" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <StackPane onDragDropped="#imageSelectorDropped" onDragOver="#imageSelectorDragOver" onMouseClicked="#imageSelectorClicked" GridPane.columnIndex="1">
@@ -71,7 +68,7 @@
             <children>
                 <Pane HBox.hgrow="ALWAYS" />
                 <Button cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
-                <Button fx:id="saveButton" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#saveClicked" text="Save" />
+                <Button fx:id="nextButton" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#nextClicked" text="Next" />
             </children>
             <padding>
                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

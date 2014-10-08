@@ -235,3 +235,7 @@
 .control-buttons > Button {
     -fx-base: white;
 }
+
+.server-type-selbox > RadioButton {
+    -fx-font-weight: bold;
+}
