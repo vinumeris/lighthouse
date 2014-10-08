@@ -1,15 +1,5 @@
 package lighthouse;
 
-import org.bitcoinj.core.AbstractPeerEventListener;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Peer;
-import org.bitcoinj.kits.WalletAppKit;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.RegTestParams;
-import org.bitcoinj.params.TestNet3Params;
-import org.bitcoinj.utils.BriefLogFormatter;
-import org.bitcoinj.utils.Threading;
-import org.bitcoinj.wallet.DeterministicSeed;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -40,13 +30,27 @@ import lighthouse.subwindows.EmbeddedWindow;
 import lighthouse.utils.GuiUtils;
 import lighthouse.utils.TextFieldValidator;
 import lighthouse.wallet.PledgingWallet;
+import org.bitcoinj.core.AbstractPeerEventListener;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Peer;
+import org.bitcoinj.core.PeerAddress;
+import org.bitcoinj.kits.WalletAppKit;
+import org.bitcoinj.net.discovery.DnsDiscovery;
+import org.bitcoinj.net.discovery.PeerDiscovery;
+import org.bitcoinj.net.discovery.PeerDiscoveryException;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.RegTestParams;
+import org.bitcoinj.params.TestNet3Params;
+import org.bitcoinj.utils.BriefLogFormatter;
+import org.bitcoinj.utils.Threading;
+import org.bitcoinj.wallet.DeterministicSeed;
 import org.bouncycastle.math.ec.ECPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
@@ -321,12 +325,27 @@ public class Main extends Application {
                 wallet = (PledgingWallet) bitcoin.wallet();
                 backend = new LighthouseBackend(CLIENT, vPeerGroup, vChain, wallet);
 
+                reached("onSetupCompleted");
+                walletLoadedLatch.countDown();
+
                 if (params == RegTestParams.get()) {
                     vPeerGroup.setMaxConnections(1);
                 } else {
                     // TODO: Replace this with a DNS seed that crawls for NODE_GETUTXOS (or whatever it's renamed to).
-                    vPeerGroup.addAddress(unchecked(() -> InetAddress.getByName("vinumeris.com")));
-                    vPeerGroup.addAddress(unchecked(() -> InetAddress.getByName("riker.plan99.net")));
+                    PeerDiscovery discovery = new DnsDiscovery(params) {
+                        @Override
+                        public InetSocketAddress[] getPeers(long timeoutValue, TimeUnit timeoutUnit) throws PeerDiscoveryException {
+                            InetSocketAddress[] result = super.getPeers(timeoutValue, timeoutUnit);
+                            if (result.length > 2) {
+                                result[0] = new InetSocketAddress("vinumeris.com", params.getPort());
+                                result[1] = new InetSocketAddress("riker.plan99.net", params.getPort());
+                            }
+                            return result;
+                        }
+                    };
+                    vPeerGroup.addPeerDiscovery(discovery);
+                    vPeerGroup.setMaxConnections(4);
+                    vPeerGroup.setConnectTimeoutMillis(10000);
                 }
 
                 vPeerGroup.addEventListener(new AbstractPeerEventListener() {
@@ -344,9 +363,6 @@ public class Main extends Application {
                         }
                     }
                 });
-
-                reached("onSetupCompleted");
-                walletLoadedLatch.countDown();
             }
         };
         if (bitcoin.isChainFileLocked()) {
@@ -366,7 +382,8 @@ public class Main extends Application {
         } else if (params == TestNet3Params.get()) {
             bitcoin.setCheckpoints(getClass().getResourceAsStream("checkpoints.testnet"));
         }
-        bitcoin.setBlockingStartup(false)
+        bitcoin.setPeerNodes(new PeerAddress[0])    // Hack to prevent WAK adding DnsDiscovery
+               .setBlockingStartup(false)
                .setDownloadListener(MainWindow.bitcoinUIModel.getDownloadListener())
                .setUserAgent("Lighthouse", "" + VERSION)
                .restoreWalletFromSeed(restoreFromSeed);
@@ -397,8 +414,10 @@ public class Main extends Application {
     private Node stopClickPane = new Pane();
 
     public boolean waitForInit() {
+        log.info("Waiting for bitcoin load ...");
         Uninterruptibles.awaitUninterruptibly(walletLoadedLatch);
         if (Main.backend != null) {
+            log.info("Waiting for backend init ...");
             Main.backend.waitForInit();
             return true;
         } else {

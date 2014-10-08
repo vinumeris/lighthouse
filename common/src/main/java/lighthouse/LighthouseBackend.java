@@ -155,9 +155,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         executor.execute(() -> {
             chain.addListener(this, executor);
 
-            // Load pledges found in the wallet. Note that if the user moves or deletes the project file they downloaded,
-            // the pledge won't be usable anymore! This is not what users expect; we need to really nail the "import" vs
-            // "watch" case. TODO: Make this all work properly for the different cases (probably make redundant copies).
+            // Load pledges found in the wallet.
             for (LHProtos.Pledge pledge : wallet.getPledges()) {
                 Project project = diskManager.getProjectById(pledge.getProjectId());
                 if (project != null) {
@@ -195,17 +193,23 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 }
             }
 
+            log.info("Backend initialized ...");
             initialized.complete(true);
         });
     }
 
     private void addClaimConfidenceListener(AffinityExecutor executor, Transaction transaction, Project project) {
         transaction.getConfidence().addEventListener(new TransactionConfidence.Listener() {
+            private boolean done = false;
+
             @Override
             public void onConfidenceChanged(Transaction t, ChangeReason changeReason) {
-                log.info("Saw claim tx {} change confidence because {}", t.getHash(), changeReason);
-                if (LighthouseBackend.this.checkClaimConfidence(t, project))
+                if (!done && checkClaimConfidence(t, project)) {
+                    // Because an async thread is queuing up events on our thread, we can still get run even after
+                    // the event listener has been removed. So just quiet things a bit here.
+                    done = true;
                     transaction.getConfidence().removeEventListener(this);
+                }
             }
         }, executor);
     }
@@ -400,8 +404,12 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             log.info("Checking {} pledge(s) against P2P network for {}", pledges.size(), project);
             markAsInProgress(project);
             ListenableFuture<List<Peer>> peerFuture = peerGroup.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION);
-            if (!peerFuture.isDone())
+            if (!peerFuture.isDone()) {
                 log.info("Waiting to find {} peers that support getutxo", minPeersForUTXOQuery);
+                for (Peer peer : peerGroup.getConnectedPeers()) {
+                    log.info("Connected to: {}", peer);
+                }
+            }
             Futures.addCallback(peerFuture, new FutureCallback<List<Peer>>() {
                 @Override
                 public void onSuccess(@Nullable List<Peer> peers) {
