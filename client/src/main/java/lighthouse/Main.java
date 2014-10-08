@@ -1,6 +1,8 @@
 package lighthouse;
 
+import org.bitcoinj.core.AbstractPeerEventListener;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Peer;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.RegTestParams;
@@ -319,16 +321,29 @@ public class Main extends Application {
                 wallet = (PledgingWallet) bitcoin.wallet();
                 backend = new LighthouseBackend(CLIENT, vPeerGroup, vChain, wallet);
 
-                // For now we must run some custom Bitcoin Core nodes until pull #4351 is merged and people upgrade.
-                // Once there are enough nodes out there that we're likely to always find at least two, we can take
-                // these lines out.
-                // TODO: This can throw if DNS resolution doesn't work.
-                vPeerGroup.addAddress(unchecked(() -> InetAddress.getByName("vinumeris.com")));
-                vPeerGroup.addAddress(unchecked(() -> InetAddress.getByName("riker.plan99.net")));
-
                 if (params == RegTestParams.get()) {
                     vPeerGroup.setMaxConnections(1);
+                } else {
+                    // TODO: Replace this with a DNS seed that crawls for NODE_GETUTXOS (or whatever it's renamed to).
+                    vPeerGroup.addAddress(unchecked(() -> InetAddress.getByName("vinumeris.com")));
+                    vPeerGroup.addAddress(unchecked(() -> InetAddress.getByName("riker.plan99.net")));
                 }
+
+                vPeerGroup.addEventListener(new AbstractPeerEventListener() {
+                    @Override
+                    public void onPeerConnected(Peer peer, int peerCount) {
+                        if (peer.getAddress().getAddr().isLoopbackAddress() && !peer.getPeerVersionMessage().isGetUTXOsSupported()) {
+                            // We connected to localhost but it doesn't have what we need.
+                            log.warn("Localhost peer does not have support for NODE_GETUTXOS, ignoring");
+                            // TODO: Once Bitcoin Core fork name is chosen and released, be more specific in this message.
+                            informationalAlert("Local Bitcoin node not usable",
+                                    "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support Lighthouse needs. Lighthouse will still " +
+                                    "work but will use the peer to peer network instead, so you won't get upgraded security.");
+                            vPeerGroup.setUseLocalhostPeerWhenPossible(false);
+                            vPeerGroup.setMaxConnections(4);
+                        }
+                    }
+                });
 
                 reached("onSetupCompleted");
                 walletLoadedLatch.countDown();
