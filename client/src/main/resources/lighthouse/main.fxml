@@ -22,7 +22,7 @@
                             <Label fx:id="networkIndicatorLabel" text="testnet" styleClass="network-indicator" visible="false"/>
                         </HBox>
                         <ClickableBitcoinAddress fx:id="addressControl"/>
-                        <HBox spacing="20">
+                        <HBox spacing="20" styleClass="control-buttons">
                             <children>
                                 <Button text="Set up wallet" fx:id="setupWalletBtn" onAction="#setupWalletClicked" styleClass="no-focus-button"/>
                                 <Button text="Empty wallet" fx:id="sendMoneyOutBtn" onAction="#sendMoneyOut" />

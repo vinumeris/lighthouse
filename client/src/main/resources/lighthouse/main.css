@@ -231,3 +231,7 @@
     -fx-border-width: 0 0 1 0;
     -fx-font-size: 12;
 }
+
+.control-buttons > Button {
+    -fx-base: white;
+}
