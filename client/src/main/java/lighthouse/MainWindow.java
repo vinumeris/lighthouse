@@ -26,6 +26,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import lighthouse.controls.ClickableBitcoinAddress;
 import lighthouse.controls.NotificationBarPane;
@@ -54,6 +55,7 @@ import java.nio.file.Path;
 
 import static com.google.common.base.Preconditions.checkState;
 import static lighthouse.threading.AffinityExecutor.UI_THREAD;
+import static lighthouse.utils.GuiUtils.platformFiddleChooser;
 
 /**
  * Gets created auto-magically by FXMLLoader via reflection. The widget fields are set to the GUI controls they're named
@@ -211,6 +213,19 @@ public class MainWindow {
     @FXML
     public void addProjectClicked(ActionEvent event) {
         Main.instance.overlayUI("subwindows/add_project.fxml", "Create/import");
+    }
+
+    @FXML
+    public void importClicked(ActionEvent event) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Select a bitcoin project file to import");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Project/contract files", "*.lighthouse-project"));
+        platformFiddleChooser(chooser);
+        File file = chooser.showOpenDialog(Main.instance.mainStage);
+        if (file == null)
+            return;
+        log.info("Import clicked: {}", file);
+        importProject(file);
     }
 
     @FXML

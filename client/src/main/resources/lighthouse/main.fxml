@@ -80,7 +80,10 @@
                                                 <VBox spacing="20" alignment="CENTER" maxWidth="650" styleClass="add-project-pane, fat-buttons" minHeight="126.0">
                                                     <children>
                                                         <Label fx:id="addProjectIcon"/>
-                                                        <Button onAction="#addProjectClicked" text="Create / import project" cancelButton="true"/>
+                                                        <HBox spacing="10" alignment="CENTER">
+                                                            <Button onAction="#addProjectClicked" text="Create project" cancelButton="true"/>
+                                                            <Button onAction="#importClicked" text="Import project" cancelButton="true"/>
+                                                        </HBox>
                                                         <Label text="You can also drop an existing project file here."/>
                                                     </children>
                                                 </VBox>

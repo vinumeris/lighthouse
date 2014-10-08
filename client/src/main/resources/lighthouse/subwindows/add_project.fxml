@@ -69,7 +69,6 @@
     <bottom>
         <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="10.0" styleClass="fat-buttons" BorderPane.alignment="CENTER">
             <children>
-                <Button mnemonicParsing="false" onAction="#importClicked" text="Import from file" />
                 <Pane HBox.hgrow="ALWAYS" />
                 <Button cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
                 <Button fx:id="saveButton" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#saveClicked" text="Save" />

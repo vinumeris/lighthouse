@@ -1,6 +1,5 @@
 package lighthouse.subwindows;
 
-import org.bitcoinj.core.Address;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HostAndPort;
@@ -26,13 +25,13 @@ import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import lighthouse.Main;
-import lighthouse.MainWindow;
 import lighthouse.model.ProjectModel;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
 import lighthouse.utils.DownloadProgress;
 import lighthouse.utils.ValidationLink;
+import org.bitcoinj.core.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,20 +198,6 @@ public class AddProjectWindow {
         } catch (IOException e) {
             crashAlert(e);
         }
-    }
-
-    @FXML
-    public void importClicked(ActionEvent event) {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select a bitcoin project file to import");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Project/contract files", "*.lighthouse-project"));
-        platformFiddleChooser(chooser);
-        File file = chooser.showOpenDialog(Main.instance.mainStage);
-        if (file == null)
-            return;
-        log.info("Import clicked: {}", file);
-        MainWindow.importProject(file);
-        overlayUI.done();
     }
 
     @FXML
