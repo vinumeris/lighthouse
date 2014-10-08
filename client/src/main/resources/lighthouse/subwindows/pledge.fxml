@@ -32,13 +32,14 @@
                         <Font size="44.0" />
                     </font>
                 </TextField>
+            <Label fx:id="minersFeeLabel" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" style="-fx-text-fill: silver;" text="-0.001 BTC miners fee" textAlignment="CENTER">
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </Label>
                 <Label fx:id="allMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#allMoneyClicked" styleClass="link-label" text="Maximum amount possible" />
+            <Label fx:id="minMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#minMoneyClicked" styleClass="link-label" text="Minimum amount possible" />
                 <Pane VBox.vgrow="ALWAYS" />
-                <TextFlow>
-                    <children>
-                        <Text>Please note that a Bitcoin miner fee may need to be included to make a pledge.</Text>
-                    </children>
-                </TextFlow>
             </children>
             <padding>
                 <Insets left="30.0" right="30.0" />

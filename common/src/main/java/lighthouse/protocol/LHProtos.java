@@ -621,6 +621,30 @@ public final class LHProtos {
      * </pre>
      */
     com.google.protobuf.ByteString getAuthKey();
+
+    // optional int64 min_pledge_size = 4;
+    /**
+     * <code>optional int64 min_pledge_size = 4;</code>
+     *
+     * <pre>
+     * Smallest plege in satoshis we are willing to accept for this project. Typically this will be calculated by
+     * dividing the goal amount by the max number of inputs we're allowed in a standard transaction. In future might
+     * be overridable in server assisted cases.
+     * TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
+     * </pre>
+     */
+    boolean hasMinPledgeSize();
+    /**
+     * <code>optional int64 min_pledge_size = 4;</code>
+     *
+     * <pre>
+     * Smallest plege in satoshis we are willing to accept for this project. Typically this will be calculated by
+     * dividing the goal amount by the max number of inputs we're allowed in a standard transaction. In future might
+     * be overridable in server assisted cases.
+     * TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
+     * </pre>
+     */
+    long getMinPledgeSize();
   }
   /**
    * Protobuf type {@code lighthouse.ProjectExtraDetails}
@@ -690,6 +714,11 @@ public final class LHProtos {
             case 26: {
               bitField0_ |= 0x00000004;
               authKey_ = input.readBytes();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              minPledgeSize_ = input.readInt64();
               break;
             }
           }
@@ -831,10 +860,41 @@ public final class LHProtos {
       return authKey_;
     }
 
+    // optional int64 min_pledge_size = 4;
+    public static final int MIN_PLEDGE_SIZE_FIELD_NUMBER = 4;
+    private long minPledgeSize_;
+    /**
+     * <code>optional int64 min_pledge_size = 4;</code>
+     *
+     * <pre>
+     * Smallest plege in satoshis we are willing to accept for this project. Typically this will be calculated by
+     * dividing the goal amount by the max number of inputs we're allowed in a standard transaction. In future might
+     * be overridable in server assisted cases.
+     * TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
+     * </pre>
+     */
+    public boolean hasMinPledgeSize() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional int64 min_pledge_size = 4;</code>
+     *
+     * <pre>
+     * Smallest plege in satoshis we are willing to accept for this project. Typically this will be calculated by
+     * dividing the goal amount by the max number of inputs we're allowed in a standard transaction. In future might
+     * be overridable in server assisted cases.
+     * TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
+     * </pre>
+     */
+    public long getMinPledgeSize() {
+      return minPledgeSize_;
+    }
+
     private void initFields() {
       title_ = "";
       coverImage_ = com.google.protobuf.ByteString.EMPTY;
       authKey_ = com.google.protobuf.ByteString.EMPTY;
+      minPledgeSize_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -861,6 +921,9 @@ public final class LHProtos {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeBytes(3, authKey_);
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(4, minPledgeSize_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -881,6 +944,10 @@ public final class LHProtos {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(3, authKey_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, minPledgeSize_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1008,6 +1075,8 @@ public final class LHProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         authKey_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
+        minPledgeSize_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -1048,6 +1117,10 @@ public final class LHProtos {
           to_bitField0_ |= 0x00000004;
         }
         result.authKey_ = authKey_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.minPledgeSize_ = minPledgeSize_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1074,6 +1147,9 @@ public final class LHProtos {
         }
         if (other.hasAuthKey()) {
           setAuthKey(other.getAuthKey());
+        }
+        if (other.hasMinPledgeSize()) {
+          setMinPledgeSize(other.getMinPledgeSize());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1296,6 +1372,67 @@ public final class LHProtos {
       public Builder clearAuthKey() {
         bitField0_ = (bitField0_ & ~0x00000004);
         authKey_ = getDefaultInstance().getAuthKey();
+        onChanged();
+        return this;
+      }
+
+      // optional int64 min_pledge_size = 4;
+      private long minPledgeSize_ ;
+      /**
+       * <code>optional int64 min_pledge_size = 4;</code>
+       *
+       * <pre>
+       * Smallest plege in satoshis we are willing to accept for this project. Typically this will be calculated by
+       * dividing the goal amount by the max number of inputs we're allowed in a standard transaction. In future might
+       * be overridable in server assisted cases.
+       * TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
+       * </pre>
+       */
+      public boolean hasMinPledgeSize() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int64 min_pledge_size = 4;</code>
+       *
+       * <pre>
+       * Smallest plege in satoshis we are willing to accept for this project. Typically this will be calculated by
+       * dividing the goal amount by the max number of inputs we're allowed in a standard transaction. In future might
+       * be overridable in server assisted cases.
+       * TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
+       * </pre>
+       */
+      public long getMinPledgeSize() {
+        return minPledgeSize_;
+      }
+      /**
+       * <code>optional int64 min_pledge_size = 4;</code>
+       *
+       * <pre>
+       * Smallest plege in satoshis we are willing to accept for this project. Typically this will be calculated by
+       * dividing the goal amount by the max number of inputs we're allowed in a standard transaction. In future might
+       * be overridable in server assisted cases.
+       * TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
+       * </pre>
+       */
+      public Builder setMinPledgeSize(long value) {
+        bitField0_ |= 0x00000008;
+        minPledgeSize_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 min_pledge_size = 4;</code>
+       *
+       * <pre>
+       * Smallest plege in satoshis we are willing to accept for this project. Typically this will be calculated by
+       * dividing the goal amount by the max number of inputs we're allowed in a standard transaction. In future might
+       * be overridable in server assisted cases.
+       * TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
+       * </pre>
+       */
+      public Builder clearMinPledgeSize() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        minPledgeSize_ = 0L;
         onChanged();
         return this;
       }
@@ -9320,30 +9457,31 @@ public final class LHProtos {
     java.lang.String[] descriptorData = {
       "\n\024extended-bip70.proto\022\nlighthouse\"+\n\006Ou" +
       "tput\022\021\n\006amount\030\001 \001(\004:\0010\022\016\n\006script\030\002 \002(\014\"" +
-      "K\n\023ProjectExtraDetails\022\r\n\005title\030\001 \002(\t\022\023\n" +
-      "\013cover_image\030\002 \001(\014\022\020\n\010auth_key\030\003 \001(\014\"#\n\t" +
-      "OwnerData\022\026\n\016auth_key_index\030\001 \001(\r\"\335\001\n\016Pr" +
-      "ojectDetails\022\025\n\007network\030\001 \001(\t:\004main\022#\n\007o" +
-      "utputs\030\002 \003(\0132\022.lighthouse.Output\022\014\n\004time" +
-      "\030\003 \002(\004\022\017\n\007expires\030\004 \001(\004\022\014\n\004memo\030\005 \001(\t\022\023\n" +
-      "\013payment_url\030\006 \001(\t\022\025\n\rmerchant_data\030\007 \001(" +
-      "\014\0226\n\rextra_details\030e \002(\0132\037.lighthouse.Pr",
-      "ojectExtraDetails\"\216\001\n\007Project\022\"\n\027payment" +
-      "_details_version\030\001 \001(\r:\0011\022\026\n\010pki_type\030\002 " +
-      "\001(\t:\004none\022\020\n\010pki_data\030\003 \001(\014\022\"\n\032serialize" +
-      "d_payment_details\030\004 \002(\014\022\021\n\tsignature\030\005 \001" +
-      "(\014\"\'\n\020X509Certificates\022\023\n\013certificate\030\001 " +
-      "\003(\014\"\277\001\n\006Pledge\022\025\n\rmerchant_data\030\001 \001(\014\022\024\n" +
-      "\014transactions\030\002 \003(\014\022\031\n\021total_input_value" +
-      "\030e \002(\004\022\022\n\nproject_id\030f \002(\t\022\021\n\ttimestamp\030" +
-      "g \002(\004\022\021\n\torig_hash\030h \001(\014\022%\n\trefund_to\030\003 " +
-      "\003(\0132\022.lighthouse.Output\022\014\n\004memo\030\004 \001(\t\">\n",
-      "\tPledgeACK\022#\n\007payment\030\001 \002(\0132\022.lighthouse" +
-      ".Pledge\022\014\n\004memo\030\002 \001(\t\"\205\001\n\rProjectStatus\022" +
-      "\n\n\002id\030\001 \002(\t\022\021\n\ttimestamp\030\002 \002(\004\022\034\n\024value_" +
-      "pledged_so_far\030\003 \002(\004\022#\n\007pledges\030\004 \003(\0132\022." +
-      "lighthouse.Pledge\022\022\n\nclaimed_by\030\005 \001(\014B!\n" +
-      "\023lighthouse.protocolB\010LHProtosH\001"
+      "d\n\023ProjectExtraDetails\022\r\n\005title\030\001 \002(\t\022\023\n" +
+      "\013cover_image\030\002 \001(\014\022\020\n\010auth_key\030\003 \001(\014\022\027\n\017" +
+      "min_pledge_size\030\004 \001(\003\"#\n\tOwnerData\022\026\n\016au" +
+      "th_key_index\030\001 \001(\r\"\335\001\n\016ProjectDetails\022\025\n" +
+      "\007network\030\001 \001(\t:\004main\022#\n\007outputs\030\002 \003(\0132\022." +
+      "lighthouse.Output\022\014\n\004time\030\003 \002(\004\022\017\n\007expir" +
+      "es\030\004 \001(\004\022\014\n\004memo\030\005 \001(\t\022\023\n\013payment_url\030\006 " +
+      "\001(\t\022\025\n\rmerchant_data\030\007 \001(\014\0226\n\rextra_deta",
+      "ils\030e \002(\0132\037.lighthouse.ProjectExtraDetai" +
+      "ls\"\216\001\n\007Project\022\"\n\027payment_details_versio" +
+      "n\030\001 \001(\r:\0011\022\026\n\010pki_type\030\002 \001(\t:\004none\022\020\n\010pk" +
+      "i_data\030\003 \001(\014\022\"\n\032serialized_payment_detai" +
+      "ls\030\004 \002(\014\022\021\n\tsignature\030\005 \001(\014\"\'\n\020X509Certi" +
+      "ficates\022\023\n\013certificate\030\001 \003(\014\"\277\001\n\006Pledge\022" +
+      "\025\n\rmerchant_data\030\001 \001(\014\022\024\n\014transactions\030\002" +
+      " \003(\014\022\031\n\021total_input_value\030e \002(\004\022\022\n\nproje" +
+      "ct_id\030f \002(\t\022\021\n\ttimestamp\030g \002(\004\022\021\n\torig_h" +
+      "ash\030h \001(\014\022%\n\trefund_to\030\003 \003(\0132\022.lighthous",
+      "e.Output\022\014\n\004memo\030\004 \001(\t\">\n\tPledgeACK\022#\n\007p" +
+      "ayment\030\001 \002(\0132\022.lighthouse.Pledge\022\014\n\004memo" +
+      "\030\002 \001(\t\"\205\001\n\rProjectStatus\022\n\n\002id\030\001 \002(\t\022\021\n\t" +
+      "timestamp\030\002 \002(\004\022\034\n\024value_pledged_so_far\030" +
+      "\003 \002(\004\022#\n\007pledges\030\004 \003(\0132\022.lighthouse.Pled" +
+      "ge\022\022\n\nclaimed_by\030\005 \001(\014B!\n\023lighthouse.pro" +
+      "tocolB\010LHProtosH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -9361,7 +9499,7 @@ public final class LHProtos {
           internal_static_lighthouse_ProjectExtraDetails_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_lighthouse_ProjectExtraDetails_descriptor,
-              new java.lang.String[] { "Title", "CoverImage", "AuthKey", });
+              new java.lang.String[] { "Title", "CoverImage", "AuthKey", "MinPledgeSize", });
           internal_static_lighthouse_OwnerData_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_lighthouse_OwnerData_fieldAccessorTable = new

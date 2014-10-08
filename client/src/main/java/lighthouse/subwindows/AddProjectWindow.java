@@ -26,6 +26,8 @@ import lighthouse.protocol.LHUtils;
 import lighthouse.utils.DownloadProgress;
 import lighthouse.utils.ValidationLink;
 import org.bitcoinj.core.Address;
+import org.bitcoinj.core.Coin;
+import org.controlsfx.control.PopOver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +54,12 @@ public class AddProjectWindow {
     @FXML TextField addressEdit;
     @FXML TextField goalAmountEdit;
     @FXML TextField titleEdit;
+    @FXML TextField minPledgeEdit;
     @FXML TextArea descriptionEdit;
     @FXML Button nextButton;
     @FXML Pane createPane;
+
+    private PopOver maxPledgesPopOver;
 
     public Main.OverlayUI<InnerWindow> overlayUI;
 
@@ -79,16 +84,45 @@ public class AddProjectWindow {
         coverPhotoSiteLink.setText(COVERPHOTO_SITE);
 
         ValidationLink goalValid = new ValidationLink(goalAmountEdit, str -> !LHUtils.didThrow(() -> valueOrThrow(str)));
-        ValidationLink.autoDisableButton(nextButton,
-                goalValid,
-                new ValidationLink(titleEdit, str -> !str.isEmpty()));
-
         goalAmountEdit.textProperty().addListener((obj, prev, cur) -> {
             if (goalValid.isValid.get())
                 this.model.goalAmount.set(valueOrThrow(cur).value);
         });
+        // Figure out the smallest pledge that is allowed based on the goal divided by number of inputs we can have.
+        model.minPledgeAmountProperty().addListener(o -> {
+            minPledgeEdit.setPromptText(model.getMinPledgeAmount().toPlainString());
+        });
+        minPledgeEdit.setPromptText("");
+        ValidationLink minPledgeValue = new ValidationLink(minPledgeEdit, str -> {
+            if (str.isEmpty())
+                return true;  // default is used
+            Coin coin = valueOrNull(str);
+            if (coin == null) return false;
+            Coin amount = model.getMinPledgeAmount();
+            // If min pledge == suggested amount it's ok, or if it's between min amount and goal.
+            return coin.equals(amount) || (coin.isGreaterThan(amount) && coin.isLessThan(Coin.valueOf(this.model.goalAmount.get())));
+        });
+
+        ValidationLink.autoDisableButton(nextButton,
+                goalValid,
+                new ValidationLink(titleEdit, str -> !str.isEmpty()),
+                minPledgeValue);
+
+
         roundCorners(coverImageView, 10);
         setupDefaultCoverImage();
+
+        Label maxPledgesWarning = new Label(String.format("You can collect a maximum of %d pledges, due to limits in the Bitcoin protocol.", ProjectModel.MAX_NUM_INPUTS));
+        maxPledgesWarning.setStyle("-fx-font-size: 12; -fx-padding: 10");
+        maxPledgesPopOver = new PopOver(maxPledgesWarning);
+        maxPledgesPopOver.setDetachable(false);
+        maxPledgesPopOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_CENTER);
+        minPledgeEdit.focusedProperty().addListener(o -> {
+            if (minPledgeEdit.isFocused())
+                maxPledgesPopOver.show(minPledgeEdit);
+            else
+                maxPledgesPopOver.hide();
+        });
     }
 
     private void setupDefaultCoverImage() {

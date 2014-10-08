@@ -39,6 +39,12 @@ message ProjectExtraDetails {
     // Usually this is initialised to a wallet key when the project is created.
     optional bytes auth_key = 3;
 
+    // Smallest plege in satoshis we are willing to accept for this project. Typically this will be calculated by
+    // dividing the goal amount by the max number of inputs we're allowed in a standard transaction. In future might
+    // be overridable in server assisted cases.
+    // TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
+    optional int64 min_pledge_size = 4;
+
     // TODO: Contact details.
 }
 

@@ -7,7 +7,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="828.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.AddProjectWindow">
+<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="610.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.AddProjectWindow">
     <center>
         <VBox>
             <children>
@@ -35,7 +35,17 @@
                         <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                             <children>
                                 <TextField fx:id="goalAmountEdit" alignment="CENTER_RIGHT" style="-fx-graphic: url('icon.png')" text="0.0" HBox.hgrow="ALWAYS" />
-                                <Label styleClass="btc-label-block" text="BTC" />
+                                <Label minWidth="-Infinity" styleClass="btc-label-block" text="BTC" />
+                        <Label minWidth="-Infinity" text="Min pledge">
+                           <padding>
+                              <Insets left="15.0" />
+                           </padding>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </Label>
+                        <TextField fx:id="minPledgeEdit" alignment="CENTER_RIGHT" />
+                        <Label minWidth="-Infinity" styleClass="btc-label-block" text="BTC" />
                             </children>
                         </HBox>
                         <Label text="Address" GridPane.rowIndex="4" />

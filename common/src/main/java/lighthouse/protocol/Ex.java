@@ -47,4 +47,17 @@ public class Ex extends RuntimeException {
     public static class NonStandardInput extends Ex {}
 
     public static class P2SHPledge extends Ex {}
+
+    public static class PledgeTooSmall extends Ex {
+        private final long amount;
+
+        public PledgeTooSmall(long l) {
+            this.amount = l;
+        }
+
+        @Override
+        public String toString() {
+            return "PledgeTooSmall{amount=" + amount + '}';
+        }
+    }
 }

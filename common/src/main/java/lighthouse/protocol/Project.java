@@ -48,7 +48,7 @@ public class Project {
     // These fields should be immutable pure functions of projectReq, as we may hand back projectReq later and
     // expect that it's not been changed.
     private final ImmutableList<TransactionOutput> outputs;
-    private final long goalAmount;
+    private final long goalAmount, minPledgeAmount;
     private final String title;
     @Nullable private final URI  url;
     // Projects are identified by the hash of their serialized contents. There is no canonical encoding
@@ -78,6 +78,7 @@ public class Project {
         this.params = session.getNetworkParameters();
         this.projectReq = LHProtos.ProjectDetails.parseFrom(proto.getSerializedPaymentDetails());
         this.goalAmount = this.projectReq.getOutputsList().stream().mapToLong(LHProtos.Output::getAmount).sum();
+        this.minPledgeAmount = this.projectReq.getExtraDetails().getMinPledgeSize();
         if (this.goalAmount <= 0)
             throw new Ex.ValueMismatch(this.goalAmount);
         this.title = this.projectReq.getExtraDetails().getTitle();
@@ -201,7 +202,8 @@ public class Project {
                 // The pledge matches some unspent outputs: now verify the scripts can spend and are signed with
                 // SIGHASH_ANYONECANPAY as appropriate.
                 verifyScripts(tx, result);
-                // Check that the pledge.total_input_value field is consistent/correct.
+                // Check that the pledge.total_input_value field is consistent/correct, and is not under the min
+                // pledge size for this project.
                 verifyValues(pledge, result);
                 // The pledge appears to be connected to unspent outputs and should be accepted by the network.
                 // So we think it's a success!
@@ -221,6 +223,8 @@ public class Project {
         for (TransactionOutput output : result) totalValue += output.getValue().longValue();
         if (pledge.getTotalInputValue() != totalValue || totalValue == 0)
             throw new Ex.CachedValueMismatch();
+        if (totalValue < minPledgeAmount)
+            throw new Ex.PledgeTooSmall(minPledgeAmount - totalValue);
     }
 
     private void verifyScripts(Transaction tx, List<TransactionOutput> result) throws VerificationException {
@@ -437,12 +441,8 @@ public class Project {
         return getTitle() + DiskManager.PROJECT_FILE_EXTENSION;
     }
 
-    public String claimedTag() {
-        return "com.vinumeris.cc:claimed:" + getID();
-    }
-
-    public String ownedTag() {
-        return "com.vinumeris.cc:owned:" + getID();
+    public Coin getMinPledgeAmount() {
+        return Coin.valueOf(minPledgeAmount);
     }
 
     @Nullable

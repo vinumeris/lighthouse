@@ -287,6 +287,15 @@ public class GuiUtils {
             return Main.class.getResource(name);
     }
 
+    @Nullable
+    public static Coin valueOrNull(String str) {
+        try {
+            return valueOrThrow(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     public static Coin valueOrThrow(String str) throws NumberFormatException {
         long value = BitcoinValue.userInputToSatoshis(str);
         if (value > 0)

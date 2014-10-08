@@ -395,7 +395,7 @@ public class ProjectView extends HBox {
         log.info("Invoking pledge screen");
         PledgeWindow window = Main.instance.<PledgeWindow>overlayUI("subwindows/pledge.fxml", "Pledge").controller;
         window.project = p;
-        window.setLimit(p.getGoalAmount().subtract(Coin.valueOf(pledgedValue.get())));
+        window.setLimits(p.getGoalAmount().subtract(Coin.valueOf(pledgedValue.get())), p.getMinPledgeAmount());
         window.onSuccess = () -> {
             mode = Mode.PLEDGED;
             updateGUIForState();

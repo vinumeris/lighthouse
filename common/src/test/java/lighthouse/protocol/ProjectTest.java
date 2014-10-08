@@ -1,5 +1,9 @@
 package lighthouse.protocol;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.ByteString;
+import lighthouse.wallet.PledgingWallet;
 import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.params.UnitTestParams;
@@ -7,20 +11,16 @@ import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 import org.bitcoinj.script.ScriptOpCodes;
 import org.bitcoinj.utils.BriefLogFormatter;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.ByteString;
-import lighthouse.wallet.PledgingWallet;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.security.SignatureException;
 import java.util.List;
 
-import static org.bitcoinj.testing.FakeTxBuilder.createFakeTx;
-import static org.bitcoinj.testing.FakeTxBuilder.roundTripTransaction;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static lighthouse.protocol.LHUtils.checkedGet;
+import static org.bitcoinj.testing.FakeTxBuilder.createFakeTx;
+import static org.bitcoinj.testing.FakeTxBuilder.roundTripTransaction;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -112,6 +112,18 @@ public class ProjectTest {
         pledge.setProjectId("abc");
         Project project = new Project(projectBuilder.build());
         checkedGet(project.verifyPledge(outPoints -> completedFuture(EMPTY_LIST), pledge.build()));
+    }
+
+    @Test(expected = Ex.PledgeTooSmall.class)
+    public void badPledgeTooSmall() throws Exception {
+        TxData pledgeTX = makePledge(details, 0.00001);
+        LHProtos.Pledge.Builder pledge = pledgeToBuilder(pledgeTX, false);
+        details.getExtraDetailsBuilder().setMinPledgeSize(2000);
+        projectBuilder.setSerializedPaymentDetails(details.build().toByteString());
+        Project project = new Project(projectBuilder.build());
+        pledge.setTotalInputValue(project.getGoalAmount().divide(100000).value);
+        List<TransactionOutput> outputs = ImmutableList.of(pledgeTX.fakeStub.getOutput(0).duplicateDetached());
+        checkedGet(project.verifyPledge(outPoints -> completedFuture(outputs), pledge.build()));
     }
 
     @Test(expected = Ex.UnknownUTXO.class)

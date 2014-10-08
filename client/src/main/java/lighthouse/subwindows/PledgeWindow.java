@@ -1,10 +1,9 @@
 package lighthouse.subwindows;
 
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.InsufficientMoneyException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import lighthouse.Main;
@@ -12,6 +11,8 @@ import lighthouse.protocol.Project;
 import lighthouse.utils.GuiUtils;
 import lighthouse.utils.ValidationLink;
 import lighthouse.wallet.PledgingWallet;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.InsufficientMoneyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.params.KeyParameter;
@@ -19,8 +20,7 @@ import org.spongycastle.crypto.params.KeyParameter;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
-import static lighthouse.utils.GuiUtils.checkGuiThread;
-import static lighthouse.utils.GuiUtils.valueOrThrow;
+import static lighthouse.utils.GuiUtils.*;
 
 /**
  * Window which asks user to specify the amount they want to pledge.
@@ -30,32 +30,34 @@ public class PledgeWindow extends InnerWindow {
 
     @FXML TextField amountEdit;
     @FXML Button confirmButton;
+    @FXML Label minersFeeLabel;
 
     // Will be initialised by the ProjectView.
     public Project project;
 
-    private Coin max;
+    private Coin max, min;
     public Runnable onSuccess;
 
     public void initialize() {
         ValidationLink amountLink = new ValidationLink(amountEdit, str -> {
-            try {
-                // Can't pledge more than our balance or more than the project is trying to actually raise
-                // as excess would go to miners fees.
-                return valueOrThrow(str).compareTo(max) <= 0;
-            } catch (NumberFormatException e) {
-                return false;
-            }
+            // Can't pledge more than our balance or more than the project is trying to actually raise
+            // as excess would go to miners fees.
+            Coin coin = valueOrNull(str);
+            boolean valid = coin != null && coin.compareTo(max) <= 0 && coin.compareTo(min) >= 0;
+            minersFeeLabel.setVisible(valid && !coin.equals(Main.wallet.getBalance()));
+            return valid;
         });
         ValidationLink.autoDisableButton(confirmButton, amountLink);
     }
 
-    public void setLimit(Coin limit) {
+    public void setLimits(Coin limit, Coin min) {
         // Note that we don't subtract the fee here because if the user pledges their entire balance, we should not
         // require a dependency tx as all outputs can be included in the pledge.
         // TODO: Make sure that it actually works this way when we sent multiple payments to the app.
-        max = Coin.valueOf(Math.min(limit.value, Main.wallet.getBalance().value));
+        this.max = Coin.valueOf(Math.min(limit.value, Main.wallet.getBalance().value));
         checkState(!max.isNegative());
+        this.min = min;
+        log.info("Max {}    Min {}", max, min);
         amountEdit.setPromptText("e.g. " + max.toPlainString());
     }
 
@@ -101,5 +103,11 @@ public class PledgeWindow extends InnerWindow {
     public void allMoneyClicked(MouseEvent event) {
         log.info("Maximum amount possible clicked");
         amountEdit.setText(max.toPlainString());
+    }
+
+    @FXML
+    public void minMoneyClicked(MouseEvent event) {
+        log.info("Minimum amount possible clicked");
+        amountEdit.setText(min.toPlainString());
     }
 }
