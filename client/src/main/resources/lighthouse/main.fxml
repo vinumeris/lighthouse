@@ -10,7 +10,7 @@
 <?import lighthouse.controls.ProjectView?>
 <VBox id="root" fx:id="root" alignment="CENTER" styleClass="cc-root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.MainWindow">
     <children>
-        <HBox fx:id="topBox" minHeight="120" alignment="CENTER" style="-fx-border-color: darkgreen; -fx-border-width: 0 0 1 0">
+        <HBox fx:id="topBox" minHeight="100" alignment="CENTER" styleClass="topbox">
             <children>
                 <ImageView fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                     <Image url="@icon.jpg"/>
@@ -62,14 +62,13 @@
         <StackPane VBox.vgrow="ALWAYS" styleClass="gradient-pane">
             <ScrollPane fx:id="contentScrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" onDragOver="#dragOver" onDragDropped="#dragDropped">
                 <content>
-                    <VBox fx:id="contentStack">
-                        <StackPane fx:id="projectViewContainer" style="-fx-padding: 40">
-                            <children>
-                                <ProjectView fx:id="projectView" onBackClicked="#backToOverview" styleClass="project-view"/>
-                            </children>
-                            <effect>
-                                <DropShadow/>
-                            </effect>
+                    <VBox fx:id="contentStack" minHeight="${root.height - topBox.height - 5}">
+                        <StackPane fx:id="projectViewContainer" style="-fx-padding: 40" VBox.vgrow="ALWAYS">
+                            <ProjectView fx:id="projectView" onBackClicked="#backToOverview" styleClass="project-view">
+                                <effect>
+                                    <DropShadow/>
+                                </effect>
+                            </ProjectView>
                         </StackPane>
                         <VBox fx:id="overviewVbox" styleClass="content-vbox">
                             <children>

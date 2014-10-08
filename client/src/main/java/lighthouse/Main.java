@@ -21,6 +21,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import lighthouse.controls.NotificationBarPane;
@@ -242,8 +243,12 @@ public class Main extends Application {
         scene = new Scene(uiStack);
         scene.getAccelerators().put(KeyCombination.valueOf("Shortcut+S"), () -> Platform.runLater(this::loadMainWindow));
         stage.setTitle(APP_NAME);
-        stage.setMinWidth(1024);
-        stage.setMinHeight(800);
+        stage.setMinWidth(800);
+        stage.setMinHeight(600);
+        stage.setWidth(1024);
+        // Kind of empirical hacks - we could also just start maximised but then animations can get slow on big retina
+        // displays. We try and fit on small screens with task bars / docks here.
+        stage.setHeight(Math.max(700, Screen.getPrimary().getBounds().getHeight() - 150));
         stage.setScene(scene);
 
         if (demoName != null) {

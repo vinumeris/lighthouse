@@ -10,7 +10,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root prefHeight="522.0" prefWidth="846.0" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="495.0" prefWidth="846.0" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox fx:id="root" maxHeight="Infinity" maxWidth="Infinity" minWidth="-Infinity" prefHeight="565.0" prefWidth="595.0" style="-fx-background-color: white;" HBox.hgrow="ALWAYS">
           <children>

@@ -225,3 +225,9 @@
     -fx-background-color: #000000aa;
     -fx-background-radius: 10;
 }
+
+.topbox {
+    -fx-border-color: darkgreen;
+    -fx-border-width: 0 0 1 0;
+    -fx-font-size: 12;
+}
