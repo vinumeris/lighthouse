@@ -200,9 +200,13 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
 
     private void addClaimConfidenceListener(AffinityExecutor executor, Transaction transaction, Project project) {
-        transaction.getConfidence().addEventListener((t, changeReason) -> {
-            log.info("Saw claim tx {} change confidence because {}", t.getHash(), changeReason);
-            checkClaimConfidence(t, project);
+        transaction.getConfidence().addEventListener(new TransactionConfidence.Listener() {
+            @Override
+            public void onConfidenceChanged(Transaction t, ChangeReason changeReason) {
+                log.info("Saw claim tx {} change confidence because {}", t.getHash(), changeReason);
+                if (LighthouseBackend.this.checkClaimConfidence(t, project))
+                    transaction.getConfidence().removeEventListener(this);
+            }
         }, executor);
     }
 
@@ -228,7 +232,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         addClaimConfidenceListener(executor, tx, project);
     }
 
-    private void checkClaimConfidence(Transaction t, Project project) {
+    private boolean checkClaimConfidence(Transaction t, Project project) {
         switch (t.getConfidence().getConfidenceType()) {
             case PENDING:
                 int seenBy = t.getConfidence().numBroadcastPeers();
@@ -238,6 +242,8 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 // Fall through ...
             case BUILDING:
                 log.info("Claim propagated or mined");
+                if (t.getConfidence().getDepthInBlocks() > 3)
+                    return true;  // Don't care about watching this anymore.
                 if (project.getPaymentURL() == null)
                     movePledgesFromOpenToClaimed(t, project);
                 else
@@ -251,6 +257,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             case UNKNOWN:
                 break;
         }
+        return false;  // Don't remove listener.
     }
 
     private void movePledgesFromOpenToClaimed(Transaction claim, Project project) {
