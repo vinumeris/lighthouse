@@ -593,7 +593,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             // Remove if this is a scrubbed version of a pledge we already have i.e. because we created it, uploaded it
             // and are now seeing it come back to us.
             newlyOpen.removeIf(pledge ->
-                            pledge.hasOrigHash() && hashes.get(hashFromPledge(pledge)) != null
+                pledge.hasOrigHash() && hashes.get(hashFromPledge(pledge)) != null
             );
         }
         curOpenPledges.addAll(newlyOpen);
