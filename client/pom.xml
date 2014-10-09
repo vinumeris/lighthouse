@@ -70,7 +70,7 @@
         <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx</artifactId>
-            <version>8.0.6</version>
+            <version>8.0.10</version>
         </dependency>
         <dependency>
             <groupId>net.glxn</groupId>

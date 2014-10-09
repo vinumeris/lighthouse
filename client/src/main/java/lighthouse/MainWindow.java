@@ -36,6 +36,7 @@ import lighthouse.controls.ProjectView;
 import lighthouse.files.AppDirectory;
 import lighthouse.model.BitcoinUIModel;
 import lighthouse.protocol.Project;
+import lighthouse.subwindows.UpdateFXWindow;
 import lighthouse.subwindows.WalletSettingsController;
 import lighthouse.utils.GuiUtils;
 import lighthouse.utils.easing.EasingMode;
@@ -69,7 +70,7 @@ public class MainWindow {
 
     @FXML HBox topBoxLeftArea;
     @FXML Label balance;
-    @FXML Button sendMoneyOutBtn, setupWalletBtn;
+    @FXML Button sendMoneyOutBtn, setupWalletBtn, menuBtn;
     @FXML ClickableBitcoinAddress addressControl;
     @FXML HBox balanceArea;
     @FXML VBox projectsVBox;
@@ -98,6 +99,8 @@ public class MainWindow {
 
     private SimpleBooleanProperty inProjectView = new SimpleBooleanProperty();
 
+    private static Updater updater;
+
     enum Views {
         OVERVIEW,
         PROJECT
@@ -115,6 +118,8 @@ public class MainWindow {
         AwesomeDude.setIcon(backButton, AwesomeIcon.ARROW_CIRCLE_LEFT, "30");
         animatedBind(topBoxLeftArea, topBoxLeftArea.translateXProperty(), when(inProjectView).then(0).otherwise(-45),
                 Interpolator.EASE_OUT);
+
+        AwesomeDude.setIcon(menuBtn, AwesomeIcon.BARS);
 
         // Avoid duplicate add errors.
         contentStack.getChildren().remove(projectViewContainer);
@@ -368,14 +373,8 @@ public class MainWindow {
     }
 
     private void doOnlineUpdateCheck() {
-        Updater updater = new Updater(Main.instance.updatesURL, Main.APP_NAME, Main.VERSION, AppDirectory.dir(),
-                UpdateFX.findCodePath(Main.class), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD) {
-            @Override
-            protected void updateProgress(long workDone, long max) {
-                super.updateProgress(workDone, max);
-                //Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-            }
-        };
+        updater = new Updater(Main.instance.updatesURL, Main.APP_NAME, Main.VERSION, AppDirectory.dir(),
+                UpdateFX.findCodePath(Main.class), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD);
 
         if (!Main.instance.updatesURL.equals(Main.UPDATES_BASE_URL))
             updater.setOverrideURLs(true);    // For testing.
@@ -428,6 +427,11 @@ public class MainWindow {
         );
         animation.play();
         return animation;
+    }
+
+    public void menuClicked(ActionEvent event) {
+        // For now just skip straight to the only menu item: the update control panel.
+        UpdateFXWindow.open(updater);
     }
 
     //region Generic Bitcoin wallet related code

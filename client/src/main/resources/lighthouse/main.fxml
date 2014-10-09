@@ -14,7 +14,6 @@
         <HBox fx:id="topBox" minHeight="100" alignment="CENTER" styleClass="topbox">
             <children>
                 <HBox alignment="CENTER" fx:id="topBoxLeftArea">
-
                     <Button fx:id="backButton" mnemonicParsing="false" onAction="#backToOverview" styleClass="back-button" text="">
                         <padding><Insets right="15"/></padding>
                     </Button>
@@ -28,8 +27,9 @@
                                 <Label fx:id="networkIndicatorLabel" text="testnet" styleClass="network-indicator" visible="false"/>
                             </HBox>
                             <ClickableBitcoinAddress fx:id="addressControl"/>
-                            <HBox spacing="20" styleClass="control-buttons">
+                            <HBox spacing="10" styleClass="control-buttons">
                                 <children>
+                                    <Button text="" fx:id="menuBtn" onAction="#menuClicked" />
                                     <Button text="Set up wallet" fx:id="setupWalletBtn" onAction="#setupWalletClicked" styleClass="no-focus-button"/>
                                     <Button text="Empty wallet" fx:id="sendMoneyOutBtn" onAction="#sendMoneyOut" />
                                 </children>

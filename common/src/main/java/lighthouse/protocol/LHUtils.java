@@ -1,15 +1,17 @@
 package lighthouse.protocol;
 
-import org.bitcoinj.core.*;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionInput;
+import org.bitcoinj.core.TransactionOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -30,9 +32,9 @@ import java.util.stream.Stream;
 public class LHUtils {
     private static final Logger log = LoggerFactory.getLogger(LHUtils.class);
 
-    public static List<Path> listDir(Path dir) throws IOException {
+    public static List<Path> listDir(Path dir) {
         List<Path> contents = new LinkedList<>();
-        try (Stream<Path> list = Files.list(dir)) {
+        try (Stream<Path> list = unchecked(() -> Files.list(dir))) {
             list.forEach(contents::add);
         }
         return contents;
