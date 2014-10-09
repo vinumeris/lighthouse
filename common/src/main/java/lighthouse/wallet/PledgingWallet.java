@@ -10,6 +10,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import lighthouse.protocol.LHProtos;
+import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
 import net.jcip.annotations.GuardedBy;
 import org.bitcoinj.core.*;
@@ -134,7 +135,7 @@ public class PledgingWallet extends Wallet {
                 checkNotNull(output);
                 // Record the contract output it pledges to.
                 contractOuts.put(tx.getOutput(0), pledge);
-                log.info("Loaded pledge {}", pledge);
+                log.info("Loaded pledge {}", LHUtils.hashFromPledge(pledge));
                 wallet.pledges.put(output, pledge);
             }
             for (LHProtos.Project project : ext.getProjectsList()) {

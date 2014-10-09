@@ -174,7 +174,6 @@ public class DiskManager {
         if (pledge != null) {
             Project project = getProjectById(pledge.getProjectId());
             if (project != null) {
-                log.info("Loaded pledge from {}", path);
                 pledgesByPath.put(path, pledge);
                 getPledgesOrCreate(project).add(pledge);
             } else {

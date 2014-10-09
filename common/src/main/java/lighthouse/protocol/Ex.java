@@ -60,4 +60,5 @@ public class Ex extends RuntimeException {
             return "PledgeTooSmall{amount=" + amount + '}';
         }
     }
+    public static class GoalExceeded extends Ex {}
 }

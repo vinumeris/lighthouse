@@ -185,11 +185,12 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                     checkPossibleClaimTX(tx);
                 }
             }, executor);
-            for (Transaction transaction : wallet.getTransactions(false)) {
-                Project project = diskManager.getProjectFromClaim(transaction);
+            for (Transaction tx : wallet.getTransactions(false)) {
+                Project project = diskManager.getProjectFromClaim(tx);
                 if (project != null) {
-                    addClaimConfidenceListener(executor, transaction, project);
-                    movePledgesFromOpenToClaimed(transaction, project);
+                    log.info("Loading stored claim {}", tx.getHash());
+                    addClaimConfidenceListener(executor, tx, project);
+                    movePledgesFromOpenToClaimed(tx, project);
                 }
             }
 
@@ -600,7 +601,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         newlyInvalid.removeAll(verifiedPledges);
         curOpenPledges.removeAll(newlyInvalid);
         // A pledge that's missing might be claimed. See if we know about that here.
-        if (forProject.getPaymentURL() == null) {
+        if (forProject.getPaymentURL() == null || mode == Mode.SERVER) {
             Transaction claim = getClaimForProject(forProject);
             if (claim != null) {
                 Set<LHProtos.Pledge> newlyClaimed = new HashSet<>(newlyInvalid);
@@ -688,6 +689,17 @@ public class LighthouseBackend extends AbstractBlockChainListener {
 
     public ObservableMap<Project, CheckStatus> mirrorCheckStatuses(AffinityExecutor executor) {
         return this.executor.fetchFrom(() -> ObservableMirrors.mirrorMap(checkStatuses, executor));
+    }
+
+    public Coin fetchTotalPledged(Project project) {
+        return executor.fetchFrom(() -> {
+            Coin amount = Coin.ZERO;
+            for (LHProtos.Pledge pledge : getOpenPledgesFor(project))
+                amount = amount.add(Coin.valueOf(pledge.getTotalInputValue()));
+            for (LHProtos.Pledge pledge : getClaimedPledgesFor(project))
+                amount = amount.add(Coin.valueOf(pledge.getTotalInputValue()));
+            return amount;
+        });
     }
 
     /** Returns a property calculated from the given list, with no special mirroring setup. */
@@ -797,21 +809,33 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         CompletableFuture<LHProtos.Pledge> result = new CompletableFuture<>();
         try {
             project.fastSanityCheck(pledge);
-            // TODO: Check that the amount pledged (claimed to to be pledged: that claim will be checked below) does not push us over the goal.
             // Maybe broadcast the dependencies first.
+            CompletableFuture<LHProtos.Pledge> broadcast = new CompletableFuture<>();
             if (pledge.getTransactionsCount() > 1)
-                result = broadcastDependenciesOf(pledge);
+                broadcast = broadcastDependenciesOf(pledge);
             else
-                result.complete(null);
-            result = result.thenCompose(a ->
-                // Once dependencies (if any) are handled, start the check process. On any thread here.
-                checkPledgeAgainstP2PNetwork(project, pledge)
-            );
-            result = result.thenApply(a ->
-                // Finally, save to disk. This will cause a notification of a new pledge to happen but we'll end
-                // up ignoring it because we'll see we already loaded and verified it.
-                savePledge(pledge)
-            );
+                broadcast.complete(null);
+            // Switch to backend thread.
+            broadcast.handleAsync((a, ex) -> {
+                if (ex != null) {
+                    result.completeExceptionally(ex);
+                } else {
+                    // Check we don't accept too many pledges. This can happen if there's a buggy client or if users
+                    // are submitting pledges more or less in parallel - running on the backend thread here should
+                    // eliminate any races from that and ensure only one pledge wins.
+                    Coin total = fetchTotalPledged(project);
+                    if (total.add(Coin.valueOf(pledge.getTotalInputValue())).isGreaterThan(project.getGoalAmount()))
+                        throw new Ex.GoalExceeded();
+                    // Once dependencies (if any) are handled, start the check process. This will update openPledges once
+                    // done successfully.
+                    checkPledgeAgainstP2PNetwork(project, pledge);
+                    // Finally, save to disk. This will cause a notification of a new pledge to happen but we'll end
+                    // up ignoring it because we'll see we already loaded and verified it.
+                    savePledge(pledge);
+                    result.complete(pledge);
+                }
+                return null;
+            }, executor);
         } catch (Exception e) {
             result.completeExceptionally(e);
         }
