@@ -77,7 +77,6 @@ public class ProjectView extends HBox {
     @FXML Label noPledgesLabel;
     @FXML ListView<LHProtos.Pledge> pledgesList;
     @FXML PieChart pieChart;
-    @FXML Button backButton;
     @FXML Button actionButton;
     @FXML Pane coverImage;
     @FXML Label numPledgersLabel;
