@@ -13,7 +13,7 @@ if [ ! -e "$build" ]; then
 fi
 
 javapackager -deploy \
-    -BappVersion=1 \
+    -BappVersion=$ver \
     -Bcategory=Office,Finance \
     -BlicenseType=Apache \
     -Bemail=contact@vinumeris.com \
