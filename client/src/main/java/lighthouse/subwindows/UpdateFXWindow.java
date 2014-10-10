@@ -86,6 +86,7 @@ public class UpdateFXWindow {
         return result;
     }
 
+    @FXML
     public void pinClicked(ActionEvent event) {
         UFXProtocol.Update selected = updatesList.getSelectionModel().getSelectedItem();
         if (selected == null) {
@@ -104,6 +105,7 @@ public class UpdateFXWindow {
         }
     }
 
+    @FXML
     public void closeClicked(ActionEvent event) {
         overlayUI.done();
     }

@@ -429,6 +429,7 @@ public class MainWindow {
         return animation;
     }
 
+    @FXML
     public void menuClicked(ActionEvent event) {
         // For now just skip straight to the only menu item: the update control panel.
         UpdateFXWindow.open(updater);

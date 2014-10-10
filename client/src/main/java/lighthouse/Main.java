@@ -307,8 +307,11 @@ public class Main extends Application {
                 uiStack.getChildren().remove(node);
             }
         } catch (Throwable e) {
-            e.printStackTrace();
-            informationalAlert("Failed to load UI", "Error: %s", e.getMessage());
+            log.error("Failed to load UI: ", e);
+            if (GuiUtils.resourceOverrideDirectory != null)
+                informationalAlert("Failed to load UI", "Error: %s", e.getMessage());
+            else
+                GuiUtils.crashAlert(e);
         }
     }
 
