@@ -3,13 +3,13 @@
 [Setup]
 AppId={{lighthouse}}
 AppName=Lighthouse
-AppVersion=1
-AppVerName=Lighthouse 1
+AppVersion=6
+AppVerName=Lighthouse
 AppPublisher=Vinumeris
 AppComments=Lighthouse
 AppCopyright=Copyright (C) 2014
-;AppPublisherURL=http://java.com/
-;AppSupportURL=http://java.com/
+AppPublisherURL=https://www.vinumeris.com
+AppSupportURL=https://www.vinumeris.com
 ;AppUpdatesURL=http://java.com/
 DefaultDirName={localappdata}\Lighthouse
 DisableStartupPrompt=Yes
@@ -23,7 +23,7 @@ DefaultGroupName=Vinumeris
 LicenseFile=
 ;WinXP or above
 MinVersion=0,5.1
-OutputBaseFilename=Lighthouse-1
+OutputBaseFilename=Lighthouse-6
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest
