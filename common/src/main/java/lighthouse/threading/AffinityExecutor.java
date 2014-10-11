@@ -142,10 +142,20 @@ public interface AffinityExecutor extends Executor {
     public static class Gate extends BaseAffinityExecutor {
         private final Thread thisThread = Thread.currentThread();
         private final LinkedBlockingQueue<Runnable> commandQ = new LinkedBlockingQueue<>();
+        private final boolean alwaysQueue;
+
+        public Gate() {
+            this(false);
+        }
+
+        /** If alwaysQueue is true, executeASAP will never short-circuit and will always queue up. */
+        public Gate(boolean alwaysQueue) {
+            this.alwaysQueue = alwaysQueue;
+        }
 
         @Override
         public boolean isOnThread() {
-            return Thread.currentThread() == thisThread;
+            return !alwaysQueue && Thread.currentThread() == thisThread;
         }
 
         @Override

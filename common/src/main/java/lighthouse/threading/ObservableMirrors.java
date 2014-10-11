@@ -2,10 +2,10 @@ package lighthouse.threading;
 
 import javafx.beans.WeakListener;
 import javafx.collections.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -16,8 +16,6 @@ import java.util.Set;
  * thread, without needing to worry about cross-thread interference.
  */
 public class ObservableMirrors {
-    private static final Logger log = LoggerFactory.getLogger(ObservableMirrors.class);
-
     /**
      * Creates an unmodifiable list that asynchronously follows changes in mirrored, with changes applied using
      * the given executor. This should only be called on the thread that owns the list to be mirrored, as the contents
@@ -51,19 +49,29 @@ public class ObservableMirrors {
                 // self contained except for the iteration state. So we synchronize on the change and reset it at the
                 // start to ensure we can iterate over it safely. Note that set changes actually are immutable and
                 // so don't need this.
+
+                LinkedList<List<? extends E>> sublists = new LinkedList<>();
+                while (change.next()) {
+                    if (change.wasPermutated()) {
+                        sublists.add(new ArrayList<>(change.getList().subList(change.getFrom(), change.getTo())));
+                    } else if (change.wasAdded()) {
+                        sublists.add(new ArrayList<>(change.getAddedSubList()));
+                    }
+                }
+
                 runChangesIn.executeASAP(() -> {
                     synchronized (change) {
                         change.reset();
                         while (change.next()) {
                             if (change.wasPermutated()) {
                                 list.subList(change.getFrom(), change.getTo()).clear();
-                                list.addAll(change.getFrom(), change.getList().subList(change.getFrom(), change.getTo()));
+                                list.addAll(change.getFrom(), sublists.pollFirst());
                             } else {
                                 if (change.wasRemoved()) {
                                     list.subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
                                 }
                                 if (change.wasAdded()) {
-                                    list.addAll(change.getFrom(), change.getAddedSubList());
+                                    list.addAll(change.getFrom(), sublists.pollFirst());
                                 }
                             }
                         }
