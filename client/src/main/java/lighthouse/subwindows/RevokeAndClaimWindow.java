@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
-import static lighthouse.utils.GuiUtils.checkGuiThread;
 import static lighthouse.utils.GuiUtils.informationalAlert;
 
 /**
@@ -83,17 +82,13 @@ public class RevokeAndClaimWindow {
     private void confirmClicked() {
         if (Main.wallet.isEncrypted()) {
             log.info("Wallet is encrypted, requesting password");
-            Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", "Password");
-            pwd.controller.aesKeyProperty().addListener((observable, old, cur) -> {
-                // We only get here if the user found the right password. If they don't or they cancel, we end up back on
-                // the main UI screen.
-                checkGuiThread();
+            WalletPasswordController.requestPassword(key -> {
                 Main.OverlayUI<RevokeAndClaimWindow> screen = Main.instance.overlayUI("subwindows/revoke_and_claim.fxml", "Revoke pledge");
                 screen.controller.pledgeToRevoke = pledgeToRevoke;
                 screen.controller.projectToClaim = projectToClaim;
                 screen.controller.pledgesToClaim = pledgesToClaim;
                 screen.controller.onSuccess = onSuccess;
-                screen.controller.go(cur);
+                screen.controller.go(key);
             });
         } else {
             go(null);

@@ -171,12 +171,14 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertTrue(Files.exists(tmpDir.resolve("Foo" + DiskManager.PROJECT_FILE_EXTENSION)));
     }
 
-    private void sendServerStatus(LHProtos.Pledge scrubbedPledge, HttpExchange exchange) throws IOException {
+    private void sendServerStatus(HttpExchange exchange, LHProtos.Pledge... scrubbedPledges) throws IOException {
         LHProtos.ProjectStatus.Builder status = LHProtos.ProjectStatus.newBuilder();
         status.setId(project.getID());
         status.setTimestamp(Instant.now().getEpochSecond());
         status.setValuePledgedSoFar(Coin.COIN.value);
-        status.addPledges(scrubbedPledge);
+        for (LHProtos.Pledge pledge : scrubbedPledges) {
+            status.addPledges(pledge);
+        }
         byte[] bits = status.build().toByteArray();
         exchange.sendResponseHeaders(HTTP_OK, bits.length);
         exchange.getResponseBody().write(bits);
@@ -209,7 +211,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // HTTP request was made to server to learn about existing pledges.
         gate.waitAndRun();
         HttpExchange exchange = httpReqs.take();
-        sendServerStatus(scrubbedPledge, exchange);
+        sendServerStatus(exchange, scrubbedPledge);
 
         // We got a pledge list update relayed into our thread.
         pledges.addListener((SetChangeListener<LHProtos.Pledge>) c -> {
@@ -268,7 +270,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertTrue(statuses.get(project).inProgress);
         gate.waitAndRun();
         exchange = httpReqs.take();
-        sendServerStatus(scrubbedPledge, exchange);
+        sendServerStatus(exchange, scrubbedPledge);
         gate.waitAndRun();
         assertEquals(0, statuses.size());
     }
@@ -308,7 +310,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         // HTTP request was made to server to learn about existing pledges.
         gate.waitAndRun();
-        sendServerStatus(scrubbedPledge, httpReqs.take());
+        sendServerStatus(httpReqs.take(), scrubbedPledge);
 
         // Because we want to test the absence of action in an async process, we forcibly repeat the server lookup
         // that just occurred so we can wait for it, and be sure that the scrubbed version of our own pledge was not
@@ -316,7 +318,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // the reply we have above in parallel.
         CompletableFuture future = backend.refreshProjectStatusFromServer(project);
         gate.waitAndRun();
-        sendServerStatus(scrubbedPledge, httpReqs.take());
+        sendServerStatus(httpReqs.take(), scrubbedPledge);
         future.get();
         assertEquals(0, gate.getTaskQueueSize());    // No pending set changes now.
         assertEquals(1, pledges.size());
@@ -716,6 +718,29 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         peerGroup.stopAsync();
         peerGroup.awaitTerminated();
+    }
+
+    @Test
+    public void serverPledgeSync() throws Exception {
+        // Test that the client backend stays in sync with the server as pledges are added and revoked.
+        projectModel.serverName.set("localhost");
+        project = projectModel.getProject();
+        ObservableSet<LHProtos.Pledge> openPledges = backend.mirrorOpenPledges(project, gate);
+        final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge();
+        Path projectPath = writeProjectToDisk();
+        backend.addProjectFile(projectPath);
+        gate.waitAndRun();
+        // Is now loaded from disk and doing request to server.
+        HttpExchange exchange = httpReqs.take();
+        sendServerStatus(exchange, scrubbedPledge);
+        gate.waitAndRun();
+        assertEquals(1, openPledges.size());
+        // Pledge gets revoked.
+        backend.refreshProjectStatusFromServer(project);
+        gate.waitAndRun();
+        sendServerStatus(httpReqs.take());
+        gate.waitAndRun();
+        assertEquals(0, openPledges.size());
     }
 
     private LHProtos.Pledge.Builder makeSimpleHalfPledge(ECKey signingKey, TransactionOutput output) {

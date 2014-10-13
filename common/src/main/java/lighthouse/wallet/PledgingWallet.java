@@ -206,10 +206,12 @@ public class PledgingWallet extends Wallet {
             checkState(!committed);
             log.info("Committing pledge for stub: {}", stub);
             committed = true;
-            if (dependency != null && andBroadcastDependencies) {
+            if (dependency != null) {
                 commitTx(dependency);
-                log.info("Committing and broadcasting dependency");
-                vTransactionBroadcaster.broadcastTransaction(dependency);
+                if (andBroadcastDependencies) {
+                    log.info("Broadcasting dependency");
+                    vTransactionBroadcaster.broadcastTransaction(dependency);
+                }
             }
             log.info("Pledge has {} txns", data.getTransactionsCount());
             Coin prevBalance = getBalance();

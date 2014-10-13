@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.params.KeyParameter;
 
 import java.time.Duration;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static lighthouse.utils.GuiUtils.*;
@@ -41,6 +42,16 @@ public class WalletPasswordController {
     public void initialize() {
         progressMeter.setOpacity(0);
         Platform.runLater(pass1::requestFocus);
+    }
+
+    public static void requestPassword(Consumer<KeyParameter> keyConsumer) {
+        Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", "Password");
+        pwd.controller.aesKeyProperty().addListener((observable, old, cur) -> {
+            // We only get here if the user found the right password. If they don't or they cancel, we end up back on
+            // the main UI screen.
+            checkGuiThread();
+            keyConsumer.accept(cur);
+        });
     }
 
     @FXML void confirmClicked(ActionEvent event) {

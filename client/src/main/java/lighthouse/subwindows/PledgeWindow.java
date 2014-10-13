@@ -70,13 +70,7 @@ public class PledgeWindow extends InnerWindow {
         Platform.runLater(() -> {
             if (Main.wallet.isEncrypted()) {
                 log.info("Wallet is encrypted, requesting password");
-                Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", "Password");
-                pwd.controller.aesKeyProperty().addListener((observable, old, cur) -> {
-                    // We only get here if the user found the right password. If they don't or they cancel, we end up back on
-                    // the main UI screen.
-                    checkGuiThread();
-                    tryMakePledge(cur);
-                });
+                WalletPasswordController.requestPassword(this::tryMakePledge);
             } else {
                 tryMakePledge(null);
             }

@@ -36,6 +36,7 @@ import lighthouse.controls.ProjectView;
 import lighthouse.files.AppDirectory;
 import lighthouse.model.BitcoinUIModel;
 import lighthouse.protocol.Project;
+import lighthouse.subwindows.SendMoneyController;
 import lighthouse.subwindows.UpdateFXWindow;
 import lighthouse.subwindows.WalletSettingsController;
 import lighthouse.utils.GuiUtils;
@@ -438,8 +439,7 @@ public class MainWindow {
     //region Generic Bitcoin wallet related code
     @FXML
     public void sendMoneyOut(ActionEvent event) {
-        // Hide this UI and show the send money UI. This UI won't be clickable until the user dismisses send_money.
-        Main.instance.overlayUI("subwindows/send_money.fxml", "Send money");
+        SendMoneyController.open();
     }
 
     @FXML

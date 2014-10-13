@@ -39,6 +39,10 @@ public class SendMoneyController {
         overlayUI.done();
     }
 
+    public static Main.OverlayUI<SendMoneyController> open() {
+        return Main.instance.overlayUI("subwindows/send_money.fxml", "Send money");
+    }
+
     @FXML
     public void send(@Nullable ActionEvent event) {
         // Address exception cannot happen as we validated it beforehand.
@@ -80,14 +84,10 @@ public class SendMoneyController {
     }
 
     private void askForPasswordAndRetry() {
-        Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml");
         final String addressStr = address.getText();
-        pwd.controller.aesKeyProperty().addListener((observable, old, cur) -> {
-            // We only get here if the user found the right password. If they don't or they cancel, we end up back on
-            // the main UI screen. By now the send money screen is history so we must recreate it.
-            checkGuiThread();
-            Main.OverlayUI<SendMoneyController> screen = Main.instance.overlayUI("subwindows/send_money.fxml");
-            screen.controller.aesKey = cur;
+        WalletPasswordController.requestPassword(key -> {
+            Main.OverlayUI<SendMoneyController> screen = open();
+            screen.controller.aesKey = key;
             screen.controller.address.setText(addressStr);
             screen.controller.send(null);
         });
@@ -97,5 +97,4 @@ public class SendMoneyController {
         final int peers = sendResult.tx.getConfidence().numBroadcastPeers();
         titleLabel.setText(String.format("Broadcasting ... seen by %d peers", peers));
     }
-
 }

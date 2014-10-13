@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.net.HostAndPort;
 import com.google.common.net.InternetDomainName;
 import com.google.protobuf.ByteString;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -78,39 +79,42 @@ public class AddProjectTypeWindow {
 
     @FXML
     public void saveClicked(ActionEvent event) {
-        final LHProtos.ProjectDetails detailsProto = model.getDetailsProto().build();
-        log.info("Saving: {}", detailsProto.getExtraDetails().getTitle());
-        try {
-            Project project;
-            if (!detailsProto.hasPaymentUrl()) {
-                // Request directory first then save, so the animations are right.
-                DirectoryChooser chooser = new DirectoryChooser();
-                chooser.setTitle("Select a directory to store the project and pledges");
-                platformFiddleChooser(chooser);
-                File dir = chooser.showDialog(Main.instance.mainStage);
-                if (dir == null)
-                    return;
-                final Path dirPath = dir.toPath();
-                project = model.getProject();
-                // Make sure we don't try and run too many animations simultaneously.
-                final Project fp = project;
-                overlayUI.runAfterFade(ev -> {
-                    saveAndWatchDirectory(fp, dirPath);
-                });
-                overlayUI.done();
-            } else {
-                // User has to explicitly export it somewhere (not watched) so they can get it to the server.
-                project = Main.backend.saveProject(model.getProject());
-                ExportWindow.openForProject(project);
+        // Work around ConcurrentModificationException error.
+        Platform.runLater(() -> {
+            final LHProtos.ProjectDetails detailsProto = model.getDetailsProto().build();
+            log.info("Saving: {}", detailsProto.getExtraDetails().getTitle());
+            try {
+                Project project;
+                if (!detailsProto.hasPaymentUrl()) {
+                    // Request directory first then save, so the animations are right.
+                    DirectoryChooser chooser = new DirectoryChooser();
+                    chooser.setTitle("Select a directory to store the project and pledges");
+                    platformFiddleChooser(chooser);
+                    File dir = chooser.showDialog(Main.instance.mainStage);
+                    if (dir == null)
+                        return;
+                    final Path dirPath = dir.toPath();
+                    project = model.getProject();
+                    // Make sure we don't try and run too many animations simultaneously.
+                    final Project fp = project;
+                    overlayUI.runAfterFade(ev -> {
+                        saveAndWatchDirectory(fp, dirPath);
+                    });
+                    overlayUI.done();
+                } else {
+                    // User has to explicitly export it somewhere (not watched) so they can get it to the server.
+                    project = Main.backend.saveProject(model.getProject());
+                    ExportWindow.openForProject(project);
+                }
+                // Mark this project as being created by us in the wallet. We have to record this explicitly because
+                // the target address might not actually be one of ours, e.g. if it's being paid directly to a TREZOR.
+                Main.wallet.setTag("com.vinumeris.cc:owned:" + project.getID(), ByteString.EMPTY);
+            } catch (IOException e) {
+                informationalAlert("Could not save project",
+                        "An error was encountered whilst trying to save the project: %s",
+                        Throwables.getRootCause(e).getMessage());
             }
-            // Mark this project as being created by us in the wallet. We have to record this explicitly because
-            // the target address might not actually be one of ours, e.g. if it's being paid directly to a TREZOR.
-            Main.wallet.setTag("com.vinumeris.cc:owned:" + project.getID(), ByteString.EMPTY);
-        } catch (IOException e) {
-            informationalAlert("Could not save project",
-                    "An error was encountered whilst trying to save the project: %s",
-                    Throwables.getRootCause(e).getMessage());
-        }
+        });
     }
 
     private void saveAndWatchDirectory(Project project, Path dirPath) {

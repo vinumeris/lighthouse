@@ -511,7 +511,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 }
             }
             log.info("{} of {} pledges verified (were not revoked/claimed)", verifiedPledges.size(), pledges.size());
-            syncPledges(project, pledges, verifiedPledges, checkingAllPledges);
+            syncPledges(project, pledges, verifiedPledges);
             markAsCheckDone(project);
             result.complete(new HashSet<>(verifiedPledges));
         } catch (InterruptedException | ExecutionException e) {
@@ -551,7 +551,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                     // as little as possible. This ensures that as updates flow through to the UI any animations look
                     // good (as opposed to total replacement which would animate poorly).
                     log.info("Processing project status:\n{}", status);
-                    syncPledges(project, new HashSet<>(status.getPledgesList()), status.getPledgesList(), true);
+                    syncPledges(project, new HashSet<>(status.getPledgesList()), status.getPledgesList());
                     // Server's view of the truth overrides our own for UI purposes, as we might have failed to
                     // observe the contract/claim tx if the user imported the project post-claim.
                     if (status.hasClaimedBy() && diskManager.getProjectState(project).state != ProjectState.CLAIMED) {
@@ -571,7 +571,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return lookupPledgesFromServer(project);
     }
 
-    private void syncPledges(Project forProject, Set<LHProtos.Pledge> testedPledges, List<LHProtos.Pledge> verifiedPledges, boolean moveMissing) {
+    private void syncPledges(Project forProject, Set<LHProtos.Pledge> testedPledges, List<LHProtos.Pledge> verifiedPledges) {
         executor.checkOnThread();
         final ObservableSet<LHProtos.Pledge> curOpenPledges = getOpenPledgesFor(forProject);
 
@@ -600,7 +600,28 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         Set<LHProtos.Pledge> newlyInvalid = new HashSet<>(testedPledges);
         newlyInvalid.removeAll(verifiedPledges);
         curOpenPledges.removeAll(newlyInvalid);
-        // A pledge that's missing might be claimed. See if we know about that here.
+        if (forProject.getPaymentURL() != null && mode == Mode.CLIENT) {
+            // Little hack here. In the app when checking a server-assisted project we don't have the same notion of
+            // "testedness" so testedPledges always equals verifiedPledges. So, we must remove revoked pledges here
+            // manually. A better version in future would record stored server statuses to disk so we can always
+            // compare against the previous state like we do in the serverless case, then, this would let us unify
+            // the code paths, and it would give us better offline support too.
+            //
+            // TODO: Save server statuses to disk so we can render them offline and so tested vs verified pledges is meaningful.
+
+            // Figure out which pledges are no longer being reported, taking into account scrubbing.
+            Set<LHProtos.Pledge> removedItems = new HashSet<>(hashes.values());
+            for (LHProtos.Pledge pledge : verifiedPledges) {
+                LHProtos.Pledge orig = hashes.get(hashFromPledge(pledge));
+                if (orig != null)
+                    removedItems.remove(orig);
+            }
+            if (removedItems.size() > 0) {
+                log.info("Server no longer reporting some pledges, revoked: {}", removedItems);
+                curOpenPledges.removeAll(removedItems);
+            }
+        }
+        // A pledge that's missing might be claimed.
         if (forProject.getPaymentURL() == null || mode == Mode.SERVER) {
             Transaction claim = getClaimForProject(forProject);
             if (claim != null) {

@@ -52,7 +52,7 @@ public class WalletSettingsController {
             if (seed.isEncrypted()) {
                 log.info("Wallet is encrypted, requesting password first.");
                 // Delay execution of this until after we've finished initialising this screen.
-                Platform.runLater(() -> askForPasswordAndRetry());
+                Platform.runLater(this::askForPasswordAndRetry);
                 return;
             }
         } else {
@@ -118,13 +118,10 @@ public class WalletSettingsController {
     }
 
     private void askForPasswordAndRetry() {
-        Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", "Enter password");
-        pwd.controller.aesKeyProperty().addListener((observable, old, cur) -> {
-            // We only get here if the user found the right password. If they don't or they cancel, we end up back on
-            // the main UI screen.
+        WalletPasswordController.requestPassword(key -> {
             checkGuiThread();
             Main.OverlayUI<WalletSettingsController> screen = Main.instance.overlayUI("subwindows/wallet_settings.fxml", "Wallet settings");
-            screen.controller.initialize(cur);
+            screen.controller.initialize(key);
         });
     }
 
