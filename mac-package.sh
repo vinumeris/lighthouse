@@ -28,7 +28,5 @@ $jh/bin/javapackager -deploy \
     -vendor Vinumeris \
     -outdir deploy \
     -appclass lighthouse.Main \
-    -srcfiles updates/builds/$ver.jar \
+    -srcfiles $build \
     -outfile Lighthouse
-
-# TODO: Gatekeeper signing

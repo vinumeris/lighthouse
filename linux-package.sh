@@ -24,7 +24,7 @@ javapackager -deploy \
     -vendor Vinumeris \
     -outdir deploy \
     -appclass lighthouse.Main \
-    -srcfiles updates/builds/$ver.jar \
+    -srcfiles $build \
     -outfile lighthouse
 
 # TODO: Figure out where LICENSE file goes so distros don't complain about "low quality" packages.
