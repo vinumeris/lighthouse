@@ -1,4 +1,0 @@
-Allow setting the min pledge size, update control, UI improvements, and more.
-This update allows project owners to set the smallest pledge they will accept. It tweaks the UI to be more intuitive and optimises download/update sizes.
-
-Additionally, from this version on updates have a description and you can pick which older version to use if you don't like an update.
