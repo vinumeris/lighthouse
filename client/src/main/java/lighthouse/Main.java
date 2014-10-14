@@ -72,7 +72,7 @@ public class Main extends Application {
 
     // This is an UpdateFX version code. It's incremented monotonically after a new version is released via
     // auto update.
-    public static final int VERSION = 7;
+    public static final int VERSION = 8;
     public static final String APP_NAME = "Lighthouse";
     public static final String UPDATES_BASE_URL = "https://www.vinumeris.com/lighthouse/updates";
     public static final List<ECPoint> UPDATE_SIGNING_KEYS = Crypto.decode("02A3CDE5D0EDC281637C67AA67C0CB009EA6573E0F101C6E018ACB91393C08C129");
