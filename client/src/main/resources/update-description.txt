@@ -1,0 +1,3 @@
+Misc bugfixes, including fixes to project and pledge directory auto-watching.
+
+This update fixes issues that could surface when using a shared folder to coordinate a crowdfund. It also resolves severe graphics lag that could occur during project load on systems that can't handle hardware rendering, and resolves an issue that could sometimes cause startup to become stuck. Updates list is now shown with most recent version at the top.
