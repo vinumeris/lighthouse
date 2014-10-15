@@ -31,10 +31,7 @@ import lighthouse.subwindows.EmbeddedWindow;
 import lighthouse.utils.GuiUtils;
 import lighthouse.utils.TextFieldValidator;
 import lighthouse.wallet.PledgingWallet;
-import org.bitcoinj.core.AbstractPeerEventListener;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Peer;
-import org.bitcoinj.core.PeerAddress;
+import org.bitcoinj.core.*;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.net.discovery.DnsDiscovery;
 import org.bitcoinj.net.discovery.PeerDiscovery;
@@ -233,6 +230,8 @@ public class Main extends Application {
     }
 
     private void initGUI(Stage stage) throws IOException {
+        if (GuiUtils.isSoftwarePipeline())
+            log.warn("Prism is using software rendering");
         mainStage = stage;
         stage.getIcons().add(new Image(Main.class.getResourceAsStream("icon.png")));
         Font.loadFont(Main.class.getResource("nanlight-webfont.ttf").toString(), 10);
@@ -248,7 +247,7 @@ public class Main extends Application {
         stage.setWidth(1024);
         // Kind of empirical hacks - we could also just start maximised but then animations can get slow on big retina
         // displays. We try and fit on small screens with task bars / docks here.
-        stage.setHeight(Math.max(700, Screen.getPrimary().getBounds().getHeight() - 150));
+        stage.setHeight(Math.max(750, Screen.getPrimary().getBounds().getHeight() - 150));
         stage.setScene(scene);
 
         if (demoName != null) {
@@ -340,20 +339,27 @@ public class Main extends Application {
                     vPeerGroup.setMaxConnections(1);
                 } else {
                     // TODO: Replace this with a DNS seed that crawls for NODE_GETUTXOS (or whatever it's renamed to).
-                    PeerDiscovery discovery = new DnsDiscovery(params) {
+                    PeerDiscovery hardCodedPeers = new PeerDiscovery() {
                         @Override
                         public InetSocketAddress[] getPeers(long timeoutValue, TimeUnit timeoutUnit) throws PeerDiscoveryException {
-                            InetSocketAddress[] result = super.getPeers(timeoutValue, timeoutUnit);
-                            if (result.length > 2) {
-                                result[0] = new InetSocketAddress("vinumeris.com", params.getPort());
-                                result[1] = new InetSocketAddress("riker.plan99.net", params.getPort());
-                            }
+                            InetSocketAddress[] result = new InetSocketAddress[2];
+                            result[0] = new InetSocketAddress("vinumeris.com", params.getPort());
+                            result[1] = new InetSocketAddress("riker.plan99.net", params.getPort());
                             return result;
                         }
+
+                        @Override
+                        public void shutdown() {
+                        }
                     };
-                    vPeerGroup.addPeerDiscovery(discovery);
-                    vPeerGroup.setMaxConnections(4);
+                    vPeerGroup.addPeerDiscovery(hardCodedPeers);
+                    vPeerGroup.setMaxConnections(2);
                     vPeerGroup.setConnectTimeoutMillis(10000);
+                    // Sequence things so we *always* get both hard-coded peers for now.
+                    vPeerGroup.waitForPeersOfVersion(2, GetUTXOsMessage.MIN_PROTOCOL_VERSION).addListener(() -> {
+                        vPeerGroup.addPeerDiscovery(new DnsDiscovery(params));
+                        vPeerGroup.setMaxConnections(6);
+                    }, Threading.SAME_THREAD);
                 }
 
                 vPeerGroup.addEventListener(new AbstractPeerEventListener() {

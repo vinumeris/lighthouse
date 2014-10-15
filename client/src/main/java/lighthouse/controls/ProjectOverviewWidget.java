@@ -83,12 +83,18 @@ public class ProjectOverviewWidget extends HBox {
         final Image image = new Image(project.getCoverImage().newInput());
         ColorAdjust colorAdjust = new ColorAdjust();
         colorAdjust.saturationProperty().bind(when(equal(state, LighthouseBackend.ProjectState.CLAIMED)).then(-0.9).otherwise(0.0));
-        GaussianBlur blur = new GaussianBlur();
-        blur.setInput(colorAdjust);
-        animatedBind(coverImage, blur.radiusProperty(), when(isLoading).then(25).otherwise(0.0));
+        if (GuiUtils.isSoftwarePipeline()) {
+            // SW pipeline cannot handle gaussian blurs with acceptable performance.
+            coverImage.setEffect(colorAdjust);
+        } else {
+            GaussianBlur blur = new GaussianBlur();
+            blur.setInput(colorAdjust);
+            animatedBind(coverImage, blur.radiusProperty(), when(isLoading).then(25).otherwise(0.0));
+            coverImage.setEffect(blur);
+        }
         coverImage.setImage(image);
         coverImage.setClip(new Rectangle(coverImage.getFitWidth(), coverImage.getFitHeight()));
-        coverImage.setEffect(blur);
+
 
         animatedBind(loadingIndicatorArea, loadingIndicatorArea.opacityProperty(), when(isLoading).then(1.0).otherwise(0.0));
         // Hack around a bug in jfx: progress indicator leaks the spinner animation even if it's invisible so we have

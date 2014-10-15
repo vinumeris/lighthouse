@@ -1,5 +1,7 @@
 package lighthouse.utils;
 
+import com.sun.prism.GraphicsPipeline;
+import com.sun.prism.sw.SWPipeline;
 import org.bitcoinj.core.Coin;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -380,5 +382,9 @@ public class GuiUtils {
         info.bindFrom = bindFrom;
         node.setUserData(info);
         return info;
+    }
+
+    public static boolean isSoftwarePipeline() {
+        return GraphicsPipeline.getPipeline() instanceof SWPipeline;
     }
 }
