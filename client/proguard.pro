@@ -39,6 +39,9 @@
 -keep class lighthouse.protocol.LHProtos** {
     *;
 }
+-keep class com.vinumeris.updatefx.UFXProtocol** {
+    *;
+}
 
 -keepattributes **
 
