@@ -1,8 +1,5 @@
 package lighthouse.files;
 
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.protocols.payments.PaymentProtocolException;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import javafx.beans.InvalidationListener;
@@ -15,6 +12,9 @@ import lighthouse.threading.AffinityExecutor;
 import lighthouse.threading.MarshallingObservers;
 import lighthouse.threading.ObservableMirrors;
 import net.jcip.annotations.GuardedBy;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.protocols.payments.PaymentProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +31,26 @@ import static com.google.common.base.Preconditions.*;
 import static lighthouse.protocol.LHUtils.*;
 
 /**
- * <p>Provides an observable list of projects and pledges that this app is managing, using the AppDirectory class.
+ * Provides an observable list of projects and pledges that this app is managing, using the AppDirectory class.
  * Projects can be indirect: the app dir can contain text files containing the real path of the project. This is useful
- * to let the user gather pledges using the file system e.g. a shared folder on Google Drive/Dropbox/etc.</p>
+ * to let the user gather pledges using the file system e.g. a shared folder on Google Drive/Dropbox/etc.
  *
- * <p>Note that pledges can be in two places. One is the users wallet. That's the pledges they have made. The other
- * is on disk. That's the pledges other people have made, when in decentralised mode.</p>
+ * Note that pledges can be in two places. One is the users wallet. That's the pledges they have made. The other
+ * is on disk. That's the pledges other people have made, when in decentralised mode.
+ *
+ * The logic implemented here is a bit complicated:
+ *
+ *  - Projects and pledges are automatically imported when they are dropped into the app directory. The app will copy
+ *    project files to the app directory for the user so if the original file is deleted it doesn't disappear.
+ *  - Pledges are automatically loaded from disk from the directory that a project was originally imported from in
+ *    client mode.
+ *  - The user is allowed to delete / rename any directories other than the app directory at any time and we have to
+ *    handle that.
+ *
+ * The projects.txt file stores a list of paths. If a path is a file that ends with .lighthouse-project, it is loaded.
+ * Paths can be just filenames, in that case they are expected to be relative to the app directory. If it is a path
+ * to a directory then all pledges there will be loaded and the directory will be watched. The app directory is
+ * always watched.
  */
 public class DiskManager {
     private static final Logger log = LoggerFactory.getLogger(DiskManager.class);
@@ -44,6 +58,9 @@ public class DiskManager {
     public static final String PROJECT_FILE_EXTENSION = ".lighthouse-project";
     public static final String PLEDGE_FILE_EXTENSION = ".lighthouse-pledge";
     public static final String PROJECT_STATUS_FILENAME = "project-status.txt";
+    // For historical reasons this is called projects.txt although it contains paths of directories to watch for
+    // pledges. Older files may also contain absolute file paths to project files.
+    public static final String PLEDGE_PATHS_FILENAME = "projects.txt";
 
     // All private methods and private variables are used from this executor.
     private final AffinityExecutor executor;
@@ -53,11 +70,9 @@ public class DiskManager {
     // These are locked so other threads can reach in and read them without having to do cross-thread RPCs.
     @GuardedBy("this") private final ObservableMap<String, Project> projectsById;
     @GuardedBy("this") private final Map<Project, ObservableSet<LHProtos.Pledge>> pledges;
-    private final List<Path> projectFiles;
-    private final List<Path> projectsDirs;
+    private final List<Path> pledgePaths;
     private DirectoryWatcher directoryWatcher;
     private final ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;
-    private final boolean autoLoadProjects;
 
     /**
      * Creates a disk manager that reloads data from disk when a new project path is added or the directories change.
@@ -74,9 +89,7 @@ public class DiskManager {
         projectStates = FXCollections.observableHashMap();
         pledgesByPath = new HashMap<>();
         pledges = new HashMap<>();
-        projectFiles = new ArrayList<>();
-        projectsDirs = new ArrayList<>();
-        this.autoLoadProjects = autoLoadProjects;
+        pledgePaths = new ArrayList<>();
         // Use execute() rather than executeASAP() so that if we're being invoked from the owning thread, the caller
         // has a chance to set up observers and the like before the thread event loops and starts loading stuff. That
         // way the observers will run for the newly loaded data.
@@ -85,27 +98,27 @@ public class DiskManager {
 
     private void init() throws IOException {
         executor.checkOnThread();
-        if (Files.exists(getProjectPathsFile()))
-            readProjectPathsFromDisk();
+        if (Files.exists(getPledgePathsFile()))
+            readPledgePaths();
         // Reload them on the UI thread if any files show up behind our back, i.e. from Drive/Dropbox/being put there
         // manually by the user.
-        directoryWatcher = createDirWatcher();
         loadAll();
+        directoryWatcher = createDirWatcher();
     }
 
     private DirectoryWatcher createDirWatcher() {
         Set<Path> directories = new HashSet<>();
-        for (Path path : projectFiles) {
-            if (path.isAbsolute()) {
-                if (Files.isRegularFile(path))
-                    directories.add(path.getParent().normalize());
-                else
-                    log.error("Project path was not found, ignoring: {}", path);
-            } else {
-                // File name of a project stored in the app dir, so we don't watch that.
-            }
+        // We always watch the app directory.
+        directories.add(AppDirectory.dir());
+        // We also watch the list of origin directories where serverless projects were imported from.
+        for (Path path : pledgePaths) {
+            if (!path.isAbsolute()) continue;    // Old projects.txt that has names of imported projects in it.
+            if (Files.isDirectory(path))
+                directories.add(path);
+            else if (path.toString().endsWith(PROJECT_FILE_EXTENSION))    // For backwards compat: watch origin dirs recorded as paths to project files.
+                directories.add(path.getParent());
         }
-        directories.addAll(projectsDirs);
+
         return new DirectoryWatcher(ImmutableSet.copyOf(directories), this::onDirectoryChanged, executor);
     }
 
@@ -117,7 +130,12 @@ public class DiskManager {
         boolean isCreate = kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY;
         boolean isDelete = kind == StandardWatchEventKinds.ENTRY_DELETE || kind == StandardWatchEventKinds.ENTRY_MODIFY;
 
-        if (isProject && autoLoadProjects) {
+        if (isProject || isPledge)
+            log.info("{} -> {}", path, kind);
+
+        // Project files are only auto loaded from the app directory. If the user downloads a serverless project to their
+        // Downloads folder, imports it, then downloads a second project, we don't want it to automatically appear.
+        if (isProject && path.getParent().equals(AppDirectory.dir())) {
             if (isDelete) {
                 log.info("Project file deleted/modified: {}", path);
                 Project project = projectsByPath.get(path);
@@ -134,10 +152,8 @@ public class DiskManager {
                 }
             }
             if (isCreate) {
-                if (projectsDirs.contains(path.getParent())) {
-                    log.info("New project found: {}", path);
-                    this.tryLoadProject(path);
-                }
+                log.info("New project found: {}", path);
+                this.tryLoadProject(path);
             }
         } else if (isPledge) {
             if (isDelete) {
@@ -161,9 +177,9 @@ public class DiskManager {
         }
     }
 
-    private void loadPledgesFromDisk(List<Path> files) throws IOException {
+    private void loadPledgesFromDirectory(Path directory) throws IOException {
         executor.checkOnThread();
-        for (Path path : files) {
+        for (Path path : LHUtils.listDir(directory)) {
             if (!path.toString().endsWith(PLEDGE_FILE_EXTENSION)) continue;
             tryLoadPledge(path);
         }
@@ -177,7 +193,10 @@ public class DiskManager {
                 pledgesByPath.put(path, pledge);
                 getPledgesOrCreate(project).add(pledge);
             } else {
-                // Projects are loaded first so this should not happen.
+                // TODO: This can happen if we're importing a project that already has pledges next to the file.
+                // In that case, the app will copy the project into the app dir, then ask us to watch the origin dir
+                // for pledges, but then the project load and scanning the origin dir are racing. So we need to
+                // just put these pledges to one side and try again next time we find a new project.
                 log.error("Found pledge on disk we don't have the project for: {}", path);
             }
         } else {
@@ -197,32 +216,41 @@ public class DiskManager {
         }
     }
 
-    private void readProjectPathsFromDisk() throws IOException {
+    private void readPledgePaths() throws IOException {
         executor.checkOnThread();
-        projectFiles.clear();
-        Files.readAllLines(getProjectPathsFile()).forEach(line -> projectFiles.add(Paths.get(line)));
-        log.info("{} project dirs read", projectFiles.size());
-        for (Path dir : projectFiles) {
+        pledgePaths.clear();
+        Files.readAllLines(getPledgePathsFile()).forEach(line -> pledgePaths.add(Paths.get(line)));
+        log.info("{} project dirs read", pledgePaths.size());
+        for (Path dir : pledgePaths) {
             log.info(dir.toString());
         }
     }
 
-    private void writeProjectPathsFromDisk() throws IOException {
+    private void writePledgePaths() throws IOException {
         executor.checkOnThread();
-        log.info("Writing {}", getProjectPathsFile());
-        Path path = getProjectPathsFile();
-        Files.write(path, (Iterable<String>) projectFiles.stream().map(Path::toString)::iterator, Charsets.UTF_8);
+        log.info("Writing {}", getPledgePathsFile());
+        Path path = getPledgePathsFile();
+        Files.write(path, (Iterable<String>) pledgePaths.stream().map(Path::toString)::iterator, Charsets.UTF_8);
     }
 
-    private Path getProjectPathsFile() {
-        return AppDirectory.dir().resolve("projects.txt");
+    private Path getPledgePathsFile() {
+        return AppDirectory.dir().resolve(PLEDGE_PATHS_FILENAME);
     }
 
     private void loadAll() throws IOException {
         executor.checkOnThread();
         log.info("Updating all data from disk");
-        for (Path file : projectFiles)
-            loadProjectAndPledges(file);
+        for (Path path : LHUtils.listDir(AppDirectory.dir())) {
+            if (!path.toString().endsWith(PROJECT_FILE_EXTENSION))
+                continue;
+            if (!Files.isRegularFile(path) || (tryLoadProject(path) == null))
+                log.warn("Failed to load project {}", path);
+        }
+        // Load pledges from each project path.
+        for (Path path : pledgePaths) {
+            if (!Files.isDirectory(path)) continue;    // Can be from an old version or deleted by user.
+            loadPledgesFromDirectory(path);
+        }
         loadProjectStatuses();
         log.info("... disk data loaded");
     }
@@ -266,26 +294,14 @@ public class DiskManager {
         }
     }
 
-    private void loadProjectAndPledges(Path path) throws IOException {
-        path = AppDirectory.dir().resolve(path);
-        log.info("Loading project and associated pledges: {}", path);
-        if (!path.toString().endsWith(PROJECT_FILE_EXTENSION)) {
-            log.error("Project path does not end in correct extension: {}", path);
-            return;
-        }
-        if (!tryLoadProject(path))
-            return;
-        List<Path> files = listDir(path.getParent().normalize());
-        loadPledgesFromDisk(files);
-    }
-
-    private boolean tryLoadProject(Path path) {
+    public Project tryLoadProject(Path path) {
+        executor.checkOnThread();
         Project p = loadProject(path);
         if (p != null) {
             synchronized (this) {
                 if (projectsById.containsKey(p.getID())) {
                     log.info("Already have project id {}, skipping load", p.getID());
-                    return false;
+                    return projectsById.get(p.getID());
                 }
                 projectsById.put(p.getID(), p);
             }
@@ -298,7 +314,7 @@ public class DiskManager {
                 projectStates.put(p.getID(), new LighthouseBackend.ProjectStateInfo(LighthouseBackend.ProjectState.OPEN, null));
             }
         }
-        return p != null;
+        return p;
     }
 
     @Nullable
@@ -328,19 +344,19 @@ public class DiskManager {
         try (OutputStream stream = new BufferedOutputStream(Files.newOutputStream(path))) {
             project.writeTo(stream);
         }
+        // This should trigger a directory change notification that loads the project.
         Files.move(path, AppDirectory.dir().resolve(filename));
-        addProjectFile(filename);
         return obj;
     }
 
-    public void addProjectFile(Path file) {
-        // file may be relative to the appdir (just a file name).
-        final Path absolute = AppDirectory.dir().resolve(file);
-        checkArgument(Files.isRegularFile(absolute));
+    /** Adds a directory that will be watched for pledge files. */
+    public void addPledgePath(Path dir) {
+        checkArgument(Files.isDirectory(dir));
         executor.executeASAP(() -> {
-            projectFiles.add(file);
-            ignoreAndLog(this::writeProjectPathsFromDisk);
-            loadProjectAndPledges(absolute);
+            log.info("Adding pledge path {}", dir);
+            pledgePaths.add(dir);
+            ignoreAndLog(this::writePledgePaths);
+            loadPledgesFromDirectory(dir);
             directoryWatcher.stop();
             directoryWatcher = createDirWatcher();
         });
@@ -407,18 +423,5 @@ public class DiskManager {
             return projectStates;
         else
             return executor.fetchFrom(() -> ObservableMirrors.mirrorMap(projectStates, runChangesIn));
-    }
-
-    public void addProjectsDir(Path dir) {
-        checkArgument(Files.isDirectory(dir));
-        executor.executeASAP(() -> {
-            projectsDirs.add(dir);
-            for (Path path : LHUtils.listDir(dir)) {
-                if (path.toString().endsWith(PROJECT_FILE_EXTENSION))
-                    loadProjectAndPledges(path.toAbsolutePath());
-            }
-            directoryWatcher.stop();
-            directoryWatcher = createDirWatcher();
-        });
     }
 }

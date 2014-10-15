@@ -108,12 +108,9 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         AppDirectory.initAppDir("lhtests");
 
         // Give data backend its own thread. The "gate" lets us just run commands in the context of the unit test thread.
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                e.printStackTrace();
-                fail("Uncaught exception");
-            }
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            e.printStackTrace();
+            fail("Uncaught exception");
         });
         gate = new AffinityExecutor.Gate();
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
@@ -157,20 +154,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         localServer.stop(Integer.MAX_VALUE);
     }
 
-    @Test
-    public void projectCreated() throws Exception {
-        // Check that if we save a project, we get a set change mirrored back into our own thread and the file is
-        // stored to disk correctly.
-        ObservableList<Project> projects = backend.mirrorProjects(gate);
-        assertEquals(0, projects.size());
-        backend.saveProject(project);
-        assertEquals(0, projects.size());
-        gate.waitAndRun();
-        assertEquals(1, projects.size());
-        assertEquals("Foo", projects.iterator().next().getTitle());
-        assertTrue(Files.exists(tmpDir.resolve("Foo" + DiskManager.PROJECT_FILE_EXTENSION)));
-    }
-
     private void sendServerStatus(HttpExchange exchange, LHProtos.Pledge... scrubbedPledges) throws IOException {
         LHProtos.ProjectStatus.Builder status = LHProtos.ProjectStatus.newBuilder();
         status.setId(project.getID());
@@ -185,6 +168,33 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         exchange.close();
     }
 
+    private LHProtos.Pledge makeScrubbedPledge() {
+        final LHProtos.Pledge pledge = LHProtos.Pledge.newBuilder()
+                .setTotalInputValue(Coin.COIN.value)
+                .setProjectId(project.getID())
+                .setTimestamp(Utils.currentTimeSeconds())
+                .addTransactions(ByteString.copyFromUtf8("not a real tx"))
+                .build();
+        final Sha256Hash origHash = Sha256Hash.create(pledge.toByteArray());
+        return pledge.toBuilder()
+                .clearTransactions()
+                .setOrigHash(ByteString.copyFrom(origHash.getBytes()))
+                .build();
+    }
+
+    private Path writeProjectToDisk() throws IOException {
+        return writeProjectToDisk(AppDirectory.dir());
+    }
+
+    private Path writeProjectToDisk(Path dir) throws IOException {
+        Path file = dir.resolve("test-project" + DiskManager.PROJECT_FILE_EXTENSION);
+        try (OutputStream stream = Files.newOutputStream(file)) {
+            project.getProto().writeTo(stream);
+        }
+        // Backend should now notice the new project in the app dir.
+        return file;
+    }
+
     @Test
     public void projectAddedWithServer() throws Exception {
         // Check that if we add a path containing a project, it's noticed and the projects set is updated.
@@ -194,10 +204,9 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         project = projectModel.getProject();
         final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge();
 
-        Path projectPath = writeProjectToDisk();
         ObservableList<Project> projects = backend.mirrorProjects(gate);
         assertEquals(0, projects.size());
-        backend.addProjectFile(projectPath);
+        writeProjectToDisk();
         assertEquals(0, projects.size());
         gate.waitAndRun();
         // Is now loaded from disk.
@@ -222,18 +231,18 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertEquals(Coin.COIN.value, pledges.iterator().next().getTotalInputValue());
     }
 
-    private LHProtos.Pledge makeScrubbedPledge() {
-        final LHProtos.Pledge pledge = LHProtos.Pledge.newBuilder()
-                .setTotalInputValue(Coin.COIN.value)
-                .setProjectId(project.getID())
-                .setTimestamp(Utils.currentTimeSeconds())
-                .addTransactions(ByteString.copyFromUtf8("not a real tx"))
-                .build();
-        final Sha256Hash origHash = Sha256Hash.create(pledge.toByteArray());
-        return pledge.toBuilder()
-                .clearTransactions()
-                .setOrigHash(ByteString.copyFrom(origHash.getBytes()))
-                .build();
+    @Test
+    public void projectCreated() throws Exception {
+        // Check that if we save a project, we get a set change mirrored back into our own thread and the file is
+        // stored to disk correctly.
+        ObservableList<Project> projects = backend.mirrorProjects(gate);
+        assertEquals(0, projects.size());
+        backend.saveProject(project);
+        assertEquals(0, projects.size());
+        gate.waitAndRun();
+        assertEquals(1, projects.size());
+        assertEquals("Foo", projects.iterator().next().getTitle());
+        assertTrue(Files.exists(tmpDir.resolve("Foo" + DiskManager.PROJECT_FILE_EXTENSION)));
     }
 
     @Test
@@ -244,8 +253,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge();
         ObservableMap<Project, LighthouseBackend.CheckStatus> statuses = backend.mirrorCheckStatuses(gate);
         assertEquals(0, statuses.size());
-        Path projectPath = writeProjectToDisk();
-        backend.addProjectFile(projectPath);
+        writeProjectToDisk();
         gate.waitAndRun();
         // Is now loaded from disk.
         assertEquals(1, statuses.size());
@@ -293,14 +301,13 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
                 .setOrigHash(ByteString.copyFrom(origHash.getBytes()))
                 .build();
 
-        Path projectPath = writeProjectToDisk();
         // Make the wallet return the above pledge without having to screw around with actually using the wallet.
         injectedPledge = pledge;
         executor.service.shutdown();
         executor.service.awaitTermination(5, TimeUnit.SECONDS);
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
         diskManager = new DiskManager(executor, true);
-        diskManager.addProjectFile(projectPath);
+        writeProjectToDisk();
         backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
 
         // Let's watch out for pledges from the server.
@@ -332,9 +339,12 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         // Check that if we add an path containing a project, it's noticed and the projects set is updated.
         // Also check that pledges are loaded from disk and checked against the P2P network.
-        Path projectPath = writeProjectToDisk();
         ObservableList<Project> projects = backend.mirrorProjects(gate);
-        backend.addProjectFile(projectPath);
+
+        Path dropDir = Files.createTempDirectory("lh-droptest");
+        Path downloadedFile = writeProjectToDisk(dropDir);
+        backend.importProjectFrom(downloadedFile);
+
         gate.waitAndRun();
         // Is now loaded from disk.
         assertEquals(1, projects.size());
@@ -349,7 +359,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         ObservableSet<LHProtos.Pledge> pledges = backend.mirrorOpenPledges(project, gate);
 
         // The user drops the pledge.
-        try (OutputStream stream = Files.newOutputStream(projectPath.getParent().resolve("dropped-pledge" + DiskManager.PLEDGE_FILE_EXTENSION))) {
+        try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge.writeTo(stream);
         }
 
@@ -399,15 +409,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         peerGroup.awaitTerminated();
     }
 
-    private Path writeProjectToDisk() throws IOException {
-        Path dropDir = Files.createTempDirectory("lighthouse-droptest");
-        Path file = dropDir.resolve("dropped-project" + DiskManager.PROJECT_FILE_EXTENSION);
-        try (OutputStream stream = Files.newOutputStream(file)) {
-            project.getProto().writeTo(stream);
-        }
-        return file;
-    }
-
     @Test
     public void mergePeerAnswers() throws Exception {
         // Check that we throw an exception if peers disagree on the state of the UTXO set. Such a pledge would
@@ -423,8 +424,11 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         ObservableList<Project> projects = backend.mirrorProjects(gate);
         ObservableMap<Project, LighthouseBackend.CheckStatus> statuses = backend.mirrorCheckStatuses(gate);
 
-        Path projectPath = writeProjectToDisk();
-        backend.addProjectFile(projectPath);
+        Path dropDir = Files.createTempDirectory("lh-droptest");
+        Path downloadedFile = writeProjectToDisk(dropDir);
+
+        backend.importProjectFrom(downloadedFile);
+
         gate.waitAndRun();
         assertEquals(1, projects.size());
         // This triggers a Bloom filter update so we can spot claims.
@@ -434,7 +438,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         Transaction stubTx = data.getValue0();
         Transaction pledgeTx = data.getValue1();
         LHProtos.Pledge pledge = data.getValue2();
-        try (OutputStream stream = Files.newOutputStream(projectPath.getParent().resolve("dropped-pledge" + DiskManager.PLEDGE_FILE_EXTENSION))) {
+        try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge.writeTo(stream);
         }
 
@@ -486,9 +490,8 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
     @Test
     public void pledgeAddedViaWallet() throws Exception {
-        Path projectPath = writeProjectToDisk();
         ObservableList<Project> projects = backend.mirrorProjects(gate);
-        backend.addProjectFile(projectPath);
+        writeProjectToDisk();
         gate.waitAndRun();
         // Is now loaded from disk.
         assertEquals(1, projects.size());
@@ -523,7 +526,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         Transaction pledgeTx = data.getValue1();
         LHProtos.Pledge pledge = data.getValue2();
 
-        backend.addProjectFile(writeProjectToDisk());
+        writeProjectToDisk();
 
         ObservableSet<LHProtos.Pledge> pledges = backend.mirrorOpenPledges(project, gate);
 
@@ -590,8 +593,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         peerGroup.startAsync();
         peerGroup.awaitRunning();
 
-        Path projectPath = writeProjectToDisk();
-        backend.addProjectFile(projectPath);
+        Path dropDir = Files.createTempDirectory("lh-droptest");
+        Path downloadedFile = writeProjectToDisk(dropDir);
+
+        backend.importProjectFrom(downloadedFile);
 
         ObservableSet<LHProtos.Pledge> openPledges = backend.mirrorOpenPledges(project, gate);
         ObservableSet<LHProtos.Pledge> claimedPledges = backend.mirrorClaimedPledges(project, gate);
@@ -605,10 +610,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         LHProtos.Pledge pledge2 = data2.getValue2();
 
         // The user drops the pledges.
-        try (OutputStream stream = Files.newOutputStream(projectPath.getParent().resolve("dropped-pledge1" + DiskManager.PLEDGE_FILE_EXTENSION))) {
+        try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge1" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge1.writeTo(stream);
         }
-        try (OutputStream stream = Files.newOutputStream(projectPath.getParent().resolve("dropped-pledge2" + DiskManager.PLEDGE_FILE_EXTENSION))) {
+        try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge2" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge2.writeTo(stream);
         }
 
@@ -656,8 +661,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // or maliciously. Note that in the case where two pledges have two different dependencies that both double
         // spend the same output, this will be caught by the backend trying to broadcast the dependencies itself
         // (in the server case), and then observing that the second pledge has a dependency that's failing to propagate.
-        Path projectPath = writeProjectToDisk();
-        backend.addProjectFile(projectPath);
+        Path dropDir = Files.createTempDirectory("lh-droptest");
+        Path downloadedFile = writeProjectToDisk(dropDir);
+
+        backend.importProjectFrom(downloadedFile);
         ObservableSet<LHProtos.Pledge> openPledges = backend.mirrorOpenPledges(project, gate);
 
         peerGroup.setMinBroadcastConnections(2);
@@ -690,7 +697,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         InboundMessageQueuer p1 = connectPeer(1, supportingVer);
         InboundMessageQueuer p2 = connectPeer(2, supportingVer);
         // User drops pledge 1
-        try (OutputStream stream = Files.newOutputStream(projectPath.getParent().resolve("dropped-pledge1" + DiskManager.PLEDGE_FILE_EXTENSION))) {
+        try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge1" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge1.build().writeTo(stream);
         }
         doGetUTXOAnswer(output, p1);
@@ -704,7 +711,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertEquals(pledge1.build(), openPledges.iterator().next());
 
         // User drops pledge 2
-        try (OutputStream stream = Files.newOutputStream(projectPath.getParent().resolve("dropped-pledge2" + DiskManager.PLEDGE_FILE_EXTENSION))) {
+        try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge2" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge2.build().writeTo(stream);
         }
         doGetUTXOAnswer(output, p1);
@@ -727,8 +734,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         project = projectModel.getProject();
         ObservableSet<LHProtos.Pledge> openPledges = backend.mirrorOpenPledges(project, gate);
         final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge();
-        Path projectPath = writeProjectToDisk();
-        backend.addProjectFile(projectPath);
+        writeProjectToDisk();
         gate.waitAndRun();
         // Is now loaded from disk and doing request to server.
         HttpExchange exchange = httpReqs.take();

@@ -53,10 +53,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static com.google.common.base.Preconditions.checkState;
 import static javafx.beans.binding.Bindings.when;
 import static lighthouse.threading.AffinityExecutor.UI_THREAD;
 import static lighthouse.utils.GuiUtils.animatedBind;
@@ -274,16 +272,22 @@ public class MainWindow {
             importProject(file);
     }
 
+
     public static void importProject(File file) {
+        importProject(file.toPath());
+    }
+
+    public static void importProject(Path file) {
+        String msg;
         try {
-            checkState(file.exists());
-            Path toPath = AppDirectory.dir().resolve(file.toPath().getFileName());
-            Files.copy(file.toPath(), toPath);
-            Main.backend.addProjectFile(toPath);
+            if (Main.backend.importProjectFrom(file) != null)
+                return;
+            msg = "Format error, check log";   // TODO: lame, redo with proper exception handling.
         } catch (IOException e) {
-            GuiUtils.informationalAlert("Failed to import project",
-                    "Could not read project file: " + e);
+            msg = e.getLocalizedMessage();
         }
+        GuiUtils.informationalAlert("Failed to import project",
+                "Could not read project file: " + msg);
     }
 
     private static boolean firstTime = true;

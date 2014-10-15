@@ -119,15 +119,12 @@ public class AddProjectTypeWindow {
 
     private void saveAndWatchDirectory(Project project, Path dirPath) {
         try {
-            // Write to tmp file and then rename, otherwise it's possible that the Linux kernel delivers directory
-            // change events to the DiskManager whilst the file is partially written.
-            Path file = dirPath.resolve(project.getSuggestedFileName() + ".tmp");
+            Path file = dirPath.resolve(project.getSuggestedFileName());
             try (OutputStream stream = new BufferedOutputStream(Files.newOutputStream(file))) {
                 project.getProto().writeTo(stream);
             }
-            Path realPath = dirPath.resolve(project.getSuggestedFileName());
-            Files.move(file, realPath);
-            Main.backend.addProjectFile(realPath);
+            Main.backend.importProjectFrom(file);
+            Main.backend.watchDirectoryForPledges(dirPath);
         } catch (IOException e) {
             crashAlert(e);
         }

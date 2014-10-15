@@ -1,7 +1,5 @@
 package lighthouse;
 
-import org.bitcoinj.core.*;
-import org.bitcoinj.params.RegTestParams;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -17,6 +15,8 @@ import lighthouse.threading.AffinityExecutor;
 import lighthouse.threading.ObservableMirrors;
 import lighthouse.wallet.PledgingWallet;
 import net.jcip.annotations.GuardedBy;
+import org.bitcoinj.core.*;
+import org.bitcoinj.params.RegTestParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -142,10 +143,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         }
 
         diskManager.observeProjects(this::onDiskProjectAdded, executor);
-
-        // In server mode watch the apps data directory for new projects being dropped.
-        if (mode == Mode.SERVER)
-            diskManager.addProjectsDir(AppDirectory.dir());
 
         // Run initialisation later (not ASAP). This is needed because the disk manager may itself be waiting to fully
         // start up. This odd initialisation sequence is to simplify the addition of event handlers: the backend and
@@ -414,6 +411,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             Futures.addCallback(peerFuture, new FutureCallback<List<Peer>>() {
                 @Override
                 public void onSuccess(@Nullable List<Peer> peers) {
+                    log.info("Peers available: {}", peers);
                     // On backend thread here. We must be because we need to ensure only a single UTXO query is in flight
                     // on the P2P network at once and only triggering such queries from the backend thread is a simple
                     // way to achieve that. It means we block the backend thread until the query completes or times out
@@ -661,9 +659,25 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return diskManager.saveProject(project.getProto(), project.getTitle());
     }
 
-    /** Adds the given file as a project: the containing directory will be watched for pledges. */
-    public void addProjectFile(Path file) {
-        diskManager.addProjectFile(file);
+    public Project importProjectFrom(Path file) throws IOException {
+        // Can be on any thread here. Do file IO on calling thread so IO error handling is easier.
+        checkState(Files.isRegularFile(file));
+        Path destPath = AppDirectory.dir().resolve(file.getFileName());
+        Path tmpPath = Paths.get(destPath + ".tmp");
+        // Copy and rename to avoid superfluous directory change notifications.
+        Files.copy(file, tmpPath);
+        Files.move(tmpPath, destPath);
+        return executor.fetchFrom(() -> {
+            Project p = diskManager.tryLoadProject(destPath);
+            if (p.getPaymentURL() == null)
+                watchDirectoryForPledges(file.getParent());
+            return p;
+        });
+    }
+
+    public void watchDirectoryForPledges(Path dir) {
+        checkArgument(Files.isDirectory(dir));
+        diskManager.addPledgePath(dir);
     }
 
     /**
