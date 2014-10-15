@@ -23,6 +23,10 @@ import lighthouse.files.AppDirectory;
 
 import javax.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static java.nio.file.Files.exists;
@@ -123,7 +127,9 @@ public class UpdateFXWindow {
         summary = Futures.getUnchecked(updater);
         updates.clear();
         updates.add(null);  // Sentinel for "latest"
-        for (UFXProtocol.Update update : summary.updates.getUpdatesList()) {
+        List<UFXProtocol.Update> list = new ArrayList<>(summary.updates.getUpdatesList());
+        Collections.reverse(list);
+        for (UFXProtocol.Update update : list) {
             // For each update in the index, check if we have it on disk (the index can contain updates older than
             // what we can roll back to).
             if (exists(AppDirectory.dir().resolve(format("%d.jar", update.getVersion())))) {
