@@ -268,9 +268,9 @@ public class DiskManager {
 
     private void loadProjectAndPledges(Path path) throws IOException {
         path = AppDirectory.dir().resolve(path);
-        log.info("Loading project and associated pledges: {}", path.toString());
+        log.info("Loading project and associated pledges: {}", path);
         if (!path.toString().endsWith(PROJECT_FILE_EXTENSION)) {
-            log.error("Project path does not end in correct extension: {}", path.toString());
+            log.error("Project path does not end in correct extension: {}", path);
             return;
         }
         if (!tryLoadProject(path))

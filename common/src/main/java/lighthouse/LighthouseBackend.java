@@ -870,7 +870,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             Sha256Hash hash = Sha256Hash.create(bits);
             // This file name is not very helpful for sysadmins. Perhaps if we scrub the metadata enough we can make a
             // better one, e.g. with the users contact details in.
-            String filename = hash.toString() + DiskManager.PLEDGE_FILE_EXTENSION;
+            String filename = hash + DiskManager.PLEDGE_FILE_EXTENSION;
             // Use a temp file and rename to disallow allow partially visible pledges.
             Path path = AppDirectory.dir().resolve(filename + ".tmp");
             try (OutputStream stream = new BufferedOutputStream(Files.newOutputStream(path))) {
