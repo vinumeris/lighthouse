@@ -844,6 +844,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         CompletableFuture<LHProtos.Pledge> result = new CompletableFuture<>();
         try {
             project.fastSanityCheck(pledge);
+            log.info("Pledge passed fast sanity check");
             // Maybe broadcast the dependencies first.
             CompletableFuture<LHProtos.Pledge> broadcast = new CompletableFuture<>();
             if (pledge.getTransactionsCount() > 1)
@@ -855,19 +856,25 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 if (ex != null) {
                     result.completeExceptionally(ex);
                 } else {
-                    // Check we don't accept too many pledges. This can happen if there's a buggy client or if users
-                    // are submitting pledges more or less in parallel - running on the backend thread here should
-                    // eliminate any races from that and ensure only one pledge wins.
-                    Coin total = fetchTotalPledged(project);
-                    if (total.add(Coin.valueOf(pledge.getTotalInputValue())).isGreaterThan(project.getGoalAmount()))
-                        throw new Ex.GoalExceeded();
-                    // Once dependencies (if any) are handled, start the check process. This will update openPledges once
-                    // done successfully.
-                    checkPledgeAgainstP2PNetwork(project, pledge);
-                    // Finally, save to disk. This will cause a notification of a new pledge to happen but we'll end
-                    // up ignoring it because we'll see we already loaded and verified it.
-                    savePledge(pledge);
-                    result.complete(pledge);
+                    try {
+                        // Check we don't accept too many pledges. This can happen if there's a buggy client or if users
+                        // are submitting pledges more or less in parallel - running on the backend thread here should
+                        // eliminate any races from that and ensure only one pledge wins.
+                        Coin total = fetchTotalPledged(project);
+                        if (total.add(Coin.valueOf(pledge.getTotalInputValue())).isGreaterThan(project.getGoalAmount())) {
+                            log.error("Too much money submitted! {} already vs {} in new pledge", total, pledge.getTotalInputValue());
+                            throw new Ex.GoalExceeded();
+                        }
+                        // Once dependencies (if any) are handled, start the check process. This will update openPledges once
+                        // done successfully.
+                        checkPledgeAgainstP2PNetwork(project, pledge);
+                        // Finally, save to disk. This will cause a notification of a new pledge to happen but we'll end
+                        // up ignoring it because we'll see we already loaded and verified it.
+                        savePledge(pledge);
+                        result.complete(pledge);
+                    } catch (Exception e) {
+                        result.completeExceptionally(e);
+                    }
                 }
                 return null;
             }, executor);
@@ -901,11 +908,13 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     private CompletableFuture<LHProtos.Pledge> broadcastDependenciesOf(LHProtos.Pledge pledge) {
         checkArgument(pledge.getTransactionsCount() > 1);
         CompletableFuture<LHProtos.Pledge> result = new CompletableFuture<>();
+        log.info("Pledge has {} dependencies", pledge.getTransactionsCount() - 1);
         executor.executeASAP(() -> {
             try {
                 List<ByteString> txnBytes = pledge.getTransactionsList().subList(0, pledge.getTransactionsCount() - 1);
                 if (txnBytes.size() > 5) {
                     // We don't accept ridiculous number of dependency txns. Even this is probably too much.
+                    log.error("Too many dependencies");
                     result.completeExceptionally(new Ex.TooManyDependencies(txnBytes.size()));
                 } else {
                     log.info("Broadcasting {} provided pledge dependencies", txnBytes.size());
@@ -914,6 +923,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                         // Wait for each broadcast in turn. In the local node case this will complete immediately. In the
                         // case of remote nodes (maybe we should forbid this later), it may block for a few seconds whilst
                         // the transactions propagate.
+                        log.info("Broadcasting dependency {} with thirty second timeout", tx.getHash());
                         peerGroup.broadcastTransaction(tx).get(30, TimeUnit.SECONDS);
                     }
                     result.complete(pledge);
