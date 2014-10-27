@@ -163,7 +163,7 @@ public class DiskManager {
                     synchronized (this) {
                         Project project = projectsById.get(pledge.getProjectId());
                         ObservableSet<LHProtos.Pledge> projectPledges = this.getPledgesFor(project);
-                        checkState(projectPledges != null);  // Project should be in both sets or neither.
+                        checkNotNull(projectPledges);  // Project should be in both sets or neither.
                         projectPledges.remove(pledge);
                     }
                     pledgesByPath.remove(path);
@@ -247,6 +247,7 @@ public class DiskManager {
                 log.warn("Failed to load project {}", path);
         }
         // Load pledges from each project path.
+        loadPledgesFromDirectory(AppDirectory.dir());
         for (Path path : pledgePaths) {
             if (!Files.isDirectory(path)) continue;    // Can be from an old version or deleted by user.
             loadPledgesFromDirectory(path);
