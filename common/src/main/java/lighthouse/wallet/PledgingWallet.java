@@ -101,7 +101,7 @@ public class PledgingWallet extends Wallet {
         public boolean isWalletExtensionMandatory() {
             // Allow other apps to open these wallets. Of course those wallets will be downgraded automatically and
             // may have their pledges messed up/revoked, but in a pinch it may be a good way to recover money from
-            // a bad install (e.g. if CC crashes at startup for some reason).
+            // a bad install (e.g. if app crashes at startup for some reason).
             return false;
         }
 
