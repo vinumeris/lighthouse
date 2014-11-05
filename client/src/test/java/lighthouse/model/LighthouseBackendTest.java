@@ -1,5 +1,6 @@
 package lighthouse.model;
 
+import javafx.scene.effect.Bloom;
 import org.bitcoinj.core.*;
 import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.testing.FakeTxBuilder;
@@ -378,6 +379,16 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
                 blockStore.getChainHead().getHeader().getHash(),
                 blockStore.getChainHead().getHeight()));
 
+        // App sets a new Bloom filter so it finds out about revocations. Filter contains the outpoint of the stub.
+        BloomFilter filter = (BloomFilter) waitForOutbound(p2);
+        assertEquals(filter, waitForOutbound(p1));
+        assertTrue(filter.contains(stubTx.getOutput(0).getOutPointFor().bitcoinSerialize()));
+        assertFalse(filter.contains(pledgeTx.bitcoinSerialize()));
+        assertFalse(filter.contains(pledgeTx.getHash().getBytes()));
+
+        assertEquals(MemoryPoolMessage.class, waitForOutbound(p1).getClass());
+        assertEquals(MemoryPoolMessage.class, waitForOutbound(p2).getClass());
+
         // We got a pledge list update relayed into our thread.
         AtomicBoolean flag = new AtomicBoolean(false);
         pledges.addListener((SetChangeListener<LHProtos.Pledge>) c -> {
@@ -390,18 +401,17 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertEquals(Coin.COIN.value / 2, pledge2.getTotalInputValue());
 
         // New block: let's pretend this block contains a revocation transaction. LighthouseBackend should recheck.
-        Block newBlock = FakeTxBuilder.makeSolvedTestBlock(blockStore, new ECKey().toAddress(params));
-        inbound(p1, newBlock);
-        // TODO: Replace this with just watching for revocations using the Bloom filter.
-        getutxos = (GetUTXOsMessage) waitForOutbound(p2);
-        assertNotNull(getutxos);
-        assertEquals(pledgeTx.getInput(0).getOutpoint(), getutxos.getOutPoints().get(0));
-        final ArrayList<TransactionOutput> empty = new ArrayList<>(1);
-        empty.add(null);
-        inbound(p2, new UTXOsMessage(params, empty,
-                new long[]{UTXOsMessage.MEMPOOL_HEIGHT},
-                blockStore.getChainHead().getHeader().getHash(),
-                blockStore.getChainHead().getHeight()));
+        Transaction revocation = new Transaction(params);
+        revocation.addInput(stubTx.getOutput(0));
+        revocation.addOutput(stubTx.getOutput(0).getValue(), new ECKey().toAddress(params));
+        Block newBlock = FakeTxBuilder.makeSolvedTestBlock(blockChain.getChainHead().getHeader(), revocation);
+        FilteredBlock filteredBlock = filter.applyAndUpdate(newBlock);
+        inbound(p1, filteredBlock);
+        for (Transaction transaction : filteredBlock.getAssociatedTransactions().values()) {
+            inbound(p1, transaction);
+        }
+        inbound(p1, new Ping(123));   // Force processing of the filtered merkle block.
+
         gate.waitAndRun();
         assertEquals(0, pledges.size());   // was revoked
 
@@ -590,6 +600,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // Create enough pledges to satisfy the project, broadcast the claim transaction, make sure the backend
         // spots the claim and understands the current state of the project.
         peerGroup.setMinBroadcastConnections(2);
+        peerGroup.setDownloadTxDependencies(false);
         peerGroup.startAsync();
         peerGroup.awaitRunning();
 
@@ -609,6 +620,9 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         Triplet<Transaction, Transaction, LHProtos.Pledge> data2 = TestUtils.makePledge(project, to, project.getGoalAmount());
         LHProtos.Pledge pledge2 = data2.getValue2();
 
+        InboundMessageQueuer p1 = connectPeer(1);
+        InboundMessageQueuer p2 = connectPeer(2, supportingVer);
+
         // The user drops the pledges.
         try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge1" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge1.writeTo(stream);
@@ -617,10 +631,13 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
             pledge2.writeTo(stream);
         }
 
-        InboundMessageQueuer p1 = connectPeer(1);
-        InboundMessageQueuer p2 = connectPeer(2, supportingVer);
-        doGetUTXOAnswer(data.getValue0().getOutput(0), p2);
-        doGetUTXOAnswer(data2.getValue0().getOutput(0), p2);
+        int q = 0;
+        for (int i = 0; i < 6; i++) {
+            Message m = waitForOutbound(p2);
+            if (m instanceof GetUTXOsMessage) {
+                doGetUTXOAnswer(q++ == 0 ? data.getValue0().getOutput(0) : data2.getValue0().getOutput(0), p2);
+            }
+        }
 
         gate.waitAndRun();
         gate.waitAndRun();
@@ -634,8 +651,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         waitForOutbound(p1);   // getdata for the contract.
         inbound(p2, InventoryMessage.with(contract));
         inbound(p1, contract);
-        GetDataMessage gdm = (GetDataMessage) waitForOutbound(p1);   // Dep resolution.
-        inbound(p1, new NotFoundMessage(params, gdm.getItems()));
+        for (int i = 0; i < 2; i++) {
+            Message m = waitForOutbound(p1);
+            assertTrue(m instanceof MemoryPoolMessage || m instanceof BloomFilter);
+        }
 
         for (int i = 0; i < 5; i++) {
             gate.waitAndRun();   // updates to lists and things.
@@ -700,8 +719,14 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge1" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge1.build().writeTo(stream);
         }
-        doGetUTXOAnswer(output, p1);
-        doGetUTXOAnswer(output, p2);
+        for (int i = 0; i < 3; i++) {
+            Message m = waitForOutbound(p1);
+            if (m instanceof GetUTXOsMessage)
+                doGetUTXOAnswer(output, p1);
+            m = waitForOutbound(p2);
+            if (m instanceof GetUTXOsMessage)
+                doGetUTXOAnswer(output, p2);
+        }
         gate.waitAndRun();   // statuses (start lookup)
         gate.waitAndRun();   // openPledges
         gate.waitAndRun();   // statuses (end lookup)
@@ -714,7 +739,9 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge2" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge2.build().writeTo(stream);
         }
+        waitForOutbound(p1);
         doGetUTXOAnswer(output, p1);
+        waitForOutbound(p2);
         doGetUTXOAnswer(output, p2);
 
         // Wait for check status to update.
@@ -761,9 +788,8 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         return pledge;
     }
 
-    private void doGetUTXOAnswer(TransactionOutput output, InboundMessageQueuer p2) throws InterruptedException, BlockStoreException {
-        waitForOutbound(p2);  // getutxos
-        inbound(p2, new UTXOsMessage(params,
+    private void doGetUTXOAnswer(TransactionOutput output, InboundMessageQueuer p) throws InterruptedException, BlockStoreException {
+        inbound(p, new UTXOsMessage(params,
                 ImmutableList.of(output),
                 new long[]{UTXOsMessage.MEMPOOL_HEIGHT},
                 blockStore.getChainHead().getHeader().getHash(),

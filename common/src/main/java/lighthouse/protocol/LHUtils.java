@@ -4,10 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionInput;
-import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +61,10 @@ public class LHUtils {
 
     public static boolean isUnix() {
         return System.getProperty("os.name").toLowerCase().contains("linux") || System.getProperty("os.name").toLowerCase().contains("freebsd");
+    }
+
+    public static Transaction pledgeToTx(NetworkParameters params, LHProtos.Pledge pledge) {
+        return new Transaction(params, pledge.getTransactions(pledge.getTransactionsCount() - 1).toByteArray());
     }
 
     //region Generic Java 8 enhancements

@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 
 import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Throwables.getRootCause;
@@ -190,6 +192,11 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                     movePledgesFromOpenToClaimed(tx, project);
                 }
             }
+
+            // Let us find revocations by using a direct Bloom filter provider. We could watch out for claims in this
+            // way too, but we want the wallet to monitor confidence of claims, and don't care about revocations as much.
+            installBloomFilterProvider();
+            refreshBloomFilter();
 
             log.info("Backend initialized ...");
             initialized.complete(true);
@@ -510,6 +517,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             }
             log.info("{} of {} pledges verified (were not revoked/claimed)", verifiedPledges.size(), pledges.size());
             syncPledges(project, pledges, verifiedPledges);
+            refreshBloomFilter();
             markAsCheckDone(project);
             result.complete(new HashSet<>(verifiedPledges));
         } catch (InterruptedException | ExecutionException e) {
@@ -764,20 +772,15 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     @Override
     public void notifyNewBestBlock(StoredBlock block) throws VerificationException {
         executor.checkOnThread();
-        // TODO: Fix this so we just watch for revocation transactions via Bloom filtering.
-        // Don't bother with pointless recalculations until we're caught up with the chain tip.
-        if (block.getHeight() > peerGroup.getMostCommonChainHeight() - 2) {
-            log.info("New block found, refreshing pledges");
-            for (Project project : diskManager.getProjects()) {
-                // In the app, use a new block as a hint to go back and ask the server for an update (e.g. in case
-                // any pledges were revoked). This also ensures the project page can be left open and it'll update from
-                // time to time, which is nice if you just want it running in the corner of a room or on a projector,
-                // etc.
-                if (mode == Mode.CLIENT && project.getPaymentURL() != null) {
-                    jitteredServerRequery(project);
-                } else {
-                    jitteredP2PRequery(project);
-                }
+        // In the app, use a new block as a hint to go back and ask the server for an update (e.g. in case
+        // any pledges were revoked). This also ensures the project page can be left open and it'll update from
+        // time to time, which is nice if you just want it running in the corner of a room or on a projector,
+        // etc.
+        if (mode == Mode.CLIENT) {
+            // Don't bother with pointless/noisy server requeries until we're caught up with the chain tip.
+            if (block.getHeight() > peerGroup.getMostCommonChainHeight() - 2) {
+                log.info("New block found, refreshing pledges");
+                diskManager.getProjects().stream().filter(project -> project.getPaymentURL() != null).forEach(this::jitteredServerRequery);
             }
         }
     }
@@ -963,5 +966,133 @@ public class LighthouseBackend extends AbstractBlockChainListener {
 
     public synchronized Project getProjectFromURL(URI uri) {
         return projectsByUrlPath.get(uri.getPath());
+    }
+
+    private class BloomFilterManager extends AbstractPeerEventListener implements PeerFilterProvider {
+        private Map<TransactionOutPoint, LHProtos.Pledge> allPledges;
+
+        // Methods in logical sequence of how they are used/called.
+
+        @Override
+        public long getEarliestKeyCreationTime() {
+            return Utils.currentTimeSeconds();   // Unused
+        }
+
+        @Override
+        public void beginBloomFilterCalculation() {
+            allPledges = executor.fetchFrom(LighthouseBackend.this::getAllOpenPledgedOutpoints);
+        }
+
+        @Override
+        public int getBloomFilterElementCount() {
+            return allPledges.size();
+        }
+
+        @Override
+        public BloomFilter getBloomFilter(int size, double falsePositiveRate, long nTweak) {
+            BloomFilter filter = new BloomFilter(size, falsePositiveRate, nTweak);
+            for (TransactionOutPoint pledge : allPledges.keySet()) {
+                filter.insert(pledge.bitcoinSerialize());
+            }
+            log.info("Calculated Bloom filter for detecting revocations and claims");
+            return filter;
+        }
+
+        @Override
+        public boolean isRequiringUpdateAllBloomFilter() {
+            return false;
+        }
+
+        @Override
+        public void endBloomFilterCalculation() {
+            allPledges = null;
+        }
+
+        @Override
+        public void onTransaction(Peer peer, Transaction t) {
+            executor.checkOnThread();
+            // TODO: Gate this logic on t being announced by multiple peers.
+            checkForRevocation(t);
+            // TODO: Watch out for the confirmation. If no confirmation of the revocation occurs within N hours, alert the user.
+        }
+    }
+
+    public void checkForRevocation(Transaction t) {
+        log.info("Checking {} for to see if it's a revocation", t.getHash());
+        List<LHProtos.Pledge> revoked = whichPledgesAreRevokedBy(t);
+        if (revoked.isEmpty()) return;
+        for (ObservableSet<LHProtos.Pledge> pledges : openPledges.values()) {
+            pledges.removeAll(revoked);
+        }
+    }
+
+    @Override
+    public void receiveFromBlock(Transaction tx, StoredBlock block, AbstractBlockChain.NewBlockType blockType, int relativityOffset) throws VerificationException {
+        if (blockType != AbstractBlockChain.NewBlockType.BEST_CHAIN) return;
+        checkForRevocation(tx);
+    }
+
+    @Override
+    public boolean notifyTransactionIsInBlock(Sha256Hash txHash, StoredBlock block, AbstractBlockChain.NewBlockType blockType, int relativityOffset) throws VerificationException {
+        // TODO: Watch out for the confirmation. If no confirmation of the revocation occurs within N hours, alert the user.
+        return super.notifyTransactionIsInBlock(txHash, block, blockType, relativityOffset);
+    }
+
+    @Override
+    public boolean isTransactionRelevant(Transaction tx) throws ScriptException {
+        return true;
+    }
+
+    private List<LHProtos.Pledge> whichPledgesAreRevokedBy(Transaction t) {
+        List<LHProtos.Pledge> result = new ArrayList<>();
+        Project project = diskManager.getProjectFromClaim(t);
+        List<TransactionInput> inputs = t.getInputs();
+        Map<TransactionOutPoint, LHProtos.Pledge> outpointsToPledges = getAllOpenPledgedOutpoints();
+        for (int i = 0; i < inputs.size(); i++) {
+            TransactionInput input = inputs.get(i);
+            LHProtos.Pledge pledge = outpointsToPledges.get(input.getOutpoint());
+            if (pledge == null) continue;  // Irrelevant input.
+            log.info("Broadcast tx {} input {} matches pledge {}", t.getHash(), i, LHUtils.hashFromPledge(pledge));
+            if (project != null) {
+                Transaction tx = pledgeToTx(wallet.getParams(), pledge);
+                if (LHUtils.compareOutputsStructurally(tx, project)) {
+                    // This transaction is a claim for a project we know about, and this input is claiming a pledge
+                    // for that project, so skip. We must still process other inputs because they may revoke other
+                    // pledges that are not being claimed.
+                    log.info("... and is claim");
+                    continue;
+                }
+            }
+            log.info("... and is a revocation");
+            result.add(pledge);
+        }
+        if (result.size() > 1)
+            log.info("TX {} revoked {} pledges", t.getHash(), result.size());
+        return result;
+    }
+
+    private void installBloomFilterProvider() {
+        BloomFilterManager manager = new BloomFilterManager();
+        peerGroup.addPeerFilterProvider(manager);
+        peerGroup.addEventListener(manager, executor);
+    }
+
+    public void refreshBloomFilter() {
+        peerGroup.recalculateFastCatchupAndFilter(PeerGroup.FilterRecalculateMode.SEND_IF_CHANGED);
+    }
+
+    private Map<TransactionOutPoint, LHProtos.Pledge> getAllOpenPledgedOutpoints() {
+        executor.checkOnThread();
+        Map<TransactionOutPoint, LHProtos.Pledge> result = new HashMap<>();
+        for (ObservableSet<LHProtos.Pledge> pledges : openPledges.values()) {
+            for (LHProtos.Pledge pledge : pledges) {
+                if (pledge.hasOrigHash()) continue;   // Can't watch for revocations of scrubbed pledges.
+                Transaction tx = LHUtils.pledgeToTx(wallet.getParams(), pledge);
+                for (TransactionInput input : tx.getInputs()) {
+                    result.put(input.getOutpoint(), pledge);
+                }
+            }
+        }
+        return result;
     }
 }

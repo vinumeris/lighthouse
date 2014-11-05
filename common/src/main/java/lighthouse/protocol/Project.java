@@ -337,7 +337,7 @@ public class Project {
         if (pledge.getTransactionsList().isEmpty())
             throw new Ex.NoTransactionData();
         // We take the last the transaction because the others are dependencies.
-        Transaction tx = new Transaction(params, pledge.getTransactions(pledge.getTransactionsCount() - 1).toByteArray());
+        Transaction tx = LHUtils.pledgeToTx(params, pledge);
         if (tx.getOutputs().size() != outputs.size())
             throw new Ex.TxWrongNumberOfOutputs(tx.getOutputs().size(), outputs.size());
         // Output scripts must match project output scripts. We assume the project creator doesn't specify an invalid

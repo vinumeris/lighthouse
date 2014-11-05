@@ -42,7 +42,7 @@ public class PledgeServer {
     public static final short DEFAULT_LOCALHOST_PORT = (short) LHUtils.HTTP_LOCAL_TEST_PORT;
 
     public static void main(String[] args) throws Exception {
-        BriefLogFormatter.init();
+        BriefLogFormatter.initVerbose();
 
         OptionParser parser = new OptionParser();
         OptionSpec<String> dirFlag = parser.accepts("dir").withRequiredArg();
