@@ -575,7 +575,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
 
         // Build a map of pledgehash->pledge so we can dedupe server-scrubbed pledges.
         Map<Sha256Hash, LHProtos.Pledge> hashes = curOpenPledges.stream().collect(
-                toMap(p -> Sha256Hash.create(p.toByteArray()), p -> p)
+                toMap(LHUtils::hashFromPledge, p -> p)
         );
 
         // Try and update openPledges/claimedPledges with minimal touching, so animations work right.
