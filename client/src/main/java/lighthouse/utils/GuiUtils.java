@@ -72,14 +72,12 @@ public class GuiUtils {
     public static void crashAlert(Throwable t) {
         Throwable rootCause = Throwables.getRootCause(t);
         log.error("CRASH!", rootCause);
-        Runnable r = () -> {
+        // Always use runLater to avoid "Nested event loops are allowed only while handling system events" error that
+        // can occur if the crash occurs during e.g. an animation.
+        Platform.runLater(() -> {
             runAlert((stage, controller) -> controller.crashAlert(stage, rootCause.toString()));
             Platform.exit();
-        };
-        if (Platform.isFxApplicationThread())
-            r.run();
-        else
-            Platform.runLater(r);
+        });
     }
 
     /** Show a GUI alert box for any unhandled exceptions that propagate out of this thread. */
