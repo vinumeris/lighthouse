@@ -41,12 +41,26 @@ public class AddProjectTypeWindow {
     @FXML Button saveButton;
 
     private ProjectModel model;
+    private boolean editing;
+
     public Main.OverlayUI<InnerWindow> overlayUI;
 
-    public static Main.OverlayUI<AddProjectTypeWindow> open(ProjectModel projectModel) {
-        Main.OverlayUI<AddProjectTypeWindow> result = Main.instance.overlayUI("subwindows/add_project_type.fxml", "Type");
-        result.controller.model = projectModel;
+    public static Main.OverlayUI<AddProjectTypeWindow> open(ProjectModel projectModel, boolean editing) {
+        Main.OverlayUI<AddProjectTypeWindow> result = Main.instance.overlayUI("subwindows/add_project_type.fxml",
+                editing ? "Change type" : "Select type");
+        result.controller.setModel(projectModel);
+        result.controller.editing = editing;
         return result;
+    }
+
+    private void setModel(ProjectModel model) {
+        this.model = model;
+        if (model.serverName.get() != null) {
+            serverNameEdit.setText(model.serverName.get());
+            serverAssisted.setSelected(true);
+        } else {
+            fullyDecentralised.setSelected(true);
+        }
     }
 
     public void initialize() {
@@ -106,13 +120,11 @@ public class AddProjectTypeWindow {
                     project = Main.backend.saveProject(model.getProject());
                     ExportWindow.openForProject(project);
                 }
-                // Mark this project as being created by us in the wallet. We have to record this explicitly because
-                // the target address might not actually be one of ours, e.g. if it's being paid directly to a TREZOR.
-                Main.wallet.setTag("com.vinumeris.cc:owned:" + project.getID(), ByteString.EMPTY);
             } catch (IOException e) {
+                log.error("Could not save project", e);
                 informationalAlert("Could not save project",
                         "An error was encountered whilst trying to save the project: %s",
-                        Throwables.getRootCause(e).getMessage());
+                        Throwables.getRootCause(e));
             }
         });
     }

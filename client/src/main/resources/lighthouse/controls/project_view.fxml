@@ -26,7 +26,7 @@
                                       <!-- Text within the image area -->
                                       <VBox layoutX="14.0" layoutY="14.0" prefHeight="95.0" prefWidth="619.0" spacing="10.0" HBox.hgrow="ALWAYS">
                                           <children>
-                                              <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                              <HBox spacing="10.0">
                                                   <children>
                                                       <Label fx:id="projectTitle" styleClass="project-title-label, drop-shadow-label" text="A really really really really long title for a project that's kind of self indulgent" wrapText="true" HBox.hgrow="ALWAYS">
                                                           <font>
@@ -36,6 +36,12 @@
                                                               <DropShadow height="10.0" radius="4.5" width="10.0" />
                                                           </effect>
                                                       </Label>
+                                          <Pane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                                          <Button fx:id="editButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#edit" styleClass="edit-button" text="Edit">
+                                             <HBox.margin>
+                                                <Insets top="5.0" />
+                                             </HBox.margin>
+                                          </Button>
                                                   </children>
                                               </HBox>
                                           </children>
@@ -71,7 +77,7 @@
                   <children>
                       <VBox fx:id="rightVBox" spacing="10.0" HBox.hgrow="ALWAYS">
                           <children>
-                              <TextFlow style="-fx-text-fill: black; -fx-padding: 5 0 0 0" lineSpacing="5" fx:id="description">
+                              <TextFlow fx:id="description" lineSpacing="5" style="-fx-text-fill: black; -fx-padding: 5 0 0 0">
                                   <children>
                                       <Text text="Sample description" textAlignment="JUSTIFY" />
                                   </children>

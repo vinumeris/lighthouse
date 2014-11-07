@@ -231,3 +231,9 @@
 .server-type-selbox > RadioButton {
     -fx-font-weight: bold;
 }
+
+.edit-button {
+    -fx-base: black;
+    -fx-opacity: 0.8;
+    -fx-cursor: hand;
+}

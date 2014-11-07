@@ -30,8 +30,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
 
 import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Throwables.getRootCause;
@@ -144,7 +142,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             setMaxJitterSeconds(1);
         }
 
-        diskManager.observeProjects(this::onDiskProjectAdded, executor);
+        diskManager.observeProjects(this::onDiskProjectAdded);
 
         // Run initialisation later (not ASAP). This is needed because the disk manager may itself be waiting to fully
         // start up. This odd initialisation sequence is to simplify the addition of event handlers: the backend and
@@ -288,6 +286,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     private void onDiskProjectAdded(ListChangeListener.Change<? extends Project> change) {
         executor.checkOnThread();
         while (change.next()) {
+            log.info("Change: {}", change);
             if (change.wasUpdated()) {
                 // Sometimes we get such updates from the Linux kernel even when all we did was create a file on disk
                 // in a directory that's already being monitored due to another project.
@@ -295,11 +294,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 continue;
             }
 
-            if (change.wasRemoved()) {
-                checkState(change.getRemovedSize() == 1);   // DiskManager doesn't batch.
-                Project project = change.getRemoved().get(0);
-                log.info("Project removed: {}", project);
-            }
             if (change.wasAdded()) {
                 checkState(change.getAddedSize() == 1);   // DiskManager doesn't batch.
                 Project project = change.getAddedSubList().get(0);
@@ -667,6 +661,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return diskManager.saveProject(project.getProto(), project.getTitle());
     }
 
+    @Nullable
     public Project importProjectFrom(Path file) throws IOException {
         // Can be on any thread here. Do file IO on calling thread so IO error handling is easier.
         checkState(Files.isRegularFile(file));
@@ -677,9 +672,14 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         Files.move(tmpPath, destPath);
         return executor.fetchFrom(() -> {
             Project p = diskManager.tryLoadProject(destPath);
-            if (p.getPaymentURL() == null)
-                watchDirectoryForPledges(file.getParent());
-            return p;
+            if (p == null) {
+                log.error("Unable to import project");
+                return null;
+            } else {
+                if (p.getPaymentURL() == null)
+                    watchDirectoryForPledges(file.getParent());
+                return p;
+            }
         });
     }
 

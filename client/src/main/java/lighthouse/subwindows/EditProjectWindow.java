@@ -21,11 +21,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import lighthouse.Main;
+import lighthouse.files.AppDirectory;
+import lighthouse.files.DiskManager;
 import lighthouse.model.ProjectModel;
 import lighthouse.protocol.LHUtils;
+import lighthouse.protocol.Project;
 import lighthouse.utils.DownloadProgress;
 import lighthouse.utils.ValidationLink;
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.controlsfx.control.PopOver;
 import org.slf4j.Logger;
@@ -35,16 +37,19 @@ import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 
+import static lighthouse.protocol.LHUtils.uncheck;
 import static lighthouse.protocol.LHUtils.unchecked;
 import static lighthouse.utils.GuiUtils.*;
 
 /**
- * A window that lets you create a new project by typing in its details.
+ * A window that lets you create a new project or edit an existing one.
  */
-public class AddProjectWindow {
-    private static final Logger log = LoggerFactory.getLogger(AddProjectWindow.class);
+public class EditProjectWindow {
+    private static final Logger log = LoggerFactory.getLogger(EditProjectWindow.class);
     private static final String COVERPHOTO_SITE = "coverphotofinder.com";
 
     @FXML BorderPane rootPane;
@@ -64,19 +69,42 @@ public class AddProjectWindow {
     public Main.OverlayUI<InnerWindow> overlayUI;
 
     private ProjectModel model;
+    private boolean editing;
 
-    // Called by FXMLLoader.
-    public void initialize() {
-        // TODO: This fixed value won't work properly with internationalization.
-        rootPane.setPrefWidth(618);
-        rootPane.prefHeightProperty().bind(Main.instance.scene.heightProperty().multiply(0.8));
+    public static void openForCreate() {
+        Main.OverlayUI<EditProjectWindow> ui = Main.instance.overlayUI("subwindows/add_edit_project.fxml", "Create new project");
+        ui.controller.setupFor(new ProjectModel(Main.wallet), false);
+    }
 
-        // We grab a fresh address here because a project is identified by the hash of its output address and its
-        // title. If we didn't use a fresh address here, two projects created in sequence that for whatever reason
-        // had the same title would end up having the same ID.
-        final Address address = Main.wallet.freshReceiveAddress();
-        addressEdit.setText(address.toString());
-        this.model = new ProjectModel(Main.wallet);
+    public static void openForEdit(Project project) {
+        Main.OverlayUI<EditProjectWindow> ui = Main.instance.overlayUI("subwindows/add_edit_project.fxml", "Edit project");
+        ui.controller.setupFor(new ProjectModel(project.getProtoDetails().toBuilder()), true);
+    }
+
+    private void setupFor(ProjectModel model, boolean editing) {
+        this.model = model;
+        this.editing = editing;
+
+        // Copy data from model.
+        addressEdit.setText(model.address.get());
+        titleEdit.setText(model.title.get());
+        descriptionEdit.setText(model.memo.get());
+        Coin goalCoin = Coin.valueOf(model.goalAmount.get());
+        if (goalCoin.value != 1) {  // 1 satoshi is sentinel value meaning new project.
+            goalAmountEdit.setText(goalCoin.toPlainString());
+            minPledgeEdit.setPromptText(model.getMinPledgeAmount().toPlainString());
+        } else {
+            minPledgeEdit.setPromptText("");
+        }
+        if (model.image.get() == null) {
+            setupDefaultCoverImage();
+        } else {
+            InputStream stream = model.image.get().newInput();
+            coverImageView.setImage(new Image(stream));
+            uncheck(stream::close);
+        }
+
+        // Bind UI back to model.
         this.model.title.bind(titleEdit.textProperty());
         this.model.memo.bind(descriptionEdit.textProperty());
         this.model.address.bind(addressEdit.textProperty());
@@ -92,7 +120,6 @@ public class AddProjectWindow {
         model.minPledgeAmountProperty().addListener(o -> {
             minPledgeEdit.setPromptText(model.getMinPledgeAmount().toPlainString());
         });
-        minPledgeEdit.setPromptText("");
         ValidationLink minPledgeValue = new ValidationLink(minPledgeEdit, str -> {
             if (str.isEmpty())
                 return true;  // default is used
@@ -108,9 +135,7 @@ public class AddProjectWindow {
                 new ValidationLink(titleEdit, str -> !str.isEmpty()),
                 minPledgeValue);
 
-
         roundCorners(coverImageView, 10);
-        setupDefaultCoverImage();
 
         Label maxPledgesWarning = new Label(String.format("You can collect a maximum of %d pledges, due to limits in the Bitcoin protocol.", ProjectModel.MAX_NUM_INPUTS));
         maxPledgesWarning.setStyle("-fx-font-size: 12; -fx-padding: 10");
@@ -123,6 +148,13 @@ public class AddProjectWindow {
             else
                 maxPledgesPopOver.hide();
         });
+    }
+
+    // Called by FXMLLoader.
+    public void initialize() {
+        // TODO: This fixed value won't work properly with internationalization.
+        rootPane.setPrefWidth(618);
+        rootPane.prefHeightProperty().bind(Main.instance.scene.heightProperty().multiply(0.8));
     }
 
     private void setupDefaultCoverImage() {
@@ -154,7 +186,16 @@ public class AddProjectWindow {
 
     @FXML
     public void nextClicked(ActionEvent event) {
-        AddProjectTypeWindow.open(model);
+        // Quick check that they haven't duplicated the title as otherwise that results in file name clashes
+        // We could add (2) after the file name or whatever to avoid this, but multiple different projects with
+        // the same title would be confusing anyway so just forbid it.
+        if (!editing && Files.exists(AppDirectory.dir().resolve(model.title.get() + DiskManager.PROJECT_FILE_EXTENSION))) {
+            informationalAlert("Title conflict",
+                    "You already have a project with that title. Please choose another. If you are trying to create a " +
+                            "different version, consider putting the date or a number in the title so people can distinguish them.");
+            return;
+        }
+        AddProjectTypeWindow.open(model, editing);
     }
 
     @FXML

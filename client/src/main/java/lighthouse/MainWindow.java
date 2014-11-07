@@ -36,6 +36,7 @@ import lighthouse.controls.ProjectView;
 import lighthouse.files.AppDirectory;
 import lighthouse.model.BitcoinUIModel;
 import lighthouse.protocol.Project;
+import lighthouse.subwindows.EditProjectWindow;
 import lighthouse.subwindows.SendMoneyController;
 import lighthouse.subwindows.UpdateFXWindow;
 import lighthouse.subwindows.WalletSettingsController;
@@ -136,17 +137,16 @@ public class MainWindow {
         projects = Main.backend.mirrorProjects(UI_THREAD);
         projectStates = Main.backend.mirrorProjectStates(UI_THREAD);
         checkStates = Main.backend.mirrorCheckStatuses(UI_THREAD);
-        for (Project project : projects) {
+        for (Project project : projects)
             projectsVBox.getChildren().add(0, buildProjectWidget(project));
-        }
         projects.addListener((ListChangeListener<Project>) change -> {
             while (change.next()) {
-                if (change.wasAdded()) {
-                    // Hack: delay until the next iteration of the main loop to give the calling code time to mark the
-                    // project as owned by us in the wallet.
-                    Platform.runLater(() -> slideInNewProject(change.getAddedSubList().get(0)));
-                } else {
-                    log.warn("Cannot animate project remove yet");
+                if (change.wasReplaced()) {
+                    updateExistingProject(change.getFrom(), change.getAddedSubList().get(0), change.getRemoved().get(0));
+                } else if (change.wasAdded()) {
+                    slideInNewProject(change.getAddedSubList().get(0));
+                } else if (change.wasRemoved()) {
+                    log.warn("Cannot animate project remove yet: {}", change);
                 }
             }
         });
@@ -174,6 +174,14 @@ public class MainWindow {
         log.info("Switching to project: {}", next.getTitle());
         projectView.project.set(next);
         switchView(Views.PROJECT);
+    }
+
+    // Triggered by the project disk model being adjusted.
+    private void updateExistingProject(int index, Project newProject, Project prevProject) {
+        projectsVBox.getChildren().set(projectsVBox.getChildren().size() - 2 - index, buildProjectWidget(newProject));
+        if (inProjectView.get() && projectView.getProject().equals(prevProject)) {
+            projectView.setProject(newProject);
+        }
     }
 
     // Triggered by the project disk model being adjusted.
@@ -229,7 +237,7 @@ public class MainWindow {
 
     @FXML
     public void addProjectClicked(ActionEvent event) {
-        Main.instance.overlayUI("subwindows/add_project.fxml", "Create new project");
+        EditProjectWindow.openForCreate();
     }
 
     @FXML

@@ -140,18 +140,17 @@ public class DiskManager {
                 log.info("Project file deleted/modified: {}", path);
                 Project project = projectsByPath.get(path);
                 if (project != null) {
+                    if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        log.info("Project file modified, reloading ...");
+                        this.tryLoadProject(path, projects.indexOf(project));
+                    }
                     projects.remove(project);
                     projectsByPath.remove(path);
                     synchronized (this) {
                         projectsById.remove(project.getID());
                     }
                 }
-                if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-                    log.info("Reloading ...");
-                    this.tryLoadProject(path);
-                }
-            }
-            if (isCreate) {
+            } else if (isCreate) {
                 log.info("New project found: {}", path);
                 this.tryLoadProject(path);
             }
@@ -282,8 +281,7 @@ public class DiskManager {
         Path path = AppDirectory.dir().resolve(PROJECT_STATUS_FILENAME);
         Properties properties = new Properties();
         for (Map.Entry<String, LighthouseBackend.ProjectStateInfo> entry : projectStates.entrySet()) {
-            String val = entry.getValue().state == LighthouseBackend.ProjectState.OPEN ? "OPEN" :
-                    checkNotNull(entry.getValue().claimedBy).toString();
+            String val = entry.getValue().state == LighthouseBackend.ProjectState.OPEN ? "OPEN" : checkNotNull(entry.getValue().claimedBy).toString();
             properties.setProperty(entry.getKey(), val);
         }
         if (properties.isEmpty()) return;
@@ -295,21 +293,32 @@ public class DiskManager {
         }
     }
 
+    @Nullable
     public Project tryLoadProject(Path path) {
+        return tryLoadProject(path, -1);
+    }
+
+    @Nullable
+    public Project tryLoadProject(Path path, int indexToReplace) {
         executor.checkOnThread();
         Project p = loadProject(path);
         if (p != null) {
             synchronized (this) {
-                if (projectsById.containsKey(p.getID())) {
+                if (projectsById.containsKey(p.getID()) && indexToReplace < 0) {
                     log.info("Already have project id {}, skipping load", p.getID());
                     return projectsById.get(p.getID());
                 }
                 projectsById.put(p.getID(), p);
             }
-            projects.add(p);
+            if (indexToReplace >= 0) {
+                projects.set(indexToReplace, p);
+                log.info("Replaced project at index {} with newly loaded project", indexToReplace);
+            } else {
+                projects.add(p);
+            }
             projectsByPath.put(path, p);
             if (!projectStates.containsKey(p.getID())) {
-                // Assume new projects are open: we have no other way to tell for now (would require a block explorer
+                // Assume new projects are open: we have no other way to tell for now: would require a block explorer
                 // lookup to detect that the project came and went already. But we do remember even if the project
                 // is deleted and came back.
                 projectStates.put(p.getID(), new LighthouseBackend.ProjectStateInfo(LighthouseBackend.ProjectState.OPEN, null));
@@ -346,7 +355,9 @@ public class DiskManager {
             project.writeTo(stream);
         }
         // This should trigger a directory change notification that loads the project.
-        Files.move(path, AppDirectory.dir().resolve(filename));
+        if (Files.exists(AppDirectory.dir().resolve(filename)))
+            log.info("... and replacing");
+        Files.move(path, AppDirectory.dir().resolve(filename), StandardCopyOption.REPLACE_EXISTING);
         return obj;
     }
 
@@ -363,8 +374,8 @@ public class DiskManager {
         });
     }
 
-    public ListChangeListener<Project> observeProjects(ListChangeListener<Project> listener, Executor e) {
-        return MarshallingObservers.addListener(projects, listener, e);
+    public void observeProjects(ListChangeListener<Project> listener) {
+        projects.addListener(listener);
     }
 
     public ObservableList<Project> mirrorProjects(AffinityExecutor executor) {

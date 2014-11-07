@@ -1,0 +1,2 @@
+Bug fixes. Revocations are now noticed immediately instead of at the next block.
+

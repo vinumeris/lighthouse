@@ -129,6 +129,10 @@ public class Project {
         return proto.build();
     }
 
+    public LHProtos.ProjectDetails getProtoDetails() {
+        return projectReq;
+    }
+
     /**
      * Returns a string that is used to uniquely identify a project: a 256-bit hash of the project contents.
      */

@@ -35,6 +35,7 @@ import lighthouse.protocol.Ex;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
+import lighthouse.subwindows.EditProjectWindow;
 import lighthouse.subwindows.PledgeWindow;
 import lighthouse.subwindows.RevokeAndClaimWindow;
 import lighthouse.threading.AffinityExecutor;
@@ -58,6 +59,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static javafx.beans.binding.Bindings.*;
 import static javafx.collections.FXCollections.singletonObservableList;
 import static lighthouse.utils.GuiUtils.getResource;
+import static lighthouse.utils.GuiUtils.informationalAlert;
 import static lighthouse.utils.MoreBindings.bindSetToList;
 import static lighthouse.utils.MoreBindings.mergeSets;
 
@@ -81,6 +83,7 @@ public class ProjectView extends HBox {
     @FXML Pane coverImage;
     @FXML Label numPledgersLabel;
     @FXML Label percentFundedLabel;
+    @FXML Button editButton;
 
     public final ObjectProperty<Project> project = new SimpleObjectProperty<>();
     public final ObjectProperty<EventHandler<ActionEvent>> onBackClickedProperty = new SimpleObjectProperty<>();
@@ -230,6 +233,8 @@ public class ProjectView extends HBox {
         emptySlice.getNode().setVisible(false);
 
         checkForMyPledge(p);
+
+        editButton.setVisible(Main.wallet.isProjectMine(p));
 
         if (p.getPaymentURL() != null) {
             Platform.runLater(() -> {
@@ -423,6 +428,10 @@ public class ProjectView extends HBox {
         this.project.set(project);
     }
 
+    public Project getProject() {
+        return this.project.get();
+    }
+
     // Should we show revoked pledges crossed out?
     private class PledgeListCell extends ListCell<LHProtos.Pledge> {
         @Override
@@ -438,5 +447,19 @@ public class ProjectView extends HBox {
                 msg += " (yours)";
             setText(msg);
         }
+    }
+
+    @FXML
+    public void edit(ActionEvent event) {
+        log.info("Edit button clicked");
+        if (pledgedValue.get() > 0) {
+            informationalAlert("Unable to edit",
+                    "You cannot edit a project that has already started gathering pledges, as otherwise existing " +
+                            "pledges could be invalidated and participants could get confused. If you would like to " +
+                            "change this project either create a new one, or request revocation of existing pledges."
+            );
+            return;
+        }
+        EditProjectWindow.openForEdit(project.get());
     }
 }

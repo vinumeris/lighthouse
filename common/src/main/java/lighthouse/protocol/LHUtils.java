@@ -161,7 +161,8 @@ public class LHUtils {
             if (path.isEmpty())
                 return null;
             URI uri = new URI(path);
-            if (uri.getScheme().equals("https") && uri.getPath().equals(HTTP_PATH_PREFIX + HTTP_PROJECT_PATH + projectID))
+            boolean validScheme = uri.getScheme().equals("https") || (uri.getScheme().equals("http") && uri.getHost().equals("localhost"));
+            if (validScheme && uri.getPath().startsWith(HTTP_PATH_PREFIX + HTTP_PROJECT_PATH))
                 return uri.getHost();
             else
                 return null;

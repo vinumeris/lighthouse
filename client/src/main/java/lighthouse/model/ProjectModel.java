@@ -33,7 +33,7 @@ public class ProjectModel {
     public static final int MAX_NUM_INPUTS = (Transaction.MAX_STANDARD_TX_SIZE - 64) /* for output */ / ESTIMATED_INPUT_SIZE;
 
     public ProjectModel(PledgingWallet wallet) {
-        this(Project.makeDetails("New project", "", wallet.freshReceiveAddress(), Coin.SATOSHI, wallet.freshAuthKey(),
+        this(Project.makeDetails("", "", wallet.freshReceiveAddress(), Coin.SATOSHI, wallet.freshAuthKey(),
                 wallet.getKeychainLookaheadSize()));
     }
 
@@ -44,11 +44,12 @@ public class ProjectModel {
         title.set(project.getTitle());
         memo.set(project.getMemo());
         goalAmount.set(project.getGoalAmount().value);
+        minPledgeAmount.set(recalculateMinPledgeAmount(goalAmount.longValue()));
 
         if (liveProto.hasPaymentUrl()) {
             String host = LHUtils.validateServerPath(liveProto.getPaymentUrl(), project.getID());
             if (host == null)
-                throw new IllegalArgumentException("Server path not valid for CC protocol: " + liveProto.getPaymentUrl());
+                throw new IllegalArgumentException("Server path not valid for Lighthouse protocol: " + liveProto.getPaymentUrl());
             serverName.set(host);
         }
 
@@ -85,6 +86,8 @@ public class ProjectModel {
             }
         });
 
+        if (proto.getExtraDetailsBuilder().hasCoverImage())
+            image.set(proto.getExtraDetailsBuilder().getCoverImage());
         image.addListener(o -> {
             proto.getExtraDetailsBuilder().setCoverImage(image.get());
         });
