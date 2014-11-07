@@ -79,5 +79,19 @@ public class ObservableMirrorsTest {
         change.next();
         assertTrue(change.wasAdded());
         assertEquals("phi", change.getAddedSubList().get(0));
+        gate.waitAndRun();
+        changes.poll();
+        gate.waitAndRun();
+        changes.poll();
+
+        // Expect a set on the source list to show up as a replace event on the dest list.
+        source.set(0, "zero");
+        gate.waitAndRun();
+        change = changes.poll();
+        change.next();
+        assertTrue(change.toString(), change.wasReplaced());
+        assertEquals(0, change.getFrom());
+        assertEquals(1, change.getTo());
+        assertEquals("zero", change.getAddedSubList().get(0));
     }
 }

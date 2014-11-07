@@ -67,11 +67,16 @@ public class ObservableMirrors {
                                 list.subList(change.getFrom(), change.getTo()).clear();
                                 list.addAll(change.getFrom(), sublists.pollFirst());
                             } else {
-                                if (change.wasRemoved()) {
-                                    list.subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
-                                }
-                                if (change.wasAdded()) {
-                                    list.addAll(change.getFrom(), sublists.pollFirst());
+                                if (change.wasReplaced() && change.getFrom() == change.getTo() - 1) {
+                                    // Don't know how to manage multi-item replacements.
+                                    list.set(change.getFrom(), sublists.pollFirst().get(0));
+                                } else {
+                                    if (change.wasRemoved()) {
+                                        list.subList(change.getFrom(), change.getFrom() + change.getRemovedSize()).clear();
+                                    }
+                                    if (change.wasAdded()) {
+                                        list.addAll(change.getFrom(), sublists.pollFirst());
+                                    }
                                 }
                             }
                         }
