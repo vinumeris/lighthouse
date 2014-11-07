@@ -9,7 +9,6 @@ import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
 import lighthouse.threading.AffinityExecutor;
-import lighthouse.threading.MarshallingObservers;
 import lighthouse.threading.ObservableMirrors;
 import net.jcip.annotations.GuardedBy;
 import org.bitcoinj.core.Sha256Hash;
@@ -25,7 +24,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.*;
 import static lighthouse.protocol.LHUtils.*;
