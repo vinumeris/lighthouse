@@ -94,7 +94,7 @@
               </HBox>
           </children>
       </VBox>
-      <VBox fx:id="rightPane" fillWidth="true" styleClass="project-view-right-pane" HBox.hgrow="NEVER">
+      <VBox fx:id="rightPane" fillWidth="true" maxHeight="1.7976931348623157E308" styleClass="project-view-right-pane" HBox.hgrow="NEVER">
          <children>
             <VBox fx:id="projectGoalVBox">
                <children>
@@ -158,14 +158,14 @@
                      </Rectangle>
                  </children>
              </Pane>
-            <VBox style="-fx-background-color: white; -fx-border-color: lightgray; -fx-border-width: 0 0 0 1;" styleClass="fat-buttons">
+            <VBox maxHeight="1.7976931348623157E308" style="-fx-background-color: white; -fx-border-color: lightgray; -fx-border-width: 0 0 0 1;" styleClass="fat-buttons" VBox.vgrow="ALWAYS">
                <children>
                   <Button fx:id="actionButton" defaultButton="true" maxWidth="Infinity" minHeight="50" mnemonicParsing="false" onAction="#actionClicked" prefHeight="46.0">
                      <VBox.margin>
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                      </VBox.margin>
                   </Button>
-                  <StackPane minWidth="250.0">
+                  <StackPane minWidth="250.0" VBox.vgrow="ALWAYS">
                      <children>
                         <ListView fx:id="pledgesList" layoutX="14.0" layoutY="113.0" prefHeight="450.0" prefWidth="300.0" styleClass="pledges-list" />
                         <VBox alignment="CENTER" fillWidth="true" mouseTransparent="true" prefHeight="285.0" prefWidth="250.0" spacing="10">
