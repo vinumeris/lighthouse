@@ -175,6 +175,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
                 .setProjectId(project.getID())
                 .setTimestamp(Utils.currentTimeSeconds())
                 .addTransactions(ByteString.copyFromUtf8("not a real tx"))
+                .setPledgeDetails(LHProtos.PledgeDetails.newBuilder().build())
                 .build();
         final Sha256Hash origHash = Sha256Hash.create(pledge.toByteArray());
         return pledge.toBuilder()
@@ -295,6 +296,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
                 .setProjectId(project.getID())
                 .setTimestamp(Utils.currentTimeSeconds())
                 .addTransactions(ByteString.copyFromUtf8("not a real tx"))
+                .setPledgeDetails(LHProtos.PledgeDetails.newBuilder().build())
                 .build();
         final Sha256Hash origHash = Sha256Hash.create(pledge.toByteArray());
         final LHProtos.Pledge scrubbedPledge = pledge.toBuilder()
@@ -304,9 +306,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         // Make the wallet return the above pledge without having to screw around with actually using the wallet.
         injectedPledge = pledge;
+        backend.shutdown();
         executor.service.shutdown();
         executor.service.awaitTermination(5, TimeUnit.SECONDS);
-        executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
+        executor = new AffinityExecutor.ServiceAffinityExecutor("test thread 2");
         diskManager = new DiskManager(executor, true);
         writeProjectToDisk();
         backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
@@ -785,6 +788,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         pledge.setTotalInputValue(Coin.COIN.divide(2).value);
         pledge.setProjectId(project.getID());
         pledge.setTimestamp(Utils.currentTimeSeconds());
+        pledge.getPledgeDetailsBuilder();
         return pledge;
     }
 

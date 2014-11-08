@@ -5367,6 +5367,729 @@ public final class LHProtos {
     // @@protoc_insertion_point(class_scope:lighthouse.X509Certificates)
   }
 
+  public interface PledgeDetailsOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional string memo = 1;
+    /**
+     * <code>optional string memo = 1;</code>
+     *
+     * <pre>
+     * Human-readable message for the project owner.
+     * </pre>
+     */
+    boolean hasMemo();
+    /**
+     * <code>optional string memo = 1;</code>
+     *
+     * <pre>
+     * Human-readable message for the project owner.
+     * </pre>
+     */
+    java.lang.String getMemo();
+    /**
+     * <code>optional string memo = 1;</code>
+     *
+     * <pre>
+     * Human-readable message for the project owner.
+     * </pre>
+     */
+    com.google.protobuf.ByteString
+        getMemoBytes();
+
+    // optional string contact_address = 2;
+    /**
+     * <code>optional string contact_address = 2;</code>
+     *
+     * <pre>
+     * Email address or so on.
+     * </pre>
+     */
+    boolean hasContactAddress();
+    /**
+     * <code>optional string contact_address = 2;</code>
+     *
+     * <pre>
+     * Email address or so on.
+     * </pre>
+     */
+    java.lang.String getContactAddress();
+    /**
+     * <code>optional string contact_address = 2;</code>
+     *
+     * <pre>
+     * Email address or so on.
+     * </pre>
+     */
+    com.google.protobuf.ByteString
+        getContactAddressBytes();
+  }
+  /**
+   * Protobuf type {@code lighthouse.PledgeDetails}
+   */
+  public static final class PledgeDetails extends
+      com.google.protobuf.GeneratedMessage
+      implements PledgeDetailsOrBuilder {
+    // Use PledgeDetails.newBuilder() to construct.
+    private PledgeDetails(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private PledgeDetails(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final PledgeDetails defaultInstance;
+    public static PledgeDetails getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public PledgeDetails getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PledgeDetails(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              memo_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              contactAddress_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return lighthouse.protocol.LHProtos.internal_static_lighthouse_PledgeDetails_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return lighthouse.protocol.LHProtos.internal_static_lighthouse_PledgeDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              lighthouse.protocol.LHProtos.PledgeDetails.class, lighthouse.protocol.LHProtos.PledgeDetails.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<PledgeDetails> PARSER =
+        new com.google.protobuf.AbstractParser<PledgeDetails>() {
+      public PledgeDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PledgeDetails(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PledgeDetails> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional string memo = 1;
+    public static final int MEMO_FIELD_NUMBER = 1;
+    private java.lang.Object memo_;
+    /**
+     * <code>optional string memo = 1;</code>
+     *
+     * <pre>
+     * Human-readable message for the project owner.
+     * </pre>
+     */
+    public boolean hasMemo() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional string memo = 1;</code>
+     *
+     * <pre>
+     * Human-readable message for the project owner.
+     * </pre>
+     */
+    public java.lang.String getMemo() {
+      java.lang.Object ref = memo_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          memo_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string memo = 1;</code>
+     *
+     * <pre>
+     * Human-readable message for the project owner.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getMemoBytes() {
+      java.lang.Object ref = memo_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        memo_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // optional string contact_address = 2;
+    public static final int CONTACT_ADDRESS_FIELD_NUMBER = 2;
+    private java.lang.Object contactAddress_;
+    /**
+     * <code>optional string contact_address = 2;</code>
+     *
+     * <pre>
+     * Email address or so on.
+     * </pre>
+     */
+    public boolean hasContactAddress() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional string contact_address = 2;</code>
+     *
+     * <pre>
+     * Email address or so on.
+     * </pre>
+     */
+    public java.lang.String getContactAddress() {
+      java.lang.Object ref = contactAddress_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          contactAddress_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string contact_address = 2;</code>
+     *
+     * <pre>
+     * Email address or so on.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getContactAddressBytes() {
+      java.lang.Object ref = contactAddress_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        contactAddress_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private void initFields() {
+      memo_ = "";
+      contactAddress_ = "";
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getMemoBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getContactAddressBytes());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getMemoBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, getContactAddressBytes());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static lighthouse.protocol.LHProtos.PledgeDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(lighthouse.protocol.LHProtos.PledgeDetails prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code lighthouse.PledgeDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return lighthouse.protocol.LHProtos.internal_static_lighthouse_PledgeDetails_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return lighthouse.protocol.LHProtos.internal_static_lighthouse_PledgeDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                lighthouse.protocol.LHProtos.PledgeDetails.class, lighthouse.protocol.LHProtos.PledgeDetails.Builder.class);
+      }
+
+      // Construct using lighthouse.protocol.LHProtos.PledgeDetails.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        memo_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        contactAddress_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return lighthouse.protocol.LHProtos.internal_static_lighthouse_PledgeDetails_descriptor;
+      }
+
+      public lighthouse.protocol.LHProtos.PledgeDetails getDefaultInstanceForType() {
+        return lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
+      }
+
+      public lighthouse.protocol.LHProtos.PledgeDetails build() {
+        lighthouse.protocol.LHProtos.PledgeDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public lighthouse.protocol.LHProtos.PledgeDetails buildPartial() {
+        lighthouse.protocol.LHProtos.PledgeDetails result = new lighthouse.protocol.LHProtos.PledgeDetails(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.memo_ = memo_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.contactAddress_ = contactAddress_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof lighthouse.protocol.LHProtos.PledgeDetails) {
+          return mergeFrom((lighthouse.protocol.LHProtos.PledgeDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(lighthouse.protocol.LHProtos.PledgeDetails other) {
+        if (other == lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance()) return this;
+        if (other.hasMemo()) {
+          bitField0_ |= 0x00000001;
+          memo_ = other.memo_;
+          onChanged();
+        }
+        if (other.hasContactAddress()) {
+          bitField0_ |= 0x00000002;
+          contactAddress_ = other.contactAddress_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        lighthouse.protocol.LHProtos.PledgeDetails parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (lighthouse.protocol.LHProtos.PledgeDetails) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional string memo = 1;
+      private java.lang.Object memo_ = "";
+      /**
+       * <code>optional string memo = 1;</code>
+       *
+       * <pre>
+       * Human-readable message for the project owner.
+       * </pre>
+       */
+      public boolean hasMemo() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional string memo = 1;</code>
+       *
+       * <pre>
+       * Human-readable message for the project owner.
+       * </pre>
+       */
+      public java.lang.String getMemo() {
+        java.lang.Object ref = memo_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          memo_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string memo = 1;</code>
+       *
+       * <pre>
+       * Human-readable message for the project owner.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getMemoBytes() {
+        java.lang.Object ref = memo_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          memo_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string memo = 1;</code>
+       *
+       * <pre>
+       * Human-readable message for the project owner.
+       * </pre>
+       */
+      public Builder setMemo(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        memo_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string memo = 1;</code>
+       *
+       * <pre>
+       * Human-readable message for the project owner.
+       * </pre>
+       */
+      public Builder clearMemo() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        memo_ = getDefaultInstance().getMemo();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string memo = 1;</code>
+       *
+       * <pre>
+       * Human-readable message for the project owner.
+       * </pre>
+       */
+      public Builder setMemoBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        memo_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional string contact_address = 2;
+      private java.lang.Object contactAddress_ = "";
+      /**
+       * <code>optional string contact_address = 2;</code>
+       *
+       * <pre>
+       * Email address or so on.
+       * </pre>
+       */
+      public boolean hasContactAddress() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional string contact_address = 2;</code>
+       *
+       * <pre>
+       * Email address or so on.
+       * </pre>
+       */
+      public java.lang.String getContactAddress() {
+        java.lang.Object ref = contactAddress_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          contactAddress_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string contact_address = 2;</code>
+       *
+       * <pre>
+       * Email address or so on.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getContactAddressBytes() {
+        java.lang.Object ref = contactAddress_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          contactAddress_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string contact_address = 2;</code>
+       *
+       * <pre>
+       * Email address or so on.
+       * </pre>
+       */
+      public Builder setContactAddress(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        contactAddress_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string contact_address = 2;</code>
+       *
+       * <pre>
+       * Email address or so on.
+       * </pre>
+       */
+      public Builder clearContactAddress() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        contactAddress_ = getDefaultInstance().getContactAddress();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string contact_address = 2;</code>
+       *
+       * <pre>
+       * Email address or so on.
+       * </pre>
+       */
+      public Builder setContactAddressBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        contactAddress_ = value;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:lighthouse.PledgeDetails)
+    }
+
+    static {
+      defaultInstance = new PledgeDetails(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:lighthouse.PledgeDetails)
+  }
+
   public interface PledgeOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -5428,8 +6151,8 @@ public final class LHProtos {
      * <code>required uint64 total_input_value = 101;</code>
      *
      * <pre>
-     * TODO: Move this stuff to a submessage.
-     * NEW! This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+     * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
+     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
      * </pre>
      */
     boolean hasTotalInputValue();
@@ -5437,8 +6160,8 @@ public final class LHProtos {
      * <code>required uint64 total_input_value = 101;</code>
      *
      * <pre>
-     * TODO: Move this stuff to a submessage.
-     * NEW! This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+     * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
+     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
      * </pre>
      */
     long getTotalInputValue();
@@ -5490,6 +6213,20 @@ public final class LHProtos {
      */
     com.google.protobuf.ByteString getOrigHash();
 
+    // optional .lighthouse.PledgeDetails pledge_details = 100;
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    boolean hasPledgeDetails();
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    lighthouse.protocol.LHProtos.PledgeDetails getPledgeDetails();
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder getPledgeDetailsOrBuilder();
+
     // repeated .lighthouse.Output refund_to = 3;
     /**
      * <code>repeated .lighthouse.Output refund_to = 3;</code>
@@ -5534,36 +6271,13 @@ public final class LHProtos {
      */
     lighthouse.protocol.LHProtos.OutputOrBuilder getRefundToOrBuilder(
         int index);
-
-    // optional string memo = 4;
-    /**
-     * <code>optional string memo = 4;</code>
-     *
-     * <pre>
-     * Human-readable message for the project owner.
-     * </pre>
-     */
-    boolean hasMemo();
-    /**
-     * <code>optional string memo = 4;</code>
-     *
-     * <pre>
-     * Human-readable message for the project owner.
-     * </pre>
-     */
-    java.lang.String getMemo();
-    /**
-     * <code>optional string memo = 4;</code>
-     *
-     * <pre>
-     * Human-readable message for the project owner.
-     * </pre>
-     */
-    com.google.protobuf.ByteString
-        getMemoBytes();
   }
   /**
    * Protobuf type {@code lighthouse.Pledge}
+   *
+   * <pre>
+   * Modified Payment message.
+   * </pre>
    */
   public static final class Pledge extends
       com.google.protobuf.GeneratedMessage
@@ -5627,16 +6341,24 @@ public final class LHProtos {
               break;
             }
             case 26: {
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
                 refundTo_ = new java.util.ArrayList<lighthouse.protocol.LHProtos.Output>();
-                mutable_bitField0_ |= 0x00000040;
+                mutable_bitField0_ |= 0x00000080;
               }
               refundTo_.add(input.readMessage(lighthouse.protocol.LHProtos.Output.PARSER, extensionRegistry));
               break;
             }
-            case 34: {
+            case 802: {
+              lighthouse.protocol.LHProtos.PledgeDetails.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000020) == 0x00000020)) {
+                subBuilder = pledgeDetails_.toBuilder();
+              }
+              pledgeDetails_ = input.readMessage(lighthouse.protocol.LHProtos.PledgeDetails.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(pledgeDetails_);
+                pledgeDetails_ = subBuilder.buildPartial();
+              }
               bitField0_ |= 0x00000020;
-              memo_ = input.readBytes();
               break;
             }
             case 808: {
@@ -5670,7 +6392,7 @@ public final class LHProtos {
         if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
           transactions_ = java.util.Collections.unmodifiableList(transactions_);
         }
-        if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
           refundTo_ = java.util.Collections.unmodifiableList(refundTo_);
         }
         this.unknownFields = unknownFields.build();
@@ -5780,8 +6502,8 @@ public final class LHProtos {
      * <code>required uint64 total_input_value = 101;</code>
      *
      * <pre>
-     * TODO: Move this stuff to a submessage.
-     * NEW! This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+     * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
+     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
      * </pre>
      */
     public boolean hasTotalInputValue() {
@@ -5791,8 +6513,8 @@ public final class LHProtos {
      * <code>required uint64 total_input_value = 101;</code>
      *
      * <pre>
-     * TODO: Move this stuff to a submessage.
-     * NEW! This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+     * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
+     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
      * </pre>
      */
     public long getTotalInputValue() {
@@ -5886,6 +6608,28 @@ public final class LHProtos {
       return origHash_;
     }
 
+    // optional .lighthouse.PledgeDetails pledge_details = 100;
+    public static final int PLEDGE_DETAILS_FIELD_NUMBER = 100;
+    private lighthouse.protocol.LHProtos.PledgeDetails pledgeDetails_;
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    public boolean hasPledgeDetails() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    public lighthouse.protocol.LHProtos.PledgeDetails getPledgeDetails() {
+      return pledgeDetails_;
+    }
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    public lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder getPledgeDetailsOrBuilder() {
+      return pledgeDetails_;
+    }
+
     // repeated .lighthouse.Output refund_to = 3;
     public static final int REFUND_TO_FIELD_NUMBER = 3;
     private java.util.List<lighthouse.protocol.LHProtos.Output> refundTo_;
@@ -5942,61 +6686,6 @@ public final class LHProtos {
       return refundTo_.get(index);
     }
 
-    // optional string memo = 4;
-    public static final int MEMO_FIELD_NUMBER = 4;
-    private java.lang.Object memo_;
-    /**
-     * <code>optional string memo = 4;</code>
-     *
-     * <pre>
-     * Human-readable message for the project owner.
-     * </pre>
-     */
-    public boolean hasMemo() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
-    }
-    /**
-     * <code>optional string memo = 4;</code>
-     *
-     * <pre>
-     * Human-readable message for the project owner.
-     * </pre>
-     */
-    public java.lang.String getMemo() {
-      java.lang.Object ref = memo_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          memo_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string memo = 4;</code>
-     *
-     * <pre>
-     * Human-readable message for the project owner.
-     * </pre>
-     */
-    public com.google.protobuf.ByteString
-        getMemoBytes() {
-      java.lang.Object ref = memo_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        memo_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     private void initFields() {
       merchantData_ = com.google.protobuf.ByteString.EMPTY;
       transactions_ = java.util.Collections.emptyList();
@@ -6004,8 +6693,8 @@ public final class LHProtos {
       projectId_ = "";
       timestamp_ = 0L;
       origHash_ = com.google.protobuf.ByteString.EMPTY;
+      pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
       refundTo_ = java.util.Collections.emptyList();
-      memo_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -6047,7 +6736,7 @@ public final class LHProtos {
         output.writeMessage(3, refundTo_.get(i));
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeBytes(4, getMemoBytes());
+        output.writeMessage(100, pledgeDetails_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeUInt64(101, totalInputValue_);
@@ -6089,7 +6778,7 @@ public final class LHProtos {
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(4, getMemoBytes());
+          .computeMessageSize(100, pledgeDetails_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
@@ -6187,6 +6876,10 @@ public final class LHProtos {
     }
     /**
      * Protobuf type {@code lighthouse.Pledge}
+     *
+     * <pre>
+     * Modified Payment message.
+     * </pre>
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
@@ -6215,6 +6908,7 @@ public final class LHProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getPledgeDetailsFieldBuilder();
           getRefundToFieldBuilder();
         }
       }
@@ -6236,14 +6930,18 @@ public final class LHProtos {
         bitField0_ = (bitField0_ & ~0x00000010);
         origHash_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000020);
+        if (pledgeDetailsBuilder_ == null) {
+          pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
+        } else {
+          pledgeDetailsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000040);
         if (refundToBuilder_ == null) {
           refundTo_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000080);
         } else {
           refundToBuilder_.clear();
         }
-        memo_ = "";
-        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -6297,19 +6995,23 @@ public final class LHProtos {
           to_bitField0_ |= 0x00000010;
         }
         result.origHash_ = origHash_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        if (pledgeDetailsBuilder_ == null) {
+          result.pledgeDetails_ = pledgeDetails_;
+        } else {
+          result.pledgeDetails_ = pledgeDetailsBuilder_.build();
+        }
         if (refundToBuilder_ == null) {
-          if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          if (((bitField0_ & 0x00000080) == 0x00000080)) {
             refundTo_ = java.util.Collections.unmodifiableList(refundTo_);
-            bitField0_ = (bitField0_ & ~0x00000040);
+            bitField0_ = (bitField0_ & ~0x00000080);
           }
           result.refundTo_ = refundTo_;
         } else {
           result.refundTo_ = refundToBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
-          to_bitField0_ |= 0x00000020;
-        }
-        result.memo_ = memo_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -6353,11 +7055,14 @@ public final class LHProtos {
         if (other.hasOrigHash()) {
           setOrigHash(other.getOrigHash());
         }
+        if (other.hasPledgeDetails()) {
+          mergePledgeDetails(other.getPledgeDetails());
+        }
         if (refundToBuilder_ == null) {
           if (!other.refundTo_.isEmpty()) {
             if (refundTo_.isEmpty()) {
               refundTo_ = other.refundTo_;
-              bitField0_ = (bitField0_ & ~0x00000040);
+              bitField0_ = (bitField0_ & ~0x00000080);
             } else {
               ensureRefundToIsMutable();
               refundTo_.addAll(other.refundTo_);
@@ -6370,7 +7075,7 @@ public final class LHProtos {
               refundToBuilder_.dispose();
               refundToBuilder_ = null;
               refundTo_ = other.refundTo_;
-              bitField0_ = (bitField0_ & ~0x00000040);
+              bitField0_ = (bitField0_ & ~0x00000080);
               refundToBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getRefundToFieldBuilder() : null;
@@ -6378,11 +7083,6 @@ public final class LHProtos {
               refundToBuilder_.addAllMessages(other.refundTo_);
             }
           }
-        }
-        if (other.hasMemo()) {
-          bitField0_ |= 0x00000080;
-          memo_ = other.memo_;
-          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -6608,8 +7308,8 @@ public final class LHProtos {
        * <code>required uint64 total_input_value = 101;</code>
        *
        * <pre>
-       * TODO: Move this stuff to a submessage.
-       * NEW! This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+       * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
+       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
        * </pre>
        */
       public boolean hasTotalInputValue() {
@@ -6619,8 +7319,8 @@ public final class LHProtos {
        * <code>required uint64 total_input_value = 101;</code>
        *
        * <pre>
-       * TODO: Move this stuff to a submessage.
-       * NEW! This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+       * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
+       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
        * </pre>
        */
       public long getTotalInputValue() {
@@ -6630,8 +7330,8 @@ public final class LHProtos {
        * <code>required uint64 total_input_value = 101;</code>
        *
        * <pre>
-       * TODO: Move this stuff to a submessage.
-       * NEW! This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+       * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
+       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
        * </pre>
        */
       public Builder setTotalInputValue(long value) {
@@ -6644,8 +7344,8 @@ public final class LHProtos {
        * <code>required uint64 total_input_value = 101;</code>
        *
        * <pre>
-       * TODO: Move this stuff to a submessage.
-       * NEW! This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+       * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
+       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
        * </pre>
        */
       public Builder clearTotalInputValue() {
@@ -6822,13 +7522,130 @@ public final class LHProtos {
         return this;
       }
 
+      // optional .lighthouse.PledgeDetails pledge_details = 100;
+      private lighthouse.protocol.LHProtos.PledgeDetails pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          lighthouse.protocol.LHProtos.PledgeDetails, lighthouse.protocol.LHProtos.PledgeDetails.Builder, lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder> pledgeDetailsBuilder_;
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public boolean hasPledgeDetails() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public lighthouse.protocol.LHProtos.PledgeDetails getPledgeDetails() {
+        if (pledgeDetailsBuilder_ == null) {
+          return pledgeDetails_;
+        } else {
+          return pledgeDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public Builder setPledgeDetails(lighthouse.protocol.LHProtos.PledgeDetails value) {
+        if (pledgeDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          pledgeDetails_ = value;
+          onChanged();
+        } else {
+          pledgeDetailsBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000040;
+        return this;
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public Builder setPledgeDetails(
+          lighthouse.protocol.LHProtos.PledgeDetails.Builder builderForValue) {
+        if (pledgeDetailsBuilder_ == null) {
+          pledgeDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          pledgeDetailsBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000040;
+        return this;
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public Builder mergePledgeDetails(lighthouse.protocol.LHProtos.PledgeDetails value) {
+        if (pledgeDetailsBuilder_ == null) {
+          if (((bitField0_ & 0x00000040) == 0x00000040) &&
+              pledgeDetails_ != lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance()) {
+            pledgeDetails_ =
+              lighthouse.protocol.LHProtos.PledgeDetails.newBuilder(pledgeDetails_).mergeFrom(value).buildPartial();
+          } else {
+            pledgeDetails_ = value;
+          }
+          onChanged();
+        } else {
+          pledgeDetailsBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000040;
+        return this;
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public Builder clearPledgeDetails() {
+        if (pledgeDetailsBuilder_ == null) {
+          pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
+          onChanged();
+        } else {
+          pledgeDetailsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000040);
+        return this;
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public lighthouse.protocol.LHProtos.PledgeDetails.Builder getPledgeDetailsBuilder() {
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return getPledgeDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder getPledgeDetailsOrBuilder() {
+        if (pledgeDetailsBuilder_ != null) {
+          return pledgeDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return pledgeDetails_;
+        }
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          lighthouse.protocol.LHProtos.PledgeDetails, lighthouse.protocol.LHProtos.PledgeDetails.Builder, lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder> 
+          getPledgeDetailsFieldBuilder() {
+        if (pledgeDetailsBuilder_ == null) {
+          pledgeDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              lighthouse.protocol.LHProtos.PledgeDetails, lighthouse.protocol.LHProtos.PledgeDetails.Builder, lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder>(
+                  pledgeDetails_,
+                  getParentForChildren(),
+                  isClean());
+          pledgeDetails_ = null;
+        }
+        return pledgeDetailsBuilder_;
+      }
+
       // repeated .lighthouse.Output refund_to = 3;
       private java.util.List<lighthouse.protocol.LHProtos.Output> refundTo_ =
         java.util.Collections.emptyList();
       private void ensureRefundToIsMutable() {
-        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
+        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
           refundTo_ = new java.util.ArrayList<lighthouse.protocol.LHProtos.Output>(refundTo_);
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000080;
          }
       }
 
@@ -7021,7 +7838,7 @@ public final class LHProtos {
       public Builder clearRefundTo() {
         if (refundToBuilder_ == null) {
           refundTo_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000080);
           onChanged();
         } else {
           refundToBuilder_.clear();
@@ -7126,110 +7943,12 @@ public final class LHProtos {
           refundToBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               lighthouse.protocol.LHProtos.Output, lighthouse.protocol.LHProtos.Output.Builder, lighthouse.protocol.LHProtos.OutputOrBuilder>(
                   refundTo_,
-                  ((bitField0_ & 0x00000040) == 0x00000040),
+                  ((bitField0_ & 0x00000080) == 0x00000080),
                   getParentForChildren(),
                   isClean());
           refundTo_ = null;
         }
         return refundToBuilder_;
-      }
-
-      // optional string memo = 4;
-      private java.lang.Object memo_ = "";
-      /**
-       * <code>optional string memo = 4;</code>
-       *
-       * <pre>
-       * Human-readable message for the project owner.
-       * </pre>
-       */
-      public boolean hasMemo() {
-        return ((bitField0_ & 0x00000080) == 0x00000080);
-      }
-      /**
-       * <code>optional string memo = 4;</code>
-       *
-       * <pre>
-       * Human-readable message for the project owner.
-       * </pre>
-       */
-      public java.lang.String getMemo() {
-        java.lang.Object ref = memo_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          memo_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string memo = 4;</code>
-       *
-       * <pre>
-       * Human-readable message for the project owner.
-       * </pre>
-       */
-      public com.google.protobuf.ByteString
-          getMemoBytes() {
-        java.lang.Object ref = memo_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          memo_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string memo = 4;</code>
-       *
-       * <pre>
-       * Human-readable message for the project owner.
-       * </pre>
-       */
-      public Builder setMemo(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000080;
-        memo_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string memo = 4;</code>
-       *
-       * <pre>
-       * Human-readable message for the project owner.
-       * </pre>
-       */
-      public Builder clearMemo() {
-        bitField0_ = (bitField0_ & ~0x00000080);
-        memo_ = getDefaultInstance().getMemo();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string memo = 4;</code>
-       *
-       * <pre>
-       * Human-readable message for the project owner.
-       * </pre>
-       */
-      public Builder setMemoBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000080;
-        memo_ = value;
-        onChanged();
-        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:lighthouse.Pledge)
@@ -9432,6 +10151,11 @@ public final class LHProtos {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_lighthouse_X509Certificates_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_lighthouse_PledgeDetails_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_lighthouse_PledgeDetails_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_lighthouse_Pledge_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -9470,18 +10194,20 @@ public final class LHProtos {
       "n\030\001 \001(\r:\0011\022\026\n\010pki_type\030\002 \001(\t:\004none\022\020\n\010pk" +
       "i_data\030\003 \001(\014\022\"\n\032serialized_payment_detai" +
       "ls\030\004 \002(\014\022\021\n\tsignature\030\005 \001(\014\"\'\n\020X509Certi" +
-      "ficates\022\023\n\013certificate\030\001 \003(\014\"\277\001\n\006Pledge\022" +
-      "\025\n\rmerchant_data\030\001 \001(\014\022\024\n\014transactions\030\002" +
-      " \003(\014\022\031\n\021total_input_value\030e \002(\004\022\022\n\nproje" +
-      "ct_id\030f \002(\t\022\021\n\ttimestamp\030g \002(\004\022\021\n\torig_h" +
-      "ash\030h \001(\014\022%\n\trefund_to\030\003 \003(\0132\022.lighthous",
-      "e.Output\022\014\n\004memo\030\004 \001(\t\">\n\tPledgeACK\022#\n\007p" +
-      "ayment\030\001 \002(\0132\022.lighthouse.Pledge\022\014\n\004memo" +
-      "\030\002 \001(\t\"\205\001\n\rProjectStatus\022\n\n\002id\030\001 \002(\t\022\021\n\t" +
-      "timestamp\030\002 \002(\004\022\034\n\024value_pledged_so_far\030" +
-      "\003 \002(\004\022#\n\007pledges\030\004 \003(\0132\022.lighthouse.Pled" +
-      "ge\022\022\n\nclaimed_by\030\005 \001(\014B!\n\023lighthouse.pro" +
-      "tocolB\010LHProtosH\001"
+      "ficates\022\023\n\013certificate\030\001 \003(\014\"6\n\rPledgeDe" +
+      "tails\022\014\n\004memo\030\001 \001(\t\022\027\n\017contact_address\030\002" +
+      " \001(\t\"\344\001\n\006Pledge\022\025\n\rmerchant_data\030\001 \001(\014\022\024" +
+      "\n\014transactions\030\002 \003(\014\022\031\n\021total_input_valu" +
+      "e\030e \002(\004\022\022\n\nproject_id\030f \002(\t\022\021\n\ttimestamp",
+      "\030g \002(\004\022\021\n\torig_hash\030h \001(\014\0221\n\016pledge_deta" +
+      "ils\030d \001(\0132\031.lighthouse.PledgeDetails\022%\n\t" +
+      "refund_to\030\003 \003(\0132\022.lighthouse.Output\">\n\tP" +
+      "ledgeACK\022#\n\007payment\030\001 \002(\0132\022.lighthouse.P" +
+      "ledge\022\014\n\004memo\030\002 \001(\t\"\205\001\n\rProjectStatus\022\n\n" +
+      "\002id\030\001 \002(\t\022\021\n\ttimestamp\030\002 \002(\004\022\034\n\024value_pl" +
+      "edged_so_far\030\003 \002(\004\022#\n\007pledges\030\004 \003(\0132\022.li" +
+      "ghthouse.Pledge\022\022\n\nclaimed_by\030\005 \001(\014B!\n\023l" +
+      "ighthouse.protocolB\010LHProtosH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -9524,20 +10250,26 @@ public final class LHProtos {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_lighthouse_X509Certificates_descriptor,
               new java.lang.String[] { "Certificate", });
-          internal_static_lighthouse_Pledge_descriptor =
+          internal_static_lighthouse_PledgeDetails_descriptor =
             getDescriptor().getMessageTypes().get(6);
+          internal_static_lighthouse_PledgeDetails_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_lighthouse_PledgeDetails_descriptor,
+              new java.lang.String[] { "Memo", "ContactAddress", });
+          internal_static_lighthouse_Pledge_descriptor =
+            getDescriptor().getMessageTypes().get(7);
           internal_static_lighthouse_Pledge_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_lighthouse_Pledge_descriptor,
-              new java.lang.String[] { "MerchantData", "Transactions", "TotalInputValue", "ProjectId", "Timestamp", "OrigHash", "RefundTo", "Memo", });
+              new java.lang.String[] { "MerchantData", "Transactions", "TotalInputValue", "ProjectId", "Timestamp", "OrigHash", "PledgeDetails", "RefundTo", });
           internal_static_lighthouse_PledgeACK_descriptor =
-            getDescriptor().getMessageTypes().get(7);
+            getDescriptor().getMessageTypes().get(8);
           internal_static_lighthouse_PledgeACK_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_lighthouse_PledgeACK_descriptor,
               new java.lang.String[] { "Payment", "Memo", });
           internal_static_lighthouse_ProjectStatus_descriptor =
-            getDescriptor().getMessageTypes().get(8);
+            getDescriptor().getMessageTypes().get(9);
           internal_static_lighthouse_ProjectStatus_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_lighthouse_ProjectStatus_descriptor,

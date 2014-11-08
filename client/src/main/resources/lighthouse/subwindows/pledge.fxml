@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.PledgeWindow">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="462.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.PledgeWindow">
     <bottom>
         <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
             <children>
@@ -19,7 +19,7 @@
         </HBox>
     </bottom>
     <center>
-        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="5" BorderPane.alignment="CENTER">
+        <VBox alignment="CENTER" prefHeight="374.0" prefWidth="400.0" spacing="5.0" BorderPane.alignment="CENTER">
             <children>
                 <Pane VBox.vgrow="ALWAYS" />
                 <Label style="-fx-font-size: 40;" text="Amount">
@@ -39,7 +39,17 @@
             </Label>
                 <Label fx:id="allMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#allMoneyClicked" styleClass="link-label" text="Maximum amount possible" />
             <Label fx:id="minMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#minMoneyClicked" styleClass="link-label" text="Minimum amount possible" />
-                <Pane VBox.vgrow="ALWAYS" />
+            <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="15.0">
+               <children>
+                  <Label text="Contact details" />
+                  <TextField fx:id="emailEdit" HBox.hgrow="ALWAYS" />
+               </children>
+               <padding>
+                  <Insets top="10.0" />
+               </padding>
+            </HBox>
+            <TextArea fx:id="messageEdit" prefHeight="200.0" prefWidth="200.0" promptText="Message to project owner (optional)" wrapText="true" />
+                <Pane prefHeight="0.0" prefWidth="340.0" VBox.vgrow="ALWAYS" />
             </children>
             <padding>
                 <Insets left="30.0" right="30.0" />

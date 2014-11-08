@@ -237,3 +237,26 @@
     -fx-opacity: 0.8;
     -fx-cursor: hand;
 }
+
+.pledge-cell-status {
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+}
+.pledge-cell-email {
+    -fx-text-fill: darkgray;
+}
+.pledge-cell-date {
+    -fx-text-fill: darkslategray;
+}
+.pledge-cell-memo {
+}
+.pledge-cell Label {
+    -fx-font-size: 11;
+}
+
+.show-pledge-window Label {
+    -fx-text-fill: black;
+}
+.show-pledge-inner-label {
+    -fx-text-fill: darkgrey;
+}

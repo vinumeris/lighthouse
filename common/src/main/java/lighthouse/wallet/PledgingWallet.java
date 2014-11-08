@@ -171,14 +171,17 @@ public class PledgingWallet extends Wallet {
         public final Transaction pledge;
         public final long feesRequired;
         public final Project project;
+        public final LHProtos.PledgeDetails details;
 
         private boolean committed = false;
 
-        public PendingPledge(Project project, @Nullable Transaction dependency, Transaction pledge, long feesRequired) {
+        public PendingPledge(Project project, @Nullable Transaction dependency, Transaction pledge, long feesRequired,
+                             LHProtos.PledgeDetails details) {
             this.project = project;
             this.dependency = dependency;
             this.pledge = pledge;
             this.feesRequired = feesRequired;
+            this.details = details;
         }
 
         public LHProtos.Pledge getData() {
@@ -191,6 +194,7 @@ public class PledgingWallet extends Wallet {
             proto.setTotalInputValue(stub.getValue().longValue());
             proto.setTimestamp(Utils.currentTimeSeconds());
             proto.setProjectId(project.getID());
+            proto.setPledgeDetails(details);
             return proto.build();
         }
 
@@ -253,11 +257,12 @@ public class PledgingWallet extends Wallet {
         projects.put(project, data);
     }
 
-    public PendingPledge createPledge(Project project, long satoshis, KeyParameter aesKey) throws InsufficientMoneyException {
-        return createPledge(project, Coin.valueOf(satoshis), aesKey);
+    public PendingPledge createPledge(Project project, long satoshis, @Nullable KeyParameter aesKey) throws InsufficientMoneyException {
+        return createPledge(project, Coin.valueOf(satoshis), aesKey, LHProtos.PledgeDetails.getDefaultInstance());
     }
 
-    public PendingPledge createPledge(Project project, Coin value, @Nullable KeyParameter aesKey) throws InsufficientMoneyException {
+    public PendingPledge createPledge(Project project, Coin value, @Nullable KeyParameter aesKey,
+                                      LHProtos.PledgeDetails details) throws InsufficientMoneyException {
         checkNotNull(project);
         // Attempt to find a single output that can satisfy this given pledge, because pledges cannot have change
         // outputs, and submitting multiple inputs is unfriendly (increases fees paid by the pledge claimer).
@@ -321,7 +326,7 @@ public class PledgingWallet extends Wallet {
 
         log.info("Paid {} satoshis in fees to create pledge tx {}", totalFees, pledge);
 
-        return new PendingPledge(project, dependency, pledge, totalFees.longValue());
+        return new PendingPledge(project, dependency, pledge, totalFees.longValue(), details);
     }
 
     @Nullable

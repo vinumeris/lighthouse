@@ -18,6 +18,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -38,6 +39,7 @@ import lighthouse.protocol.Project;
 import lighthouse.subwindows.EditProjectWindow;
 import lighthouse.subwindows.PledgeWindow;
 import lighthouse.subwindows.RevokeAndClaimWindow;
+import lighthouse.subwindows.ShowPledgeWindow;
 import lighthouse.threading.AffinityExecutor;
 import lighthouse.utils.ConcatenatingList;
 import lighthouse.utils.GuiUtils;
@@ -51,7 +53,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -432,20 +439,64 @@ public class ProjectView extends HBox {
         return this.project.get();
     }
 
-    // Should we show revoked pledges crossed out?
+    // TODO: Should we show revoked pledges crossed out?
     private class PledgeListCell extends ListCell<LHProtos.Pledge> {
+        private Label status, email, memoSnippet, date;
+        private Label viewMore;
+
+        public PledgeListCell() {
+            Pane pane;
+            HBox hbox;
+            VBox vbox = new VBox(
+                    (status = new Label()),
+                    (hbox = new HBox(
+                            (email = new Label()),
+                            (pane = new Pane()),
+                            (date = new Label())
+                    )),
+                    (memoSnippet = new Label()),
+                    (viewMore = new Label("View more"))
+            );
+            vbox.getStyleClass().add("pledge-cell");
+            status.getStyleClass().add("pledge-cell-status");
+            email.getStyleClass().add("pledge-cell-email");
+            HBox.setHgrow(pane, Priority.ALWAYS);
+            vbox.setFillWidth(true);
+            hbox.maxWidthProperty().bind(vbox.widthProperty());
+            date.getStyleClass().add("pledge-cell-date");
+            date.setMinWidth(USE_PREF_SIZE);    // Date is shown in preference to contact if contact data is too long
+            memoSnippet.getStyleClass().add("pledge-cell-memo");
+            memoSnippet.setWrapText(true);
+            memoSnippet.maxWidthProperty().bind(vbox.widthProperty());
+            memoSnippet.setMaxHeight(100);
+            viewMore.setStyle("-fx-text-fill: blue; -fx-cursor: hand");
+            viewMore.setOnMouseClicked(ev -> ShowPledgeWindow.open(getItem()));
+            viewMore.setAlignment(Pos.CENTER_RIGHT);
+            viewMore.prefWidthProperty().bind(vbox.widthProperty());
+            setGraphic(vbox);
+            setOnMouseClicked(ev -> {
+                if (ev.getClickCount() == 2)
+                    ShowPledgeWindow.open(getItem());
+            });
+        }
+
         @Override
         protected void updateItem(LHProtos.Pledge pledge, boolean empty) {
             super.updateItem(pledge, empty);
             if (empty) {
-                setText("");
+                getGraphic().setVisible(false);
                 return;
             }
-            String btc = Coin.valueOf(pledge.getTotalInputValue()).toFriendlyString();
-            String msg = String.format("Pledge of %s", btc);
+            getGraphic().setVisible(true);
+            String msg = Coin.valueOf(pledge.getTotalInputValue()).toFriendlyString();
             if (LHUtils.hashFromPledge(pledge).equals(myPledgeHash))
                 msg += " (yours)";
-            setText(msg);
+            status.setText(msg);
+            email.setText(pledge.getPledgeDetails().getContactAddress());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            LocalDateTime time = LocalDateTime.ofEpochSecond(pledge.getTimestamp(), 0, ZoneOffset.UTC);
+            date.setText(time.format(formatter));
+            memoSnippet.setText(pledge.getPledgeDetails().getMemo());
         }
     }
 

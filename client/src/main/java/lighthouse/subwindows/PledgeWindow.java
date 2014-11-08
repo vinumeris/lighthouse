@@ -4,9 +4,11 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import lighthouse.Main;
+import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.Project;
 import lighthouse.utils.GuiUtils;
 import lighthouse.utils.ValidationLink;
@@ -31,6 +33,8 @@ public class PledgeWindow extends InnerWindow {
     @FXML TextField amountEdit;
     @FXML Button confirmButton;
     @FXML Label minersFeeLabel;
+    @FXML TextArea messageEdit;
+    @FXML TextField emailEdit;
 
     // Will be initialised by the ProjectView.
     public Project project;
@@ -47,7 +51,8 @@ public class PledgeWindow extends InnerWindow {
             minersFeeLabel.setVisible(valid && !coin.equals(Main.wallet.getBalance()));
             return valid;
         });
-        ValidationLink.autoDisableButton(confirmButton, amountLink);
+        ValidationLink emailLink = new ValidationLink(emailEdit, str -> str.contains("@"));
+        ValidationLink.autoDisableButton(confirmButton, amountLink, emailLink);
     }
 
     public void setLimits(Coin limit, Coin min) {
@@ -79,7 +84,12 @@ public class PledgeWindow extends InnerWindow {
 
     private void tryMakePledge(@Nullable KeyParameter aesKey) {
         try {
-            PledgingWallet.PendingPledge pledge = Main.wallet.createPledge(project, valueOrThrow(amountEdit.getText()), aesKey);
+            LHProtos.PledgeDetails.Builder details = LHProtos.PledgeDetails.newBuilder();
+            if (!emailEdit.getText().isEmpty())
+                details.setContactAddress(emailEdit.getText());
+            if (!messageEdit.getText().isEmpty())
+                details.setMemo(messageEdit.getText());
+            PledgingWallet.PendingPledge pledge = Main.wallet.createPledge(project, valueOrThrow(amountEdit.getText()), aesKey, details.build());
             log.info("Created pledge is {}", pledge);
             if (project.getPaymentURL() == null) {
                 // Show drag/drop icon and file save button. This will automatically finish this overlay UI too.

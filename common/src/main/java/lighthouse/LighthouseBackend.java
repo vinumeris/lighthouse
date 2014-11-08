@@ -1071,10 +1071,16 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return result;
     }
 
+    private BloomFilterManager manager = new BloomFilterManager();
+
     private void installBloomFilterProvider() {
-        BloomFilterManager manager = new BloomFilterManager();
         peerGroup.addPeerFilterProvider(manager);
         peerGroup.addEventListener(manager, executor);
+    }
+
+    public void shutdown() {
+        peerGroup.removePeerFilterProvider(manager);
+        peerGroup.removeEventListener(manager);
     }
 
     public void refreshBloomFilter() {

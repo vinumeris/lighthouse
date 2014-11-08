@@ -25,6 +25,7 @@ public class TestUtils {
         pledge.setTotalInputValue(pledgeVal.longValue());
         pledge.setProjectId(forProject.getID());
         pledge.setTimestamp(Utils.currentTimeSeconds());
+        pledge.getPledgeDetailsBuilder();
         return new Triplet<>(tx0, tx1, pledge.build());
     }
 

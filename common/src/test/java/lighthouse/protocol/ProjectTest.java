@@ -82,6 +82,7 @@ public class ProjectTest {
         pledge.setTotalInputValue(0);
         pledge.setProjectId("abc");
         pledge.setTimestamp(Utils.currentTimeSeconds());
+        pledge.getPledgeDetailsBuilder();
         Project project = new Project(projectBuilder.build());
         checkedGet(project.verifyPledge(outPoints -> completedFuture(EMPTY_LIST), pledge.build()));
     }
@@ -97,6 +98,7 @@ public class ProjectTest {
         pledge.setTotalInputValue(0);
         pledge.setTimestamp(Utils.currentTimeSeconds());
         pledge.setProjectId("abc");
+        pledge.getPledgeDetailsBuilder();
         Project project = new Project(projectBuilder.build());
         checkedGet(project.verifyPledge(outPoints -> completedFuture(EMPTY_LIST), pledge.build()));
     }
@@ -110,6 +112,7 @@ public class ProjectTest {
         pledge.setTotalInputValue(0);
         pledge.setTimestamp(Utils.currentTimeSeconds());
         pledge.setProjectId("abc");
+        pledge.getPledgeDetailsBuilder();
         Project project = new Project(projectBuilder.build());
         checkedGet(project.verifyPledge(outPoints -> completedFuture(EMPTY_LIST), pledge.build()));
     }
@@ -122,6 +125,7 @@ public class ProjectTest {
         projectBuilder.setSerializedPaymentDetails(details.build().toByteString());
         Project project = new Project(projectBuilder.build());
         pledge.setTotalInputValue(project.getGoalAmount().divide(100000).value);
+        pledge.getPledgeDetailsBuilder();
         List<TransactionOutput> outputs = ImmutableList.of(pledgeTX.fakeStub.getOutput(0).duplicateDetached());
         checkedGet(project.verifyPledge(outPoints -> completedFuture(outputs), pledge.build()));
     }
@@ -135,6 +139,7 @@ public class ProjectTest {
         pledge.setTotalInputValue(0);
         pledge.setTimestamp(Utils.currentTimeSeconds());
         pledge.setProjectId("abc");
+        pledge.getPledgeDetailsBuilder();
         Project project = new Project(projectBuilder.build());
         checkedGet(project.verifyPledge(outPoints -> completedFuture(EMPTY_LIST), pledge.build()));
     }
@@ -158,6 +163,7 @@ public class ProjectTest {
         pledge.setTotalInputValue(val.value);
         pledge.setTimestamp(Utils.currentTimeSeconds());
         pledge.setProjectId("abc");
+        pledge.getPledgeDetailsBuilder();
         Project project = new Project(projectBuilder.build());
         TransactionOutput badOutput = new TransactionOutput(params, null, val,
                 new ScriptBuilder().op(ScriptOpCodes.OP_TRUE).build().getProgram());
@@ -184,6 +190,7 @@ public class ProjectTest {
         pledge.setTotalInputValue((long) (Coin.COIN.longValue() * (valueMismatch ? 0.2 : 0.1)));  // Mismatch.
         pledge.setTimestamp(Utils.currentTimeSeconds());
         pledge.setProjectId("abc");
+        pledge.getPledgeDetailsBuilder();
         return pledge;
     }
 
@@ -248,11 +255,13 @@ public class ProjectTest {
         pledge1.setTotalInputValue((long) (Coin.COIN.longValue() * 0.1));
         pledge1.setTimestamp(Utils.currentTimeSeconds());
         pledge1.setProjectId("abc");
+        pledge1.getPledgeDetailsBuilder();
         LHProtos.Pledge.Builder pledge2 = LHProtos.Pledge.newBuilder();
         pledge2.addTransactions(ByteString.copyFrom(pledgeTX2.pledge.bitcoinSerialize()));
         pledge2.setTotalInputValue((long) (Coin.COIN.longValue() * 0.7));
         pledge2.setTimestamp(Utils.currentTimeSeconds());
         pledge2.setProjectId("abc");
+        pledge2.getPledgeDetailsBuilder();
 
         Project project = new Project(projectBuilder.build());
         Transaction contract = project.completeContract(ImmutableSet.of(pledge1.build(), pledge2.build()));
@@ -268,11 +277,13 @@ public class ProjectTest {
         pledge1.setTotalInputValue((long) (Coin.COIN.longValue() * 0.1));
         pledge1.setTimestamp(Utils.currentTimeSeconds());
         pledge1.setProjectId("abc");
+        pledge1.getPledgeDetailsBuilder();
         LHProtos.Pledge.Builder pledge2 = LHProtos.Pledge.newBuilder();
         pledge2.addTransactions(ByteString.copyFrom(pledgeTX2.pledge.bitcoinSerialize()));
         pledge2.setTotalInputValue((long) (Coin.COIN.longValue() * 0.9));
         pledge2.setTimestamp(Utils.currentTimeSeconds());
         pledge2.setProjectId("abc");
+        pledge2.getPledgeDetailsBuilder();
 
         Project project = new Project(projectBuilder.build());
         Transaction contract = project.completeContract(ImmutableSet.of(pledge1.build(), pledge2.build()));
