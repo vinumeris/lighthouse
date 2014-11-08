@@ -1,2 +1,4 @@
-Bug fixes. Revocations are now noticed immediately instead of at the next block.
-
+Project editing, faster revocation.
+This update allows you to edit a project if it hasn't obtained any pledges yet and you own it. There are some bug fixes
+that could cause a timeout when submitting pledges to the server, and revocations are now noticed immediately instead
+of only on the next block.
