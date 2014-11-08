@@ -54,6 +54,10 @@ public class PledgeWindow extends InnerWindow {
         });
         ValidationLink emailLink = new ValidationLink(emailEdit, str -> str.contains("@"));
         ValidationLink.autoDisableButton(confirmButton, amountLink, emailLink);
+
+        String savedContact = Main.instance.prefs.getContactAddress();
+        if (savedContact != null)
+            emailEdit.setText(savedContact);
     }
 
     public void setLimits(Coin limit, Coin min) {
@@ -86,8 +90,10 @@ public class PledgeWindow extends InnerWindow {
     private void tryMakePledge(@Nullable KeyParameter aesKey) {
         try {
             LHProtos.PledgeDetails.Builder details = LHProtos.PledgeDetails.newBuilder();
-            if (!emailEdit.getText().isEmpty())
+            if (!emailEdit.getText().isEmpty()) {
                 details.setContactAddress(emailEdit.getText());
+                Main.instance.prefs.setContactAddress(emailEdit.getText());
+            }
             if (!messageEdit.getText().isEmpty())
                 details.setMemo(messageEdit.getText());
             PledgingWallet.PendingPledge pledge = Main.wallet.createPledge(project, valueOrThrow(amountEdit.getText()), aesKey, details.build());

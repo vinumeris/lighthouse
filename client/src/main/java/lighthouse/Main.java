@@ -91,6 +91,8 @@ public class Main extends Application {
 
     public NotificationBarPane notificationBar;
 
+    public UserPrefs prefs;
+
     private boolean useTor;
     private boolean slowGFX;
     public String updatesURL = UPDATES_BASE_URL;
@@ -145,6 +147,7 @@ public class Main extends Application {
         log.info("App dir is {}. We have {} cores.", AppDirectory.dir(), Runtime.getRuntime().availableProcessors());
         // Set up the basic window with an empty UI stack, and put a quick splash there.
         reached("JFX initialised");
+        prefs = new UserPrefs();
         initGUI(stage);
         stage.show();
         Runnable setup = () -> {
