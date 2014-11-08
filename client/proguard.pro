@@ -1,4 +1,4 @@
--injars target/client-0.1-SNAPSHOT-bundled.jar
+-injars target/shaded.jar
 -outjars target/lighthouse.jar
 -libraryjars <java.home>/lib/rt.jar
 -libraryjars <java.home>/lib/jce.jar

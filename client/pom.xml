@@ -46,6 +46,7 @@
                         <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>bundled</shadedClassifierName>
+                            <finalName>shaded</finalName>
                         </configuration>
                     </execution>
                 </executions>
