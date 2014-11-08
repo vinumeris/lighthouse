@@ -166,7 +166,12 @@ public class PledgingWallet extends Wallet {
         return builder.toString();
     }
 
-    public class PendingPledge {
+    public interface PledgeSupplier {
+        public LHProtos.Pledge getData();
+        public LHProtos.Pledge commit(boolean andBroadcastDeps);
+    }
+
+    public class PendingPledge implements PledgeSupplier {
         @Nullable public final Transaction dependency;
         public final Transaction pledge;
         public final long feesRequired;

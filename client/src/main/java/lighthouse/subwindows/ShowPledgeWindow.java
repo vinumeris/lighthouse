@@ -1,11 +1,16 @@
 package lighthouse.subwindows;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import lighthouse.Main;
 import lighthouse.protocol.LHProtos;
+import lighthouse.protocol.LHUtils;
+import lighthouse.protocol.Project;
+import lighthouse.wallet.PledgingWallet;
 import org.bitcoinj.core.Coin;
 
 import java.time.LocalDateTime;
@@ -20,16 +25,20 @@ public class ShowPledgeWindow {
     @FXML Label contactLabel;
     @FXML Label dateLabel;
     @FXML TextArea messageField;
+    @FXML Button saveToFileButton;
 
     public Main.OverlayUI<ShowPledgeWindow> overlayUI;
 
-    public static Main.OverlayUI<ShowPledgeWindow> open(LHProtos.Pledge pledge) {
+    private Project project;   // if our pledge in serverless mode
+    private LHProtos.Pledge pledge;
+
+    public static Main.OverlayUI<ShowPledgeWindow> open(Project project, LHProtos.Pledge pledge) {
         Main.OverlayUI<ShowPledgeWindow> ui = Main.instance.overlayUI("subwindows/show_pledge.fxml", "View pledge");
-        ui.controller.init(pledge);
+        ui.controller.init(project, pledge);
         return ui;
     }
 
-    private void init(LHProtos.Pledge pledge) {
+    private void init(Project project, LHProtos.Pledge pledge) {
         amountLabel.setText(Coin.valueOf(pledge.getTotalInputValue()).toFriendlyString());
         if (pledge.hasPledgeDetails()) {
             contactLabel.setText(pledge.getPledgeDetails().getContactAddress());
@@ -45,10 +54,33 @@ public class ShowPledgeWindow {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM uuuu HH:mm");
         LocalDateTime time = LocalDateTime.ofEpochSecond(pledge.getTimestamp(), 0, ZoneOffset.UTC);
         dateLabel.setText(time.format(formatter));
+        this.project = project;
+        this.pledge = pledge;
+
+        // Let the user save their pledge again if it's a serverless project and this pledge is ours.
+        LHProtos.Pledge pledgeFor = Main.wallet.getPledgeFor(project);
+        saveToFileButton.setVisible(project.getPaymentURL() == null && pledgeFor != null && LHUtils.hashFromPledge(pledge).equals(LHUtils.hashFromPledge(pledgeFor)));
     }
 
     @FXML
     public void closeClicked(ActionEvent event) {
         overlayUI.done();
+    }
+
+    @FXML
+    public void saveToFile(ActionEvent event) {
+        Platform.runLater(() -> {
+            ExportWindow.openForPledge(project, new PledgingWallet.PledgeSupplier() {
+                @Override
+                public LHProtos.Pledge getData() {
+                    return pledge;
+                }
+
+                @Override
+                public LHProtos.Pledge commit(boolean andBroadcastDeps) {
+                    return null;   // Doesn't matter.
+                }
+            });
+        });
     }
 }

@@ -1,1 +1,1 @@
-Support messages and contact addresses in pledges.
+Support messages and contact addresses in pledges. Allow re-export of pledges in serverless mode.

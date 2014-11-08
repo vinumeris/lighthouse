@@ -37,7 +37,7 @@ public class ExportWindow {
     public Main.OverlayUI<InnerWindow> overlayUI;
 
     private Project project;
-    @Nullable private PledgingWallet.PendingPledge pledge;
+    @Nullable private PledgingWallet.PledgeSupplier pledge;
 
     public void initialize() {
         // TODO: Make a composite icon that looks more pledgey.
@@ -45,7 +45,7 @@ public class ExportWindow {
         moneyIcon.setTextFill(Color.valueOf("#cccccc"));
     }
 
-    public static void openForPledge(Project project, PledgingWallet.PendingPledge pledge) {
+    public static void openForPledge(Project project, PledgingWallet.PledgeSupplier pledge) {
         log.info("Open ExportWindow for a pledge for {}", project.getTitle());
         ExportWindow window = Main.instance.<ExportWindow>overlayUI("subwindows/export.fxml", "Export pledge").controller;
         window.project = project;
@@ -159,10 +159,5 @@ public class ExportWindow {
                 GuiUtils.informationalAlert("Failed to save file", e.getLocalizedMessage());
             }
         });
-    }
-
-    @FXML
-    public void closeWidgetClicked(MouseEvent event) {
-        overlayUI.done();
     }
 }

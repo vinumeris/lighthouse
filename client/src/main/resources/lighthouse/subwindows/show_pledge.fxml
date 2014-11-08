@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="551.0" prefWidth="481.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.ShowPledgeWindow">
+   <bottom>
+      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+         <children>
+            <Button fx:id="saveToFileButton" mnemonicParsing="false" onAction="#saveToFile" text="Save to file" />
+            <Button defaultButton="true" mnemonicParsing="false" onAction="#closeClicked" text="Close" />
+         </children>
+      </HBox>
+   </bottom>
+   <center>
+      <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0" styleClass="show-pledge-window" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="amountLabel" style="-fx-font-size: 50;" text="Amount" />
+            <Label styleClass="show-pledge-inner-label" text="pledged by" />
+            <Label fx:id="contactLabel" style="-fx-font-size: 30;" text="foo@bar.org" />
+            <Label styleClass="show-pledge-inner-label" text="on" />
+            <Label fx:id="dateLabel" style="-fx-font-size: 30;" text="Wednesday 7th July" />
+            <Separator prefWidth="200.0" />
+            <TextArea fx:id="messageField" prefHeight="197.0" prefWidth="421.0" promptText="No attached message" wrapText="true" />
+         </children>
+         <padding>
+            <Insets left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </VBox>
+   </center>
+</BorderPane>

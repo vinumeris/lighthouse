@@ -468,13 +468,13 @@ public class ProjectView extends HBox {
             memoSnippet.maxWidthProperty().bind(vbox.widthProperty());
             memoSnippet.setMaxHeight(100);
             viewMore.setStyle("-fx-text-fill: blue; -fx-cursor: hand");
-            viewMore.setOnMouseClicked(ev -> ShowPledgeWindow.open(getItem()));
+            viewMore.setOnMouseClicked(ev -> ShowPledgeWindow.open(project.get(), getItem()));
             viewMore.setAlignment(Pos.CENTER_RIGHT);
             viewMore.prefWidthProperty().bind(vbox.widthProperty());
             setGraphic(vbox);
             setOnMouseClicked(ev -> {
                 if (ev.getClickCount() == 2)
-                    ShowPledgeWindow.open(getItem());
+                    ShowPledgeWindow.open(project.get(), getItem());
             });
         }
 
