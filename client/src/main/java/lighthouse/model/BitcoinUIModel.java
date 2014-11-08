@@ -1,12 +1,12 @@
 package lighthouse.model;
 
 
-import org.bitcoinj.core.*;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import org.bitcoinj.core.*;
 
 import java.util.Date;
 

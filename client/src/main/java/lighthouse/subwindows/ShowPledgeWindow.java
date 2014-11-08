@@ -1,12 +1,9 @@
 package lighthouse.subwindows;
 
-import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import lighthouse.Main;
 import lighthouse.protocol.LHProtos;
 import org.bitcoinj.core.Coin;

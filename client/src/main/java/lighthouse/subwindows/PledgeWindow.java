@@ -22,7 +22,8 @@ import org.spongycastle.crypto.params.KeyParameter;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
-import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.GuiUtils.valueOrNull;
+import static lighthouse.utils.GuiUtils.valueOrThrow;
 
 /**
  * Window which asks user to specify the amount they want to pledge.

@@ -1,11 +1,11 @@
 package lighthouse.controls;
 
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.NetworkParameters;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import lighthouse.utils.TextFieldValidator;
+import org.bitcoinj.core.Address;
+import org.bitcoinj.core.AddressFormatException;
+import org.bitcoinj.core.NetworkParameters;
 
 /**
  * Given a text field, some network params and optionally some nodes, will make the text field an angry red colour

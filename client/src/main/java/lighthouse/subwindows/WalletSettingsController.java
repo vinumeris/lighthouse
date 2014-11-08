@@ -1,7 +1,5 @@
 package lighthouse.subwindows;
 
-import org.bitcoinj.crypto.MnemonicCode;
-import org.bitcoinj.wallet.DeterministicSeed;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.util.concurrent.Service;
@@ -14,6 +12,8 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
 import lighthouse.Main;
 import lighthouse.utils.TextFieldValidator;
+import org.bitcoinj.crypto.MnemonicCode;
+import org.bitcoinj.wallet.DeterministicSeed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.params.KeyParameter;
@@ -27,9 +27,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static javafx.beans.binding.Bindings.*;
-import static lighthouse.protocol.LHUtils.didThrow;
-import static lighthouse.protocol.LHUtils.uncheck;
-import static lighthouse.protocol.LHUtils.unchecked;
+import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.checkGuiThread;
 import static lighthouse.utils.GuiUtils.informationalAlert;
 

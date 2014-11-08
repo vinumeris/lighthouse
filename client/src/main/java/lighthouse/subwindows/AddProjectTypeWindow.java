@@ -3,7 +3,6 @@ package lighthouse.subwindows;
 import com.google.common.base.Throwables;
 import com.google.common.net.HostAndPort;
 import com.google.common.net.InternetDomainName;
-import com.google.protobuf.ByteString;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

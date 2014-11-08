@@ -2,14 +2,9 @@ package lighthouse.subwindows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import javafx.application.Platform;
-import lighthouse.Main;
-import lighthouse.files.DiskManager;
-import lighthouse.protocol.Project;
-import lighthouse.utils.GuiUtils;
-import lighthouse.wallet.PledgingWallet;
 import de.jensd.fx.fontawesome.AwesomeDude;
 import de.jensd.fx.fontawesome.AwesomeIcon;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -17,6 +12,11 @@ import javafx.scene.input.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import lighthouse.Main;
+import lighthouse.files.DiskManager;
+import lighthouse.protocol.Project;
+import lighthouse.utils.GuiUtils;
+import lighthouse.wallet.PledgingWallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

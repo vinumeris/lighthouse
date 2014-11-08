@@ -1,8 +1,8 @@
 package lighthouse;
 
-import org.bitcoinj.protocols.payments.PaymentProtocolException;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.Project;
+import org.bitcoinj.protocols.payments.PaymentProtocolException;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,15 +1,15 @@
 package lighthouse.subwindows;
 
-import javafx.fxml.FXML;
-import org.bitcoinj.core.*;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import lighthouse.Main;
 import lighthouse.controls.BitcoinAddressValidator;
+import org.bitcoinj.core.*;
 import org.spongycastle.crypto.params.KeyParameter;
 
 import javax.annotation.Nullable;

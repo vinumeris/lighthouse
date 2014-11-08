@@ -1,10 +1,9 @@
 package lighthouse.utils;
 
-import com.sun.prism.GraphicsPipeline;
-import com.sun.prism.sw.SWPipeline;
-import org.bitcoinj.core.Coin;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.sun.prism.GraphicsPipeline;
+import com.sun.prism.sw.SWPipeline;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -31,6 +30,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import lighthouse.Main;
 import lighthouse.protocol.LHUtils;
+import org.bitcoinj.core.Coin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

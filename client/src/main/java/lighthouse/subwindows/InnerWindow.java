@@ -1,6 +1,5 @@
 package lighthouse.subwindows;
 
-import lighthouse.Main;
 import javafx.animation.*;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -10,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import lighthouse.Main;
 
 import java.util.Arrays;
 import java.util.List;

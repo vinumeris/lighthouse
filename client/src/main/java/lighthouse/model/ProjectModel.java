@@ -1,14 +1,17 @@
 package lighthouse.model;
 
-import org.bitcoinj.core.*;
-import org.bitcoinj.script.Script;
-import org.bitcoinj.script.ScriptBuilder;
 import com.google.protobuf.ByteString;
 import javafx.beans.property.*;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
 import lighthouse.wallet.PledgingWallet;
+import org.bitcoinj.core.Address;
+import org.bitcoinj.core.AddressFormatException;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
 
 import static lighthouse.protocol.LHUtils.unchecked;
 

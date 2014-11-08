@@ -1,9 +1,9 @@
 package lighthouse.utils;
 
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.utils.MonetaryFormat;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableNumberValue;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.utils.MonetaryFormat;
 
 /** A simple class that reactively formats a string based on an observable amount of satoshis */
 public class ReactiveCoinFormatter extends SimpleStringProperty {

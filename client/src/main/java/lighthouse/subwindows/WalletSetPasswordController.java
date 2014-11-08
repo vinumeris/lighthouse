@@ -1,8 +1,7 @@
 package lighthouse.subwindows;
 
-import javafx.fxml.FXML;
-import org.bitcoinj.crypto.KeyCrypterScrypt;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ProgressIndicator;
@@ -10,6 +9,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import lighthouse.Main;
 import lighthouse.utils.KeyDerivationTasks;
+import org.bitcoinj.crypto.KeyCrypterScrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.params.KeyParameter;

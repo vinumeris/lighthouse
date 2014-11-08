@@ -22,7 +22,6 @@ import lighthouse.Main;
 import lighthouse.files.AppDirectory;
 
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
