@@ -28,6 +28,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -661,26 +662,17 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return diskManager.saveProject(project.getProto(), project.getTitle());
     }
 
-    @Nullable
-    public Project importProjectFrom(Path file) throws IOException {
+    public void importProjectFrom(Path file) throws IOException {
         // Can be on any thread here. Do file IO on calling thread so IO error handling is easier.
         checkState(Files.isRegularFile(file));
         Path destPath = AppDirectory.dir().resolve(file.getFileName());
         Path tmpPath = Paths.get(destPath + ".tmp");
         // Copy and rename to avoid superfluous directory change notifications.
-        Files.copy(file, tmpPath);
-        Files.move(tmpPath, destPath);
-        return executor.fetchFrom(() -> {
-            Project p = diskManager.tryLoadProject(destPath);
-            if (p == null) {
-                log.error("Unable to import project");
-                return null;
-            } else {
-                if (p.getPaymentURL() == null)
-                    watchDirectoryForPledges(file.getParent());
-                return p;
-            }
-        });
+        Files.copy(file, tmpPath, StandardCopyOption.REPLACE_EXISTING);
+        Files.move(tmpPath, destPath, StandardCopyOption.REPLACE_EXISTING);
+        // Hack: wait a while so the directory watcher can process the changes from the above file move, before
+        // adding a new directory to watch, which can result in reconstruction of the dir watcher and lost notifications.
+        scheduleInSeconds(6, () -> watchDirectoryForPledges(file.getParent()));
     }
 
     public void watchDirectoryForPledges(Path dir) {
@@ -797,14 +789,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         this.maxJitterSeconds = maxJitterSeconds;
     }
 
-    private void jitteredP2PRequery(Project project) {
-        jitteredExecute(() -> {
-            ObservableSet<LHProtos.Pledge> pledgesFor = diskManager.getPledgesFor(project);
-            if (pledgesFor != null)
-                checkPledgesAgainstP2PNetwork(project, pledgesFor, true /* remove invalid as we're checking all pledges */);
-        }, 15);
-    }
-
     private void jitteredServerRequery(Project project) {
         jitteredExecute(() -> refreshProjectStatusFromServer(project), 15);
     }
@@ -813,13 +797,17 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     // and then smear requests over another baseSeconds.
     private void jitteredExecute(Runnable runnable, int baseSeconds) {
         if (executor instanceof AffinityExecutor.ServiceAffinityExecutor) {
-            ScheduledExecutorService service = ((AffinityExecutor.ServiceAffinityExecutor) executor).service;
             int jitterSeconds = Math.min(maxJitterSeconds, baseSeconds + (int) (Math.random() * baseSeconds));
             log.info("Scheduling execution in {} seconds", jitterSeconds);
-            service.schedule(runnable, jitterSeconds, TimeUnit.SECONDS);
+            scheduleInSeconds(jitterSeconds, runnable);
         } else {
             runnable.run();
         }
+    }
+
+    private void scheduleInSeconds(int jitterSeconds, Runnable runnable) {
+        ScheduledExecutorService service = ((AffinityExecutor.ServiceAffinityExecutor) executor).service;
+        service.schedule(runnable, jitterSeconds, TimeUnit.SECONDS);
     }
 
     /**

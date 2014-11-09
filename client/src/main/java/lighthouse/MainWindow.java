@@ -286,16 +286,12 @@ public class MainWindow {
     }
 
     public static void importProject(Path file) {
-        String msg;
         try {
-            if (Main.backend.importProjectFrom(file) != null)
-                return;
-            msg = "Format error, check log";   // TODO: lame, redo with proper exception handling.
+            Main.backend.importProjectFrom(file);
         } catch (IOException e) {
-            msg = e.getLocalizedMessage();
+            GuiUtils.informationalAlert("Failed to import project",
+                    "Could not read project file: " + e.getLocalizedMessage());
         }
-        GuiUtils.informationalAlert("Failed to import project",
-                "Could not read project file: " + msg);
     }
 
     private static boolean firstTime = true;

@@ -135,7 +135,6 @@ public class AddProjectTypeWindow {
                 project.getProto().writeTo(stream);
             }
             Main.backend.importProjectFrom(file);
-            Main.backend.watchDirectoryForPledges(dirPath);
         } catch (IOException e) {
             crashAlert(e);
         }

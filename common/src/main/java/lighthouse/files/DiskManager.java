@@ -25,7 +25,8 @@ import java.io.OutputStream;
 import java.nio.file.*;
 import java.util.*;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static lighthouse.protocol.LHUtils.*;
 
 /**
@@ -141,11 +142,12 @@ public class DiskManager {
                     if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
                         log.info("Project file modified, reloading ...");
                         this.tryLoadProject(path, projects.indexOf(project));
-                    }
-                    projects.remove(project);
-                    projectsByPath.remove(path);
-                    synchronized (this) {
-                        projectsById.remove(project.getID());
+                    } else {
+                        projects.remove(project);
+                        projectsByPath.remove(path);
+                        synchronized (this) {
+                            projectsById.remove(project.getID());
+                        }
                     }
                 }
             } else if (isCreate) {
