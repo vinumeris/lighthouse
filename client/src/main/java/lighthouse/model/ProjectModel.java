@@ -100,7 +100,7 @@ public class ProjectModel {
         // This isn't a perfect estimation by any means especially as we allow P2SH outputs to be pledged, which
         // could end up gobbling up a lot of space in the contract, but it'll do for now. How many pledges can we
         // have assuming Lighthouse makes them all i.e. pay to address?
-        return value / MAX_NUM_INPUTS;
+        return Math.max(value / MAX_NUM_INPUTS, Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.multiply(4).value);
     }
 
     public LHProtos.Project.Builder getProto() {

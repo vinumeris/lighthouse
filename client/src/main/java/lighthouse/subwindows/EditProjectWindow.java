@@ -92,10 +92,8 @@ public class EditProjectWindow {
         Coin goalCoin = Coin.valueOf(model.goalAmount.get());
         if (goalCoin.value != 1) {  // 1 satoshi is sentinel value meaning new project.
             goalAmountEdit.setText(goalCoin.toPlainString());
-            minPledgeEdit.setPromptText(model.getMinPledgeAmount().toPlainString());
-        } else {
-            minPledgeEdit.setPromptText("");
         }
+        minPledgeEdit.setPromptText(model.getMinPledgeAmount().toPlainString());
         if (model.image.get() == null) {
             setupDefaultCoverImage();
         } else {

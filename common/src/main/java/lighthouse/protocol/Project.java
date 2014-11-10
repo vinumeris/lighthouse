@@ -20,7 +20,10 @@ import org.spongycastle.crypto.params.KeyParameter;
 import org.spongycastle.util.io.Streams;
 
 import javax.annotation.Nullable;
-import java.net.*;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.time.Instant;
@@ -446,7 +449,17 @@ public class Project {
     }
 
     public Coin getMinPledgeAmount() {
-        return Coin.valueOf(minPledgeAmount);
+        return getMinPledgeAmountFrom(minPledgeAmount);
+    }
+
+    /**
+     * Returns the max of the min pledge amount recorded in the project definition, and the min output value times two.
+     * The reason is: we need to be able to revoke a pledge we made, and that may require paying a fee. If we allowed
+     * a pledge of the dust amount, we'd be unable to revoke because the entire amount we're trying to revoke would
+     * get consumed in fees.
+     */
+    public static Coin getMinPledgeAmountFrom(long minPledgeAmount) {
+        return Coin.valueOf(Math.max(minPledgeAmount, Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.multiply(4).value));
     }
 
     @Nullable
