@@ -29,8 +29,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Throwables.getRootCause;
@@ -54,7 +58,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     private static final Logger log = LoggerFactory.getLogger(LighthouseBackend.class);
 
     private final DiskManager diskManager;
-    public final AffinityExecutor executor;
+    public final AffinityExecutor.ServiceAffinityExecutor executor;
     private final PeerGroup peerGroup;
     private final PledgingWallet wallet;
     private final CompletableFuture<Boolean> initialized = new CompletableFuture<>();
@@ -127,7 +131,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         this(mode, peerGroup, chain, wallet, new DiskManager(executor), executor);
     }
 
-    public LighthouseBackend(Mode mode, PeerGroup peerGroup, AbstractBlockChain chain, PledgingWallet wallet, DiskManager diskManager, AffinityExecutor executor) {
+    public LighthouseBackend(Mode mode, PeerGroup peerGroup, AbstractBlockChain chain, PledgingWallet wallet, DiskManager diskManager, AffinityExecutor.ServiceAffinityExecutor executor) {
         this.diskManager = diskManager;
         this.executor = executor;
         this.peerGroup = peerGroup;
@@ -672,7 +676,8 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         Files.move(tmpPath, destPath, StandardCopyOption.REPLACE_EXISTING);
         // Hack: wait a while so the directory watcher can process the changes from the above file move, before
         // adding a new directory to watch, which can result in reconstruction of the dir watcher and lost notifications.
-        scheduleInSeconds(6, () -> watchDirectoryForPledges(file.getParent()));
+        Runnable runnable = () -> watchDirectoryForPledges(file.getParent());
+        executor.executeIn(Duration.ofSeconds(3), runnable);
     }
 
     public void watchDirectoryForPledges(Path dir) {
@@ -796,18 +801,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     // Always wait at least baseSeconds to allow for block propagation and processing of revocations server-side
     // and then smear requests over another baseSeconds.
     private void jitteredExecute(Runnable runnable, int baseSeconds) {
-        if (executor instanceof AffinityExecutor.ServiceAffinityExecutor) {
-            int jitterSeconds = Math.min(maxJitterSeconds, baseSeconds + (int) (Math.random() * baseSeconds));
-            log.info("Scheduling execution in {} seconds", jitterSeconds);
-            scheduleInSeconds(jitterSeconds, runnable);
-        } else {
-            runnable.run();
-        }
-    }
-
-    private void scheduleInSeconds(int jitterSeconds, Runnable runnable) {
-        ScheduledExecutorService service = ((AffinityExecutor.ServiceAffinityExecutor) executor).service;
-        service.schedule(runnable, jitterSeconds, TimeUnit.SECONDS);
+        int jitterSeconds = Math.min(maxJitterSeconds, baseSeconds + (int) (Math.random() * baseSeconds));
+        log.info("Scheduling execution in {} seconds", jitterSeconds);
+        executor.executeIn(Duration.ofSeconds(jitterSeconds), runnable);
     }
 
     /**

@@ -135,6 +135,19 @@ public interface AffinityExecutor extends Executor {
         public <T> ScheduledFuture<T> executeIn(Duration time, Callable<T> command) {
             return service.schedule(command::call, time.toMillis(), TimeUnit.MILLISECONDS);
         }
+
+        public void executeIn(Duration time, Runnable runnable) {
+            service.schedule(() -> {
+                try {
+                    runnable.run();
+                } catch (Throwable e) {
+                    if (handler != null)
+                        handler.uncaughtException(Thread.currentThread(), e);
+                    else
+                        e.printStackTrace();
+                }
+            }, time.toMillis(), TimeUnit.MILLISECONDS);
+        }
     }
 
     /**
