@@ -113,7 +113,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         });
         gate = new AffinityExecutor.Gate();
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
-        diskManager = new DiskManager(executor, true);
+        diskManager = new DiskManager(executor);
         backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
         backend.setMinPeersForUTXOQuery(1);
         backend.setMaxJitterSeconds(0);
@@ -308,7 +308,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         executor.service.shutdown();
         executor.service.awaitTermination(5, TimeUnit.SECONDS);
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread 2");
-        diskManager = new DiskManager(executor, true);
+        diskManager = new DiskManager(executor);
         writeProjectToDisk();
         backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
 

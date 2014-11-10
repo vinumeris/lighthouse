@@ -62,7 +62,7 @@ public class DiskManager {
     public static final String PLEDGE_PATHS_FILENAME = "projects.txt";
 
     // All private methods and private variables are used from this executor.
-    private final AffinityExecutor executor;
+    private final AffinityExecutor.ServiceAffinityExecutor executor;
     private final ObservableList<Project> projects;
     private final Map<Path, Project> projectsByPath;
     private final Map<Path, LHProtos.Pledge> pledgesByPath;
@@ -78,7 +78,7 @@ public class DiskManager {
      * This object should be owned by the thread backing owningExecutor: changes will all be queued onto this
      * thread.
      */
-    public DiskManager(AffinityExecutor owningExecutor, boolean autoLoadProjects) {
+    public DiskManager(AffinityExecutor.ServiceAffinityExecutor owningExecutor) {
         // Initialize projects by selecting files matching the right name pattern and then trying to load, ignoring
         // failures (nulls).
         executor = owningExecutor;

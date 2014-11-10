@@ -6,10 +6,8 @@ import lighthouse.protocol.LHUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.time.Duration;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -132,6 +130,10 @@ public interface AffinityExecutor extends Executor {
                         e.printStackTrace();
                 }
             });
+        }
+
+        public <T> ScheduledFuture<T> executeIn(Duration time, Callable<T> command) {
+            return service.schedule(command::call, time.toMillis(), TimeUnit.MILLISECONDS);
         }
     }
 

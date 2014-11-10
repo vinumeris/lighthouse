@@ -101,7 +101,7 @@ public class PledgeServer {
         // This app is mostly single threaded. It handles all requests and state changes on a single thread.
         // Speed should ideally not be an issue, as the backend blocks only rarely. If it's a problem then
         // we'll have to split the backend thread from the http server thread.
-        AffinityExecutor executor = new AffinityExecutor.ServiceAffinityExecutor("server");
+        AffinityExecutor.ServiceAffinityExecutor executor = new AffinityExecutor.ServiceAffinityExecutor("server");
         server.setExecutor(executor);
         LighthouseBackend backend = new LighthouseBackend(SERVER, kit.peerGroup(), kit.chain(), (PledgingWallet) kit.wallet(), executor);
         backend.setMinPeersForUTXOQuery(minPeersSupportingGetUTXO);
