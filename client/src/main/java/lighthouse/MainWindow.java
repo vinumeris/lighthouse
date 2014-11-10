@@ -34,6 +34,7 @@ import lighthouse.controls.NotificationBarPane;
 import lighthouse.controls.ProjectOverviewWidget;
 import lighthouse.controls.ProjectView;
 import lighthouse.files.AppDirectory;
+import lighthouse.files.DiskManager;
 import lighthouse.model.BitcoinUIModel;
 import lighthouse.protocol.Project;
 import lighthouse.subwindows.EditProjectWindow;
@@ -44,6 +45,7 @@ import lighthouse.utils.GuiUtils;
 import lighthouse.utils.easing.EasingMode;
 import lighthouse.utils.easing.ElasticInterpolator;
 import org.bitcoinj.core.Coin;
+import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.params.TestNet3Params;
@@ -54,6 +56,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static javafx.beans.binding.Bindings.when;
@@ -244,8 +247,8 @@ public class MainWindow {
     public void importClicked(ActionEvent event) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Select a bitcoin project file to import");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Project/contract files", "*.lighthouse-project"));
-        platformFiddleChooser(chooser);
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Project/contract files", "*" + DiskManager.PROJECT_FILE_EXTENSION));
+                platformFiddleChooser(chooser);
         File file = chooser.showOpenDialog(Main.instance.mainStage);
         if (file == null)
             return;
@@ -260,12 +263,12 @@ public class MainWindow {
 
     @FXML
     public void dragOver(DragEvent event) {
-        boolean accept = true;
+        boolean accept = false;
         if (event.getGestureSource() != null)
             return;   // Coming from us.
         for (File file : event.getDragboard().getFiles()) {
-            if (!file.toString().endsWith(".lighthouse-project")) {
-                accept = false;
+            if (file.toString().endsWith(DiskManager.PROJECT_FILE_EXTENSION) || file.toString().endsWith(DiskManager.PLEDGE_FILE_EXTENSION)) {
+                accept = true;
                 break;
             }
         }
@@ -276,8 +279,20 @@ public class MainWindow {
     @FXML
     public void dragDropped(DragEvent event) {
         log.info("Drop: {}", event);
-        for (File file : event.getDragboard().getFiles())
-            importProject(file);
+        for (File file : event.getDragboard().getFiles()) {
+            if (file.toString().endsWith(DiskManager.PROJECT_FILE_EXTENSION)) {
+                importProject(file);
+            } else if (file.toString().endsWith(DiskManager.PLEDGE_FILE_EXTENSION)) {
+                try {
+                    Sha256Hash hash = Sha256Hash.hashFileContents(file);
+                    Files.copy(file.toPath(), AppDirectory.dir().resolve(hash + DiskManager.PLEDGE_FILE_EXTENSION));
+                } catch (IOException e) {
+                    GuiUtils.informationalAlert("Import failed",
+                            "Could not copy the dropped pledge into the Lighthouse application directory: " + e);
+                }
+            } else
+                log.error("Unknown file type dropped: should not happen: " + file);
+        }
     }
 
 

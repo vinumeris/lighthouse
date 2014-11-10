@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
-
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="318.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.ExportWindow">
-    <bottom>
-        <HBox alignment="CENTER" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
-            <children>
-                <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" onAction="#saveClicked" text="Save to file" />
-            </children>
-            <padding>
-                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-            </padding>
-        </HBox>
-    </bottom>
+<?import javafx.scene.shape.Rectangle?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="413.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.ExportWindow">
     <center>
-        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0" BorderPane.alignment="CENTER">
+        <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="20.0" BorderPane.alignment="CENTER">
             <children>
                 <StackPane fx:id="dragArea" onDragDetected="#dragDetected" onDragDone="#dragDone" prefHeight="150.0" prefWidth="200.0">
                     <children>
@@ -28,7 +18,23 @@
                     </children>
                 </StackPane>
                 <Label text="Drag to a folder, email or chat window. Or ..." />
+                <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" onAction="#saveClicked" text="Save to file" />
             </children>
         </VBox>
     </center>
+   <bottom>
+      <HBox fx:id="folderWatchExplainer" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="20.0" style="-fx-background-color: #f2f2f2;" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fitHeight="79.0" fitWidth="79.0" opacity="0.45" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../light-bulb-icon.png" />
+               </image>
+            </ImageView>
+            <Label text="The folder you save the project to will be watched, and any pledges found there will be automatically loaded." wrapText="true" />
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </HBox>
+   </bottom>
 </BorderPane>
