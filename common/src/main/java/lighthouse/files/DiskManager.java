@@ -1,6 +1,7 @@
 package lighthouse.files;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import javafx.beans.InvalidationListener;
 import javafx.collections.*;
@@ -71,7 +72,11 @@ public class DiskManager {
     @GuardedBy("this") private final Map<Project, ObservableSet<LHProtos.Pledge>> pledges;
     private final List<Path> pledgePaths;
     private DirectoryWatcher directoryWatcher;
+
+    // Ordered map: the ordering is needed to keep the UI showing projects in import order instead of whatever order
+    // is returned by the disk file system. Keys are hex hashes (project.getId()).
     private final ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;
+    private final LinkedHashMap<String, LighthouseBackend.ProjectStateInfo> projectStatesMap;
 
     /**
      * Creates a disk manager that reloads data from disk when a new project path is added or the directories change.
@@ -85,7 +90,8 @@ public class DiskManager {
         projects = FXCollections.observableArrayList();
         projectsById = FXCollections.observableHashMap();
         projectsByPath = new HashMap<>();
-        projectStates = FXCollections.observableHashMap();
+        projectStatesMap = new LinkedHashMap<>();
+        projectStates = FXCollections.observableMap(projectStatesMap);
         pledgesByPath = new HashMap<>();
         pledges = new HashMap<>();
         pledgePaths = new ArrayList<>();
@@ -239,19 +245,37 @@ public class DiskManager {
     private void loadAll() throws IOException {
         executor.checkOnThread();
         log.info("Updating all data from disk");
+        loadProjectStatuses();
+        List<String> ids = new ArrayList<>(projectStatesMap.keySet());
         for (Path path : LHUtils.listDir(AppDirectory.dir())) {
             if (!path.toString().endsWith(PROJECT_FILE_EXTENSION))
                 continue;
-            if (!Files.isRegularFile(path) || (tryLoadProject(path) == null))
+            if (!Files.isRegularFile(path))
+                continue;
+            if (tryLoadProject(path) == null)
                 log.warn("Failed to load project {}", path);
         }
+        projects.sort(new Comparator<Project>() {
+            @Override
+            public int compare(Project o1, Project o2) {
+                int o1i = ids.indexOf(o1.getID());
+                int o2i = ids.indexOf(o2.getID());
+                // Project might have appeared on disk when we were not running and thus not have a status. This should
+                // not happen in GUI mode unless the user dicks around with our private app directory so we can just
+                // allow an unstable sort in this case. For servers it is expected but they don't care about the order.
+                if (o1i == -1)
+                    o1i = Integer.MAX_VALUE;
+                if (o2i == -1)
+                    o2i = Integer.MAX_VALUE;
+                return Integer.compare(o1i, o2i);
+            }
+        });
         // Load pledges from each project path.
         loadPledgesFromDirectory(AppDirectory.dir());
         for (Path path : pledgePaths) {
             if (!Files.isDirectory(path)) continue;    // Can be from an old version or deleted by user.
             loadPledgesFromDirectory(path);
         }
-        loadProjectStatuses();
         log.info("... disk data loaded");
     }
 
@@ -259,13 +283,13 @@ public class DiskManager {
         Path path = AppDirectory.dir().resolve(PROJECT_STATUS_FILENAME);
         projectStates.addListener((InvalidationListener) x -> saveProjectStatuses());
         if (!Files.exists(path)) return;
-        Properties properties = new Properties();
-        try (InputStream stream = Files.newInputStream(path)) {
-            properties.load(stream);
-        }
-        for (Object o : properties.keySet()) {
-            String key = (String) o;
-            String val = properties.getProperty(key);
+        // Parse, paying attention to ordering.
+        List<String> lines = Files.readAllLines(path);
+        for (String line : lines) {
+            if (line.startsWith("#")) continue;    // Backwards compat.
+            List<String> parts = Splitter.on("=").splitToList(line);
+            String key = parts.get(0);
+            String val = parts.get(1);
             if (val.equals("OPEN")) {
                 projectStates.put(key, new LighthouseBackend.ProjectStateInfo(LighthouseBackend.ProjectState.OPEN, null));
             } else {
@@ -279,18 +303,12 @@ public class DiskManager {
     private void saveProjectStatuses() {
         log.info("Saving project statuses");
         Path path = AppDirectory.dir().resolve(PROJECT_STATUS_FILENAME);
-        Properties properties = new Properties();
+        List<String> lines = new ArrayList<>();
         for (Map.Entry<String, LighthouseBackend.ProjectStateInfo> entry : projectStates.entrySet()) {
             String val = entry.getValue().state == LighthouseBackend.ProjectState.OPEN ? "OPEN" : checkNotNull(entry.getValue().claimedBy).toString();
-            properties.setProperty(entry.getKey(), val);
+            lines.add(entry.getKey() + "=" + val);
         }
-        if (properties.isEmpty()) return;
-        try (OutputStream stream = Files.newOutputStream(path)) {
-            properties.store(stream, "Records which projects have been claimed by which transactions");
-        } catch (IOException e) {
-            // Should this be surfaced to the user? Probably they're out of disk space?
-            log.error("Failed to save project status file!", e);
-        }
+        uncheck(() -> Files.write(path, lines));
     }
 
     @Nullable

@@ -1063,8 +1063,10 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
 
     public void shutdown() {
-        peerGroup.removePeerFilterProvider(manager);
-        peerGroup.removeEventListener(manager);
+        executor.execute(() -> {
+            peerGroup.removePeerFilterProvider(manager);
+            peerGroup.removeEventListener(manager);
+        });
     }
 
     public void refreshBloomFilter() {

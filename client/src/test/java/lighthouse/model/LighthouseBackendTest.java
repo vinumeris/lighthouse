@@ -523,6 +523,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
     @Test
     public void submitPledgeViaHTTP() throws Exception {
+        backend.shutdown();
         backend = new LighthouseBackend(SERVER, peerGroup, blockChain, pledgingWallet, diskManager, executor);
         backend.setMinPeersForUTXOQuery(1);
         backend.setMaxJitterSeconds(0);
