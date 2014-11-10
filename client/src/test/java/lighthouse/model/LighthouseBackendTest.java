@@ -1,12 +1,5 @@
 package lighthouse.model;
 
-import javafx.scene.effect.Bloom;
-import org.bitcoinj.core.*;
-import org.bitcoinj.store.BlockStoreException;
-import org.bitcoinj.testing.FakeTxBuilder;
-import org.bitcoinj.testing.InboundMessageQueuer;
-import org.bitcoinj.testing.TestWithPeerGroup;
-import org.bitcoinj.utils.BriefLogFormatter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -26,6 +19,12 @@ import lighthouse.protocol.Project;
 import lighthouse.protocol.TestUtils;
 import lighthouse.threading.AffinityExecutor;
 import lighthouse.wallet.PledgingWallet;
+import org.bitcoinj.core.*;
+import org.bitcoinj.store.BlockStoreException;
+import org.bitcoinj.testing.FakeTxBuilder;
+import org.bitcoinj.testing.InboundMessageQueuer;
+import org.bitcoinj.testing.TestWithPeerGroup;
+import org.bitcoinj.utils.BriefLogFormatter;
 import org.javatuples.Triplet;
 import org.junit.After;
 import org.junit.Before;
@@ -42,7 +41,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -51,11 +49,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.bitcoinj.testing.FakeTxBuilder.createFakeBlock;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static lighthouse.LighthouseBackend.Mode.CLIENT;
 import static lighthouse.LighthouseBackend.Mode.SERVER;
 import static lighthouse.protocol.LHUtils.*;
+import static org.bitcoinj.testing.FakeTxBuilder.createFakeBlock;
 import static org.junit.Assert.*;
 
 public class LighthouseBackendTest extends TestWithPeerGroup {
@@ -742,10 +740,15 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge2" + DiskManager.PLEDGE_FILE_EXTENSION))) {
             pledge2.build().writeTo(stream);
         }
-        waitForOutbound(p1);
-        doGetUTXOAnswer(output, p1);
-        waitForOutbound(p2);
-        doGetUTXOAnswer(output, p2);
+
+        for (int i = 0; i < 3; i++) {
+            Message m = waitForOutbound(p1);
+            if (m instanceof GetUTXOsMessage)
+                doGetUTXOAnswer(output, p1);
+            m = waitForOutbound(p2);
+            if (m instanceof GetUTXOsMessage)
+                doGetUTXOAnswer(output, p2);
+        }
 
         // Wait for check status to update.
         gate.waitAndRun();   // statuses (start lookup)
