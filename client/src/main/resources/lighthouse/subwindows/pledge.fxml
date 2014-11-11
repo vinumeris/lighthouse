@@ -39,7 +39,7 @@
             <Label fx:id="minMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#minMoneyClicked" styleClass="link-label" text="Minimum amount possible" />
             <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="15.0">
                <children>
-                  <Label text="Contact details" />
+                  <Label text="Contact email" />
                   <TextField fx:id="emailEdit" HBox.hgrow="ALWAYS" />
                </children>
                <padding>
@@ -47,6 +47,7 @@
                </padding>
             </HBox>
             <TextArea fx:id="messageEdit" prefHeight="200.0" prefWidth="200.0" promptText="Message to project owner (optional)" wrapText="true" />
+            <Label maxWidth="1.7976931348623157E308" minWidth="-Infinity" style="-fx-text-fill: silver;" text="Contact details and message will be public." />
                 <Pane prefHeight="0.0" prefWidth="340.0" VBox.vgrow="ALWAYS" />
             </children>
             <padding>
