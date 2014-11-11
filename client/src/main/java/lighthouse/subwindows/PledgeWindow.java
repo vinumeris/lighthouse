@@ -15,6 +15,7 @@ import lighthouse.utils.ValidationLink;
 import lighthouse.wallet.PledgingWallet;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.InsufficientMoneyException;
+import org.bitcoinj.core.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.params.KeyParameter;
@@ -58,6 +59,8 @@ public class PledgeWindow extends InnerWindow {
         String savedContact = Main.instance.prefs.getContactAddress();
         if (savedContact != null)
             emailEdit.setText(savedContact);
+
+        minersFeeLabel.setText(String.format(minersFeeLabel.getText(), Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.toFriendlyString()));
     }
 
     public void setLimits(Coin limit, Coin min) {
