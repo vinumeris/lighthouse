@@ -26,7 +26,7 @@
     <orderEntry type="library" name="Maven: org.bitcoinj:bitcoinj-core:0.13-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
     <orderEntry type="library" name="Maven: com.lambdaworks:scrypt:1.4.0" level="project" />
-    <orderEntry type="library" name="Maven: org.bitcoinj:orchid:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.bitcoinj:orchid:1.1" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.6" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-jdk14:1.7.6" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:16.0.1" level="project" />
