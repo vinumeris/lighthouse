@@ -100,6 +100,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         };
         wallet = pledgingWallet;
         super.setUp();
+        peerGroup.start();
         BriefLogFormatter.init();
 
         tmpDir = Files.createTempDirectory("lighthouse-dmtest");
@@ -336,9 +337,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
     @Test
     public void projectAddedP2P() throws Exception {
-        peerGroup.startAsync();
-        peerGroup.awaitRunning();
-
         // Check that if we add an path containing a project, it's noticed and the projects set is updated.
         // Also check that pledges are loaded from disk and checked against the P2P network.
         ObservableList<Project> projects = backend.mirrorProjects(gate);
@@ -415,18 +413,12 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         gate.waitAndRun();
         assertEquals(0, pledges.size());   // was revoked
-
-        peerGroup.stopAsync();
-        peerGroup.awaitTerminated();
     }
 
     @Test
     public void mergePeerAnswers() throws Exception {
         // Check that we throw an exception if peers disagree on the state of the UTXO set. Such a pledge would
         // be considered invalid.
-        peerGroup.startAsync();
-        peerGroup.awaitRunning();
-
         InboundMessageQueuer p1 = connectPeer(1, supportingVer);
         InboundMessageQueuer p2 = connectPeer(2, supportingVer);
         InboundMessageQueuer p3 = connectPeer(3, supportingVer);
@@ -530,8 +522,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // Test the process of broadcasting a pledge's dependencies, then checking the UTXO set to see if it was
         // revoked already. If all is OK then it should show up in the verified pledges set.
         peerGroup.setMinBroadcastConnections(2);
-        peerGroup.startAsync();
-        peerGroup.awaitRunning();
 
         Triplet<Transaction, Transaction, LHProtos.Pledge> data = TestUtils.makePledge(project, to, project.getGoalAmount());
         Transaction stubTx = data.getValue0();
@@ -592,9 +582,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         final Sha256Hash pledgeHash = Sha256Hash.create(pledge.toByteArray());
         final List<Path> dirFiles = mapList(listDir(AppDirectory.dir()), Path::getFileName);
         assertTrue(dirFiles.contains(Paths.get(pledgeHash.toString() + DiskManager.PLEDGE_FILE_EXTENSION)));
-
-        peerGroup.stopAsync();
-        peerGroup.awaitTerminated();
     }
 
     @Test
@@ -603,8 +590,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // spots the claim and understands the current state of the project.
         peerGroup.setMinBroadcastConnections(2);
         peerGroup.setDownloadTxDependencies(false);
-        peerGroup.startAsync();
-        peerGroup.awaitRunning();
 
         Path dropDir = Files.createTempDirectory("lh-droptest");
         Path downloadedFile = writeProjectToDisk(dropDir);
@@ -671,9 +656,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertTrue(claimedPledges.contains(pledge2));
 
         // TODO: Craft a test that verifies double spending of the claim is handled properly.
-
-        peerGroup.stopAsync();
-        peerGroup.awaitTerminated();
     }
 
     @Test
@@ -689,8 +671,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         ObservableSet<LHProtos.Pledge> openPledges = backend.mirrorOpenPledges(project, gate);
 
         peerGroup.setMinBroadcastConnections(2);
-        peerGroup.startAsync();
-        peerGroup.awaitRunning();
 
         Transaction doubleSpentTx = new Transaction(params);
         doubleSpentTx.addInput(TestUtils.makeRandomInput());
@@ -756,9 +736,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         gate.waitAndRun();   // statuses (error result)
         //noinspection ConstantConditions
         assertEquals(VerificationException.DuplicatedOutPoint.class, statuses.get(project).error.getClass());
-
-        peerGroup.stopAsync();
-        peerGroup.awaitTerminated();
     }
 
     @Test
