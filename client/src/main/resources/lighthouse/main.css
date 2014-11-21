@@ -67,7 +67,7 @@
 }
 
 .text-scrim-bottom {
-    -fx-background-color: linear-gradient(transparent, black);
+    -fx-background-color: linear-gradient(transparent, #333333);
 }
 
 .text-scrim-top {

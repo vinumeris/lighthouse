@@ -14,7 +14,7 @@
             <children>
                 <StackPane fx:id="coverArea" alignment="BOTTOM_CENTER" minHeight="240">
                     <ImageView fx:id="coverImage" fitHeight="240" fitWidth="650"/>
-                    <Pane maxHeight="50.0" maxWidth="1.7976931348623157E308" minWidth="-Infinity" styleClass="text-scrim-bottom" />
+                    <Pane maxHeight="120.0" maxWidth="1.7976931348623157E308" minWidth="-Infinity" styleClass="text-scrim-bottom" />
                     <HBox fx:id="titleHBox" alignment="BOTTOM_CENTER">
                         <children>
                             <Label fx:id="titleLabel" maxWidth="Infinity" styleClass="project-title-label, drop-shadow-label" text="Project title goes here" HBox.hgrow="ALWAYS" />
