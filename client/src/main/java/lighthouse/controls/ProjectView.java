@@ -471,6 +471,8 @@ public class ProjectView extends HBox {
             viewMore.setOnMouseClicked(ev -> ShowPledgeWindow.open(project.get(), getItem()));
             viewMore.setAlignment(Pos.CENTER_RIGHT);
             viewMore.prefWidthProperty().bind(vbox.widthProperty());
+            vbox.setPrefHeight(0);
+            vbox.setMaxHeight(USE_PREF_SIZE);
             setGraphic(vbox);
             setOnMouseClicked(ev -> {
                 if (ev.getClickCount() == 2)
