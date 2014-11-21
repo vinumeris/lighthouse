@@ -9,6 +9,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -31,6 +33,7 @@ import java.nio.file.Path;
 public class ExportWindow {
     private static final Logger log = LoggerFactory.getLogger(ExportWindow.class);
 
+    @FXML HBox folderWatchExplainer;
     @FXML StackPane dragArea;
     @FXML Label moneyIcon;
 
@@ -50,6 +53,7 @@ public class ExportWindow {
         ExportWindow window = Main.instance.<ExportWindow>overlayUI("subwindows/export.fxml", "Export pledge").controller;
         window.project = project;
         window.pledge = pledge;
+        ((BorderPane)window.folderWatchExplainer.getParent()).setBottom(null);
     }
 
     public static void openForProject(Project project) {
