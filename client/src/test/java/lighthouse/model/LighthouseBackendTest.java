@@ -112,15 +112,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
             e.printStackTrace();
             fail("Uncaught exception");
         });
-        gate = new AffinityExecutor.Gate();
-        executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
-        diskManager = new DiskManager(executor);
-        backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
-        backend.setMinPeersForUTXOQuery(1);
-        backend.setMaxJitterSeconds(0);
-
-        // Wait to start up.
-        backend.executor.fetchFrom(() -> null);
+        initCoreState();
 
         projectModel = new ProjectModel(pledgingWallet);
         to = new ECKey().toAddress(params);
@@ -145,6 +137,18 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         // Make peers selected for tx broadcast deterministic.
         TransactionBroadcast.random = new Random(1);
+    }
+
+    public void initCoreState() {
+        gate = new AffinityExecutor.Gate();
+        executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
+        diskManager = new DiskManager(executor);
+        backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
+        backend.setMinPeersForUTXOQuery(1);
+        backend.setMaxJitterSeconds(0);
+
+        // Wait to start up.
+        backend.executor.fetchFrom(() -> null);
     }
 
     @After
@@ -359,9 +363,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         ObservableSet<LHProtos.Pledge> pledges = backend.mirrorOpenPledges(project, gate);
 
         // The user drops the pledge.
-        try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge" + DiskManager.PLEDGE_FILE_EXTENSION))) {
-            pledge.writeTo(stream);
-        }
+        writePledgeToDisk(dropDir, pledge);
 
         // App finds a peer that supports getutxo.
         InboundMessageQueuer p1 = connectPeer(1);
@@ -441,9 +443,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         Transaction stubTx = data.getValue0();
         Transaction pledgeTx = data.getValue1();
         LHProtos.Pledge pledge = data.getValue2();
-        try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge" + DiskManager.PLEDGE_FILE_EXTENSION))) {
-            pledge.writeTo(stream);
-        }
+        writePledgeToDisk(dropDir, pledge);
 
         gate.waitAndRun();
         assertEquals(1, statuses.size());
@@ -482,6 +482,12 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertTrue(statuses.get(project).error instanceof Ex.InconsistentUTXOAnswers);
     }
 
+    public void writePledgeToDisk(Path dropDir, LHProtos.Pledge pledge) throws IOException {
+        try (OutputStream stream = Files.newOutputStream(dropDir.resolve("dropped-pledge" + DiskManager.PLEDGE_FILE_EXTENSION))) {
+            pledge.writeTo(stream);
+        }
+    }
+
     private BloomFilter checkBloomFilter(InboundMessageQueuer... peers) throws InterruptedException {
         BloomFilter result = null;
         for (InboundMessageQueuer peer : peers) {
@@ -503,7 +509,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         FakeTxBuilder.BlockPair bp = createFakeBlock(blockStore, payment);
         wallet.receiveFromBlock(payment, bp.storedBlock, AbstractBlockChain.NewBlockType.BEST_CHAIN, 0);
         wallet.notifyNewBestBlock(bp.storedBlock);
-        PledgingWallet.PendingPledge pendingPledge = pledgingWallet.createPledge(project, Coin.COIN.value / 2, null);
+        PledgingWallet.PendingPledge pendingPledge = pledgingWallet.createPledge(project, Coin.COIN.value, null);
 
         ObservableSet<LHProtos.Pledge> pledges = backend.mirrorOpenPledges(project, gate);
         assertEquals(0, pledges.size());
@@ -511,6 +517,16 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         gate.waitAndRun();
         assertEquals(1, pledges.size());
         assertEquals(proto, pledges.iterator().next());
+
+        // The pledge is saved to disk where the backend can see it. Nothing should happen because the pledge is known
+        // already and the change listener ignores it.
+        writePledgeToDisk(AppDirectory.dir(), proto);
+
+        // Now restart the backend so it doesn't see changes anymore but fresh state: we still don't recheck the pledge.
+        initCoreState();
+
+        ObservableMap<Project, LighthouseBackend.CheckStatus> statuses = backend.mirrorCheckStatuses(gate);
+        assertEquals(0, statuses.size());
     }
 
     @Test

@@ -268,7 +268,7 @@ public class ProjectView extends HBox {
                 if (msg == null)
                     msg = "Internal error: " + status.error.getClass().getName();
             else
-                msg = "Server error: " + msg;
+                msg = "Error: " + msg;
             notifyBarItem = Main.instance.notificationBar.displayNewItem(msg);
         }
     }

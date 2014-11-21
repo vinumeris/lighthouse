@@ -351,7 +351,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         }
         if (change.wasAdded()) {
             final LHProtos.Pledge added = change.getElementAdded();
-            if (!isPledgeKnown(added)) {
+            if (isPledgeKnown(added)) {
+                log.info("Saw pledge appear on disk that we already knew about: {}", LHUtils.hashFromPledge(added));
+            } else {
                 log.info("New pledge found on disk for {}", project);
                 // Jitter to give the dependency txns time to propagate in case somehow our source of pledges
                 // is faster than the P2P network (e.g. local network drive or in regtesting mode).
@@ -362,7 +364,13 @@ public class LighthouseBackend extends AbstractBlockChainListener {
 
     private boolean isPledgeKnown(LHProtos.Pledge pledge) {
         executor.checkOnThread();
-        if (mode == Mode.CLIENT && wallet.wasPledgeRevoked(pledge)) return true;
+        if (mode == Mode.CLIENT) {
+            // We have to double check against wallet.getPledges here, because during startup the disk manager queues
+            // up "new pledge found" events BEFORE we add pledges from the wallet into openPledges/claimedPledges, etc.
+            if (wallet.getPledges().contains(pledge) || wallet.wasPledgeRevoked(pledge)) {
+                return true;
+            }
+        }
         for (ObservableSet<LHProtos.Pledge> set : openPledges.values()) if (set.contains(pledge)) return true;
         for (ObservableSet<LHProtos.Pledge> set : claimedPledges.values()) if (set.contains(pledge)) return true;
         return false;
