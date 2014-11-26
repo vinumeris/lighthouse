@@ -259,3 +259,11 @@
 .show-pledge-inner-label {
     -fx-text-fill: darkgrey;
 }
+
+.hover-link {
+    -fx-text-fill: blue;
+    -fx-cursor: hand;
+}
+.hover-link:hover {
+    -fx-underline: true;
+}

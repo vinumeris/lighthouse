@@ -19,34 +19,36 @@
                 <VBox fillWidth="true" minHeight="162.0" AnchorPane.LeftAnchor="0" AnchorPane.RightAnchor="0" AnchorPane.TopAnchor="0">
                     <children>
                         <StackPane alignment="BOTTOM_CENTER" minHeight="162.0">
-                            <Pane fx:id="coverImage" />
-                            <Pane maxHeight="120" styleClass="text-scrim-bottom" />
-                            <!-- Text within the image area -->
-                            <VBox layoutX="14.0" layoutY="14.0" maxHeight="-Infinity" prefWidth="619.0" spacing="10.0">
-                                <children>
-                                    <HBox spacing="10.0">
-                                        <children>
-                                            <Label fx:id="projectTitle" styleClass="project-title-label, drop-shadow-label" text="A really really really really long title for a project that's kind of self indulgent" wrapText="true" HBox.hgrow="ALWAYS">
-                                                <font>
-                                                    <Font size="25.0" />
-                                                </font>
-                                                <effect>
-                                                    <DropShadow height="10.0" radius="4.5" width="10.0" />
-                                                </effect>
-                                            </Label>
-                                            <Pane prefHeight="10.0" prefWidth="10.0" HBox.hgrow="ALWAYS" />
-                                        </children>
-                                    </HBox>
-                                </children>
-                                <padding>
-                                    <Insets left="15" right="20" bottom="15"/>
-                                </padding>
-                            </VBox>
-                            <Button StackPane.alignment="TOP_RIGHT" fx:id="editButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#edit" styleClass="edit-button" text="Edit">
-                                <StackPane.margin>
-                                    <Insets top="15" right="15" />
-                                </StackPane.margin>
-                            </Button>
+                            <children>
+                                <Pane fx:id="coverImage" />
+                                <Pane maxHeight="120" styleClass="text-scrim-bottom" />
+                                <!-- Text within the image area -->
+                                <VBox layoutX="14.0" layoutY="14.0" maxHeight="-Infinity" prefWidth="619.0" spacing="10.0">
+                                    <children>
+                                        <HBox spacing="10.0">
+                                            <children>
+                                                <Label fx:id="projectTitle" styleClass="project-title-label, drop-shadow-label" text="A really really really really long title for a project that's kind of self indulgent" wrapText="true" HBox.hgrow="ALWAYS">
+                                                    <font>
+                                                        <Font size="25.0" />
+                                                    </font>
+                                                    <effect>
+                                                        <DropShadow height="10.0" radius="4.5" width="10.0" />
+                                                    </effect>
+                                                </Label>
+                                                <Pane prefHeight="10.0" prefWidth="10.0" HBox.hgrow="ALWAYS" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="15" left="15" right="20" />
+                                    </padding>
+                                </VBox>
+                                <Button fx:id="editButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#edit" styleClass="edit-button" text="Edit" StackPane.alignment="TOP_RIGHT">
+                                    <StackPane.margin>
+                                        <Insets right="15" top="15" />
+                                    </StackPane.margin>
+                                </Button>
+                            </children>
                         </StackPane>
                         <!-- Drop shadow between image and rest of content area -->
                         <Pane minHeight="8" mouseTransparent="true">
@@ -78,11 +80,16 @@
                                     </children>
                                 </TextFlow>
                                 <!--<Line endX="${rightVBox.width}" startX="0.0" styleClass="dotted-line" />-->
-                                <PieChart fx:id="pieChart" labelLineLength="10.0" labelsVisible="false" legendVisible="false" prefHeight="100.0" prefWidth="100.0" startAngle="90" styleClass="pledges-piechart" VBox.vgrow="ALWAYS">
+                                <PieChart fx:id="pieChart" labelLineLength="10.0" labelsVisible="false" legendVisible="false" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="300.0" startAngle="90" styleClass="pledges-piechart">
                                     <effect>
                                         <DropShadow color="#000000bb" />
                                     </effect>
                                 </PieChart>
+                                <HBox alignment="CENTER_RIGHT">
+                                    <children>
+                                        <Label alignment="CENTER_RIGHT" onMouseClicked="#onViewTechDetailsClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="View technical details" textFill="BLUE" />
+                                    </children>
+                                </HBox>
                             </children>
                         </VBox>
                     </children>

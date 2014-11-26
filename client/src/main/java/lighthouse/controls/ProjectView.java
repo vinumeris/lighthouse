@@ -27,6 +27,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -36,10 +37,7 @@ import lighthouse.protocol.Ex;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
-import lighthouse.subwindows.EditProjectWindow;
-import lighthouse.subwindows.PledgeWindow;
-import lighthouse.subwindows.RevokeAndClaimWindow;
-import lighthouse.subwindows.ShowPledgeWindow;
+import lighthouse.subwindows.*;
 import lighthouse.threading.AffinityExecutor;
 import lighthouse.utils.ConcatenatingList;
 import lighthouse.utils.GuiUtils;
@@ -467,7 +465,7 @@ public class ProjectView extends HBox {
             memoSnippet.setWrapText(true);
             memoSnippet.maxWidthProperty().bind(vbox.widthProperty());
             memoSnippet.setMaxHeight(100);
-            viewMore.setStyle("-fx-text-fill: blue; -fx-cursor: hand");
+            viewMore.getStyleClass().add("hover-link");
             viewMore.setOnMouseClicked(ev -> ShowPledgeWindow.open(project.get(), getItem()));
             viewMore.setAlignment(Pos.CENTER_RIGHT);
             viewMore.prefWidthProperty().bind(vbox.widthProperty());
@@ -512,5 +510,11 @@ public class ProjectView extends HBox {
             return;
         }
         EditProjectWindow.openForEdit(project.get());
+    }
+
+    @FXML
+    public void onViewTechDetailsClicked(MouseEvent event) {
+        log.info("View tech details of project clicked for {}", project.get().getTitle());
+        ProjectTechDetailsWindow.open(project.get());
     }
 }

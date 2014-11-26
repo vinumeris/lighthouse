@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="721.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.ProjectTechDetailsWindow">
+   <bottom>
+      <HBox alignment="CENTER_RIGHT" prefHeight="21.0" prefWidth="540.0" spacing="15.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button defaultButton="true" mnemonicParsing="false" onAction="#closeClicked" text="Close" />
+         </children>
+      </HBox>
+   </bottom>
+   <padding>
+      <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+   </padding>
+   <center>
+      <VBox>
+         <children>
+            <GridPane prefHeight="247.0" prefWidth="661.0" BorderPane.alignment="CENTER">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="327.0" minWidth="10.0" prefWidth="187.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="487.0" minWidth="10.0" prefWidth="474.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Target address" />
+                  <VBox fx:id="targetAddressVBox" maxHeight="-Infinity" GridPane.columnIndex="1" />
+                  <Label text="Server URL" GridPane.rowIndex="1" />
+                  <TextField fx:id="serverURL" editable="false" promptText="Serverless project" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label text="Min pledge size" GridPane.rowIndex="2" />
+                  <TextField fx:id="minPledgeSize" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label text="Auth key" GridPane.rowIndex="3" />
+                  <TextField fx:id="authKey" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label text="Network parameters" GridPane.rowIndex="4" />
+                  <TextField fx:id="netParams" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Label text="Creation time" GridPane.rowIndex="5" />
+                  <TextField fx:id="creationTime" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+               </children>
+            </GridPane>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
