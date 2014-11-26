@@ -15,11 +15,16 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -428,7 +433,7 @@ public class Main extends Application {
         scene.getStylesheets().add(getResource("main.css").toString());
     }
 
-    private Node stopClickPane = new Pane();
+    private ImageView stopClickPane = new ImageView();
 
     public boolean waitForInit() {
         log.info("Waiting for bitcoin load ...");
@@ -461,13 +466,22 @@ public class Main extends Application {
                 uiStack.getChildren().add(stopClickPane);
                 uiStack.getChildren().add(ui);
                 // Workaround for crappy integrated graphics chips.
-                if (slowGFX) {
+                if (GuiUtils.isSoftwarePipeline()) {
                     brightnessAdjust(mainUI, 0.9);
                 } else {
-                    stopClickPane.setStyle("-fx-background-color: white");
+                    WritableImage image = new WritableImage((int) scene.getWidth(), (int) scene.getHeight());
+                    mainUI.setClip(new Rectangle(scene.getWidth(), scene.getHeight()));
+                    ColorAdjust lighten = new ColorAdjust(0.0, 0.0, 0.7, 0.0);
+                    GaussianBlur blur = new GaussianBlur(20);
+                    blur.setInput(lighten);
+                    mainUI.setEffect(blur);
+                    mainUI.snapshot(new SnapshotParameters(), image);
+                    mainUI.setClip(null);
+                    mainUI.setEffect(null);
+
+                    stopClickPane.setImage(image);
                     stopClickPane.setOpacity(0.0);
-                    fadeIn(stopClickPane, 0, 0.7);
-                    blurOut(mainUI);
+                    fadeIn(stopClickPane, 0, 1.0);
                 }
                 ui.setOpacity(0.0);
                 fadeIn(ui);
@@ -504,12 +518,8 @@ public class Main extends Application {
                     handler.handle(ev);
                 });
             }
-            if (slowGFX) {
+            if (GuiUtils.isSoftwarePipeline()) {
                 brightnessUnadjust(mainUI);
-            } else {
-                // Make the blur finish ever so slightly before the white stopclickpane is totally clear.
-                // This looks slightly nicer, but may not be needed after 8u20 as a bug in GaussianBlur was fixed.
-                blurIn(mainUI, UI_ANIMATION_TIME.multiply(0.8));
             }
             this.ui = null;
             this.controller = null;

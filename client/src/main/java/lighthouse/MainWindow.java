@@ -119,8 +119,7 @@ public class MainWindow {
 
         // Slide back button in/out.
         AwesomeDude.setIcon(backButton, AwesomeIcon.ARROW_CIRCLE_LEFT, "30");
-        animatedBind(topBoxLeftArea, topBoxLeftArea.translateXProperty(), when(inProjectView).then(0).otherwise(-45),
-                Interpolator.EASE_OUT);
+        animatedBind(topBoxLeftArea, topBoxLeftArea.translateXProperty(), when(inProjectView).then(0).otherwise(-45), Interpolator.EASE_OUT);
 
         AwesomeDude.setIcon(menuBtn, AwesomeIcon.BARS);
 

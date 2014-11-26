@@ -99,7 +99,7 @@ public class GuiUtils {
             Platform.runLater(r);
     }
 
-    public static final int UI_ANIMATION_TIME_MSEC = 300;
+    public static final int UI_ANIMATION_TIME_MSEC = 500;
     public static final Duration UI_ANIMATION_TIME = Duration.millis(UI_ANIMATION_TIME_MSEC);
 
     public static Animation fadeIn(Node ui) {
