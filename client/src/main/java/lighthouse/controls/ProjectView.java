@@ -1,5 +1,6 @@
 package lighthouse.controls;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import javafx.animation.KeyFrame;
@@ -31,6 +32,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
 import lighthouse.LighthouseBackend;
 import lighthouse.Main;
 import lighthouse.protocol.Ex;
@@ -49,10 +51,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
@@ -87,6 +90,7 @@ public class ProjectView extends HBox {
     @FXML Label numPledgersLabel;
     @FXML Label percentFundedLabel;
     @FXML Button editButton;
+    @FXML VBox pledgesListVBox;
 
     public final ObjectProperty<Project> project = new SimpleObjectProperty<>();
     public final ObjectProperty<EventHandler<ActionEvent>> onBackClickedProperty = new SimpleObjectProperty<>();
@@ -214,6 +218,7 @@ public class ProjectView extends HBox {
 
         description.getChildren().setAll(new Text(project.get().getMemo()));
 
+        pledgesListVBox.visibleProperty().bind(not(isEmpty(pledgesList.getItems())));
         noPledgesLabel.visibleProperty().bind(isEmpty(pledgesList.getItems()));
 
         // Load and set up the cover image.
@@ -516,5 +521,32 @@ public class ProjectView extends HBox {
     public void onViewTechDetailsClicked(MouseEvent event) {
         log.info("View tech details of project clicked for {}", project.get().getTitle());
         ProjectTechDetailsWindow.open(project.get());
+    }
+
+    @FXML
+    public void exportPledgesClicked(MouseEvent event) {
+        log.info("Export pledges clicked for {}", project.get().getTitle());
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Export pledges to CSV file");
+        chooser.setInitialFileName("pledges.csv");
+        GuiUtils.platformFiddleChooser(chooser);
+        File file = chooser.showSaveDialog(Main.instance.mainStage);
+        if (file == null) {
+            log.info(" ... but user cancelled");
+            return;
+        }
+        log.info("Saving pledges as CSV to file {}", file);
+        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), Charsets.UTF_8)) {
+            writer.append(String.format("num_satoshis,time,email,message%n"));
+            for (LHProtos.Pledge pledge : pledgesList.getItems()) {
+                String time = Instant.ofEpochSecond(pledge.getTimestamp()).atZone(ZoneId.of("UTC")).format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(",", "");
+                String memo = pledge.getPledgeDetails().getMemo().replace('\n', ' ').replace(",", "");
+                writer.append(String.format("%d,%s,%s,%s%n", pledge.getTotalInputValue(), time, pledge.getPledgeDetails().getContactAddress(), memo));
+            }
+            GuiUtils.informationalAlert("Export succeeded", "Pledges are stored in a CSV file, which can be loaded with any spreadsheet application. Amounts are specified in satoshis.");
+        } catch (IOException e) {
+            log.error("Failed to write to csv file", e);
+            GuiUtils.informationalAlert("Export failed", "Lighthouse was unable to save pledge data to the selected file: %s", e.getLocalizedMessage());
+        }
     }
 }
