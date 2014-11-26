@@ -39,7 +39,7 @@
             <Label fx:id="minMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#minMoneyClicked" styleClass="link-label" text="Minimum amount possible" />
             <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="15.0">
                <children>
-                  <Label text="Contact email" />
+                  <Label text="Your email address" />
                   <TextField fx:id="emailEdit" HBox.hgrow="ALWAYS" />
                </children>
                <padding>
