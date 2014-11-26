@@ -173,7 +173,6 @@
                                 <VBox alignment="CENTER" fillWidth="true" mouseTransparent="true" prefHeight="285.0" prefWidth="250.0" spacing="10">
                                     <children>
                                         <Label fx:id="noPledgesLabel" text="No pledges yet!" />
-                                        <ProgressIndicator fx:id="pledgeDownloadIndicator" visible="false" />
                                     </children>
                                 </VBox>
                             </children>
