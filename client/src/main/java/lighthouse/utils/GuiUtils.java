@@ -1,6 +1,5 @@
 package lighthouse.utils;
 
-import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.sun.prism.GraphicsPipeline;
 import com.sun.prism.sw.SWPipeline;
@@ -67,27 +66,6 @@ public class GuiUtils {
             e.printStackTrace();
             Runtime.getRuntime().exit(1);
         }
-    }
-
-    public static void crashAlert(Throwable t) {
-        Throwable rootCause = Throwables.getRootCause(t);
-        log.error("CRASH!", rootCause);
-        // Always use runLater to avoid "Nested event loops are allowed only while handling system events" error that
-        // can occur if the crash occurs during e.g. an animation.
-        Platform.runLater(() -> {
-            runAlert((stage, controller) -> controller.crashAlert(stage, rootCause.toString()));
-            Platform.exit();
-        });
-    }
-
-    /** Show a GUI alert box for any unhandled exceptions that propagate out of this thread. */
-    public static void handleCrashesOnThisThread() {
-        Thread.currentThread().setUncaughtExceptionHandler((thread, exception) -> {
-            Platform.runLater(() -> {
-                Main.instance.mainStage.hide();
-                GuiUtils.crashAlert(Throwables.getRootCause(exception));
-            });
-        });
     }
 
     public static void informationalAlert(String message, String details, Object... args) {

@@ -3,6 +3,7 @@ package lighthouse.subwindows;
 import com.google.common.base.Throwables;
 import com.google.common.net.HostAndPort;
 import com.google.common.net.InternetDomainName;
+import com.vinumeris.crashfx.CrashFX;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -26,7 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static javafx.beans.binding.Bindings.not;
-import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.GuiUtils.informationalAlert;
+import static lighthouse.utils.GuiUtils.platformFiddleChooser;
 
 /**
  * Screen where user chooses between server assisted and serverless mode.
@@ -136,7 +138,7 @@ public class AddProjectTypeWindow {
             }
             Main.backend.importProjectFrom(file);
         } catch (IOException e) {
-            crashAlert(e);
+            CrashFX.propagate(e);
         }
     }
 

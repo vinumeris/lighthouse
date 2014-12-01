@@ -1,5 +1,6 @@
 package lighthouse.subwindows;
 
+import com.vinumeris.crashfx.CrashWindow;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -10,7 +11,6 @@ import javafx.scene.input.MouseEvent;
 import lighthouse.Main;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.Project;
-import lighthouse.utils.GuiUtils;
 import lighthouse.utils.ValidationLink;
 import lighthouse.wallet.PledgingWallet;
 import org.bitcoinj.core.Coin;
@@ -109,7 +109,7 @@ public class PledgeWindow extends InnerWindow {
             }
         } catch (InsufficientMoneyException e) {
             // This should not be possible because we disable the confirm button if the amount doesn't validate.
-            GuiUtils.crashAlert(e);
+            CrashWindow.open(e);
         }
     }
 

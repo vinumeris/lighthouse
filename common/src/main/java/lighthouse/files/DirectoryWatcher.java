@@ -2,7 +2,6 @@ package lighthouse.files;
 
 import com.google.common.collect.ImmutableSet;
 import com.sun.nio.file.SensitivityWatchEventModifier;
-import lighthouse.protocol.LHUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,6 @@ public class DirectoryWatcher {
                 for (Path directory : directories) {
                     directory.register(watcher, new WatchEvent.Kind[]{ENTRY_DELETE, ENTRY_CREATE, ENTRY_MODIFY},
                             SensitivityWatchEventModifier.HIGH);
-                    log.info("Files in {}: {}", directory, LHUtils.listDir(directory));
                 }
                 while (!Thread.currentThread().isInterrupted()) {
                     WatchKey key = watcher.take();

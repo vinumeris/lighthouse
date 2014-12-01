@@ -2,6 +2,7 @@ package lighthouse.subwindows;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.vinumeris.crashfx.CrashWindow;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -15,7 +16,8 @@ import org.spongycastle.crypto.params.KeyParameter;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkState;
-import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.GuiUtils.checkGuiThread;
+import static lighthouse.utils.GuiUtils.informationalAlert;
 
 public class SendMoneyController {
     public Button sendBtn;
@@ -61,7 +63,7 @@ public class SendMoneyController {
                 @Override
                 public void onFailure(Throwable t) {
                     // We died trying to empty the wallet.
-                    crashAlert(t);
+                    CrashWindow.open(t);
                 }
             });
             sendResult.tx.getConfidence().addEventListener((tx, reason) -> {

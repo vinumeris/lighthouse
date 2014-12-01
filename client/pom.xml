@@ -99,6 +99,11 @@
             <version>1.0</version>
         </dependency>
         <dependency>
+            <groupId>com.vinumeris</groupId>
+            <artifactId>crashfx-client</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>net.sf.proguard</groupId>
             <artifactId>proguard-base</artifactId>
             <version>5.0</version>

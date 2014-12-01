@@ -2,6 +2,7 @@ package lighthouse.subwindows;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.vinumeris.crashfx.CrashWindow;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,7 +13,6 @@ import lighthouse.Main;
 import lighthouse.protocol.Ex;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.Project;
-import lighthouse.utils.GuiUtils;
 import lighthouse.wallet.PledgingWallet;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.InsufficientMoneyException;
@@ -120,7 +120,7 @@ public class RevokeAndClaimWindow {
             };
             progress.txFuture.handleAsync((t, ex) -> {
                 if (ex != null) {
-                    GuiUtils.crashAlert(ex);
+                    CrashWindow.open(ex);
                 } else {
                     onSuccess.run();
                 }
@@ -181,7 +181,7 @@ public class RevokeAndClaimWindow {
 
                 @Override
                 public void onFailure(Throwable t) {
-                    GuiUtils.crashAlert(t);
+                    CrashWindow.open(t);
                     overlayUI.done();
                 }
             }, Platform::runLater);

@@ -3,6 +3,8 @@ package lighthouse;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.vinumeris.crashfx.CrashFX;
+import com.vinumeris.crashfx.CrashWindow;
 import com.vinumeris.updatefx.Crypto;
 import com.vinumeris.updatefx.UpdateFX;
 import javafx.animation.Animation;
@@ -138,7 +140,7 @@ public class Main extends Application {
         Thread.currentThread().setContextClassLoader(Main.class.getClassLoader());
         instance = this;
         // Show the crash dialog for any exceptions that we don't handle and that hit the main loop.
-        handleCrashesOnThisThread();
+        CrashFX.setup("Lighthouse/" + Main.VERSION, AppDirectory.dir().resolve("crashes"), URI.create("https://www.vinumeris.com/crashfx/upload"));
         // Set up the app dir + logging again, because the first time we did this (in main) could have been in the
         // context of another class loader if we're now running a different §app version to the one the user installed.
         // Anything that happened in main() therefore might have now been wipedt.
@@ -318,7 +320,7 @@ public class Main extends Application {
             if (GuiUtils.resourceOverrideDirectory != null)
                 informationalAlert("Failed to load UI", "Error: %s", e.getMessage());
             else
-                GuiUtils.crashAlert(e);
+                CrashWindow.open(e);
         }
     }
 
@@ -336,7 +338,6 @@ public class Main extends Application {
 
             @Override
             protected void onSetupCompleted() {
-                handleCrashesOnThisThread();
                 wallet = (PledgingWallet) bitcoin.wallet();
                 backend = new LighthouseBackend(CLIENT, vPeerGroup, vChain, wallet);
 
@@ -419,7 +420,7 @@ public class Main extends Application {
             public void failed(Service.State from, Throwable failure) {
                 bitcoin = null;
                 walletLoadedLatch.countDown();
-                crashAlert(failure);
+                CrashWindow.open(failure);
             }
         }, Threading.SAME_THREAD);
         bitcoin.startAsync();
