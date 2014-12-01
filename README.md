@@ -157,14 +157,8 @@ for a private link. These builds auto update so can be a convenient way to follo
 moment we're looking for people who can devote a piece of their time to helping test and find bugs. Please only ask if
 you can do this. There's a limited number of places during alpha.
 
-If you're a developer to build you need Java 8, Maven and then:
-
-* Clone bitcoinj git master and do `mvn install -DskipTests`
-* Clone [UpdateFX](https://github.com/vinumeris/updatefx) and do `mvn install -DskipTests`
-* Now you can open up this project in your favourite IDE (we recommend and use IntelliJ) or just run `mvn package` and
-  you can find the app jar in client/target.
-
-The build process will become easier once bitcoinj and UpdateFX do formal releases to package repositories.
+If you're a developer to build you need Java 8, Maven and just run `mvn package` as normal. There is no special build
+process.
 
 Then read the [design document](docs/Design%20doc.md) to learn how the code is designed and structured, pick an issue
 you like from the bug tracker (please talk to us on the mailing list first though!) and get coding!
