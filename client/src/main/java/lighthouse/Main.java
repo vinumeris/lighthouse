@@ -139,10 +139,8 @@ public class Main extends Application {
         // For some reason the JavaFX launch process results in us losing the thread context class loader: reset it.
         Thread.currentThread().setContextClassLoader(Main.class.getClassLoader());
         instance = this;
-        // Show the crash dialog for any exceptions that we don't handle and that hit the main loop.
-        CrashFX.setup("Lighthouse/" + Main.VERSION, AppDirectory.dir().resolve("crashes"), URI.create("https://www.vinumeris.com/crashfx/upload"));
         // Set up the app dir + logging again, because the first time we did this (in main) could have been in the
-        // context of another class loader if we're now running a different §app version to the one the user installed.
+        // context of another class loader if we're now running a different app version to the one the user installed.
         // Anything that happened in main() therefore might have now been wipedt.
         AppDirectory.initAppDir(APP_NAME);
         if (!parseCommandLineArgs()) {
@@ -152,6 +150,8 @@ public class Main extends Application {
         setupLogging();
         log.info("\n\nLighthouse {} starting up. It is {}\n", VERSION, LHUtils.nowAsString());
         log.info("App dir is {}. We have {} cores.", AppDirectory.dir(), Runtime.getRuntime().availableProcessors());
+        // Show the crash dialog for any exceptions that we don't handle and that hit the main loop.
+        CrashFX.setup("Lighthouse/" + Main.VERSION, AppDirectory.dir().resolve("crashes"), URI.create("https://www.vinumeris.com/crashfx/upload"));
         // Set up the basic window with an empty UI stack, and put a quick splash there.
         reached("JFX initialised");
         prefs = new UserPrefs();
