@@ -1,0 +1,2 @@
+Project details, pledge CSV export, bug fixes, graphics improvements.
+This update adds a new details window to the project view where you can see the project output addresses, signing key and so on. It also allows you to export pledge data to a CSV file so you can work with them using other tools, it brings back the blurred background, fixes some bugs and adds a crash report upload feature. This should be the last update before switching to the main network.
