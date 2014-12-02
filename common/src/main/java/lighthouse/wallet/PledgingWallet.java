@@ -216,8 +216,13 @@ public class PledgingWallet extends Wallet {
             log.info("Committing pledge for stub: {}", stub);
             committed = true;
             if (dependency != null) {
-                commitTx(dependency);
-                if (andBroadcastDependencies) {
+                // It's possible that by the time we arrive here, the dependency is already committed, thus we use the
+                // maybe variant. The reason is, for a server-assisted project the server will broadcast the dependency
+                // for us to avoid races where the server thinks a pledge is invalid because it can't see the stub
+                // output. If the server responds to our HTTP upload request and we get here *slower* that the p2p
+                // network manages to propagate the transaction back to us, we might have already processed the
+                // dependency tx!
+                if (maybeCommitTx(dependency) && andBroadcastDependencies) {
                     log.info("Broadcasting dependency");
                     vTransactionBroadcaster.broadcastTransaction(dependency);
                 }
