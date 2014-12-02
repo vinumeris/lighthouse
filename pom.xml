@@ -7,7 +7,7 @@
     <groupId>com.vinumeris.lighthouse</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.14-SNAPSHOT</version>
+    <version>0.15-SNAPSHOT</version>
 
     <build>
         <plugins>
