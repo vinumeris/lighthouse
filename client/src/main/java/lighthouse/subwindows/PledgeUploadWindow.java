@@ -90,6 +90,7 @@ public class PledgeUploadWindow {
                     GuiUtils.informationalAlert("Upload failed", "%s. This probably indicates either a problem with " +
                                     "your internet connection or a configuration issue with the server. You could try again later.",
                             Throwables.getRootCause(e).getLocalizedMessage());
+                    log.error("Upload error", e);
                     throw e;
                 }
             }
