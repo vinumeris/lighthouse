@@ -43,16 +43,16 @@ import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.MoreBindings.mergeSets;
 
 /**
- * <p>Exposes observable data about pledges and projects that is based on combining the output of a wallet and
- * DiskProjectsManager (local folders) with (when used from the app) data queried from remote project servers.</p>
+ * Exposes observable data about pledges and projects that is based on combining the output of a wallet and
+ * DiskProjectsManager (local folders) with (when used from the app) data queried from remote project servers.
  *
- * <p>LighthouseBackend is a bit actor-ish: it uses its own thread which owns almost all internal state. Other
+ * LighthouseBackend is a bit actor-ish: it uses its own thread which owns almost all internal state. Other
  * objects it owns can sometimes use their own threads, but results are always marshalled onto the LighthouseBackend
  * thread before the Observable collections are modified. This design assists with avoiding locking and keeping
- * concurrency manageable. A prior approach based on ordinary threading and locking got too complicated.</p>
+ * concurrency manageable. A prior approach based on ordinary threading and locking got too complicated.
  *
- * <p>LighthouseBackend is used in both the GUI app and on the server. In the server case the wallet will typically be
- * empty and projects/pledges are stored on disk only. Ideally, it's connected to a local Bitcoin Core node.</p>
+ * LighthouseBackend is used in both the GUI app and on the server. In the server case the wallet will typically be
+ * empty and projects/pledges are stored on disk only. Ideally, it's connected to a local Bitcoin Core node.
  */
 public class LighthouseBackend extends AbstractBlockChainListener {
     private static final Logger log = LoggerFactory.getLogger(LighthouseBackend.class);
