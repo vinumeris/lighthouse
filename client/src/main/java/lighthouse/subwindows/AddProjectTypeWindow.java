@@ -101,7 +101,11 @@ public class AddProjectTypeWindow {
             log.info("Saving: {}", detailsProto.getExtraDetails().getTitle());
             try {
                 Project project;
-                if (!detailsProto.hasPaymentUrl()) {
+                if (detailsProto.hasPaymentUrl()) {
+                    // User has to explicitly export it somewhere (not watched) so they can get it to the server.
+                    project = Main.backend.saveProject(model.getProject());
+                    ExportWindow.openForProject(project);
+                } else {
                     GuiUtils.informationalAlert("Folder watching",
                             "The folder to which you save your project file will be watched for pledge files. When you receive them from backers, just put them in the same directory and they should appear.");
                     // Request directory first then save, so the animations are right.
@@ -119,10 +123,6 @@ public class AddProjectTypeWindow {
                         saveAndWatchDirectory(fp, dirPath);
                     });
                     overlayUI.done();
-                } else {
-                    // User has to explicitly export it somewhere (not watched) so they can get it to the server.
-                    project = Main.backend.saveProject(model.getProject());
-                    ExportWindow.openForProject(project);
                 }
             } catch (IOException e) {
                 log.error("Could not save project", e);
