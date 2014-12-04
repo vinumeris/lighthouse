@@ -60,6 +60,10 @@ public class ExportWindow {
         log.info("Open ExportWindow for saving project '{}'", project.getTitle());
         ExportWindow window = Main.instance.<ExportWindow>overlayUI("subwindows/export.fxml", "Export project").controller;
         window.project = project;
+        // Don't show "will watch directory" explainer for server assisted projects.
+        if (project.getPaymentURL() != null) {
+            ((BorderPane)window.folderWatchExplainer.getParent()).setBottom(null);
+        }
     }
 
     public static DataFormat PLEDGE_MIME_TYPE = new DataFormat("application/vnd.vinumeris.lighthouse-pledge");
