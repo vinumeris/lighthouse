@@ -477,10 +477,10 @@ public class PledgingWallet extends Wallet {
             private Set<PeerAddress> addrs = new HashSet<>();
 
             @Override
-            public void onConfidenceChanged(Transaction tx, ChangeReason reason) {
+            public void onConfidenceChanged(TransactionConfidence conf, ChangeReason reason) {
                 // tx can be different.
                 if (reason == TransactionConfidence.Listener.ChangeReason.SEEN_PEERS) {
-                    addrs.addAll(Sets.newHashSet(tx.getConfidence().getBroadcastBy()));
+                    addrs.addAll(Sets.newHashSet(conf.getBroadcastBy()));
                     progress.setPeersSeen(addrs.size());
                 } else if (reason == ChangeReason.TYPE) {
                     progress.setPeersSeen(-1);

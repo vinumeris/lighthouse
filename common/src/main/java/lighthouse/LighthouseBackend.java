@@ -211,8 +211,8 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             private boolean done = false;
 
             @Override
-            public void onConfidenceChanged(Transaction t, ChangeReason changeReason) {
-                if (!done && checkClaimConfidence(t, project)) {
+            public void onConfidenceChanged(TransactionConfidence conf, ChangeReason changeReason) {
+                if (!done && checkClaimConfidence(transaction, conf, project)) {
                     // Because an async thread is queuing up events on our thread, we can still get run even after
                     // the event listener has been removed. So just quiet things a bit here.
                     done = true;
@@ -240,30 +240,30 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         tx.setPurpose(Transaction.Purpose.ASSURANCE_CONTRACT_CLAIM);
         // Figure out if the claim is good enough to tell the user about yet. Note that our confidence can go DOWN
         // as well as up if the transaction is double spent or there's a re-org that sends it back to being pending.
-        checkClaimConfidence(tx, project);
+        checkClaimConfidence(tx, tx.getConfidence(),  project);
         addClaimConfidenceListener(executor, tx, project);
     }
 
-    private boolean checkClaimConfidence(Transaction t, Project project) {
-        switch (t.getConfidence().getConfidenceType()) {
+    private boolean checkClaimConfidence(Transaction transaction, TransactionConfidence conf, Project project) {
+        switch (conf.getConfidenceType()) {
             case PENDING:
-                int seenBy = t.getConfidence().numBroadcastPeers();
+                int seenBy = conf.numBroadcastPeers();
                 log.info("Claim seen by {} peers", seenBy);
                 if (seenBy < peerGroup.getMinBroadcastConnections() || wallet.getParams().equals(RegTestParams.get()))
                     break;
                 // Fall through ...
             case BUILDING:
-                if (t.getConfidence().getDepthInBlocks() > 3)
+                if (conf.getDepthInBlocks() > 3)
                     return true;  // Don't care about watching this anymore.
                 log.info("Claim propagated or mined");
                 if (project.getPaymentURL() == null || mode == Mode.SERVER)
-                    movePledgesFromOpenToClaimed(t, project);
+                    movePledgesFromOpenToClaimed(transaction, project);
                 else
                     refreshProjectStatusFromServer(project);
-                diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED, t.getHash()));
+                diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED, transaction.getHash()));
                 break;
             case DEAD:
-                log.warn("Claim double spent! Overridden by {}", t.getConfidence().getOverridingTransaction());
+                log.warn("Claim double spent! Overridden by {}", conf.getOverridingTransaction());
                 diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.ERROR, null));
                 break;
             case UNKNOWN:
