@@ -253,10 +253,10 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                     break;
                 // Fall through ...
             case BUILDING:
-                log.info("Claim propagated or mined");
                 if (t.getConfidence().getDepthInBlocks() > 3)
                     return true;  // Don't care about watching this anymore.
-                if (project.getPaymentURL() == null)
+                log.info("Claim propagated or mined");
+                if (project.getPaymentURL() == null || mode == Mode.SERVER)
                     movePledgesFromOpenToClaimed(t, project);
                 else
                     refreshProjectStatusFromServer(project);
@@ -552,6 +552,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         // Sigh, wish Java had proper co-routines (there's a lib that does it nicely but is overkill for this function).
         // This is messy because we want to overlap multiple lookups and thenAcceptAsync doesn't work how you'd think
         // it works (it will block the backend thread whilst waiting for the getStatus call to complete).
+        checkState(mode == Mode.CLIENT);
         CompletableFuture<Void> future = new CompletableFuture<>();
         executor.execute(() -> {
             markAsInProgress(project);
