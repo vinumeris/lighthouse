@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
@@ -345,7 +346,10 @@ public class Main extends Application {
                 walletLoadedLatch.countDown();
 
                 if (params == RegTestParams.get()) {
-                    vPeerGroup.setMaxConnections(1);
+                    vPeerGroup.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort()));
+                    vPeerGroup.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort() + 1));
+                    vPeerGroup.setMinBroadcastConnections(1);
+                    vPeerGroup.setUseLocalhostPeerWhenPossible(false);
                 } else {
                     // TODO: Replace this with a DNS seed that crawls for NODE_GETUTXOS (or whatever it's renamed to).
                     PeerDiscovery hardCodedPeers = new PeerDiscovery() {
