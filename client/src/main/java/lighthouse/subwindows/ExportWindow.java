@@ -30,6 +30,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+// TODO: The folder explainer here is actually dead code.
+
 public class ExportWindow {
     private static final Logger log = LoggerFactory.getLogger(ExportWindow.class);
 

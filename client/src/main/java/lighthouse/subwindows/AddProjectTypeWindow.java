@@ -15,6 +15,7 @@ import lighthouse.Main;
 import lighthouse.model.ProjectModel;
 import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.Project;
+import lighthouse.utils.GuiUtils;
 import lighthouse.utils.ValidationLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +102,8 @@ public class AddProjectTypeWindow {
             try {
                 Project project;
                 if (!detailsProto.hasPaymentUrl()) {
+                    GuiUtils.informationalAlert("Folder watching",
+                            "The folder to which you save your project file will be watched for pledge files. When you receive them from backers, just put them in the same directory and they should appear.");
                     // Request directory first then save, so the animations are right.
                     DirectoryChooser chooser = new DirectoryChooser();
                     chooser.setTitle("Select a directory to store the project and pledges");
