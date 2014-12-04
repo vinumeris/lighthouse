@@ -249,7 +249,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             case PENDING:
                 int seenBy = conf.numBroadcastPeers();
                 log.info("Claim seen by {} peers", seenBy);
-                if (seenBy < peerGroup.getMinBroadcastConnections() || wallet.getParams().equals(RegTestParams.get()))
+                if (seenBy < peerGroup.getMinBroadcastConnections())
                     break;
                 // Fall through ...
             case BUILDING:
