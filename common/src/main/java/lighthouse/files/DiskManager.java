@@ -131,9 +131,9 @@ public class DiskManager {
         executor.checkOnThread();
         boolean isProject = path.toString().endsWith(PROJECT_FILE_EXTENSION);
         boolean isPledge = path.toString().endsWith(PLEDGE_FILE_EXTENSION);
-        // We model a change as a delete followed by an add.
-        boolean isCreate = kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY;
-        boolean isDelete = kind == StandardWatchEventKinds.ENTRY_DELETE || kind == StandardWatchEventKinds.ENTRY_MODIFY;
+        boolean isCreate = kind == StandardWatchEventKinds.ENTRY_CREATE;
+        boolean isDelete = kind == StandardWatchEventKinds.ENTRY_DELETE;
+        boolean isModify = kind == StandardWatchEventKinds.ENTRY_MODIFY;
 
         if (isProject || isPledge)
             log.info("{} -> {}", path, kind);
@@ -141,7 +141,7 @@ public class DiskManager {
         // Project files are only auto loaded from the app directory. If the user downloads a serverless project to their
         // Downloads folder, imports it, then downloads a second project, we don't want it to automatically appear.
         if (isProject && path.getParent().equals(AppDirectory.dir())) {
-            if (isDelete) {
+            if (isDelete || isModify) {
                 log.info("Project file deleted/modified: {}", path);
                 Project project = projectsByPath.get(path);
                 if (project != null) {
@@ -149,19 +149,23 @@ public class DiskManager {
                         log.info("Project file modified, reloading ...");
                         this.tryLoadProject(path, projects.indexOf(project));
                     } else {
+                        log.info("Project file deleted, removing ...");
                         projects.remove(project);
                         projectsByPath.remove(path);
                         synchronized (this) {
                             projectsById.remove(project.getID());
                         }
                     }
+                } else if (isModify) {
+                    log.info("Project file modified, but we don't know about it: last load might have failed. Retrying");
+                    this.tryLoadProject(path);
                 }
             } else if (isCreate) {
                 log.info("New project found: {}", path);
                 this.tryLoadProject(path);
             }
         } else if (isPledge) {
-            if (isDelete) {
+            if (isDelete || isModify) {
                 LHProtos.Pledge pledge = pledgesByPath.get(path);
                 if (pledge != null) {
                     log.info("Pledge file deleted/modified: {}", path);
@@ -176,7 +180,7 @@ public class DiskManager {
                     log.error("Got delete event for a pledge we had not loaded, maybe missing project? {}", path);
                 }
             }
-            if (isCreate) {
+            if (isCreate || isModify) {
                 this.tryLoadPledge(path);
             }
         }
