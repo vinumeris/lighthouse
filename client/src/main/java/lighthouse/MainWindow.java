@@ -61,8 +61,7 @@ import java.nio.file.Path;
 
 import static javafx.beans.binding.Bindings.when;
 import static lighthouse.threading.AffinityExecutor.UI_THREAD;
-import static lighthouse.utils.GuiUtils.animatedBind;
-import static lighthouse.utils.GuiUtils.platformFiddleChooser;
+import static lighthouse.utils.GuiUtils.*;
 
 /**
  * Gets created auto-magically by FXMLLoader via reflection. The widget fields are set to the GUI controls they're named
@@ -310,6 +309,7 @@ public class MainWindow {
 
     private static boolean firstTime = true;
     public void onBitcoinSetup() {
+        checkGuiThread();
         bitcoinUIModel.setWallet(Main.wallet);
         addressControl.addressProperty().bind(bitcoinUIModel.addressProperty());
         balance.textProperty().bind(EasyBind.map(bitcoinUIModel.balanceProperty(), coin -> MonetaryFormat.BTC.noCode().format(coin).toString()));

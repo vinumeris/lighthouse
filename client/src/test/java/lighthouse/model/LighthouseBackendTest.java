@@ -51,7 +51,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static lighthouse.LighthouseBackend.Mode.CLIENT;
-import static lighthouse.LighthouseBackend.Mode.SERVER;
 import static lighthouse.protocol.LHUtils.*;
 import static org.bitcoinj.testing.FakeTxBuilder.createFakeBlock;
 import static org.junit.Assert.*;
@@ -154,7 +153,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
     @After
     public void tearDown() {
         super.tearDown();
-        executor.service.shutdown();
+        backend.shutdown();
         localServer.stop(Integer.MAX_VALUE);
     }
 
@@ -532,11 +531,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
     @Test
     public void submitPledgeViaHTTP() throws Exception {
         backend.shutdown();
-        backend = new LighthouseBackend(SERVER, peerGroup, blockChain, pledgingWallet, diskManager, executor);
-        backend.setMinPeersForUTXOQuery(1);
-        backend.setMaxJitterSeconds(0);
+        initCoreState();
         // Test the process of broadcasting a pledge's dependencies, then checking the UTXO set to see if it was
         // revoked already. If all is OK then it should show up in the verified pledges set.
+
         peerGroup.setMinBroadcastConnections(2);
 
         Triplet<Transaction, Transaction, LHProtos.Pledge> data = TestUtils.makePledge(project, to, project.getGoalAmount());

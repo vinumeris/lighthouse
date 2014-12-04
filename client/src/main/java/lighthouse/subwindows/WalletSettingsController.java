@@ -2,7 +2,6 @@ package lighthouse.subwindows;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.util.concurrent.Service;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
@@ -27,7 +26,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static javafx.beans.binding.Bindings.*;
-import static lighthouse.protocol.LHUtils.*;
+import static lighthouse.protocol.LHUtils.didThrow;
+import static lighthouse.protocol.LHUtils.unchecked;
 import static lighthouse.utils.GuiUtils.checkGuiThread;
 import static lighthouse.utils.GuiUtils.informationalAlert;
 
@@ -156,14 +156,7 @@ public class WalletSettingsController {
         long birthday = datePicker.getValue().atStartOfDay().toEpochSecond(ZoneOffset.UTC);
         DeterministicSeed seed = new DeterministicSeed(Splitter.on(' ').splitToList(wordsArea.getText()), null, "", birthday);
         // Shut down bitcoinj and restart it with the new seed.
-        Main.bitcoin.addListener(new Service.Listener() {
-            @Override
-            public void terminated(Service.State from) {
-                uncheck(() -> Main.instance.initBitcoin(seed));
-                Main.bitcoin.startAsync();
-            }
-        }, Platform::runLater);
-        Main.bitcoin.stopAsync();
+        Main.restartBitcoinJ(seed);
     }
 
     @FXML

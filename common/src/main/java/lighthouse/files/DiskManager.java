@@ -111,6 +111,10 @@ public class DiskManager {
         directoryWatcher = createDirWatcher();
     }
 
+    public void shutdown() {
+        directoryWatcher.stop();
+    }
+
     private DirectoryWatcher createDirWatcher() {
         Set<Path> directories = new HashSet<>();
         // We always watch the app directory.

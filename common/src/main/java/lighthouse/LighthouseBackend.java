@@ -3,6 +3,7 @@ package lighthouse;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.LongProperty;
@@ -1072,10 +1073,12 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
 
     public void shutdown() {
-        executor.execute(() -> {
+        ignoreAndLog(() -> Uninterruptibles.getUninterruptibly(executor.service.submit(() -> {
             peerGroup.removePeerFilterProvider(manager);
             peerGroup.removeEventListener(manager);
-        });
+            diskManager.shutdown();
+            executor.service.shutdown();
+        })));
     }
 
     public void refreshBloomFilter() {

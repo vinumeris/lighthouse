@@ -95,7 +95,7 @@ public class Main extends Application {
     public Scene scene;
     public Stage mainStage;
     public MainWindow mainWindow;
-    private CountDownLatch walletLoadedLatch = new CountDownLatch(1);
+    private CountDownLatch walletLoadedLatch;
 
     public NotificationBarPane notificationBar;
 
@@ -326,6 +326,7 @@ public class Main extends Application {
     }
 
     public void initBitcoin(@Nullable DeterministicSeed restoreFromSeed) throws IOException {
+        walletLoadedLatch = new CountDownLatch(1);
         // Tell bitcoinj to run event handlers on the JavaFX UI thread. This keeps things simple and means
         // we cannot forget to switch threads when adding event handlers. Unfortunately, the DownloadListener
         // we give to the app kit is currently an exception and runs on a library thread. It'll get fixed in
@@ -454,6 +455,16 @@ public class Main extends Application {
 
     public static void restart() {
         uncheck(UpdateFX::restartApp);
+    }
+
+    public static void restartBitcoinJ(DeterministicSeed seed) {
+        new Thread(() -> {
+            Main.bitcoin.stopAsync();
+            Main.bitcoin.awaitTerminated();
+            uncheck(() -> Main.instance.initBitcoin(seed));
+            Main.instance.waitForInit();
+            Platform.runLater(Main.instance.mainWindow::onBitcoinSetup);
+        }, "Restart thread").start();
     }
 
     public class OverlayUI<T> {
@@ -594,6 +605,7 @@ public class Main extends Application {
     @Override
     public void stop() throws Exception {
         if (bitcoin != null && bitcoin.isRunning()) {
+            backend.shutdown();
             bitcoin.stopAsync();
             bitcoin.awaitTerminated();
         }
