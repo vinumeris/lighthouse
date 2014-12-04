@@ -13,6 +13,10 @@ import java.util.function.BiConsumer;
 
 import static java.nio.file.StandardWatchEventKinds.*;
 
+// TODO: This class should buffer up and deduplicate changes to avoid a stream of MODIFY MODIFY MODIFY events when a file is being copied in to a watched area.
+// The rest of the code does handle this, but it requires special cases in a bunch of places. In general this class
+// could be a whole lot easier to use.
+
 /**
  * The Java directory watching API is very low level, almost a direct translation of the underlying OS API's, so we
  * wrap it here to make it more digestable.
