@@ -244,6 +244,11 @@ public class ProjectView extends HBox {
 
         editButton.setVisible(Main.wallet.isProjectMine(p));
 
+        // If a cloned wallet double spends our pledge, the backend can notice this before the wallet does.
+        // Because the decision on what the button action should be depends on whether the wallet thinks it's pledged,
+        // we have to watch out for this and update the mode here.
+        Main.wallet.addOnRevokeHandler(pledge -> setModeFor(p, pledgedValue.get()), Platform::runLater);
+
         if (p.getPaymentURL() != null) {
             Platform.runLater(() -> {
                 Main.instance.scene.getAccelerators().put(KeyCombination.keyCombination("Shortcut+R"), () -> Main.backend.refreshProjectStatusFromServer(p));

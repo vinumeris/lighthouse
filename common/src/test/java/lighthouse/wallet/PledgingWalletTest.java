@@ -1,5 +1,11 @@
 package lighthouse.wallet;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.ListenableFuture;
+import lighthouse.protocol.LHProtos;
+import lighthouse.protocol.Project;
+import lighthouse.protocol.WalletTestObjects;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.UnitTestParams;
 import org.bitcoinj.store.UnreadableWalletException;
@@ -7,12 +13,6 @@ import org.bitcoinj.store.WalletProtobufSerializer;
 import org.bitcoinj.testing.MockTransactionBroadcaster;
 import org.bitcoinj.utils.BriefLogFormatter;
 import org.bitcoinj.utils.Threading;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.ListenableFuture;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.Project;
-import lighthouse.protocol.WalletTestObjects;
 import org.bitcoinj.wallet.Protos;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,8 +22,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.bitcoinj.core.Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.bitcoinj.core.Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
 import static org.junit.Assert.*;
 
 public class PledgingWalletTest {
@@ -178,6 +178,36 @@ public class PledgingWalletTest {
         // Check the tx executes properly.
         tx.getInput(0).verify(stub);
         assertEquals(revokedPledge[0], proto);
+    }
+
+    @Test
+    public void revokedByClone() throws Exception {
+        // Verify that the wallet does the right thing if a tx that isn't a claim appears out of nowhere and spends
+        // a pledged output. Normally this means the wallet was restored from a backup or cloned elsewhere.
+        WalletTestObjects objects = new WalletTestObjects(() -> new PledgingWallet(UnitTestParams.get()));
+        PledgingWallet wallet = (PledgingWallet) objects.wallet;
+        objects.sendAmounts(1_000_000);
+
+        LHProtos.Pledge[] revokedPledge = new LHProtos.Pledge[1];
+        wallet.addOnRevokeHandler(p -> revokedPledge[0] = p, Threading.SAME_THREAD);
+
+        Project project = new Project(makeProject(wallet, 3_000_000));
+        LHProtos.Pledge pledge = wallet.createPledge(project, 500_000, null).commit(true);
+        final MockTransactionBroadcaster.TxFuturePair txFuturePair = objects.broadcaster.waitForTxFuture();
+        txFuturePair.succeed();
+        Transaction stubTx = txFuturePair.tx;
+        LHProtos.Pledge proto = wallet.getPledges().iterator().next();
+        // Get the pledge stub outpoint.
+        Transaction pledgeTx = new Transaction(params, proto.getTransactions(1).toByteArray());
+        TransactionOutPoint stubOp = pledgeTx.getInput(0).getOutpoint();
+        TransactionOutput stub = stubTx.getOutput(stubOp.getIndex());
+        // Now double spend it
+        Transaction dblspend = new Transaction(params);
+        dblspend.addInput(stub);
+        dblspend.addOutput(stub.getValue(), new ECKey().toAddress(params));
+        wallet.receivePending(dblspend, null);
+        assertEquals(pledge, revokedPledge[0]);
+        assertEquals(0, wallet.getPledgedAmountFor(project));
     }
 
     @Test

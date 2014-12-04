@@ -416,10 +416,9 @@ public class PledgingWallet extends Wallet {
         Futures.addCallback(future, new FutureCallback<Transaction>() {
             @Override
             public void onSuccess(@Nullable Transaction result) {
-                final Sha256Hash hash = hashFromPledge(proto);
-                log.info("Broadcast of revocation was successful, marking pledge {} as revoked in wallet", hash);
+                log.info("Broadcast of revocation was successful, marking pledge {} as revoked in wallet", hashFromPledge(proto));
                 log.info("Pledge has {} txns", proto.getTransactionsCount());
-                updateForRevoke(hash, result, proto, stub);
+                updateForRevoke(result, proto, stub);
                 saveNow();
                 for (ListenerRegistration<OnRevokeHandler> handler : onRevokeHandlers) {
                     handler.executor.execute(() -> handler.listener.onRevoke(proto));
@@ -440,9 +439,9 @@ public class PledgingWallet extends Wallet {
         return new Revocation(future, revocation);
     }
 
-    private synchronized void updateForRevoke(Sha256Hash hash, Transaction tx, LHProtos.Pledge proto, TransactionOutput stub) {
+    private synchronized void updateForRevoke(Transaction tx, LHProtos.Pledge proto, TransactionOutput stub) {
         revokeInProgress.remove(tx);
-        revokedPledges.put(hash, proto);
+        revokedPledges.put(LHUtils.hashFromPledge(proto), proto);
         pledges.remove(stub);
         projects.inverse().remove(proto);
     }
@@ -556,7 +555,8 @@ public class PledgingWallet extends Wallet {
 
         // Check to see if we just saw a pledge get spent.
         synchronized (this) {
-            for (Map.Entry<TransactionOutput, LHProtos.Pledge> entry : pledges.entrySet()) {
+            // Copy the entry set so we can modify in the loop.
+            for (Map.Entry<TransactionOutput, LHProtos.Pledge> entry : new HashSet<>(pledges.entrySet())) {
                 TransactionInput spentBy = entry.getKey().getSpentBy();
                 if (spentBy != null && tx.equals(spentBy.getParentTransaction())) {
                     if (!revokeInProgress.contains(tx)) {
@@ -570,7 +570,12 @@ public class PledgingWallet extends Wallet {
                                 handler.executor.execute(() -> handler.listener.onClaim(pledge, tx));
                             }
                         } else {
-                            log.warn("... by a tx we don't recognise: cloned wallet?");
+                            log.warn("... by a tx we don't recognise: cloned wallet? Deleting pledge.");
+                            updateForRevoke(tx, pledge, entry.getKey());
+                            for (ListenerRegistration<OnRevokeHandler> handler : onRevokeHandlers) {
+                                handler.executor.execute(() -> handler.listener.onRevoke(pledge));
+                            }
+                            saveNow();
                         }
                     }
                 }
