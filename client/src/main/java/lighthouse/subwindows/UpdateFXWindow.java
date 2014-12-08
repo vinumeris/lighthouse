@@ -22,6 +22,10 @@ import lighthouse.Main;
 import lighthouse.files.AppDirectory;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,11 +34,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static java.nio.file.Files.exists;
 import static lighthouse.utils.GuiUtils.informationalAlert;
+import static lighthouse.utils.GuiUtils.log;
 
 /**
  * Lets the user select a version to pin themselves to.
  */
 public class UpdateFXWindow {
+    public static final String CACHED_UPDATE_SUMMARY = "cached-update-summary";
     public Main.OverlayUI<UpdateFXWindow> overlayUI;
 
     @FXML Text descriptionLabel;
@@ -123,9 +129,19 @@ public class UpdateFXWindow {
     }
 
     private void processUpdater(Updater updater) {
-        summary = Futures.getUnchecked(updater);
         updates.clear();
         updates.add(null);  // Sentinel for "latest"
+        try {
+            summary = Futures.getUnchecked(updater);
+        } catch (Exception e) {
+            log.warn("Failed to get online updates index, trying to fall back to disk cache: {}", e.getMessage());
+            summary = loadCachedIndex();
+            if (summary == null) {
+                log.error("Not online and failed to load cached updates, showing blank window.");
+                pinBtn.setDisable(true);
+                return;   // Not online and no cached updates, or some other issue, so give up.
+            }
+        }
         List<UFXProtocol.Update> list = new ArrayList<>(summary.updates.getUpdatesList());
         Collections.reverse(list);
         for (UFXProtocol.Update update : list) {
@@ -135,6 +151,25 @@ public class UpdateFXWindow {
                 if (update.getDescriptionCount() > 0)
                     updates.add(update);
             }
+        }
+    }
+
+    // Returns an UpdateSummary object that we previously had downloaded, so we can still display update info if
+    // we are offline, or null if not found or some other error.
+    @Nullable
+    private UpdateSummary loadCachedIndex() {
+        try (InputStream is = Files.newInputStream(AppDirectory.dir().resolve(CACHED_UPDATE_SUMMARY))) {
+            return new UpdateSummary(Main.VERSION, UFXProtocol.Updates.parseDelimitedFrom(is));
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static void saveCachedIndex(UFXProtocol.Updates updates) {
+        try (OutputStream os = Files.newOutputStream(AppDirectory.dir().resolve(CACHED_UPDATE_SUMMARY))) {
+            updates.writeDelimitedTo(os);
+        } catch (IOException e) {
+            log.error("Failed to save cached update index", e);
         }
     }
 }

@@ -60,6 +60,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static javafx.beans.binding.Bindings.when;
+import static lighthouse.protocol.LHUtils.unchecked;
 import static lighthouse.threading.AffinityExecutor.UI_THREAD;
 import static lighthouse.utils.GuiUtils.*;
 
@@ -412,6 +413,7 @@ public class MainWindow {
                 NotificationBarPane.Item downloadingItem = Main.instance.notificationBar.displayNewItem(
                         "Downloading software update", updater.progressProperty());
                 updater.setOnSucceeded(ev -> {
+                    UpdateFXWindow.saveCachedIndex(unchecked(updater::get).updates);
                     Button restartButton = new Button("Restart");
                     restartButton.setOnAction(ev2 -> Main.restart());
                     NotificationBarPane.Item newItem = Main.instance.notificationBar.createItem(
@@ -431,6 +433,8 @@ public class MainWindow {
                 shown = true;
             }
         });
+        // Save the updates list to disk so we can still display the updates screen even if we're offline.
+        updater.setOnSucceeded(ev -> UpdateFXWindow.saveCachedIndex(unchecked(updater::get).updates));
         // Don't bother the user if update check failed: assume some temporary server error that can be fixed silently.
         updater.setOnFailed(ev -> log.error("Online update check failed", updater.getException()));
         Thread thread = new Thread(updater, "Online update check");
