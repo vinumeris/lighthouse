@@ -55,15 +55,18 @@
     -fx-font-weight: bold;
 }
 
-.project-overview-widget:hover .project-title-label {
+.project-overview-widget-clickable:hover .project-title-label {
     -fx-underline: true;
 }
 
 .project-overview-widget {
-    -fx-cursor: hand;
     -fx-border-color: derive(-vn-darkgreen, -40%);
     -fx-background-color: #ffffffff;
     -fx-effect: dropshadow(gaussian, grey, 3, 0.1, 1, 1);
+}
+
+.project-overview-widget-clickable {
+    -fx-cursor: hand;
 }
 
 .text-scrim-bottom {

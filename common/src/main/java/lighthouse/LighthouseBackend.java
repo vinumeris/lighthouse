@@ -79,7 +79,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     public static enum ProjectState {
         OPEN,
         ERROR,
-        CLAIMED
+        CLAIMED,
+
+        UNKNOWN  // Used only for offline mode
     }
 
     public static class CheckStatus {

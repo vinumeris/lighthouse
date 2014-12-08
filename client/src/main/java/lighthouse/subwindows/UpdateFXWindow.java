@@ -120,7 +120,7 @@ public class UpdateFXWindow {
     }
 
     public void setUpdater(Updater updater) {
-        if (updater.isDone())
+        if (updater.isDone() || Main.offline)
             processUpdater(updater);
         else
             updater.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
@@ -131,16 +131,21 @@ public class UpdateFXWindow {
     private void processUpdater(Updater updater) {
         updates.clear();
         updates.add(null);  // Sentinel for "latest"
+        UpdateSummary s = null;
         try {
-            summary = Futures.getUnchecked(updater);
+            if (!Main.offline)
+                s = Futures.getUnchecked(updater);
         } catch (Exception e) {
             log.warn("Failed to get online updates index, trying to fall back to disk cache: {}", e.getMessage());
+        }
+        if (s != null)
+            summary = s;
+        else
             summary = loadCachedIndex();
-            if (summary == null) {
-                log.error("Not online and failed to load cached updates, showing blank window.");
-                pinBtn.setDisable(true);
-                return;   // Not online and no cached updates, or some other issue, so give up.
-            }
+        if (summary == null) {
+            log.error("Not online and failed to load cached updates, showing blank window.");
+            pinBtn.setDisable(true);
+            return;   // Not online and no cached updates, or some other issue, so give up.
         }
         List<UFXProtocol.Update> list = new ArrayList<>(summary.updates.getUpdatesList());
         Collections.reverse(list);

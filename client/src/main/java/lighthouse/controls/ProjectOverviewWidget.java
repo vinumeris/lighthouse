@@ -82,7 +82,12 @@ public class ProjectOverviewWidget extends HBox {
         // Make the cover image go grey when claimed and blurred when loading. Make a loading indicator fade in/out.
         final Image image = new Image(project.getCoverImage().newInput());
         ColorAdjust colorAdjust = new ColorAdjust();
-        colorAdjust.saturationProperty().bind(when(equal(state, LighthouseBackend.ProjectState.CLAIMED)).then(-0.9).otherwise(0.0));
+        colorAdjust.saturationProperty().bind(when(
+                or(
+                        equal(state, LighthouseBackend.ProjectState.CLAIMED),
+                        equal(state, LighthouseBackend.ProjectState.UNKNOWN))
+                ).then(-0.9).otherwise(0.0)
+        );
         if (GuiUtils.isSoftwarePipeline()) {
             // SW pipeline cannot handle gaussian blurs with acceptable performance.
             coverImage.setEffect(colorAdjust);
@@ -94,7 +99,6 @@ public class ProjectOverviewWidget extends HBox {
         }
         coverImage.setImage(image);
         coverImage.setClip(new Rectangle(coverImage.getFitWidth(), coverImage.getFitHeight()));
-
 
         animatedBind(loadingIndicatorArea, loadingIndicatorArea.opacityProperty(), when(isLoading).then(1.0).otherwise(0.0));
         // Hack around a bug in jfx: progress indicator leaks the spinner animation even if it's invisible so we have

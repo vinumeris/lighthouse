@@ -13,6 +13,7 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
@@ -219,16 +220,24 @@ public class MainWindow {
 
     private ProjectOverviewWidget buildProjectWidget(Project project) {
         SimpleObjectProperty<LighthouseBackend.ProjectState> state = new SimpleObjectProperty<>(getProjectState(project));
-        projectStates.addListener((javafx.beans.InvalidationListener) x -> state.set(getProjectState(project)));
-        ProjectOverviewWidget projectWidget = new ProjectOverviewWidget(project,
-                Main.backend.makeTotalPledgedProperty(project, UI_THREAD),
-                state);
-        projectWidget.onCheckStatusChanged(checkStates.get(project));
-        checkStates.addListener((MapChangeListener<Project, LighthouseBackend.CheckStatus>) change -> {
-            if (change.getKey().equals(project))
-                projectWidget.onCheckStatusChanged(change.wasAdded() ? change.getValueAdded() : null);
-        });
-        projectWidget.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> switchToProject(project));
+
+        ProjectOverviewWidget projectWidget;
+        if (Main.offline) {
+            state.set(LighthouseBackend.ProjectState.UNKNOWN);
+            projectWidget = new ProjectOverviewWidget(project, new SimpleLongProperty(0), state);
+        } else {
+            projectStates.addListener((javafx.beans.InvalidationListener) x -> state.set(getProjectState(project)));
+            projectWidget = new ProjectOverviewWidget(project,
+                    Main.backend.makeTotalPledgedProperty(project, UI_THREAD),
+                    state);
+            projectWidget.getStyleClass().add("project-overview-widget-clickable");
+            projectWidget.onCheckStatusChanged(checkStates.get(project));
+            checkStates.addListener((MapChangeListener<Project, LighthouseBackend.CheckStatus>) change -> {
+                if (change.getKey().equals(project))
+                    projectWidget.onCheckStatusChanged(change.wasAdded() ? change.getValueAdded() : null);
+            });
+            projectWidget.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> switchToProject(project));
+        }
         return projectWidget;
     }
 
@@ -356,6 +365,12 @@ public class MainWindow {
     }
 
     private void setupBitcoinSyncNotification() {
+        if (Main.offline) {
+            Main.instance.notificationBar.displayNewItem("You are offline. You will not be able to use the app until you go online and restart.");
+            sendMoneyOutBtn.disableProperty().unbind();
+            sendMoneyOutBtn.setDisable(true);
+            return;
+        }
         TorClient torClient = Main.bitcoin.peerGroup().getTorClient();
         if (torClient != null) {
             SimpleDoubleProperty torProgress = new SimpleDoubleProperty(-1);
@@ -399,6 +414,8 @@ public class MainWindow {
     private void doOnlineUpdateCheck() {
         updater = new Updater(Main.instance.updatesURL, Main.APP_NAME, Main.VERSION, AppDirectory.dir(),
                 UpdateFX.findCodePath(Main.class), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD);
+
+        if (Main.offline) return;
 
         if (!Main.instance.updatesURL.equals(Main.UPDATES_BASE_URL))
             updater.setOverrideURLs(true);    // For testing.

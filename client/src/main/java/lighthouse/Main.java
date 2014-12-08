@@ -105,6 +105,8 @@ public class Main extends Application {
     private boolean slowGFX;
     public String updatesURL = UPDATES_BASE_URL;
 
+    public static boolean offline = false;
+
     public static void main(String[] args) throws IOException {
         // Startup sequence: we use UpdateFX to allow for automatic online updates when the app is running. UpdateFX
         // applies binary deltas to our JAR to create a new JAR that's then dropped into the app directory.
@@ -353,44 +355,49 @@ public class Main extends Application {
                     vPeerGroup.setUseLocalhostPeerWhenPossible(false);
                 } else {
                     // TODO: Replace this with a DNS seed that crawls for NODE_GETUTXOS (or whatever it's renamed to).
-                    PeerDiscovery hardCodedPeers = new PeerDiscovery() {
-                        @Override
-                        public InetSocketAddress[] getPeers(long timeoutValue, TimeUnit timeoutUnit) throws PeerDiscoveryException {
-                            InetSocketAddress[] result = new InetSocketAddress[2];
-                            result[0] = new InetSocketAddress("vinumeris.com", params.getPort());
-                            result[1] = new InetSocketAddress("riker.plan99.net", params.getPort());
-                            return result;
-                        }
+                    InetSocketAddress[] result = new InetSocketAddress[2];
+                    result[0] = new InetSocketAddress("vinumeris.com", params.getPort());
+                    result[1] = new InetSocketAddress("riker.plan99.net", params.getPort());
 
-                        @Override
-                        public void shutdown() {
-                        }
-                    };
-                    vPeerGroup.addPeerDiscovery(hardCodedPeers);
-                    vPeerGroup.setMaxConnections(2);
-                    vPeerGroup.setConnectTimeoutMillis(10000);
-                    // Sequence things so we *always* get both hard-coded peers for now.
-                    vPeerGroup.waitForPeersOfVersion(2, GetUTXOsMessage.MIN_PROTOCOL_VERSION).addListener(() -> {
-                        vPeerGroup.addPeerDiscovery(new DnsDiscovery(params));
-                        vPeerGroup.setMaxConnections(6);
-                    }, Threading.SAME_THREAD);
-                }
+                    if (result[0].getAddress() == null && result[1].getAddress() == null) {
+                        log.warn("User appears to be offline");
+                        offline = true;
+                    } else {
+                        PeerDiscovery hardCodedPeers = new PeerDiscovery() {
+                            @Override
+                            public InetSocketAddress[] getPeers(long timeoutValue, TimeUnit timeoutUnit) throws PeerDiscoveryException {
+                                return result;
+                            }
 
-                vPeerGroup.addEventListener(new AbstractPeerEventListener() {
-                    @Override
-                    public void onPeerConnected(Peer peer, int peerCount) {
-                        if (peer.getAddress().getAddr().isLoopbackAddress() && !peer.getPeerVersionMessage().isGetUTXOsSupported()) {
-                            // We connected to localhost but it doesn't have what we need.
-                            log.warn("Localhost peer does not have support for NODE_GETUTXOS, ignoring");
-                            // TODO: Once Bitcoin Core fork name is chosen and released, be more specific in this message.
-                            informationalAlert("Local Bitcoin node not usable",
-                                    "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support Lighthouse needs. Lighthouse will still " +
-                                    "work but will use the peer to peer network instead, so you won't get upgraded security.");
-                            vPeerGroup.setUseLocalhostPeerWhenPossible(false);
-                            vPeerGroup.setMaxConnections(4);
-                        }
+                            @Override
+                            public void shutdown() {
+                            }
+                        };
+                        vPeerGroup.addPeerDiscovery(hardCodedPeers);
+                        vPeerGroup.setMaxConnections(2);
+                        vPeerGroup.setConnectTimeoutMillis(10000);
+                        // Sequence things so we *always* get both hard-coded peers for now.
+                        vPeerGroup.waitForPeersOfVersion(2, GetUTXOsMessage.MIN_PROTOCOL_VERSION).addListener(() -> {
+                            vPeerGroup.addPeerDiscovery(new DnsDiscovery(params));
+                            vPeerGroup.setMaxConnections(6);
+                        }, Threading.SAME_THREAD);
                     }
-                });
+                    vPeerGroup.addEventListener(new AbstractPeerEventListener() {
+                        @Override
+                        public void onPeerConnected(Peer peer, int peerCount) {
+                            if (peer.getAddress().getAddr().isLoopbackAddress() && !peer.getPeerVersionMessage().isGetUTXOsSupported()) {
+                                // We connected to localhost but it doesn't have what we need.
+                                log.warn("Localhost peer does not have support for NODE_GETUTXOS, ignoring");
+                                // TODO: Once Bitcoin Core fork name is chosen and released, be more specific in this message.
+                                informationalAlert("Local Bitcoin node not usable",
+                                        "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support Lighthouse needs. Lighthouse will still " +
+                                                "work but will use the peer to peer network instead, so you won't get upgraded security.");
+                                vPeerGroup.setUseLocalhostPeerWhenPossible(false);
+                                vPeerGroup.setMaxConnections(4);
+                            }
+                        }
+                    });
+                }
             }
         };
         if (bitcoin.isChainFileLocked()) {
