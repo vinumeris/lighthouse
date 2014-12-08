@@ -6,10 +6,7 @@ import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
 import lighthouse.wallet.PledgingWallet;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.*;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 
@@ -76,9 +73,12 @@ public class ProjectModel {
                 proto.setPaymentUrl(LHUtils.makeServerPath(name, LHUtils.titleToUrlString(title.get())));
         });
 
-        Address addr = project.getOutputs().get(0).getAddressFromP2PKHScript(project.getParams());
+        TransactionOutput output = project.getOutputs().get(0);
+        Address addr = output.getAddressFromP2PKHScript(project.getParams());
         if (addr == null)
-            throw new IllegalArgumentException("Output type is not a pay to address: " + project.getOutputs().get(0));
+            addr = output.getAddressFromP2SH(project.getParams());
+        if (addr == null)
+            throw new IllegalArgumentException("Output type is not pay to address/p2sh: " + output);
         address.set(addr.toString());
         address.addListener(o -> {
             try {
