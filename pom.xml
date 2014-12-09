@@ -9,6 +9,12 @@
     <packaging>pom</packaging>
     <version>0.17-SNAPSHOT</version>
 
+    <scm>
+        <connection>scm:git:https://github.com/vinumeris/lighthouse</connection>
+        <developerConnection>scm:git:https://github.com/vinumeris/lighthouse</developerConnection>
+        <url>scm:git:https://github.com/vinumeris/lighthouse</url>
+    </scm>
+
     <build>
         <plugins>
             <plugin>
