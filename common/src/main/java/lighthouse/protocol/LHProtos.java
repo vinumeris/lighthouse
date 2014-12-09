@@ -6184,10 +6184,18 @@ public final class LHProtos {
     // required uint64 timestamp = 103;
     /**
      * <code>required uint64 timestamp = 103;</code>
+     *
+     * <pre>
+     * Time in seconds.
+     * </pre>
      */
     boolean hasTimestamp();
     /**
      * <code>required uint64 timestamp = 103;</code>
+     *
+     * <pre>
+     * Time in seconds.
+     * </pre>
      */
     long getTimestamp();
 
@@ -6569,12 +6577,20 @@ public final class LHProtos {
     private long timestamp_;
     /**
      * <code>required uint64 timestamp = 103;</code>
+     *
+     * <pre>
+     * Time in seconds.
+     * </pre>
      */
     public boolean hasTimestamp() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>required uint64 timestamp = 103;</code>
+     *
+     * <pre>
+     * Time in seconds.
+     * </pre>
      */
     public long getTimestamp() {
       return timestamp_;
@@ -7433,18 +7449,30 @@ public final class LHProtos {
       private long timestamp_ ;
       /**
        * <code>required uint64 timestamp = 103;</code>
+       *
+       * <pre>
+       * Time in seconds.
+       * </pre>
        */
       public boolean hasTimestamp() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
        * <code>required uint64 timestamp = 103;</code>
+       *
+       * <pre>
+       * Time in seconds.
+       * </pre>
        */
       public long getTimestamp() {
         return timestamp_;
       }
       /**
        * <code>required uint64 timestamp = 103;</code>
+       *
+       * <pre>
+       * Time in seconds.
+       * </pre>
        */
       public Builder setTimestamp(long value) {
         bitField0_ |= 0x00000010;
@@ -7454,6 +7482,10 @@ public final class LHProtos {
       }
       /**
        * <code>required uint64 timestamp = 103;</code>
+       *
+       * <pre>
+       * Time in seconds.
+       * </pre>
        */
       public Builder clearTimestamp() {
         bitField0_ = (bitField0_ & ~0x00000010);
