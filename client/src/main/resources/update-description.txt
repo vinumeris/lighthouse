@@ -1,0 +1,2 @@
+Fix a couple of crashes. Improved offline UI state. New signing key.
+This update fixes a crash that could occur when editing a project with a P2SH output, and one that happened when trying to view software update details whilst offline. Offline support in general has been improved. A new update signing key is being phased in.
