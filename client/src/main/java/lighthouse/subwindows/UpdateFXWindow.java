@@ -70,8 +70,8 @@ public class UpdateFXWindow {
                     icon.visibleProperty().bind(currentPin.isEqualTo(item != null ? item.getVersion() : 0));
                     setGraphic(icon);
                     // Bold the current version that's running, or latest if we're up to date.
-                    if ((item == null && Main.VERSION == summary.newVersion) ||
-                            (item != null && item.getVersion() == Main.VERSION && item.getVersion() != summary.newVersion))
+                    if ((item == null && Main.VERSION == summary.highestVersion) ||
+                            (item != null && item.getVersion() == Main.VERSION && item.getVersion() != summary.highestVersion))
                         setStyle("-fx-font-weight: bold");
                     else
                         setStyle("");

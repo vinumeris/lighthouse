@@ -75,12 +75,17 @@ import static lighthouse.utils.GuiUtils.*;
 public class Main extends Application {
     public static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    // This is an UpdateFX version code. It's incremented monotonically after a new version is released via
-    // auto update.
-    public static final int VERSION = 17;
     public static final String APP_NAME = "Lighthouse";
+
+    // UpdateFX stuff. Version is incremented monotonically after a new version is released.
+    public static final int VERSION = 17;
     public static final String UPDATES_BASE_URL = "https://www.vinumeris.com/lighthouse/updates";
-    public static final List<ECPoint> UPDATE_SIGNING_KEYS = Crypto.decode("02A3CDE5D0EDC281637C67AA67C0CB009EA6573E0F101C6E018ACB91393C08C129");
+    public static final List<ECPoint> UPDATE_SIGNING_KEYS = Crypto.decode(
+            // Two keys during temporary transition from a key that was not password protected to one that is.
+            // At release the old key will be removed.
+            "02A3CDE5D0EDC281637C67AA67C0CB009EA6573E0F101C6E018ACB91393C08C129",   // old
+            "02AA4D7E966BFA942D3BEABD2049A49DB6AE92C417D8837C328BC02F8B50411A97"    // new
+    );
     public static final int UPDATE_SIGNING_THRESHOLD = 1;
 
     public static NetworkParameters params;
