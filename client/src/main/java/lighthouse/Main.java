@@ -78,7 +78,7 @@ public class Main extends Application {
     public static final String APP_NAME = "Lighthouse";
 
     // UpdateFX stuff. Version is incremented monotonically after a new version is released.
-    public static final int VERSION = 17;
+    public static final int VERSION = 18;
     public static final String UPDATES_BASE_URL = "https://www.vinumeris.com/lighthouse/updates";
     public static final List<ECPoint> UPDATE_SIGNING_KEYS = Crypto.decode(
             // Two keys during temporary transition from a key that was not password protected to one that is.
