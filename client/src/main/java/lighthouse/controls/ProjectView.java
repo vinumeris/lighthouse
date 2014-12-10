@@ -246,7 +246,8 @@ public class ProjectView extends HBox {
         bindings = new UIBindings();
 
         // This must be done after the binding because otherwise it has no node in the scene graph yet.
-        emptySlice.getNode().setVisible(false);
+        emptySlice.getNode().setOpacity(0.1);
+        emptySlice.getNode().setVisible(true);
 
         checkForMyPledge(p);
 
@@ -351,8 +352,7 @@ public class ProjectView extends HBox {
 
         long now = Instant.now().getEpochSecond();
 
-        // Total of 1.3 coins pledged.
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 1; i++) {
             builder.setTotalInputValue(Coin.CENT.value * 70);
             builder.setTimestamp(now++);
             list.add(builder.build());
