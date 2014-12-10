@@ -76,7 +76,7 @@ message Project {
     optional uint32 payment_details_version = 1 [default = 1];
     optional string pki_type = 2 [default = "none"]; // none / x509+sha256 / x509+sha1
     optional bytes pki_data = 3; // depends on pki_type
-    required bytes serialized_payment_details = 4; // PaymentDetails
+    required bytes serialized_payment_details = 4; // ProjectDetails
     optional bytes signature = 5; // pki-dependent signature
 }
 
