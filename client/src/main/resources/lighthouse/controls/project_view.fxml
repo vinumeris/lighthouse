@@ -169,21 +169,21 @@
                         </Button>
                         <StackPane minWidth="250.0" VBox.vgrow="ALWAYS">
                             <children>
-                        <VBox fx:id="pledgesListVBox">
-                           <children>
-                                      <ListView fx:id="pledgesList" layoutX="14.0" layoutY="113.0" prefHeight="450.0" prefWidth="300.0" styleClass="pledges-list" VBox.vgrow="ALWAYS" />
-                              <HBox alignment="CENTER_RIGHT">
-                                 <children>
-                                    <Label fx:id="exportPledgesBtn" onMouseClicked="#exportPledgesClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="Export as CSV ...">
-                                       <HBox.margin>
-                                          <Insets bottom="15.0" top="10.0" />
-                                       </HBox.margin>
-                                    </Label>
-                                 </children>
-                              </HBox>
-                           </children>
-                        </VBox>
-                                  <Label fx:id="noPledgesLabel" text="No pledges yet!" />
+                                <VBox fx:id="pledgesListVBox">
+                                    <children>
+                                        <ListView fx:id="pledgesList" layoutX="14.0" layoutY="113.0" prefHeight="450.0" prefWidth="300.0" styleClass="pledges-list" VBox.vgrow="ALWAYS" />
+                                        <HBox alignment="CENTER_RIGHT">
+                                            <children>
+                                                <Label fx:id="exportPledgesBtn" onMouseClicked="#exportPledgesClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="Export as CSV ...">
+                                                    <HBox.margin>
+                                                        <Insets bottom="15.0" top="10.0" />
+                                                    </HBox.margin>
+                                                </Label>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                                <Label fx:id="noPledgesLabel" text="No pledges yet!" />
                             </children>
                         </StackPane>
                     </children>
