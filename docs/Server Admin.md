@@ -26,7 +26,7 @@ Dependencies
 ------------
 
 You will need the Oracle Java 8 runtime. Note that OpenJDK will not work as for some reason it doesn't include all the
-same open source components that ship with regular Java. Hopefully in future this will be resolved.
+same open source components that ship with regular Java. Hopefully in the future this will be resolved.
 
 You will also need an SSL certificate. In future Lighthouse might start letting project creators specify server public
 keys directly, and then we could [allow servers to use self signed certificates](https://github.com/vinumeris/lighthouse/issues/93).
@@ -78,7 +78,7 @@ You can obtain the lighthouse-server.jar file from the github releases page.
 Adding and removing projects
 ----------------------------
 
-The server watches the lhserver directory. To add a project, just drop the project file into it. To remove it, just
+The server watches the `lhserver` directory. To add a project, just drop the project file into it. To remove it, just
 delete the project file. The directory is also used to hold pledges, which are named after the hash of their contents.
 Removing a project file doesn't delete the associated pledges, but they will be ignored. A future version of the server
 might clean up or archive old pledges in some way.
