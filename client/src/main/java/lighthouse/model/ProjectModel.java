@@ -47,7 +47,7 @@ public class ProjectModel {
         minPledgeAmount.set(recalculateMinPledgeAmount(goalAmount.longValue()));
 
         if (liveProto.hasPaymentUrl()) {
-            String host = LHUtils.validateServerPath(liveProto.getPaymentUrl(), project.getID());
+            String host = LHUtils.validateServerPath(liveProto.getPaymentUrl());
             if (host == null)
                 throw new IllegalArgumentException("Server path not valid for Lighthouse protocol: " + liveProto.getPaymentUrl());
             serverName.set(host);

@@ -154,9 +154,9 @@ public class LHUtils {
 
     //endregion
 
-    /** Given an HTTP[S] URL, verifies that it matches the CC protocol layout and returns the hostname if so. */
+    /** Given an HTTP[S] URL, verifies that it matches the LH protocol layout and returns the hostname if so. */
     @Nullable
-    public static String validateServerPath(String path, String projectID) {
+    public static String validateServerPath(String path) {
         try {
             if (path.isEmpty())
                 return null;
