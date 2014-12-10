@@ -3960,7 +3960,7 @@ public final class LHProtos {
      * <code>required bytes serialized_payment_details = 4;</code>
      *
      * <pre>
-     * PaymentDetails
+     * ProjectDetails
      * </pre>
      */
     boolean hasSerializedPaymentDetails();
@@ -3968,7 +3968,7 @@ public final class LHProtos {
      * <code>required bytes serialized_payment_details = 4;</code>
      *
      * <pre>
-     * PaymentDetails
+     * ProjectDetails
      * </pre>
      */
     com.google.protobuf.ByteString getSerializedPaymentDetails();
@@ -4209,7 +4209,7 @@ public final class LHProtos {
      * <code>required bytes serialized_payment_details = 4;</code>
      *
      * <pre>
-     * PaymentDetails
+     * ProjectDetails
      * </pre>
      */
     public boolean hasSerializedPaymentDetails() {
@@ -4219,7 +4219,7 @@ public final class LHProtos {
      * <code>required bytes serialized_payment_details = 4;</code>
      *
      * <pre>
-     * PaymentDetails
+     * ProjectDetails
      * </pre>
      */
     public com.google.protobuf.ByteString getSerializedPaymentDetails() {
@@ -4744,7 +4744,7 @@ public final class LHProtos {
        * <code>required bytes serialized_payment_details = 4;</code>
        *
        * <pre>
-       * PaymentDetails
+       * ProjectDetails
        * </pre>
        */
       public boolean hasSerializedPaymentDetails() {
@@ -4754,7 +4754,7 @@ public final class LHProtos {
        * <code>required bytes serialized_payment_details = 4;</code>
        *
        * <pre>
-       * PaymentDetails
+       * ProjectDetails
        * </pre>
        */
       public com.google.protobuf.ByteString getSerializedPaymentDetails() {
@@ -4764,7 +4764,7 @@ public final class LHProtos {
        * <code>required bytes serialized_payment_details = 4;</code>
        *
        * <pre>
-       * PaymentDetails
+       * ProjectDetails
        * </pre>
        */
       public Builder setSerializedPaymentDetails(com.google.protobuf.ByteString value) {
@@ -4780,7 +4780,7 @@ public final class LHProtos {
        * <code>required bytes serialized_payment_details = 4;</code>
        *
        * <pre>
-       * PaymentDetails
+       * ProjectDetails
        * </pre>
        */
       public Builder clearSerializedPaymentDetails() {
