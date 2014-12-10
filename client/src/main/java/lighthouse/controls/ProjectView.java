@@ -158,12 +158,12 @@ public class ProjectView extends HBox {
             percentFundedLabel.textProperty().bind(format);
 
             //    - Make the action button update when the amount pledged changes.
-            pledgedValue.addListener(o -> pledgedValueChanged(goalAmount, pledgedValue));
-            pledgedValueChanged(goalAmount, pledgedValue);
             isFullyFundedAndNotParticipating =
                     pledgedValue.isEqualTo(project.get().getGoalAmount().longValue()).and(
                             mode.isEqualTo(Mode.OPEN_FOR_PLEDGES)
                     );
+            pledgedValue.addListener(o -> pledgedValueChanged(goalAmount, pledgedValue));
+            pledgedValueChanged(goalAmount, pledgedValue);
             actionButton.disableProperty().bind(isFullyFundedAndNotParticipating);
 
             //    - Put pledges into the list view.
@@ -298,12 +298,11 @@ public class ProjectView extends HBox {
 
     private void updateGUIForState() {
         coverImage.setEffect(null);
-        actionButton.setDisable(false);
         switch (mode.get()) {
             case OPEN_FOR_PLEDGES:
-                if (pledgedValue.get() == project.get().getGoalAmount().longValue()) {
+                if (isFullyFundedAndNotParticipating.get()) {
                     actionButton.setText("Fully funded");
-                    actionButton.setDisable(true);
+                    // Disable state is handled by binding.
                 } else {
                     actionButton.setText("Pledge");
                 }
