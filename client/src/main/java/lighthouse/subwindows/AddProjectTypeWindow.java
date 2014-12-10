@@ -107,7 +107,7 @@ public class AddProjectTypeWindow {
                     ExportWindow.openForProject(project);
                 } else {
                     GuiUtils.informationalAlert("Folder watching",
-                            "The folder to which you save your project file will be watched for pledge files. When you receive them from backers, just put them in the same directory and they should appear.");
+                            "The folder to which you save your project file will be watched for pledge files. When you receive them from backers, just put them in the same directory and they will appear.");
                     // Request directory first then save, so the animations are right.
                     DirectoryChooser chooser = new DirectoryChooser();
                     chooser.setTitle("Select a directory to store the project and pledges");
