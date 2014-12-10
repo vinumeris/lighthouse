@@ -8,11 +8,12 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
@@ -20,8 +21,9 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import lighthouse.Main;
+import lighthouse.subwindows.EmbeddedWindow;
 import lighthouse.utils.GuiUtils;
 import net.glxn.qrgen.QRCode;
 import net.glxn.qrgen.image.ImageType;
@@ -125,20 +127,24 @@ public class ClickableBitcoinAddress extends AnchorPane {
         // lazy tonight.
         final byte[] imageBytes = QRCode
                 .from(uri())
-                .withSize(320, 240)
+                .withSize(512, 384)
                 .to(ImageType.PNG)
                 .stream()
                 .toByteArray();
         Image qrImage = new Image(new ByteArrayInputStream(imageBytes));
         ImageView view = new ImageView(qrImage);
-        view.setEffect(new DropShadow());
-        // Embed the image in a pane to ensure the drop-shadow interacts with the fade nicely, otherwise it looks weird.
-        // Then fix the width/height to stop it expanding to fill the parent, which would result in the image being
-        // non-centered on the screen. Finally fade/blur it in.
-        Pane pane = new Pane(view);
-        pane.setMaxSize(qrImage.getWidth(), qrImage.getHeight());
-        final Main.OverlayUI<ClickableBitcoinAddress> overlay = Main.instance.overlayUI(pane, this);
-        overlay.outsideClickDismisses();
+        Label label = new Label(address.get().toString());
+        label.setMaxWidth(Double.MAX_VALUE);
+        label.setAlignment(Pos.CENTER);
+        label.setPadding(new Insets(0, 0, 30, 0));
+        VBox vbox = new VBox(view, label);
+        vbox.setPrefWidth(qrImage.getWidth());
+        vbox.setStyle("-fx-background-color: white");
+        vbox.setPrefHeight(qrImage.getHeight() + label.getHeight() + vbox.getSpacing());
+        EmbeddedWindow window = new EmbeddedWindow("QR code", vbox);
+        final Main.OverlayUI<ClickableBitcoinAddress> overlay = Main.instance.overlayUI(window, this);
+        window.setOnCloseClicked(overlay::done);
+        //overlay.outsideClickDismisses();
         view.setOnMouseClicked(event1 -> overlay.done());
     }
 }
