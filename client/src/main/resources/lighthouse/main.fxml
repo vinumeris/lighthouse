@@ -8,7 +8,6 @@
 <?import javafx.scene.layout.*?>
 <?import lighthouse.controls.ClickableBitcoinAddress?>
 <?import lighthouse.controls.ProjectView?>
-<?import javafx.scene.Group?>
 <VBox id="root" fx:id="root" alignment="CENTER" styleClass="cc-root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.MainWindow">
     <children>
         <HBox fx:id="topBox" minHeight="100" alignment="CENTER" styleClass="topbox">
@@ -31,7 +30,7 @@
                                 <children>
                                     <Button text="" fx:id="menuBtn" onAction="#menuClicked" />
                                     <Button text="Set up wallet" fx:id="setupWalletBtn" onAction="#setupWalletClicked" styleClass="no-focus-button"/>
-                                    <Button text="Empty wallet" fx:id="sendMoneyOutBtn" onAction="#sendMoneyOut" />
+                                    <Button text="Empty wallet" fx:id="emptyWalletBtn" onAction="#emptyWallet" />
                                 </children>
                                 <padding>
                                     <Insets top="10"/>

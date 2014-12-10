@@ -39,7 +39,7 @@ import lighthouse.files.DiskManager;
 import lighthouse.model.BitcoinUIModel;
 import lighthouse.protocol.Project;
 import lighthouse.subwindows.EditProjectWindow;
-import lighthouse.subwindows.SendMoneyController;
+import lighthouse.subwindows.EmptyWalletController;
 import lighthouse.subwindows.UpdateFXWindow;
 import lighthouse.subwindows.WalletSettingsController;
 import lighthouse.utils.GuiUtils;
@@ -74,7 +74,7 @@ public class MainWindow {
 
     @FXML HBox topBoxLeftArea;
     @FXML Label balance;
-    @FXML Button sendMoneyOutBtn, setupWalletBtn, menuBtn;
+    @FXML Button emptyWalletBtn, setupWalletBtn, menuBtn;
     @FXML ClickableBitcoinAddress addressControl;
     @FXML HBox balanceArea;
     @FXML VBox projectsVBox;
@@ -112,8 +112,8 @@ public class MainWindow {
 
     // Called by FXMLLoader.
     public void initialize() {
-        AwesomeDude.setIcon(sendMoneyOutBtn, AwesomeIcon.SIGN_OUT, "12pt", ContentDisplay.LEFT);
-        Tooltip.install(sendMoneyOutBtn, new Tooltip("Send money out of the wallet"));
+        AwesomeDude.setIcon(emptyWalletBtn, AwesomeIcon.SIGN_OUT, "12pt", ContentDisplay.LEFT);
+        Tooltip.install(emptyWalletBtn, new Tooltip("Send money out of the wallet"));
         AwesomeDude.setIcon(setupWalletBtn, AwesomeIcon.LOCK, "12pt", ContentDisplay.LEFT);
         Tooltip.install(setupWalletBtn, new Tooltip("Make paper backup and encrypt your wallet"));
         AwesomeDude.setIcon(addProjectIcon, AwesomeIcon.FILE_ALT, "50pt; -fx-text-fill: white" /* lame hack */);
@@ -324,7 +324,7 @@ public class MainWindow {
         addressControl.addressProperty().bind(bitcoinUIModel.addressProperty());
         balance.textProperty().bind(EasyBind.map(bitcoinUIModel.balanceProperty(), coin -> MonetaryFormat.BTC.noCode().format(coin).toString()));
         // Don't let the user click send money when the wallet is empty.
-        sendMoneyOutBtn.disableProperty().bind(bitcoinUIModel.balanceProperty().isEqualTo(Coin.ZERO));
+        emptyWalletBtn.disableProperty().bind(bitcoinUIModel.balanceProperty().isEqualTo(Coin.ZERO));
 
         if (Main.params != MainNetParams.get()) {
             networkIndicatorLabel.setVisible(true);
@@ -367,8 +367,8 @@ public class MainWindow {
     private void setupBitcoinSyncNotification() {
         if (Main.offline) {
             Main.instance.notificationBar.displayNewItem("You are offline. You will not be able to use the app until you go online and restart.");
-            sendMoneyOutBtn.disableProperty().unbind();
-            sendMoneyOutBtn.setDisable(true);
+            emptyWalletBtn.disableProperty().unbind();
+            emptyWalletBtn.setDisable(true);
             return;
         }
         TorClient torClient = Main.bitcoin.peerGroup().getTorClient();
@@ -481,8 +481,8 @@ public class MainWindow {
 
     //region Generic Bitcoin wallet related code
     @FXML
-    public void sendMoneyOut(ActionEvent event) {
-        SendMoneyController.open();
+    public void emptyWallet(ActionEvent event) {
+        EmptyWalletController.open();
     }
 
     @FXML

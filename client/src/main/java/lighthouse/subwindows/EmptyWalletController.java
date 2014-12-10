@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static lighthouse.utils.GuiUtils.checkGuiThread;
 import static lighthouse.utils.GuiUtils.informationalAlert;
 
-public class SendMoneyController {
+public class EmptyWalletController {
     public Button sendBtn;
     public Button cancelBtn;
     public TextField address;
@@ -41,8 +41,8 @@ public class SendMoneyController {
         overlayUI.done();
     }
 
-    public static Main.OverlayUI<SendMoneyController> open() {
-        return Main.instance.overlayUI("subwindows/send_money.fxml", "Send money");
+    public static Main.OverlayUI<EmptyWalletController> open() {
+        return Main.instance.overlayUI("subwindows/send_money.fxml", "Empty wallet");
     }
 
     @FXML
@@ -88,7 +88,7 @@ public class SendMoneyController {
     private void askForPasswordAndRetry() {
         final String addressStr = address.getText();
         WalletPasswordController.requestPassword(key -> {
-            Main.OverlayUI<SendMoneyController> screen = open();
+            Main.OverlayUI<EmptyWalletController> screen = open();
             screen.controller.aesKey = key;
             screen.controller.address.setText(addressStr);
             screen.controller.send(null);
