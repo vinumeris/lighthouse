@@ -1,0 +1,3 @@
+Various UI tweaks and improvements.
+The QR code screen now has a title bar and shows the address too. The action button is disabled when the project is fully funded. Trying to pledge with an empty wallet gives you a little on-screen tutorial on what to do. Pledges are now listed newest to oldest. There's now a notification bubble when the copy address button is clicked. Project type window now has a back button instead of a cancel button.
+Thanks to Manfred and Lloyd for the feedback that led to these changes.
