@@ -8,6 +8,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.LongProperty;
@@ -107,6 +108,7 @@ public class ProjectView extends HBox {
     @Nullable private Sha256Hash myPledgeHash;
 
     private String goalAmountFormatStr;
+    private BooleanBinding isFullyFundedAndNotParticipating;
 
     private enum Mode {
         OPEN_FOR_PLEDGES,
@@ -114,7 +116,8 @@ public class ProjectView extends HBox {
         CAN_CLAIM,
         CLAIMED,
     }
-    private Mode mode, priorMode;
+    private SimpleObjectProperty<Mode> mode = new SimpleObjectProperty<>(Mode.OPEN_FOR_PLEDGES);
+    private Mode priorMode;
 
     public ProjectView() {
         // Don't try and access Main.backend here in case you race with startup.
@@ -157,6 +160,11 @@ public class ProjectView extends HBox {
             //    - Make the action button update when the amount pledged changes.
             pledgedValue.addListener(o -> pledgedValueChanged(goalAmount, pledgedValue));
             pledgedValueChanged(goalAmount, pledgedValue);
+            isFullyFundedAndNotParticipating =
+                    pledgedValue.isEqualTo(project.get().getGoalAmount().longValue()).and(
+                            mode.isEqualTo(Mode.OPEN_FOR_PLEDGES)
+                    );
+            actionButton.disableProperty().bind(isFullyFundedAndNotParticipating);
 
             //    - Put pledges into the list view.
             ObservableList<LHProtos.Pledge> list1 = FXCollections.observableArrayList();
@@ -194,7 +202,7 @@ public class ProjectView extends HBox {
             checkStatus.addListener(o -> updateInfoBar());
             // Don't let the user perform an action whilst loading or if there's an error.
             actionButton.disableProperty().unbind();
-            actionButton.disableProperty().bind(checkStatus.isNotNull());
+            actionButton.disableProperty().bind(isFullyFundedAndNotParticipating.or(checkStatus.isNotNull()));
             updateInfoBar();
         } else {
             // Take the back keyboard shortcut out later, because removing an accelerator whilst its callback is being
@@ -290,9 +298,15 @@ public class ProjectView extends HBox {
 
     private void updateGUIForState() {
         coverImage.setEffect(null);
-        switch (mode) {
+        actionButton.setDisable(false);
+        switch (mode.get()) {
             case OPEN_FOR_PLEDGES:
-                actionButton.setText("Pledge");
+                if (pledgedValue.get() == project.get().getGoalAmount().longValue()) {
+                    actionButton.setText("Fully funded");
+                    actionButton.setDisable(true);
+                } else {
+                    actionButton.setText("Pledge");
+                }
                 break;
             case PLEDGED:
                 actionButton.setText("Revoke");
@@ -315,18 +329,19 @@ public class ProjectView extends HBox {
     }
 
     private void setModeFor(Project project, long value) {
-        priorMode = mode;
-        mode = Mode.OPEN_FOR_PLEDGES;
+        priorMode = mode.get();
+        Mode newMode = Mode.OPEN_FOR_PLEDGES;
         if (projectStates.get(project.getID()).state == LighthouseBackend.ProjectState.CLAIMED) {
-            mode = Mode.CLAIMED;
+            newMode = Mode.CLAIMED;
         } else {
             if (Main.wallet.getPledgedAmountFor(project) > 0)
-                mode = Mode.PLEDGED;
+                newMode = Mode.PLEDGED;
             if (value >= project.getGoalAmount().value && Main.wallet.isProjectMine(project))
-                mode = Mode.CAN_CLAIM;
+                newMode = Mode.CAN_CLAIM;
         }
-        log.info("Mode is {}", mode);
-        if (priorMode == null) priorMode = mode;
+        log.info("Mode is {}", newMode);
+        mode.set(newMode);
+        if (priorMode == null) priorMode = newMode;
         updateGUIForState();
     }
 
@@ -379,7 +394,7 @@ public class ProjectView extends HBox {
     @FXML
     private void actionClicked(ActionEvent event) {
         final Project p = project.get();
-        switch (mode) {
+        switch (mode.get()) {
             case OPEN_FOR_PLEDGES:
                 makePledge(p);
                 break;
@@ -411,7 +426,7 @@ public class ProjectView extends HBox {
         window.project = p;
         window.setLimits(p.getGoalAmount().subtract(Coin.valueOf(pledgedValue.get())), p.getMinPledgeAmount());
         window.onSuccess = () -> {
-            mode = Mode.PLEDGED;
+            mode.set(Mode.PLEDGED);
             updateGUIForState();
         };
     }
@@ -420,7 +435,7 @@ public class ProjectView extends HBox {
         log.info("Claim button clicked for {}", p);
         Main.OverlayUI<RevokeAndClaimWindow> overlay = RevokeAndClaimWindow.openForClaim(p, pledges);
         overlay.controller.onSuccess = () -> {
-            mode = Mode.OPEN_FOR_PLEDGES;
+            mode.set(Mode.OPEN_FOR_PLEDGES);
             updateGUIForState();
         };
     }
@@ -432,7 +447,7 @@ public class ProjectView extends HBox {
 
         Main.OverlayUI<RevokeAndClaimWindow> overlay = RevokeAndClaimWindow.openForRevoke(pledge);
         overlay.controller.onSuccess = () -> {
-            mode = Mode.OPEN_FOR_PLEDGES;
+            mode.set(Mode.OPEN_FOR_PLEDGES);
             updateGUIForState();
         };
     }
