@@ -161,7 +161,7 @@ public class ProjectView extends HBox {
             //    - Put pledges into the list view.
             ObservableList<LHProtos.Pledge> list1 = FXCollections.observableArrayList();
             bindSetToList(pledges, list1);
-            sortedByTime = new SortedList<>(list1, (o1, o2) -> Long.compareUnsigned(o1.getTimestamp(), o2.getTimestamp()));
+            sortedByTime = new SortedList<>(list1, (o1, o2) -> -Long.compareUnsigned(o1.getTimestamp(), o2.getTimestamp()));
             bindContent(pledgesList.getItems(), sortedByTime);
 
             //    - Convert pledges into pie slices.
