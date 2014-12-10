@@ -2,6 +2,7 @@ These instructions are only really meant for Mike.
 
 To release a new version via online update:
 
+* Remember to fill out the update-description.txt file
 * Run ./package.sh to compile the app, calculate an update and new signed index.
 * Upload the patch via the AWS console
 * Sync the index to the website
