@@ -147,7 +147,10 @@ public class AddProjectTypeWindow {
 
     @FXML
     public void cancelClicked(ActionEvent event) {
-        overlayUI.done();
+        if (editing)
+            EditProjectWindow.openForEdit(model);
+        else
+            EditProjectWindow.openForCreate(model);
     }
 
     @FXML

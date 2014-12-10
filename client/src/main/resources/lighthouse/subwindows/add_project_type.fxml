@@ -10,7 +10,7 @@
       <HBox alignment="CENTER_RIGHT" prefHeight="81.0" prefWidth="750.0" spacing="10.0" styleClass="fat-buttons" BorderPane.alignment="CENTER">
          <children>
             <Pane HBox.hgrow="ALWAYS" />
-            <Button cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
+            <Button cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Back" />
             <Button fx:id="saveButton" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#saveClicked" text="Save" />
          </children>
          <padding>

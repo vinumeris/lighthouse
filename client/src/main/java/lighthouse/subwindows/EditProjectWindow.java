@@ -72,13 +72,24 @@ public class EditProjectWindow {
     private boolean editing;
 
     public static void openForCreate() {
-        Main.OverlayUI<EditProjectWindow> ui = Main.instance.overlayUI("subwindows/add_edit_project.fxml", "Create new project");
-        ui.controller.setupFor(new ProjectModel(Main.wallet), false);
+        open(new ProjectModel(Main.wallet), "Create new project", false);
+    }
+
+    public static void openForCreate(ProjectModel project) {
+        open(project, "Create new project", false);
     }
 
     public static void openForEdit(Project project) {
-        Main.OverlayUI<EditProjectWindow> ui = Main.instance.overlayUI("subwindows/add_edit_project.fxml", "Edit project");
-        ui.controller.setupFor(new ProjectModel(project.getProtoDetails().toBuilder()), true);
+        open(new ProjectModel(project.getProtoDetails().toBuilder()), "Edit project", true);
+    }
+
+    public static void openForEdit(ProjectModel project) {
+        open(project, "Edit project", true);
+    }
+
+    private static void open(ProjectModel project, String title, boolean editing) {
+        Main.OverlayUI<EditProjectWindow> ui = Main.instance.overlayUI("subwindows/add_edit_project.fxml", title);
+        ui.controller.setupFor(project, editing);
     }
 
     private void setupFor(ProjectModel model, boolean editing) {
