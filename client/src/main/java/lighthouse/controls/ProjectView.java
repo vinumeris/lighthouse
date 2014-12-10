@@ -395,7 +395,10 @@ public class ProjectView extends HBox {
         final Project p = project.get();
         switch (mode.get()) {
             case OPEN_FOR_PLEDGES:
-                makePledge(p);
+                if (Main.wallet.getBalance().value == 0)
+                    Main.instance.mainWindow.tellUserToSendSomeMoney();
+                else
+                    makePledge(p);
                 break;
             case PLEDGED:
                 revokePledge(p);

@@ -14,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.DropShadow;
@@ -30,6 +31,7 @@ import javafx.util.Duration;
 import lighthouse.Main;
 import lighthouse.protocol.LHUtils;
 import org.bitcoinj.core.Coin;
+import org.controlsfx.control.PopOver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +40,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
@@ -324,6 +327,21 @@ public class GuiUtils {
         clipRect.setArcWidth(amount);
         clipRect.setArcHeight(amount);
         view.setClip(clipRect);
+    }
+
+    public static CompletableFuture<Void> arrowBubbleToNode(Node target, String text) {
+        Label content = new Label(text);
+        content.setStyle("-fx-font-size: 12; -fx-padding: 0 20 0 20");
+        PopOver popover = new PopOver(content);
+        popover.setDetachable(false);
+        popover.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
+        popover.show(target);
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        runOnGuiThreadAfter(4000, () -> {
+            popover.hide(UI_ANIMATION_TIME);
+            runOnGuiThreadAfter(UI_ANIMATION_TIME_MSEC, () -> future.complete(null));
+        });
+        return future;
     }
 
     public static class AnimatedBindInfo {

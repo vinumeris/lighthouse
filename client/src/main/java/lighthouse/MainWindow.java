@@ -479,6 +479,12 @@ public class MainWindow {
         UpdateFXWindow.open(updater);
     }
 
+    public void tellUserToSendSomeMoney() {
+        GuiUtils.arrowBubbleToNode(balanceArea, "You don't have any bitcoins in this wallet").thenRun(() -> {
+            GuiUtils.arrowBubbleToNode(addressControl, "Send some money to this address first");
+        });
+    }
+
     //region Generic Bitcoin wallet related code
     @FXML
     public void emptyWallet(ActionEvent event) {
