@@ -29,6 +29,7 @@ import net.glxn.qrgen.QRCode;
 import net.glxn.qrgen.image.ImageType;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.uri.BitcoinURI;
+import org.controlsfx.control.PopOver;
 
 import java.awt.*;
 import java.io.ByteArrayInputStream;
@@ -119,6 +120,14 @@ public class ClickableBitcoinAddress extends AnchorPane {
     @FXML
     protected void copyWidgetClicked(MouseEvent event) {
         copyAddress(null);
+
+        Label content = new Label("Address copied to clipboard");
+        content.setStyle("-fx-font-size: 12; -fx-padding: 0 20 0 20");
+        PopOver popover = new PopOver(content);
+        popover.setDetachable(false);
+        popover.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
+        popover.show(copyWidget);
+        GuiUtils.runOnGuiThreadAfter(2000, () -> popover.hide(GuiUtils.UI_ANIMATION_TIME));
     }
 
     @FXML
