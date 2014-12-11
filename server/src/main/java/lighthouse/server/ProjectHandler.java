@@ -112,7 +112,7 @@ public class ProjectHandler implements HttpHandler {
         final String method = httpExchange.getRequestMethod();
         URI uri = httpExchange.getRequestURI();
         String path = uri.toString();
-        log.info("{}: REQ: {} {}", httpExchange.getRemoteAddress().getAddress(), method, path);
+        log.info("{}: REQ: {} {}", httpExchange.getRemoteAddress().getAddress().getHostAddress(), method, path);
         if (!path.startsWith(LHUtils.HTTP_PATH_PREFIX + LHUtils.HTTP_PROJECT_PATH)) {
             sendError(httpExchange, HTTP_NOT_FOUND);
             return;
