@@ -27,6 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class LHUtils {
+    public static final String PROJECT_MIME_TYPE = "application/vnd.vinumeris.lighthouse-project";
     private static final Logger log = LoggerFactory.getLogger(LHUtils.class);
 
     public static List<Path> listDir(Path dir) {

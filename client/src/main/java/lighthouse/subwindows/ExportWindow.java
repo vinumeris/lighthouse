@@ -16,6 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import lighthouse.Main;
 import lighthouse.files.DiskManager;
+import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
 import lighthouse.utils.GuiUtils;
 import lighthouse.wallet.PledgingWallet;
@@ -69,7 +70,7 @@ public class ExportWindow {
     }
 
     public static DataFormat PLEDGE_MIME_TYPE = new DataFormat("application/vnd.vinumeris.lighthouse-pledge");
-    public static DataFormat PROJECT_MIME_TYPE = new DataFormat("application/vnd.vinumeris.lighthouse-crowdfund");
+    public static DataFormat PROJECT_MIME_TYPE = new DataFormat(LHUtils.PROJECT_MIME_TYPE);
 
     public static class DragData {
         public Path tempDragDirectory, tempDragFile;

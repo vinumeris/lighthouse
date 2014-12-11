@@ -58,11 +58,12 @@ public class ProjectHandler implements HttpHandler {
     }
     private final Map<Project, PledgeGroup> pledges = new HashMap<>();
 
-    enum StatusFormat {
+    enum DownloadFormat {
         PBUF,
         JSON,
         HTML,
-        XML
+        XML,
+        LIGHTHOUSE_PROJECT   // protobuf of the project file itself
     }
 
     public ProjectHandler(LighthouseBackend backend) {
@@ -116,10 +117,10 @@ public class ProjectHandler implements HttpHandler {
             sendError(httpExchange, HTTP_NOT_FOUND);
             return;
         }
-        StatusFormat format = StatusFormat.PBUF;
-        if (method.equals("GET") && (path.endsWith(".json") || path.endsWith(".xml") || path.endsWith(".html"))) {
+        DownloadFormat format = DownloadFormat.PBUF;
+        if (method.equals("GET") && pathEndsWithFormat(path)) {
             try {
-                format = StatusFormat.valueOf(path.substring(path.lastIndexOf(".") + 1).toUpperCase());
+                format = DownloadFormat.valueOf(path.substring(path.lastIndexOf(".") + 1).toUpperCase().replace('-', '_'));
             } catch (IllegalArgumentException e) {
                 log.error("Could not figure out format from extension, defaulting to protobuf");
             }
@@ -134,9 +135,13 @@ public class ProjectHandler implements HttpHandler {
         }
         switch (method) {
             case "POST": pledgeUpload(httpExchange, project); break;
-            case "GET": statusDownload(httpExchange, project, format); break;
+            case "GET": download(httpExchange, project, format); break;
             default: sendError(httpExchange, HTTP_BAD_METHOD); break;
         }
+    }
+
+    private boolean pathEndsWithFormat(String path) {
+        return (path.endsWith(".json") || path.endsWith(".xml") || path.endsWith(".html") || path.endsWith(".lighthouse-project"));
     }
 
     private PledgeGroup getPledgesFor(Project project) {
@@ -150,7 +155,17 @@ public class ProjectHandler implements HttpHandler {
         return result;
     }
 
-    private void statusDownload(HttpExchange httpExchange, Project project, StatusFormat format) throws IOException, SignatureException {
+    private void download(HttpExchange httpExchange, Project project, DownloadFormat format) throws IOException, SignatureException {
+        if (format == DownloadFormat.LIGHTHOUSE_PROJECT) {
+            log.info("Replying with project file");
+            byte[] bits = project.getProto().toByteArray();
+            httpExchange.getResponseHeaders().add("Content-Type", LHUtils.PROJECT_MIME_TYPE);
+            httpExchange.sendResponseHeaders(HTTP_OK, bits.length);
+            httpExchange.getResponseBody().write(bits);
+            httpExchange.close();
+            return;
+        }
+
         LHProtos.ProjectStatus.Builder status = LHProtos.ProjectStatus.newBuilder();
         status.setId(project.getID());
         status.setTimestamp(Instant.now().getEpochSecond());
