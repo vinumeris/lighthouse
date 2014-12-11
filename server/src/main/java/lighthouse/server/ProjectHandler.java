@@ -112,7 +112,7 @@ public class ProjectHandler implements HttpHandler {
         final String method = httpExchange.getRequestMethod();
         URI uri = httpExchange.getRequestURI();
         String path = uri.toString();
-        log.info("REQ: {} {}", method, path);
+        log.info("{}: REQ: {} {}", httpExchange.getRemoteAddress().getAddress(), method, path);
         if (!path.startsWith(LHUtils.HTTP_PATH_PREFIX + LHUtils.HTTP_PROJECT_PATH)) {
             sendError(httpExchange, HTTP_NOT_FOUND);
             return;
@@ -195,7 +195,6 @@ public class ProjectHandler implements HttpHandler {
         long totalPledged = 0;
         PledgeGroup pledgeGroup = getPledgesFor(project);
         for (LHProtos.Pledge pledge : pledgeGroup.open) {
-            log.info("Pledge has {} txns", pledge.getTransactionsCount());
             if (authenticated) {
                 status.addPledges(pledge);
             } else {
@@ -224,13 +223,13 @@ public class ProjectHandler implements HttpHandler {
 
         status.setValuePledgedSoFar(totalPledged);
         final LHProtos.ProjectStatus proto = status.build();
-        log.info("Replying using {} with status: {}", format, proto);
-        byte[] bits = null;
+        byte[] bits;
         switch (format) {
             case PBUF: bits = proto.toByteArray(); break;
             case JSON: bits = JsonFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
             case HTML: bits = HtmlFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
             case XML: bits = XmlFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
+            default: throw new AssertionError();
         }
         httpExchange.sendResponseHeaders(HTTP_OK, bits.length);
         httpExchange.getResponseBody().write(bits);
