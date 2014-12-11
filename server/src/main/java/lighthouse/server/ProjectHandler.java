@@ -1,10 +1,13 @@
 package lighthouse.server;
 
-import org.bitcoinj.core.Sha256Hash;
+import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
+import com.googlecode.protobuf.format.HtmlFormat;
+import com.googlecode.protobuf.format.JsonFormat;
+import com.googlecode.protobuf.format.XmlFormat;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import javafx.collections.ObservableMap;
@@ -14,11 +17,13 @@ import lighthouse.protocol.LHProtos;
 import lighthouse.protocol.LHUtils;
 import lighthouse.protocol.Project;
 import lighthouse.threading.AffinityExecutor;
+import org.bitcoinj.core.Sha256Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.security.SignatureException;
 import java.time.Instant;
@@ -52,6 +57,13 @@ public class ProjectHandler implements HttpHandler {
         }
     }
     private final Map<Project, PledgeGroup> pledges = new HashMap<>();
+
+    enum StatusFormat {
+        PBUF,
+        JSON,
+        HTML,
+        XML
+    }
 
     public ProjectHandler(LighthouseBackend backend) {
         this.backend = backend;
@@ -97,21 +109,32 @@ public class ProjectHandler implements HttpHandler {
         // Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
 
         final String method = httpExchange.getRequestMethod();
-        final String path = httpExchange.getRequestURI().toString();
+        URI uri = httpExchange.getRequestURI();
+        String path = uri.toString();
         log.info("REQ: {} {}", method, path);
         if (!path.startsWith(LHUtils.HTTP_PATH_PREFIX + LHUtils.HTTP_PROJECT_PATH)) {
             sendError(httpExchange, HTTP_NOT_FOUND);
             return;
         }
-        Project project = backend.getProjectFromURL(httpExchange.getRequestURI());
+        StatusFormat format = StatusFormat.PBUF;
+        if (method.equals("GET") && (path.endsWith(".json") || path.endsWith(".xml") || path.endsWith(".html"))) {
+            try {
+                format = StatusFormat.valueOf(path.substring(path.lastIndexOf(".") + 1).toUpperCase());
+            } catch (IllegalArgumentException e) {
+                log.error("Could not figure out format from extension, defaulting to protobuf");
+            }
+            path = path.substring(0, path.lastIndexOf("."));
+            uri = new URI(uri.getScheme(), uri.getHost(), path, uri.getRawFragment());
+        }
+        Project project = backend.getProjectFromURL(uri);
         if (project == null) {
-            log.warn("Project URL did not match any known project", httpExchange.getRequestURI());
+            log.warn("Project URL did not match any known project", uri);
             sendError(httpExchange, HTTP_NOT_FOUND);
             return;
         }
         switch (method) {
             case "POST": pledgeUpload(httpExchange, project); break;
-            case "GET": statusDownload(httpExchange, project); break;
+            case "GET": statusDownload(httpExchange, project, format); break;
             default: sendError(httpExchange, HTTP_BAD_METHOD); break;
         }
     }
@@ -127,27 +150,31 @@ public class ProjectHandler implements HttpHandler {
         return result;
     }
 
-    private void statusDownload(HttpExchange httpExchange, Project project) throws IOException, SignatureException {
+    private void statusDownload(HttpExchange httpExchange, Project project, StatusFormat format) throws IOException, SignatureException {
         LHProtos.ProjectStatus.Builder status = LHProtos.ProjectStatus.newBuilder();
         status.setId(project.getID());
         status.setTimestamp(Instant.now().getEpochSecond());
         status.setValuePledgedSoFar(Database.getInstance().getPledgedValue(project));
 
-        boolean authenticated = false;
+        Map<String, String> params;
         String queryParams = httpExchange.getRequestURI().getRawQuery();
         if (queryParams != null && !queryParams.isEmpty()) {
             // Why doesn't the URI API have this? That's stupid.
-            Map<String, String> params = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(queryParams);
-            String signature = params.get("sig");
-            String message = params.get("msg");
-            if (signature != null && message != null) {
-                signature = URLDecoder.decode(signature, "UTF-8");
-                message = URLDecoder.decode(message, "UTF-8");
-                log.info("Attempting to authenticate project owner");
-                project.authenticateOwner(message, signature);   // throws SignatureException
-                log.info("... authenticated OK");
-                authenticated = true;
-            }
+            params = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(queryParams);
+        } else {
+            params = new HashMap<>();
+        }
+
+        boolean authenticated = false;
+        String signature = params.get("sig");
+        String message = params.get("msg");
+        if (signature != null && message != null) {
+            signature = URLDecoder.decode(signature, "UTF-8");
+            message = URLDecoder.decode(message, "UTF-8");
+            log.info("Attempting to authenticate project owner");
+            project.authenticateOwner(message, signature);   // throws SignatureException
+            log.info("... authenticated OK");
+            authenticated = true;
         }
 
         long totalPledged = 0;
@@ -182,8 +209,14 @@ public class ProjectHandler implements HttpHandler {
 
         status.setValuePledgedSoFar(totalPledged);
         final LHProtos.ProjectStatus proto = status.build();
-        log.info("Replying with status: {}", proto);
-        byte[] bits = proto.toByteArray();
+        log.info("Replying using {} with status: {}", format, proto);
+        byte[] bits = null;
+        switch (format) {
+            case PBUF: bits = proto.toByteArray(); break;
+            case JSON: bits = JsonFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
+            case HTML: bits = HtmlFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
+            case XML: bits = XmlFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
+        }
         httpExchange.sendResponseHeaders(HTTP_OK, bits.length);
         httpExchange.getResponseBody().write(bits);
         httpExchange.close();
