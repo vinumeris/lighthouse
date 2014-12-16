@@ -3,6 +3,7 @@ package lighthouse.utils;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.sun.prism.GraphicsPipeline;
 import com.sun.prism.sw.SWPipeline;
+import com.vinumeris.crashfx.CrashWindow;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -44,7 +45,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
-import static com.google.common.base.Preconditions.checkState;
 import static lighthouse.protocol.LHUtils.unchecked;
 
 public class GuiUtils {
@@ -248,7 +248,13 @@ public class GuiUtils {
     }
 
     public static void checkGuiThread() {
-        checkState(Platform.isFxApplicationThread());
+        if (!Platform.isFxApplicationThread()) {
+            // Don't just throw directly here to avoid missing the problem when buggy code swallows the exceptions.
+            IllegalStateException ex = new IllegalStateException();
+            log.error("Threading violation: not on FX UI thread", ex);
+            CrashWindow.open(ex);
+            throw ex;
+        }
     }
 
     public static BooleanBinding conjunction(List<BooleanProperty> list) {
