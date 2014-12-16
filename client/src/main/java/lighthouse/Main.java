@@ -145,11 +145,12 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         // For some reason the JavaFX launch process results in us losing the thread context class loader: reset it.
+        // This is fixed in 8u40+, I think.
         Thread.currentThread().setContextClassLoader(Main.class.getClassLoader());
         instance = this;
         // Set up the app dir + logging again, because the first time we did this (in main) could have been in the
         // context of another class loader if we're now running a different app version to the one the user installed.
-        // Anything that happened in main() therefore might have now been wipedt.
+        // Anything that happened in main() therefore might have now been wiped.
         AppDirectory.initAppDir(APP_NAME);
         if (!parseCommandLineArgs()) {
             Platform.exit();
