@@ -20,6 +20,7 @@ import org.bitcoinj.core.*;
 import org.bitcoinj.params.RegTestParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongycastle.crypto.params.KeyParameter;
 
 import javax.annotation.Nullable;
 import java.io.BufferedOutputStream;
@@ -323,7 +324,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 wallet.addWatchedScripts(mapList(project.getOutputs(), TransactionOutput::getScriptPubKey));
                 if (project.getPaymentURL() != null && mode == Mode.CLIENT) {
                     log.info("Checking project against server: {}", project);
-                    lookupPledgesFromServer(project);
+                    refreshProjectStatusFromServer(project, null);
                 } else {
                     log.info("Checking newly found project against P2P network: {}", project);
                     ObservableSet<LHProtos.Pledge> unverifiedPledges = diskManager.getPledgesOrCreate(project);
@@ -551,41 +552,46 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return results;
     }
 
-    private CompletableFuture<Void> lookupPledgesFromServer(Project project) {
+    /** Invokes a manual refresh by going back to the server. Can be called from any thread. */
+    public CompletableFuture<LHProtos.ProjectStatus> refreshProjectStatusFromServer(Project project) {
+        return refreshProjectStatusFromServer(project, null);
+    }
+
+    /** Invokes a manual refresh by going back to the server. Can be called from any thread. */
+    public CompletableFuture<LHProtos.ProjectStatus> refreshProjectStatusFromServer(Project project, @Nullable KeyParameter aesKey) {
         // Sigh, wish Java had proper co-routines (there's a lib that does it nicely but is overkill for this function).
         // This is messy because we want to overlap multiple lookups and thenAcceptAsync doesn't work how you'd think
         // it works (it will block the backend thread whilst waiting for the getStatus call to complete).
         checkState(mode == Mode.CLIENT);
-        CompletableFuture<Void> future = new CompletableFuture<>();
+        CompletableFuture<LHProtos.ProjectStatus> future = new CompletableFuture<>();
         executor.execute(() -> {
             markAsInProgress(project);
-            project.getStatus(wallet, null).whenCompleteAsync((status, ex) -> {
+            project.getStatus(wallet, aesKey).whenCompleteAsync((status, ex) -> {
                 if (ex != null) {
                     markAsErrored(project, ex);
                     future.completeExceptionally(ex);
                 } else {
-                    // Status contains a new list of pledges. We should update our own observable list by touching it
-                    // as little as possible. This ensures that as updates flow through to the UI any animations look
-                    // good (as opposed to total replacement which would animate poorly).
-                    log.info("Processing project status:\n{}", status);
-                    syncPledges(project, new HashSet<>(status.getPledgesList()), status.getPledgesList());
-                    // Server's view of the truth overrides our own for UI purposes, as we might have failed to
-                    // observe the contract/claim tx if the user imported the project post-claim.
-                    if (status.hasClaimedBy() && diskManager.getProjectState(project).state != ProjectState.CLAIMED) {
-                        diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED,
-                                new Sha256Hash(status.getClaimedBy().toByteArray())));
+                    try {
+                        // Status contains a new list of pledges. We should update our own observable list by touching it
+                        // as little as possible. This ensures that as updates flow through to the UI any animations look
+                        // good (as opposed to total replacement which would animate poorly).
+                        log.info("Processing project status:\n{}", status);
+                        syncPledges(project, new HashSet<>(status.getPledgesList()), status.getPledgesList());
+                        // Server's view of the truth overrides our own for UI purposes, as we might have failed to
+                        // observe the contract/claim tx if the user imported the project post-claim.
+                        if (status.hasClaimedBy() && diskManager.getProjectState(project).state != ProjectState.CLAIMED) {
+                            diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED,
+                                    new Sha256Hash(status.getClaimedBy().toByteArray())));
+                        }
+                        markAsCheckDone(project);
+                        future.complete(status);
+                    } catch (Throwable t) {
+                        future.completeExceptionally(t);
                     }
-                    markAsCheckDone(project);
-                    future.complete(null);
                 }
             }, executor);
         });
         return future;
-    }
-
-    /** Invokes a manual refresh by going back to the server. Can be called from any thread. */
-    public CompletableFuture<Void> refreshProjectStatusFromServer(Project project) {
-        return lookupPledgesFromServer(project);
     }
 
     private void syncPledges(Project forProject, Set<LHProtos.Pledge> testedPledges, List<LHProtos.Pledge> verifiedPledges) {

@@ -40,7 +40,9 @@ public class RevokeAndClaimWindow {
     // Or these ...
     public Project projectToClaim;
     public Set<LHProtos.Pledge> pledgesToClaim;
-    // ... are set.
+    // ... are set. pledgesToClaim is IGNORED in server assisted projects however because one of the pledges might have
+    // been revoked whilst the user was sitting on the claim screen. So we always refetch the status and recheck just
+    // before doing the claim.
     public Runnable onSuccess;
     public Main.OverlayUI overlayUI;
     public Button cancelBtn;
@@ -107,9 +109,48 @@ public class RevokeAndClaimWindow {
     }
 
     private void claim(@Nullable KeyParameter key) {
+        if (projectToClaim.getPaymentURL() != null) {
+            claimServerAssisted(key);
+        } else {
+            log.info("Attempting to claim serverless project, proceeding to merge and broadcast");
+            broadcastClaim(pledgesToClaim, key);
+        }
+    }
+
+    private void claimServerAssisted(@Nullable KeyParameter key) {
+        // Need to refresh here because we're polling the server and might be lagging behind the true state.
+        // This is kind of a hack. Better solutions would be:
+        //
+        // 1) Check the pledges returned ourselves against p2p network using getutxo: lowers trust in the server
+        // 2) Have server stream updates to client so we are never more than a second or two behind, instead of
+        //    a block interval like today.
+        log.info("Attempting to claim server assisted project, refreshing");
+        progressBar.setProgress(-1);
+        Main.backend.refreshProjectStatusFromServer(projectToClaim, key).handleAsync((status, ex) -> {
+            // On backend thread.
+            if (ex != null) {
+                log.error("Unable to fetch project status", ex);
+                informationalAlert("Unable to claim", "Could not fetch project status from server: %s", ex);
+                overlayUI.done();
+            } else {
+                HashSet<LHProtos.Pledge> newPledges = new HashSet<>(status.getPledgesList());
+                if (status.getValuePledgedSoFar() < projectToClaim.getGoalAmount().value) {
+                    log.error("Refreshed project status indicates value has changed, is now {}", status.getValuePledgedSoFar());
+                    informationalAlert("Unable to claim", "One or more pledges have been revoked whilst you were waiting.");
+                    overlayUI.done();
+                } else {
+                    // Must use newPledges here because a pledge might have been revoked and replaced in the
+                    // waiting interval.
+                    broadcastClaim(newPledges, key);
+                }
+            }
+            return null;
+        }, Platform::runLater);
+    }
+
+    private void broadcastClaim(Set<LHProtos.Pledge> pledges, @Nullable KeyParameter key) {
         try {
-            log.info("Attempting to claim");
-            PledgingWallet.CompletionProgress progress = Main.wallet.completeContractWithFee(projectToClaim, pledgesToClaim, key);
+            PledgingWallet.CompletionProgress progress = Main.wallet.completeContractWithFee(projectToClaim, pledges, key);
             double total = Main.bitcoin.peerGroup().getMinBroadcastConnections() * 2;  // two transactions.
             progress.peersSeen = seen -> {
                 if (seen == -1) {
@@ -127,24 +168,7 @@ public class RevokeAndClaimWindow {
                 overlayUI.done();
                 return null;
             }, Platform::runLater);
-        } catch (Ex.NoTransactionData e) {
-            // We were encrypted when the server request was made, so we didn't authenticate and didn't get the tx
-            // data required to make the claim. Re-request the status and try again.
-            checkState(key != null);
-            log.info("No tx data, wallet was encrypted so we must retry");
-            progressBar.setProgress(-1);
-            projectToClaim.getStatus(Main.wallet, key).handleAsync((status, ex) -> {
-                if (ex != null) {
-                    log.error("Unable to fetch project status", ex);
-                    informationalAlert("Unable to claim", "Could not fetch project status from server: %s", ex);
-                } else {
-                    log.info("Retrying claim ...");
-                    pledgesToClaim = new HashSet<>(status.getPledgesList());
-                    claim(key);
-                }
-                return null;
-            }, Platform::runLater);
-        } catch (Ex.ValueMismatch e) {
+        }  catch (Ex.ValueMismatch e) {
             // TODO: Solve value mismatch errors. We have a few options.
             // 1) Try taking away pledges to see if we can get precisely to the target value, e.g. this can
             //    help if everyone agrees up front to pledge 1 BTC exactly, and the goal is 10, but nobody
@@ -153,16 +177,22 @@ public class RevokeAndClaimWindow {
             // 2) Find a way to extend the Bitcoin protocol so the additional money can be allocated to the
             //    project owner and not miners. For instance by allowing new SIGHASH modes that control which
             //    parts of which outputs are signed. This would require a Script 2.0 effort though.
+            //
+            // This should never happen in server assisted mode.
+            log.error("Value mismatch: " + e);
             informationalAlert("Too much money",
                     "You have gathered pledges that add up to more than the goal. The excess cannot be " +
                             "redeemed in the current version of the software and would end up being paid completely " +
                             "to miners fees. Please remove some pledges and try to hit the goal amount exactly. " +
                             "There is %s too much.", Coin.valueOf(e.byAmount).toFriendlyString());
+            overlayUI.done();
         } catch (InsufficientMoneyException e) {
+            log.error("Insufficient money to claim", e);
             informationalAlert("Cannot claim pledges",
                     "Closing the contract requires paying Bitcoin network fees, but you don't have enough " +
                             "money in the wallet. Add more money and try again."
             );
+            overlayUI.done();
         }
     }
 
@@ -188,6 +218,7 @@ public class RevokeAndClaimWindow {
         } catch (InsufficientMoneyException e) {
             // This really sucks. In future we should make it a free tx, when we know if we have sufficient
             // priority to meet the relay rules.
+            log.error("Could not revoke due to insufficient money to pay the fee", e);
             informationalAlert("Cannot revoke pledge",
                     "Revoking a pledge requires making another Bitcoin transaction on the block chain, but " +
                             "you don't have sufficient funds to pay the required fee. Add more money and try again."
