@@ -528,10 +528,6 @@ public class Main extends Application {
             currentOverlay = this;
         }
 
-        public void outsideClickDismisses() {
-            stopClickPane.setOnMouseClicked((ev) -> done());
-        }
-
         private LinkedList<EventHandler<ActionEvent>> afterFade = new LinkedList<>();
 
         @Nullable
