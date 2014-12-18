@@ -42,7 +42,7 @@ public class BitcoinUIModel {
         address.set(wallet.currentReceiveAddress());
     }
 
-    private class ProgressBarUpdater extends DownloadListener {
+    private class ProgressBarUpdater extends DownloadProgressTracker {
         @Override
         protected void progress(double pct, int blocksSoFar, Date date) {
             super.progress(pct, blocksSoFar, date);
@@ -56,7 +56,7 @@ public class BitcoinUIModel {
         }
     }
 
-    public DownloadListener getDownloadListener() { return syncProgressUpdater; }
+    public DownloadProgressTracker getDownloadListener() { return syncProgressUpdater; }
 
     public ReadOnlyDoubleProperty syncProgressProperty() { return syncProgress; }
 
