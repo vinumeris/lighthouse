@@ -11,7 +11,6 @@ import javafx.event.*;
 import javafx.fxml.*;
 import javafx.geometry.*;
 import javafx.scene.*;
-import javafx.scene.control.*;
 import javafx.scene.effect.*;
 import javafx.scene.image.*;
 import javafx.scene.input.*;
@@ -52,14 +51,17 @@ import static lighthouse.utils.GuiUtils.*;
 public class Main extends Application {
     public static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    public static final String APP_NAME = "Crowdfunding App";
+    public static final String APP_NAME = "Lighthouse";
 
     // UpdateFX stuff. Version is incremented monotonically after a new version is released.
     public static final int VERSION = 23;
 
-    // No online updates URL for "Crowdfunding App".
-    @Nullable public static final String UPDATES_BASE_URL = null;
+    public static final String UPDATES_BASE_URL = "https://www.vinumeris.com/lighthouse/updates";
     public static final List<ECPoint> UPDATE_SIGNING_KEYS = Crypto.decode(
+            // Two keys during temporary transition from a key that was not password protected to one that is.
+            // At release the old key will be removed.
+            "02A3CDE5D0EDC281637C67AA67C0CB009EA6573E0F101C6E018ACB91393C08C129",   // old
+            "02AA4D7E966BFA942D3BEABD2049A49DB6AE92C417D8837C328BC02F8B50411A97"    // new
     );
     public static final int UPDATE_SIGNING_THRESHOLD = 1;
 
@@ -148,7 +150,7 @@ public class Main extends Application {
         log.info("Command line arguments are: {}", String.join(" ", getParameters().getRaw()));
         log.info("We are running on: {}", System.getProperty("os.name"));
         // Show the crash dialog for any exceptions that we don't handle and that hit the main loop.
-        CrashFX.setup();
+        CrashFX.setup("Lighthouse/" + Main.VERSION, AppDirectory.dir().resolve("crashes"), URI.create("https://www.vinumeris.com/crashfx/upload"));
         // Set up the basic window with an empty UI stack, and put a quick splash there.
         reached("JFX initialised");
         prefs = new UserPrefs();
@@ -265,6 +267,7 @@ public class Main extends Application {
         if (GuiUtils.isSoftwarePipeline())
             log.warn("Prism is using software rendering");
         mainStage = stage;
+        stage.getIcons().add(new Image(Main.class.getResourceAsStream("icon.png")));
         Font.loadFont(Main.class.getResource("nanlight-webfont.ttf").toString(), 10);
         Font.loadFont(Main.class.getResource("nanlightbold-webfont.ttf").toString(), 10);
         // Create the scene with a StackPane so we can overlay things on top of the main UI.
@@ -287,7 +290,11 @@ public class Main extends Application {
     }
 
     private Node createLoadingUI() {
-        StackPane pane = new StackPane(new Label("Crowdfunding app"));
+        ImageView lighthouseLogo = new ImageView(getResource("Logo.jpg").toString());
+        lighthouseLogo.setFitWidth(500);
+        lighthouseLogo.setPreserveRatio(true);
+        StackPane.setAlignment(lighthouseLogo, Pos.CENTER);
+        StackPane pane = new StackPane(lighthouseLogo);
         pane.setPadding(new Insets(20));
         pane.setStyle("-fx-background-color: white");
         return pane;

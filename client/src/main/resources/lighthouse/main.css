@@ -34,6 +34,7 @@
 
 .gradient-pane {
     -fx-background-color: #3c777b;
+    -fx-background-image: url("low-point-lighthouse-darkgreen.jpg");
     -fx-background-position: bottom right;
     -fx-background-repeat: no-repeat;
 }
