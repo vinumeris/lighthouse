@@ -14,13 +14,12 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Label;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCombination;
@@ -75,16 +74,13 @@ import static lighthouse.utils.GuiUtils.*;
 public class Main extends Application {
     public static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    public static final String APP_NAME = "Lighthouse";
+    public static final String APP_NAME = "Crowdfunding App";
 
     // UpdateFX stuff. Version is incremented monotonically after a new version is released.
     public static final int VERSION = 19;
-    public static final String UPDATES_BASE_URL = "https://www.vinumeris.com/lighthouse/updates";
+    // No online updates URL for "Crowdfunding App".
+    @Nullable public static final String UPDATES_BASE_URL = null;
     public static final List<ECPoint> UPDATE_SIGNING_KEYS = Crypto.decode(
-            // Two keys during temporary transition from a key that was not password protected to one that is.
-            // At release the old key will be removed.
-            "02A3CDE5D0EDC281637C67AA67C0CB009EA6573E0F101C6E018ACB91393C08C129",   // old
-            "02AA4D7E966BFA942D3BEABD2049A49DB6AE92C417D8837C328BC02F8B50411A97"    // new
     );
     public static final int UPDATE_SIGNING_THRESHOLD = 1;
 
@@ -157,10 +153,10 @@ public class Main extends Application {
             return;
         }
         setupLogging();
-        log.info("\n\nLighthouse {} starting up. It is {}\n", VERSION, LHUtils.nowAsString());
+        log.info("\n\n{} {} starting up. It is {}\n", APP_NAME, VERSION, LHUtils.nowAsString());
         log.info("App dir is {}. We have {} cores.", AppDirectory.dir(), Runtime.getRuntime().availableProcessors());
         // Show the crash dialog for any exceptions that we don't handle and that hit the main loop.
-        CrashFX.setup("Lighthouse/" + Main.VERSION, AppDirectory.dir().resolve("crashes"), URI.create("https://www.vinumeris.com/crashfx/upload"));
+        CrashFX.setup();
         // Set up the basic window with an empty UI stack, and put a quick splash there.
         reached("JFX initialised");
         prefs = new UserPrefs();
@@ -176,7 +172,7 @@ public class Main extends Application {
     private boolean parseCommandLineArgs() {
         if (getParameters().getUnnamed().contains("--help") || getParameters().getUnnamed().contains("-h")) {
             System.out.println(String.format(
-                    "Lighthouse version %d (C) 2014 Vinumeris GmbH%n%n" +
+                    "%s version %d (C) 2014 Vinumeris GmbH%n%n" +
                     "Usage:%n" +
                     "  --use-tor:                      Enable experimental Tor mode (may freeze up)%n" +
                     "  --slow-gfx:                     Enable more eyecandy that may stutter on slow GFX cards%n" +
@@ -189,7 +185,7 @@ public class Main extends Application {
                     "  --updates-url=http://xxx/       Override the default URL used for updates checking.%n" +
                     "  --resfiles=/path/to/dir         Load GUI resource files from the given directory instead of using%n" +
                     "                                  the included versions.%n",
-                    VERSION
+                    APP_NAME, VERSION
             ));
             return false;
         }
@@ -252,7 +248,6 @@ public class Main extends Application {
         if (GuiUtils.isSoftwarePipeline())
             log.warn("Prism is using software rendering");
         mainStage = stage;
-        stage.getIcons().add(new Image(Main.class.getResourceAsStream("icon.png")));
         Font.loadFont(Main.class.getResource("nanlight-webfont.ttf").toString(), 10);
         Font.loadFont(Main.class.getResource("nanlightbold-webfont.ttf").toString(), 10);
         // Create the scene with a StackPane so we can overlay things on top of the main UI.
@@ -275,16 +270,7 @@ public class Main extends Application {
     }
 
     private Node createLoadingUI() {
-        ImageView lighthouseLogo = new ImageView(getResource("Logo.jpg").toString());
-        lighthouseLogo.setFitWidth(500);
-        lighthouseLogo.setPreserveRatio(true);
-        StackPane.setAlignment(lighthouseLogo, Pos.CENTER);
-//        ImageView vinumerisLogo = new ImageView(GuiUtils.getResource("vinumeris.png").toString());
-//        vinumerisLogo.setFitHeight(25);
-//        vinumerisLogo.setPreserveRatio(true);
-//        StackPane.setAlignment(vinumerisLogo, Pos.TOP_RIGHT);
-//        StackPane pane = new StackPane(lighthouseLogo, vinumerisLogo);
-        StackPane pane = new StackPane(lighthouseLogo);
+        StackPane pane = new StackPane(new Label("Crowdfunding app"));
         pane.setPadding(new Insets(20));
         pane.setStyle("-fx-background-color: white");
         return pane;
@@ -396,8 +382,9 @@ public class Main extends Application {
                                 log.warn("Localhost peer does not have support for NODE_GETUTXOS, ignoring");
                                 // TODO: Once Bitcoin Core fork name is chosen and released, be more specific in this message.
                                 informationalAlert("Local Bitcoin node not usable",
-                                        "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support Lighthouse needs. Lighthouse will still " +
-                                                "work but will use the peer to peer network instead, so you won't get upgraded security.");
+                                        "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support %s needs. %s will still " +
+                                                "work but will use the peer to peer network instead, so you won't get upgraded security.",
+                                        APP_NAME);
                                 vPeerGroup.setUseLocalhostPeerWhenPossible(false);
                                 vPeerGroup.setMaxConnections(4);
                             }
@@ -426,7 +413,7 @@ public class Main extends Application {
         bitcoin.setPeerNodes(new PeerAddress[0])    // Hack to prevent WAK adding DnsDiscovery
                .setBlockingStartup(false)
                .setDownloadListener(MainWindow.bitcoinUIModel.getDownloadListener())
-               .setUserAgent("Lighthouse", "" + VERSION)
+               .setUserAgent(APP_NAME, "" + VERSION)
                .restoreWalletFromSeed(restoreFromSeed);
 
         if (useTor && params != RegTestParams.get())

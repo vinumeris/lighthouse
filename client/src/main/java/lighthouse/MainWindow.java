@@ -296,7 +296,7 @@ public class MainWindow {
                     Files.copy(file.toPath(), AppDirectory.dir().resolve(hash + DiskManager.PLEDGE_FILE_EXTENSION));
                 } catch (IOException e) {
                     GuiUtils.informationalAlert("Import failed",
-                            "Could not copy the dropped pledge into the Lighthouse application directory: " + e);
+                            "Could not copy the dropped pledge into the %s application directory: " + e, Main.APP_NAME);
                 }
             } else
                 log.error("Unknown file type dropped: should not happen: " + file);
@@ -412,6 +412,10 @@ public class MainWindow {
     }
 
     private void doOnlineUpdateCheck() {
+        if (Main.UPDATES_BASE_URL == null) {
+            ((HBox)menuBtn.getParent()).getChildren().remove(menuBtn);
+            return;
+        }
         updater = new Updater(Main.instance.updatesURL, Main.APP_NAME, Main.VERSION, AppDirectory.dir(),
                 UpdateFX.findCodePath(Main.class), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD);
 
