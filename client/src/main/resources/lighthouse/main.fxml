@@ -16,9 +16,9 @@
                     <Button fx:id="backButton" mnemonicParsing="false" onAction="#backToOverview" styleClass="back-button" text="">
                         <padding><Insets right="15"/></padding>
                     </Button>
-                    <!--<ImageView fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
+                    <ImageView fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
                         <Image url="@icon.jpg"/>
-                    </ImageView>-->
+                    </ImageView>
                     <VBox alignment="CENTER_LEFT" prefHeight="80.0">
                         <children>
                             <HBox spacing="15">
