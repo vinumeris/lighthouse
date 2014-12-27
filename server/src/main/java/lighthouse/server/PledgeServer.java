@@ -1,37 +1,27 @@
 package lighthouse.server;
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsConfigurator;
-import com.sun.net.httpserver.HttpsServer;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-import lighthouse.LighthouseBackend;
-import lighthouse.files.AppDirectory;
-import lighthouse.protocol.LHUtils;
-import lighthouse.threading.AffinityExecutor;
-import lighthouse.wallet.PledgingWallet;
-import org.bitcoinj.core.GetUTXOsMessage;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.kits.WalletAppKit;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.RegTestParams;
-import org.bitcoinj.params.TestNet3Params;
-import org.bitcoinj.utils.BriefLogFormatter;
+import com.sun.net.httpserver.*;
+import joptsimple.*;
+import lighthouse.*;
+import lighthouse.files.*;
+import lighthouse.protocol.*;
+import lighthouse.threading.*;
+import lighthouse.wallet.*;
+import org.bitcoinj.core.*;
+import org.bitcoinj.kits.*;
+import org.bitcoinj.params.*;
+import org.bitcoinj.utils.*;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.FileInputStream;
-import java.net.InetSocketAddress;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.KeyStore;
-import java.security.SecureRandom;
+import javax.net.ssl.*;
+import java.io.*;
+import java.net.*;
+import java.nio.file.*;
+import java.security.*;
+import java.util.logging.*;
 
-import static lighthouse.LighthouseBackend.Mode.SERVER;
+import static lighthouse.LighthouseBackend.Mode.*;
 
 /**
  * PledgeServer is a standalone HTTP server that knows how to accept pledges and vend statuses (lists of pledges).
@@ -42,14 +32,13 @@ public class PledgeServer {
     public static final short DEFAULT_LOCALHOST_PORT = (short) LHUtils.HTTP_LOCAL_TEST_PORT;
 
     public static void main(String[] args) throws Exception {
-        BriefLogFormatter.initVerbose();
-
         OptionParser parser = new OptionParser();
         OptionSpec<String> dirFlag = parser.accepts("dir").withRequiredArg();
         OptionSpec<String> netFlag = parser.accepts("net").withRequiredArg().defaultsTo("regtest");
         OptionSpec<Short> portFlag = parser.accepts("port").withRequiredArg().ofType(Short.class).defaultsTo(DEFAULT_LOCALHOST_PORT);
         OptionSpec<String> keystoreFlag = parser.accepts("keystore").withRequiredArg();
         parser.accepts("local-node");
+        OptionSpec<Void> logToConsole = parser.accepts("log-to-console");
         OptionSet options = parser.parse(args);
 
         NetworkParameters params;
@@ -68,6 +57,8 @@ public class PledgeServer {
         if (options.has(dirFlag))
             AppDirectory.overrideAppDir(Paths.get(options.valueOf(dirFlag)));
         Path appDir = AppDirectory.initAppDir("lighthouse-server");   // Create dir if necessary.
+
+        setupLogging(appDir, options.has(logToConsole));
 
         WalletAppKit kit = new WalletAppKit(params, appDir.toFile(), "lighthouse-server") {
             {
@@ -133,5 +124,20 @@ public class PledgeServer {
         } else {
             return HttpServer.create(new InetSocketAddress(portFlag.value(options)), 0);
         }
+    }
+
+    // Work around JDK misdesign/bug.
+    private static java.util.logging.Logger loggerPin;
+    private static void setupLogging(Path dir, boolean logToConsole) throws IOException {
+        java.util.logging.Logger logger = java.util.logging.Logger.getLogger("");
+        Handler handler = new FileHandler(dir.resolve("log.txt").toString(), true);
+        handler.setFormatter(new BriefLogFormatter());
+        logger.addHandler(handler);
+        if (logToConsole) {
+            logger.getHandlers()[0].setFormatter(new BriefLogFormatter());
+        } else {
+            logger.removeHandler(logger.getHandlers()[0]);
+        }
+        loggerPin = logger;
     }
 }
