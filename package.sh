@@ -2,6 +2,10 @@
 
 set -e
 
+if grep 'String UPDATES_BASE_URL = null' client/src/main/java/lighthouse/Main.java >/dev/null; then
+    echo "Don't use this for Crowdfunding App"
+    exit 1
+fi
 # Extract the version number.
 ver=$( sed -n 's/^.*final int VERSION = //p' client/src/main/java/lighthouse/Main.java )
 ver="${ver:0:${#ver}-1}"
