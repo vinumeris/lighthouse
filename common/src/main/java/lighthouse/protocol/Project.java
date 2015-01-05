@@ -1,42 +1,30 @@
 package lighthouse.protocol;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
-import lighthouse.files.DiskManager;
-import lighthouse.wallet.PledgingWallet;
+import com.google.common.collect.*;
+import com.google.protobuf.*;
+import lighthouse.files.*;
+import lighthouse.wallet.*;
 import org.bitcoin.protocols.payments.Protos;
 import org.bitcoinj.core.*;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.protocols.payments.PaymentProtocolException;
-import org.bitcoinj.protocols.payments.PaymentSession;
-import org.bitcoinj.script.Script;
-import org.bitcoinj.script.ScriptBuilder;
-import org.bitcoinj.wallet.DefaultRiskAnalysis;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.params.KeyParameter;
-import org.spongycastle.util.io.Streams;
+import org.bitcoinj.crypto.*;
+import org.bitcoinj.protocols.payments.*;
+import org.bitcoinj.script.*;
+import org.bitcoinj.wallet.*;
+import org.slf4j.*;
+import org.spongycastle.crypto.params.*;
+import org.spongycastle.util.io.*;
 
-import javax.annotation.Nullable;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.time.Instant;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import javax.annotation.*;
+import java.net.*;
+import java.security.*;
+import java.time.*;
+import java.util.*;
+import java.util.concurrent.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static java.time.Instant.now;
-import static java.util.stream.Collectors.toList;
-import static lighthouse.protocol.LHUtils.unchecked;
+import static com.google.common.base.Preconditions.*;
+import static java.time.Instant.*;
+import static java.util.stream.Collectors.*;
+import static lighthouse.protocol.LHUtils.*;
 
 /**
  * A Project represents something to which pledges can be made. It is serialized using an extended form of the BIP 70
@@ -60,6 +48,9 @@ public class Project {
 
     private final byte[] authKey;
     private final int authKeyIndex;
+
+    // For the User-Agent string in getStatus
+    public static String VERSION_CODE = "";
 
     public Project(LHProtos.ProjectDetails details) throws PaymentProtocolException, InvalidProtocolBufferException {
         this(wrapDetails(details).build());
