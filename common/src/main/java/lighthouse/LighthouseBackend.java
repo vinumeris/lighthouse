@@ -1,48 +1,34 @@
 package lighthouse;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.Uninterruptibles;
-import com.google.protobuf.ByteString;
-import javafx.beans.InvalidationListener;
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.SimpleLongProperty;
+import com.google.common.util.concurrent.*;
+import com.google.protobuf.*;
+import javafx.beans.*;
+import javafx.beans.property.*;
 import javafx.collections.*;
-import lighthouse.files.AppDirectory;
-import lighthouse.files.DiskManager;
+import lighthouse.files.*;
 import lighthouse.protocol.*;
-import lighthouse.threading.AffinityExecutor;
-import lighthouse.threading.ObservableMirrors;
-import lighthouse.wallet.PledgingWallet;
-import net.jcip.annotations.GuardedBy;
+import lighthouse.threading.*;
+import lighthouse.wallet.*;
+import net.jcip.annotations.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.params.RegTestParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.params.KeyParameter;
+import org.bitcoinj.core.ProtocolException;
+import org.bitcoinj.params.*;
+import org.slf4j.*;
+import org.spongycastle.crypto.params.*;
 
-import javax.annotation.Nullable;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.time.Duration;
+import javax.annotation.*;
+import java.io.*;
+import java.net.*;
+import java.nio.file.*;
+import java.time.*;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 import static com.google.common.base.Preconditions.*;
-import static com.google.common.base.Throwables.getRootCause;
-import static java.util.stream.Collectors.toMap;
+import static com.google.common.base.Throwables.*;
+import static java.util.stream.Collectors.*;
 import static lighthouse.protocol.LHUtils.*;
-import static lighthouse.utils.MoreBindings.mergeSets;
+import static lighthouse.utils.MoreBindings.*;
 
 /**
  * Exposes observable data about pledges and projects that is based on combining the output of a wallet and
@@ -132,7 +118,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     public LighthouseBackend(Mode mode, PeerGroup peerGroup, AbstractBlockChain chain, PledgingWallet wallet, AffinityExecutor.ServiceAffinityExecutor executor) {
         // The disk manager should only auto load projects in server mode where we install/change them by dropping them
         // into the server directory. But in client mode we always want explicit import.
-        this(mode, peerGroup, chain, wallet, new DiskManager(executor), executor);
+        this(mode, peerGroup, chain, wallet, new DiskManager(wallet.getParams(), executor), executor);
     }
 
     public LighthouseBackend(Mode mode, PeerGroup peerGroup, AbstractBlockChain chain, PledgingWallet wallet, DiskManager diskManager, AffinityExecutor.ServiceAffinityExecutor executor) {

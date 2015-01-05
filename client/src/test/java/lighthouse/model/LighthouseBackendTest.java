@@ -1,58 +1,40 @@
 package lighthouse.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Uninterruptibles;
-import com.google.protobuf.ByteString;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
-import lighthouse.LighthouseBackend;
-import lighthouse.files.AppDirectory;
-import lighthouse.files.DiskManager;
-import lighthouse.protocol.Ex;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.Project;
-import lighthouse.protocol.TestUtils;
-import lighthouse.threading.AffinityExecutor;
-import lighthouse.wallet.PledgingWallet;
+import com.google.common.collect.*;
+import com.google.common.util.concurrent.*;
+import com.google.protobuf.*;
+import com.sun.net.httpserver.*;
+import javafx.collections.*;
+import lighthouse.*;
+import lighthouse.files.*;
+import lighthouse.protocol.*;
+import lighthouse.threading.*;
+import lighthouse.wallet.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.store.BlockStoreException;
-import org.bitcoinj.testing.FakeTxBuilder;
-import org.bitcoinj.testing.InboundMessageQueuer;
-import org.bitcoinj.testing.TestWithPeerGroup;
-import org.bitcoinj.utils.BriefLogFormatter;
-import org.javatuples.Triplet;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.spongycastle.crypto.params.ECPrivateKeyParameters;
-import org.spongycastle.crypto.signers.ECDSASigner;
+import org.bitcoinj.core.Message;
+import org.bitcoinj.params.*;
+import org.bitcoinj.store.*;
+import org.bitcoinj.testing.*;
+import org.bitcoinj.utils.*;
+import org.javatuples.*;
+import org.junit.*;
+import org.spongycastle.crypto.params.*;
+import org.spongycastle.crypto.signers.*;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.math.BigInteger;
-import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.*;
+import java.io.*;
+import java.math.*;
+import java.net.*;
+import java.nio.file.*;
+import java.time.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
-import static java.net.HttpURLConnection.HTTP_OK;
-import static lighthouse.LighthouseBackend.Mode.CLIENT;
+import static java.net.HttpURLConnection.*;
+import static lighthouse.LighthouseBackend.Mode.*;
 import static lighthouse.protocol.LHUtils.*;
-import static org.bitcoinj.testing.FakeTxBuilder.createFakeBlock;
+import static org.bitcoinj.testing.FakeTxBuilder.*;
 import static org.junit.Assert.*;
 
 public class LighthouseBackendTest extends TestWithPeerGroup {
@@ -141,7 +123,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
     public void initCoreState() {
         gate = new AffinityExecutor.Gate();
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
-        diskManager = new DiskManager(executor);
+        diskManager = new DiskManager(TestNet3Params.get(), executor);
         backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
         backend.setMinPeersForUTXOQuery(1);
         backend.setMaxJitterSeconds(0);
@@ -312,7 +294,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         executor.service.shutdown();
         executor.service.awaitTermination(5, TimeUnit.SECONDS);
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread 2");
-        diskManager = new DiskManager(executor);
+        diskManager = new DiskManager(TestNet3Params.get(), executor);
         writeProjectToDisk();
         backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
 

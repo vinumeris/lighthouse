@@ -1,33 +1,23 @@
 package lighthouse.files;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
-import javafx.beans.InvalidationListener;
+import com.google.common.base.*;
+import com.google.common.collect.*;
+import javafx.beans.*;
 import javafx.collections.*;
-import lighthouse.LighthouseBackend;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.LHUtils;
-import lighthouse.protocol.Project;
-import lighthouse.threading.AffinityExecutor;
-import lighthouse.threading.ObservableMirrors;
-import net.jcip.annotations.GuardedBy;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.core.Transaction;
-import org.bitcoinj.protocols.payments.PaymentProtocolException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import lighthouse.threading.*;
+import net.jcip.annotations.*;
+import org.bitcoinj.core.*;
+import org.bitcoinj.protocols.payments.*;
+import org.slf4j.*;
 
-import javax.annotation.Nullable;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.annotation.*;
+import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 import static lighthouse.protocol.LHUtils.*;
 
 /**
@@ -71,6 +61,7 @@ public class DiskManager {
     @GuardedBy("this") private final ObservableMap<String, Project> projectsById;
     @GuardedBy("this") private final Map<Project, ObservableSet<LHProtos.Pledge>> pledges;
     private final List<Path> pledgePaths;
+    private final NetworkParameters params;
     private DirectoryWatcher directoryWatcher;
 
     // Ordered map: the ordering is needed to keep the UI showing projects in import order instead of whatever order
@@ -83,9 +74,10 @@ public class DiskManager {
      * This object should be owned by the thread backing owningExecutor: changes will all be queued onto this
      * thread.
      */
-    public DiskManager(AffinityExecutor.ServiceAffinityExecutor owningExecutor) {
+    public DiskManager(NetworkParameters params, AffinityExecutor.ServiceAffinityExecutor owningExecutor) {
         // Initialize projects by selecting files matching the right name pattern and then trying to load, ignoring
         // failures (nulls).
+        this.params = params;
         executor = owningExecutor;
         projects = FXCollections.observableArrayList();
         projectsById = FXCollections.observableHashMap();
@@ -354,11 +346,16 @@ public class DiskManager {
     }
 
     @Nullable
-    private static Project loadProject(Path from) {
+    private Project loadProject(Path from) {
         log.info("Attempting to load project file {}", from);
         try (InputStream is = Files.newInputStream(from)) {
             LHProtos.Project proto = LHProtos.Project.parseFrom(is);
-            return new Project(proto);
+            Project project = new Project(proto);
+            if (!project.getParams().equals(params)) {
+                log.warn("Ignoring project with mismatched network params: {} vs {}", project.getParams(), params);
+                return null;
+            }
+            return project;
         } catch (IOException e) {
             log.error("File appeared in directory but could not be read, ignoring: {}", e.getMessage());
             return null;

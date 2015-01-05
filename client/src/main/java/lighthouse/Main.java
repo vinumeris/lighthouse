@@ -1,6 +1,7 @@
 package lighthouse;
 
 import com.google.common.base.*;
+import com.google.common.io.*;
 import com.google.common.util.concurrent.*;
 import com.vinumeris.crashfx.*;
 import com.vinumeris.updatefx.*;
@@ -40,8 +41,9 @@ import org.slf4j.*;
 import javax.annotation.*;
 import java.io.*;
 import java.net.*;
-import java.nio.file.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
@@ -135,6 +137,7 @@ public class Main extends Application {
         setupLogging();
         log.info("\n\n{} {} starting up. It is {}\n", APP_NAME, VERSION, LHUtils.nowAsString());
         log.info("App dir is {}. We have {} cores.", AppDirectory.dir(), Runtime.getRuntime().availableProcessors());
+        log.info("Command line arguments are: {}", String.join(" ", getParameters().getRaw()));
         // Show the crash dialog for any exceptions that we don't handle and that hit the main loop.
         CrashFX.setup();
         // Set up the basic window with an empty UI stack, and put a quick splash there.
@@ -165,7 +168,7 @@ public class Main extends Application {
                     "Usage: lighthouse [args] [filename.lighthouse-project...] %n" +
                     "  --use-tor:                      Enable experimental Tor mode (may freeze up)%n" +
                     "  --slow-gfx:                     Enable more eyecandy that may stutter on slow GFX cards%n" +
-                    "  --net={regtest,main,testnet}:   Select Bitcoin network to operate on.%n" +
+                    "  --net={regtest,main,test}:      Select Bitcoin network to operate on.%n" +
                     "  --name=alice                    Name is put in titlebar and pledge filenames, useful for testing%n" +
                     "                                  multiple instances on the same machine.%n" +
                     "  --appdir=/path/to/dir           Overrides the usual directory used, useful for testing multiple%n" +
@@ -181,18 +184,11 @@ public class Main extends Application {
 
         useTor = getParameters().getUnnamed().contains("--use-tor");
 
-        // TODO: Auto-detect adapter and configure this.
         slowGFX = !getParameters().getUnnamed().contains("--slow-gfx");
 
-        // TODO: Reset to "production"
-        String netname = "test";
-        if (getParameters().getNamed().containsKey("net"))    // e.g. regtest or testnet
-            netname = getParameters().getNamed().get("net");
-        params = NetworkParameters.fromID("org.bitcoin." + netname);
-        if (params == null) {
-            informationalAlert("Unknown network ID", "The --net parameter must be production, regtest or testnet");
-            return false;
-        }
+        // Handle network parameters.
+        if (!selectNetwork()) return false;
+
         demoName = getParameters().getNamed().get("name");
         String dir = getParameters().getNamed().get("appdir");
         if (dir != null) {
@@ -221,6 +217,28 @@ public class Main extends Application {
             }
         }
 
+        return true;
+    }
+
+    private boolean selectNetwork() {
+        String netname = "main";
+        if (getParameters().getNamed().containsKey("net"))    // e.g. regtest or testnet
+            netname = getParameters().getNamed().get("net");
+        if (netname.equals("main"))
+            netname = "production";
+        params = NetworkParameters.fromID("org.bitcoin." + netname);
+        if (params == null) {
+            informationalAlert("Unknown network ID", "The --net parameter must be main, regtest or test");
+            return false;
+        }
+        // When not using testnet, use a subdirectory of the app directory to keep everything in, named after the
+        // network. This is an upgrade path for alpha testers who have a directory with wallets/blockchains/projects
+        // all on testnet.
+        if (!netname.equals("test")) {
+            Path path = AppDirectory.dir().resolve(netname);
+            uncheck(() -> Files.createDirectories(path));
+            AppDirectory.overrideAppDir(path);
+        }
         return true;
     }
 
@@ -335,33 +353,12 @@ public class Main extends Application {
                     vPeerGroup.setMinBroadcastConnections(1);
                     vPeerGroup.setUseLocalhostPeerWhenPossible(false);
                 } else {
-                    // TODO: Replace this with a DNS seed that crawls for NODE_GETUTXOS (or whatever it's renamed to).
-                    InetSocketAddress[] result = new InetSocketAddress[2];
-                    result[0] = new InetSocketAddress("vinumeris.com", params.getPort());
-                    result[1] = new InetSocketAddress("riker.plan99.net", params.getPort());
-
-                    if (result[0].getAddress() == null && result[1].getAddress() == null) {
+                    // Just a quick check to see if we can resolve DNS names.
+                    if (new InetSocketAddress("google.com", 80).getAddress() == null) {
                         log.warn("User appears to be offline");
                         offline = true;
                     } else {
-                        PeerDiscovery hardCodedPeers = new PeerDiscovery() {
-                            @Override
-                            public InetSocketAddress[] getPeers(long timeoutValue, TimeUnit timeoutUnit) throws PeerDiscoveryException {
-                                return result;
-                            }
-
-                            @Override
-                            public void shutdown() {
-                            }
-                        };
-                        vPeerGroup.addPeerDiscovery(hardCodedPeers);
-                        vPeerGroup.setMaxConnections(2);
-                        vPeerGroup.setConnectTimeoutMillis(10000);
-                        // Sequence things so we *always* get both hard-coded peers for now.
-                        vPeerGroup.waitForPeersOfVersion(2, GetUTXOsMessage.MIN_PROTOCOL_VERSION).addListener(() -> {
-                            vPeerGroup.addPeerDiscovery(new DnsDiscovery(params));
-                            vPeerGroup.setMaxConnections(6);
-                        }, Threading.SAME_THREAD);
+                        setupPeerGroup();
                     }
                     vPeerGroup.addEventListener(new AbstractPeerEventListener() {
                         @Override
@@ -369,17 +366,45 @@ public class Main extends Application {
                             if (peer.getAddress().getAddr().isLoopbackAddress() && !peer.getPeerVersionMessage().isGetUTXOsSupported()) {
                                 // We connected to localhost but it doesn't have what we need.
                                 log.warn("Localhost peer does not have support for NODE_GETUTXOS, ignoring");
-                                // TODO: Once Bitcoin Core fork name is chosen and released, be more specific in this message.
                                 informationalAlert("Local Bitcoin node not usable",
                                         "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support %s needs. %s will still " +
-                                                "work but will use the peer to peer network instead, so you won't get upgraded security.",
+                                            "work but will use the peer to peer network instead, so you won't get upgraded security. " +
+                                            "Try installing Bitcoin XT, which is a modified version of Bitcoin Core that has the upgraded protocol support.",
                                         APP_NAME);
                                 vPeerGroup.setUseLocalhostPeerWhenPossible(false);
-                                vPeerGroup.setMaxConnections(4);
+                                setupPeerGroup();
                             }
                         }
                     });
                 }
+            }
+
+            private void setupPeerGroup() {
+                // We need to find some peers that support the getutxo message, so pick two found via the
+                // vinumeris.com seed with a custom query, then pick another four from the other DNS seeds
+                // (i.e. any bitcoin peer). There's unfortunately no way to instruct the other seeds to
+                // search for a subset of the Bitcoin network so that's why we need to use a new more flexible
+                // HTTP based protocol here. The seed will find Bitcoin XT nodes as people start and stop them.
+                //
+                // Hopefully in future more people will run HTTP seeds, then we can use a MultiplexingDiscovery
+                // to randomly merge their answers and reduce the influence of any one seed. Additionally if
+                // more people run Bitcoin XT nodes we can bump up the number we search for here to again
+                // reduce the influence of any one node. But this needs people to help decentralise.
+                PeerDiscovery disco = new HttpDiscovery(params,
+                        unchecked(() -> new URI("http://main.seed.vinumeris.com:8081/peers?srvmask=3&getutxo=true")),
+                        // auth key used to sign responses.
+                        ECKey.fromPublicOnly(BaseEncoding.base16().decode(
+                                "027a79143a4de36341494d21b6593015af6b2500e720ad2eda1c0b78165f4f38c4".toUpperCase()
+                        )));
+                vPeerGroup.addPeerDiscovery(disco);
+                vPeerGroup.setMaxConnections(2);
+                vPeerGroup.setConnectTimeoutMillis(10000);
+                vPeerGroup.waitForPeersOfVersion(2, GetUTXOsMessage.MIN_PROTOCOL_VERSION).addListener(() -> {
+                    vPeerGroup.addPeerDiscovery(new DnsDiscovery(params));
+                    vPeerGroup.setMaxConnections(6);
+                    // Six peers is a tradeoff between reliability, trust and need to be gentle with network
+                    // resources. It could be higher and nothing would break though.
+                }, Threading.SAME_THREAD);
             }
         };
         if (bitcoin.isChainFileLocked()) {
@@ -399,7 +424,7 @@ public class Main extends Application {
         } else if (params == TestNet3Params.get()) {
             bitcoin.setCheckpoints(getClass().getResourceAsStream("checkpoints.testnet"));
         }
-        bitcoin.setPeerNodes(new PeerAddress[0])    // Hack to prevent WAK adding DnsDiscovery
+        bitcoin.setPeerNodes()    // Hack to prevent WAK adding DnsDiscovery
                .setBlockingStartup(false)
                .setDownloadListener(MainWindow.bitcoinUIModel.getDownloadListener())
                .setUserAgent(APP_NAME, "" + VERSION)
@@ -470,10 +495,12 @@ public class Main extends Application {
             if (currentOverlay == null) {
                 uiStack.getChildren().add(stopClickPane);
                 uiStack.getChildren().add(ui);
-                // Workaround for crappy integrated graphics chips.
+                // Workaround for crappy GPUs and people running inside VMs that don't do OpenGL/D3D.
                 if (GuiUtils.isSoftwarePipeline()) {
                     brightnessAdjust(mainUI, 0.9);
                 } else {
+                    // Gaussian blur a screenshot and then fade it in. This is much faster than animating the radius
+                    // of the blur itself which is intensive even on fast GPUs.
                     WritableImage image = new WritableImage((int) scene.getWidth(), (int) scene.getHeight());
                     mainUI.setClip(new Rectangle(scene.getWidth(), scene.getHeight()));
                     ColorAdjust lighten = new ColorAdjust(0.0, 0.0, 0.7, 0.0);
