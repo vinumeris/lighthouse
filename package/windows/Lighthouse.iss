@@ -3,7 +3,7 @@
 [Setup]
 AppId={{lighthouse}}
 AppName=Lighthouse
-AppVersion=6
+AppVersion=19
 AppVerName=Lighthouse
 AppPublisher=Vinumeris
 AppComments=Lighthouse
@@ -23,7 +23,7 @@ DefaultGroupName=Vinumeris
 LicenseFile=
 ;WinXP or above
 MinVersion=0,5.1
-OutputBaseFilename=Lighthouse-6
+OutputBaseFilename=Lighthouse
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest
@@ -33,6 +33,7 @@ UninstallDisplayName=Lighthouse
 WizardImageStretch=No
 WizardSmallImageFile=Lighthouse-setup-icon.bmp
 ArchitecturesInstallIn64BitMode=x64
+ChangesAssociations=Yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -46,6 +47,21 @@ Source: "Lighthouse\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs cr
 [Icons]
 Name: "{group}\Lighthouse"; Filename: "{app}\Lighthouse.exe"; IconFilename: "{app}\Lighthouse.ico"; Check: returnTrue()
 Name: "{commondesktop}\Lighthouse"; Filename: "{app}\Lighthouse.exe";  IconFilename: "{app}\Lighthouse.ico"; Check: returnFalse()
+
+[Registry]
+Root: HKCU; Subkey: "SOFTWARE\Classes\.lighthouse-project"; ValueType: string; ValueName: ""; ValueData: "lhprojectfile"; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "SOFTWARE\Classes\.lighthouse-project\lhprojectfile"; ValueType: string; ValueName: ""; ValueData: ""; Flags: uninsdeletekey
+Root: HKCU; Subkey: "SOFTWARE\Classes\.lighthouse-project\lhprojectfile\ShellNew"; ValueType: string; ValueName: ""; ValueData: ""; Flags: uninsdeletekey
+Root: HKCU; Subkey: "SOFTWARE\Classes\lhprojectfile"; ValueType: string; ValueName: ""; ValueData: "Lighthouse Project File"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "SOFTWARE\Classes\lhprojectfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\Lighthouse.ico,0"
+Root: HKCU; Subkey: "SOFTWARE\Classes\lhprojectfile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Lighthouse.exe"" ""%1"""
+Root: HKCU; Subkey: "SOFTWARE\Classes\.lighthouse-pledge"; ValueType: string; ValueName: ""; ValueData: "lhpledgefile"; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "SOFTWARE\Classes\.lighthouse-pledge\lhpledgefile"; ValueType: string; ValueName: ""; ValueData: ""; Flags: uninsdeletekey
+Root: HKCU; Subkey: "SOFTWARE\Classes\.lighthouse-pledge\lhpledgefile\ShellNew"; ValueType: string; ValueName: ""; ValueData: ""; Flags: uninsdeletekey
+Root: HKCU; Subkey: "SOFTWARE\Classes\lhpledgefile"; ValueType: string; ValueName: ""; ValueData: "Lighthouse Pledge File"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "SOFTWARE\Classes\lhpledgefile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\Lighthouse.ico,0"
+Root: HKCU; Subkey: "SOFTWARE\Classes\lhpledgefile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Lighthouse.exe"" ""%1"""
+
 
 [Run]
 Filename: "{app}\Lighthouse.exe"; Description: "{cm:LaunchProgram,Lighthouse}"; Flags: nowait postinstall skipifsilent; Check: returnTrue()

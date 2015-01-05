@@ -60,6 +60,10 @@ public class LHUtils {
         return new Transaction(params, pledge.getTransactions(pledge.getTransactionsCount() - 1).toByteArray());
     }
 
+    public static boolean isMac() {
+        return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
     //region Generic Java 8 enhancements
     public interface UncheckedRun<T> {
         public T run() throws Throwable;

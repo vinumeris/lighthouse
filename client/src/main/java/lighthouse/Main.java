@@ -25,6 +25,7 @@ import lighthouse.files.AppDirectory;
 import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
 import lighthouse.utils.*;
+import lighthouse.utils.ipc.*;
 import lighthouse.wallet.*;
 import org.bitcoinj.core.*;
 import org.bitcoinj.kits.*;
@@ -40,6 +41,7 @@ import javax.annotation.*;
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
@@ -125,7 +127,8 @@ public class Main extends Application {
         // context of another class loader if we're now running a different app version to the one the user installed.
         // Anything that happened in main() therefore might have now been wiped.
         AppDirectory.initAppDir(APP_NAME);
-        if (!parseCommandLineArgs()) {
+        List<Path> filesToOpen = new ArrayList<>();
+        if (!parseCommandLineArgs() || FileOpenRequests.requestFileOpen(getParameters(), filesToOpen)) {
             Platform.exit();
             return;
         }
@@ -142,46 +145,24 @@ public class Main extends Application {
         Runnable setup = () -> {
             uncheck(() -> initBitcoin(null));   // This will happen mostly async.
             loadMainWindow();
-            // If there is an Apple message queued up asking us to open a file, it'll be queued onto the UI thread
-            // at this point.
-            handleFileOpenRequests();
-        };
-        runOnGuiThreadAfter(300, setup);
-    }
-
-    private void handleFileOpenRequests() {
-        // This is only for MacOS, where the OS single instances us by default and sends us a message at startup to ask
-        // us to open a file. It requires internal APIs.
-        if (!System.getProperty("os.name").toLowerCase().contains("mac")) return;
-        com.sun.glass.ui.Application app = com.sun.glass.ui.Application.GetApplication();
-        com.sun.glass.ui.Application.EventHandler old = app.getEventHandler();
-        app.setEventHandler(new com.sun.glass.ui.Application.EventHandler() {
-            @Override public void handleQuitAction(com.sun.glass.ui.Application app, long time) {
-                old.handleQuitAction(app, time);
-            }
-            @Override public boolean handleThemeChanged(String themeName) {
-                return old.handleThemeChanged(themeName);
-            }
-
-            @Override
-            public void handleOpenFilesAction(com.sun.glass.ui.Application app, long time, String[] files) {
-                for (String strPath : files) {
-                    if (strPath.equals("com.intellij.rt.execution.application.AppMain"))
-                        continue;   // Only happens in dev environment.
-                    log.info("OS is requesting that we open " + strPath);
+            if (isMac()) {
+                FileOpenRequests.handleMacFileOpenRequests();
+            } else {
+                for (Path path : filesToOpen) {
                     Platform.runLater(() -> {
-                        Main.instance.mainWindow.handleOpenedFile(new File(strPath));
+                        Main.instance.mainWindow.handleOpenedFile(path.toFile());
                     });
                 }
             }
-        });
+        };
+        runOnGuiThreadAfter(300, setup);
     }
 
     private boolean parseCommandLineArgs() {
         if (getParameters().getUnnamed().contains("--help") || getParameters().getUnnamed().contains("-h")) {
             System.out.println(String.format(
                     "%s version %d (C) 2014 Vinumeris GmbH%n%n" +
-                    "Usage:%n" +
+                    "Usage: lighthouse [args] [filename.lighthouse-project...] %n" +
                     "  --use-tor:                      Enable experimental Tor mode (may freeze up)%n" +
                     "  --slow-gfx:                     Enable more eyecandy that may stutter on slow GFX cards%n" +
                     "  --net={regtest,main,testnet}:   Select Bitcoin network to operate on.%n" +
