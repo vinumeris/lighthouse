@@ -1,74 +1,51 @@
 package lighthouse;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.Uninterruptibles;
-import com.vinumeris.crashfx.CrashFX;
-import com.vinumeris.crashfx.CrashWindow;
-import com.vinumeris.updatefx.Crypto;
-import com.vinumeris.updatefx.UpdateFX;
-import javafx.animation.Animation;
-import javafx.application.Application;
+import com.google.common.base.*;
+import com.google.common.util.concurrent.*;
+import com.vinumeris.crashfx.*;
+import com.vinumeris.updatefx.*;
+import javafx.animation.*;
+import javafx.application.*;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.control.Label;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.GaussianBlur;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.util.Duration;
-import lighthouse.controls.NotificationBarPane;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.geometry.*;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.effect.*;
+import javafx.scene.image.*;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
+import javafx.scene.shape.*;
+import javafx.scene.text.*;
+import javafx.stage.*;
+import javafx.util.*;
+import lighthouse.controls.*;
 import lighthouse.files.AppDirectory;
-import lighthouse.protocol.LHUtils;
-import lighthouse.subwindows.EmbeddedWindow;
-import lighthouse.utils.GuiUtils;
-import lighthouse.utils.TextFieldValidator;
-import lighthouse.wallet.PledgingWallet;
+import lighthouse.protocol.*;
+import lighthouse.subwindows.*;
+import lighthouse.utils.*;
+import lighthouse.wallet.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.kits.WalletAppKit;
-import org.bitcoinj.net.discovery.DnsDiscovery;
-import org.bitcoinj.net.discovery.PeerDiscovery;
-import org.bitcoinj.net.discovery.PeerDiscoveryException;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.RegTestParams;
-import org.bitcoinj.params.TestNet3Params;
-import org.bitcoinj.utils.BriefLogFormatter;
-import org.bitcoinj.utils.Threading;
-import org.bitcoinj.wallet.DeterministicSeed;
-import org.bouncycastle.math.ec.ECPoint;
+import org.bitcoinj.kits.*;
+import org.bitcoinj.net.discovery.*;
+import org.bitcoinj.params.*;
+import org.bitcoinj.utils.*;
+import org.bitcoinj.wallet.*;
+import org.bouncycastle.math.ec.*;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.FileHandler;
+import javax.annotation.*;
+import java.io.*;
+import java.net.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.logging.*;
 
-import static lighthouse.LighthouseBackend.Mode.CLIENT;
-import static lighthouse.protocol.LHUtils.uncheck;
-import static lighthouse.protocol.LHUtils.unchecked;
+import static lighthouse.LighthouseBackend.Mode.*;
+import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
 
 public class Main extends Application {
@@ -165,8 +142,39 @@ public class Main extends Application {
         Runnable setup = () -> {
             uncheck(() -> initBitcoin(null));   // This will happen mostly async.
             loadMainWindow();
+            // If there is an Apple message queued up asking us to open a file, it'll be queued onto the UI thread
+            // at this point.
+            handleFileOpenRequests();
         };
         runOnGuiThreadAfter(300, setup);
+    }
+
+    private void handleFileOpenRequests() {
+        // This is only for MacOS, where the OS single instances us by default and sends us a message at startup to ask
+        // us to open a file. It requires internal APIs.
+        if (!System.getProperty("os.name").toLowerCase().contains("mac")) return;
+        com.sun.glass.ui.Application app = com.sun.glass.ui.Application.GetApplication();
+        com.sun.glass.ui.Application.EventHandler old = app.getEventHandler();
+        app.setEventHandler(new com.sun.glass.ui.Application.EventHandler() {
+            @Override public void handleQuitAction(com.sun.glass.ui.Application app, long time) {
+                old.handleQuitAction(app, time);
+            }
+            @Override public boolean handleThemeChanged(String themeName) {
+                return old.handleThemeChanged(themeName);
+            }
+
+            @Override
+            public void handleOpenFilesAction(com.sun.glass.ui.Application app, long time, String[] files) {
+                for (String strPath : files) {
+                    if (strPath.equals("com.intellij.rt.execution.application.AppMain"))
+                        continue;   // Only happens in dev environment.
+                    log.info("OS is requesting that we open " + strPath);
+                    Platform.runLater(() -> {
+                        Main.instance.mainWindow.handleOpenedFile(new File(strPath));
+                    });
+                }
+            }
+        });
     }
 
     private boolean parseCommandLineArgs() {

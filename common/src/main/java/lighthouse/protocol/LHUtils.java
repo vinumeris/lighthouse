@@ -1,33 +1,25 @@
 package lighthouse.protocol;
 
-import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.base.*;
+import com.google.common.util.concurrent.*;
 import org.bitcoinj.core.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import javax.annotation.Nullable;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.*;
+import java.net.*;
+import java.nio.file.*;
+import java.time.*;
+import java.time.format.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.stream.*;
 
 public class LHUtils {
     public static final String PROJECT_MIME_TYPE = "application/vnd.vinumeris.lighthouse-project";
+    public static final String PLEDGE_MIME_TYPE = "application/vnd.vinumeris.lighthouse-pledge";
+
     private static final Logger log = LoggerFactory.getLogger(LHUtils.class);
 
     public static List<Path> listDir(Path dir) {

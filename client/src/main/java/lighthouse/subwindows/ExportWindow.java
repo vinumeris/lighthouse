@@ -1,35 +1,26 @@
 package lighthouse.subwindows;
 
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
-import de.jensd.fx.fontawesome.AwesomeDude;
-import de.jensd.fx.fontawesome.AwesomeIcon;
+import com.google.common.collect.*;
+import com.google.protobuf.*;
+import de.jensd.fx.fontawesome.*;
 import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
+import javafx.fxml.*;
+import javafx.scene.*;
+import javafx.scene.control.*;
 import javafx.scene.input.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.stage.FileChooser;
-import lighthouse.Main;
-import lighthouse.files.DiskManager;
-import lighthouse.protocol.LHUtils;
-import lighthouse.protocol.Project;
-import lighthouse.utils.GuiUtils;
-import lighthouse.wallet.PledgingWallet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javafx.scene.layout.*;
+import javafx.scene.paint.*;
+import javafx.stage.*;
+import lighthouse.*;
+import lighthouse.files.*;
+import lighthouse.protocol.*;
+import lighthouse.utils.*;
+import lighthouse.wallet.*;
+import org.slf4j.*;
 
-import javax.annotation.Nullable;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import javax.annotation.*;
+import java.io.*;
+import java.nio.file.*;
 
 // TODO: The folder explainer here is actually dead code.
 
@@ -69,7 +60,7 @@ public class ExportWindow {
         }
     }
 
-    public static DataFormat PLEDGE_MIME_TYPE = new DataFormat("application/vnd.vinumeris.lighthouse-pledge");
+    public static DataFormat PLEDGE_MIME_TYPE = new DataFormat(LHUtils.PLEDGE_MIME_TYPE);
     public static DataFormat PROJECT_MIME_TYPE = new DataFormat(LHUtils.PROJECT_MIME_TYPE);
 
     public static class DragData {

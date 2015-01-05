@@ -7,6 +7,9 @@ ver=$( sed -n 's/^.*final int VERSION = //p' client/src/main/java/lighthouse/Mai
 ver="${ver:0:${#ver}-1}"
 build=updates/builds/$ver.jar
 
+# Generate the plist from the template
+sed "s|JAR_NAME_STRING_GOES_HERE|<string>$ver.jar</string>|" package/macosx/Info.template.plist >package/macosx/Info.plist
+
 if [ ! -e "$build" ]; then
   echo "Must run package.sh first to generate build"
   exit 1

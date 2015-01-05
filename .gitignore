@@ -5,3 +5,4 @@ target/
 deploy
 updates
 *.iml
+package/macosx/Info.plist

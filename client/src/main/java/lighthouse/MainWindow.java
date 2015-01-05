@@ -1,68 +1,41 @@
 package lighthouse;
 
-import com.google.protobuf.ByteString;
-import com.subgraph.orchid.TorClient;
-import com.subgraph.orchid.TorInitializationListener;
-import com.vinumeris.updatefx.UpdateFX;
-import com.vinumeris.updatefx.Updater;
-import de.jensd.fx.fontawesome.AwesomeDude;
-import de.jensd.fx.fontawesome.AwesomeIcon;
+import com.google.protobuf.*;
+import com.subgraph.orchid.*;
+import com.vinumeris.updatefx.*;
+import de.jensd.fx.fontawesome.*;
 import javafx.animation.*;
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ListChangeListener;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
+import javafx.application.*;
+import javafx.beans.*;
+import javafx.beans.property.*;
+import javafx.collections.*;
+import javafx.event.*;
+import javafx.fxml.*;
 import javafx.scene.control.*;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import javafx.util.Duration;
-import lighthouse.controls.ClickableBitcoinAddress;
-import lighthouse.controls.NotificationBarPane;
-import lighthouse.controls.ProjectOverviewWidget;
-import lighthouse.controls.ProjectView;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
+import javafx.stage.*;
+import javafx.util.*;
+import lighthouse.controls.*;
 import lighthouse.files.AppDirectory;
-import lighthouse.files.DiskManager;
-import lighthouse.model.BitcoinUIModel;
-import lighthouse.protocol.Project;
-import lighthouse.subwindows.EditProjectWindow;
-import lighthouse.subwindows.EmptyWalletController;
-import lighthouse.subwindows.UpdateFXWindow;
-import lighthouse.subwindows.WalletSettingsController;
-import lighthouse.utils.GuiUtils;
-import lighthouse.utils.easing.EasingMode;
-import lighthouse.utils.easing.ElasticInterpolator;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.RegTestParams;
-import org.bitcoinj.params.TestNet3Params;
-import org.bitcoinj.utils.MonetaryFormat;
-import org.fxmisc.easybind.EasyBind;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lighthouse.files.*;
+import lighthouse.model.*;
+import lighthouse.protocol.*;
+import lighthouse.subwindows.*;
+import lighthouse.utils.*;
+import lighthouse.utils.easing.*;
+import org.bitcoinj.core.*;
+import org.bitcoinj.params.*;
+import org.bitcoinj.utils.*;
+import org.fxmisc.easybind.*;
+import org.slf4j.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.*;
+import java.nio.file.*;
 
-import static javafx.beans.binding.Bindings.when;
-import static lighthouse.protocol.LHUtils.unchecked;
-import static lighthouse.threading.AffinityExecutor.UI_THREAD;
+import static javafx.beans.binding.Bindings.*;
+import static lighthouse.protocol.LHUtils.*;
+import static lighthouse.threading.AffinityExecutor.*;
 import static lighthouse.utils.GuiUtils.*;
 
 /**
@@ -287,19 +260,28 @@ public class MainWindow {
     @FXML
     public void dragDropped(DragEvent event) {
         log.info("Drop: {}", event);
-        for (File file : event.getDragboard().getFiles()) {
-            if (file.toString().endsWith(DiskManager.PROJECT_FILE_EXTENSION)) {
-                importProject(file);
-            } else if (file.toString().endsWith(DiskManager.PLEDGE_FILE_EXTENSION)) {
-                try {
-                    Sha256Hash hash = Sha256Hash.hashFileContents(file);
-                    Files.copy(file.toPath(), AppDirectory.dir().resolve(hash + DiskManager.PLEDGE_FILE_EXTENSION));
-                } catch (IOException e) {
-                    GuiUtils.informationalAlert("Import failed",
-                            "Could not copy the dropped pledge into the %s application directory: " + e, Main.APP_NAME);
-                }
-            } else
-                log.error("Unknown file type dropped: should not happen: " + file);
+        for (File file : event.getDragboard().getFiles())
+            handleOpenedFile(file);
+    }
+
+    public void handleOpenedFile(File file) {
+        // Can be called either due to a drop, or user double clicking a file in a file explorer.
+        checkGuiThread();
+        if (file.toString().endsWith(DiskManager.PROJECT_FILE_EXTENSION)) {
+            importProject(file);
+        } else if (file.toString().endsWith(DiskManager.PLEDGE_FILE_EXTENSION)) {
+            importPledge(file);
+        } else
+            log.error("Unknown file type open requested: should not happen: " + file);
+    }
+
+    public static void importPledge(File file) {
+        try {
+            Sha256Hash hash = Sha256Hash.hashFileContents(file);
+            Files.copy(file.toPath(), AppDirectory.dir().resolve(hash + DiskManager.PLEDGE_FILE_EXTENSION));
+        } catch (IOException e) {
+            GuiUtils.informationalAlert("Import failed",
+                    "Could not copy the dropped pledge into the %s application directory: " + e, Main.APP_NAME);
         }
     }
 

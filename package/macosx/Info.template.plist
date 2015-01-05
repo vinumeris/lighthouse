@@ -1,0 +1,148 @@
+<?xml version="1.0" ?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>LSMinimumSystemVersion</key>
+        <string>10.7.4</string>
+        <key>CFBundleDevelopmentRegion</key>
+        <string>English</string>
+        <key>CFBundleAllowMixedLocalizations</key>
+        <true/>
+        <key>CFBundleExecutable</key>
+        <string>Lighthouse</string>
+        <key>CFBundleIconFile</key>
+        <string>Lighthouse.icns</string>
+        <key>CFBundleIdentifier</key>
+        <string>com.vinumeris.lighthouse</string>
+        <key>CFBundleInfoDictionaryVersion</key>
+        <string>6.0</string>
+        <key>CFBundleName</key>
+        <string>Lighthouse</string>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+        <key>CFBundleShortVersionString</key>
+        <string>19</string>
+        <key>CFBundleSignature</key>
+        <string>????</string>
+        <!-- See http://developer.apple.com/library/mac/#releasenotes/General/SubmittingToMacAppStore/_index.html
+             for list of AppStore categories -->
+        <key>LSApplicationCategoryType</key>
+        <string>Unknown</string>
+        <key>CFBundleVersion</key>
+        <string>100</string>
+        <key>NSHumanReadableCopyright</key>
+        <string>Copyright (C) 2015</string>
+        <key>JVMRuntime</key>
+        <string>..</string>
+        <key>JVMMainClassName</key>
+        <string>lighthouse.Main</string>
+        <key>JVMAppClasspath</key>
+        <string></string>
+        <key>JVMMainJarName</key>
+        JAR_NAME_STRING_GOES_HERE
+        <key>JVMPreferencesID</key>
+        <string>lighthouse</string>
+        <key>JVMOptions</key>
+        <array>
+
+        </array>
+        <key>JVMUserOptions</key>
+        <dict>
+
+        </dict>
+        <key>NSHighResolutionCapable</key>
+        <string>true</string>
+
+        <key>CFBundleDocumentTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleTypeExtensions</key>
+                <array>
+                    <string>lighthouse-project</string>
+                </array>
+                <key>CFBundleTypeIconFile</key>
+                <string>LighthouseProject</string>
+                <key>CFBundleTypeName</key>
+                <string>Lighthouse Project</string>
+                <key>CFBundleTypeRole</key>
+                <string>Editor</string>
+                <key>CFBundleTypeName</key>
+                <string>com.vinumeris.lighthouse.project</string>
+                <key>LSItemContentTypes</key>
+                <array>
+                    <string>com.vinumeris.lighthouse.project</string>
+                </array>
+                <key>LSHandlerRank</key>
+                <string>Owner</string>
+            </dict>
+
+            <dict>
+                <key>CFBundleTypeExtensions</key>
+                <array>
+                    <string>lighthouse-pledge</string>
+                </array>
+                <key>CFBundleTypeIconFile</key>
+                <string>Lighthouse</string>
+                <key>CFBundleTypeName</key>
+                <string>Lighthouse Pledge</string>
+                <key>CFBundleTypeRole</key>
+                <string>Editor</string>
+                <key>CFBundleTypeName</key>
+                <string>com.vinumeris.lighthouse.project</string>
+                <key>LSItemContentTypes</key>
+                <array>
+                    <string>com.vinumeris.lighthouse.project</string>
+                </array>
+                <key>LSHandlerRank</key>
+                <string>Owner</string>
+            </dict>
+        </array>
+
+        <key>UTExportedTypeDeclarations</key>
+        <array>
+            <dict>
+                <key>UTTypeDescription</key>
+                <string>Lighthouse Project</string>
+                <key>UTTypeIdentifier</key>
+                <string>com.vinumeris.lighthouse.project</string>
+                <key>UTTypeTagSpecification</key>
+                <dict>
+                    <key>public.filename-extension</key>
+                    <array>
+                        <string>lighthouse-project</string>
+                    </array>
+                    <key>public.mime-type</key>
+                    <array>
+                        <string>application/vnd.vinumeris.lighthouse-project</string>
+                    </array>
+                </dict>
+                <key>UTTypeConformsTo</key>
+                <array>
+                    <string>public.data</string>
+                </array>
+            </dict>
+            <dict>
+                <key>UTTypeDescription</key>
+                <string>Lighthouse Pledge</string>
+                <key>UTTypeIdentifier</key>
+                <string>com.vinumeris.lighthouse.pledge</string>
+                <key>UTTypeTagSpecification</key>
+                <dict>
+                    <key>public.filename-extension</key>
+                    <array>
+                        <string>lighthouse-pledge</string>
+                    </array>
+                    <key>public.mime-type</key>
+                    <array>
+                        <string>application/vnd.vinumeris.lighthouse-pledge</string>
+                    </array>
+                </dict>
+                <key>UTTypeConformsTo</key>
+                <array>
+                    <string>public.data</string>
+                </array>
+            </dict>
+        </array>
+
+    </dict>
+</plist>
