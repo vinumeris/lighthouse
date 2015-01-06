@@ -1,0 +1,5 @@
+Prepare for beta: switch to main network!
+
+After this update all previous projects will disappear, along with your testnet balance. You can get it back by running the program with --net=test as a command line parameter.
+The server now supports JSON, XML and HTML formatted output. A bug fix for the case where a pledge is revoked whilst someone is sitting on a confirmation screen.
+More decentralisation: Lighthouse now uses any two Bitcoin XT nodes instead of hard coded nodes.
