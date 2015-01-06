@@ -393,6 +393,7 @@ public class MainWindow {
         });
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void doOnlineUpdateCheck() {
         if (Main.UPDATES_BASE_URL == null) {
             ((HBox)menuBtn.getParent()).getChildren().remove(menuBtn);
