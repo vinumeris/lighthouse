@@ -1,29 +1,22 @@
 package lighthouse.wallet;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.ListenableFuture;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.Project;
-import lighthouse.protocol.WalletTestObjects;
+import com.google.common.collect.*;
+import com.google.common.util.concurrent.*;
+import lighthouse.protocol.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.params.UnitTestParams;
-import org.bitcoinj.store.UnreadableWalletException;
-import org.bitcoinj.store.WalletProtobufSerializer;
-import org.bitcoinj.testing.MockTransactionBroadcaster;
-import org.bitcoinj.utils.BriefLogFormatter;
-import org.bitcoinj.utils.Threading;
-import org.bitcoinj.wallet.Protos;
-import org.junit.Before;
-import org.junit.Test;
+import org.bitcoinj.params.*;
+import org.bitcoinj.store.*;
+import org.bitcoinj.testing.*;
+import org.bitcoinj.utils.*;
+import org.bitcoinj.wallet.*;
+import org.junit.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.bitcoinj.core.Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
+import static com.google.common.base.Preconditions.*;
+import static org.bitcoinj.core.Transaction.*;
 import static org.junit.Assert.*;
 
 public class PledgingWalletTest {
@@ -38,7 +31,7 @@ public class PledgingWalletTest {
         final ECKey key = new DumpedPrivateKey(params, "cVbiZ5pX6xJgDuxxetwBCxu358G4TBD2fjHABP65xSmGYSjPyJnF").getKey();
         Address toAddress = key.toAddress(params);
         LHProtos.ProjectDetails.Builder details = Project.makeDetails(
-                "My cool project", "A project to make awesome things ... out of Lego!",
+                wallet.getParams(), "My cool project", "A project to make awesome things ... out of Lego!",
                 toAddress, Coin.valueOf(value), wallet.freshAuthKey(), wallet.getKeychainLookaheadSize());
         LHProtos.Project.Builder projectBuilder = LHProtos.Project.newBuilder();
         projectBuilder.setSerializedPaymentDetails(details.build().toByteString());

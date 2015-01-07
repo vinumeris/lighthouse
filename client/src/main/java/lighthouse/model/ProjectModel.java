@@ -1,16 +1,13 @@
 package lighthouse.model;
 
-import com.google.protobuf.ByteString;
+import com.google.protobuf.*;
 import javafx.beans.property.*;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.LHUtils;
-import lighthouse.protocol.Project;
-import lighthouse.wallet.PledgingWallet;
+import lighthouse.protocol.*;
+import lighthouse.wallet.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.script.Script;
-import org.bitcoinj.script.ScriptBuilder;
+import org.bitcoinj.script.*;
 
-import static lighthouse.protocol.LHUtils.unchecked;
+import static lighthouse.protocol.LHUtils.*;
 
 /**
  * This class wraps a LHProtos.Project and exposes JFX properties for things that users are interested in. It performs
@@ -33,7 +30,7 @@ public class ProjectModel {
     public static final int MAX_NUM_INPUTS = (Transaction.MAX_STANDARD_TX_SIZE - 64) /* for output */ / ESTIMATED_INPUT_SIZE;
 
     public ProjectModel(PledgingWallet wallet) {
-        this(Project.makeDetails("", "", wallet.freshReceiveAddress(), Coin.SATOSHI, wallet.freshAuthKey(),
+        this(Project.makeDetails(wallet.getParams(), "", "", wallet.freshReceiveAddress(), Coin.SATOSHI, wallet.freshAuthKey(),
                 wallet.getKeychainLookaheadSize()));
     }
 

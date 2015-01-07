@@ -97,7 +97,7 @@ public class Project {
         this.authKey = this.projectReq.getExtraDetails().getAuthKey().toByteArray();
     }
 
-    public static LHProtos.ProjectDetails.Builder makeDetails(String title, String memo, Address to, Coin value, DeterministicKey authKey, int lookaheadSize) {
+    public static LHProtos.ProjectDetails.Builder makeDetails(NetworkParameters params, String title, String memo, Address to, Coin value, DeterministicKey authKey, int lookaheadSize) {
         LHProtos.ProjectDetails.Builder details = LHProtos.ProjectDetails.newBuilder();
         final long now = Utils.currentTimeSeconds();
         final long oneMonthFromNow = now + (86400 * 30);
@@ -109,7 +109,7 @@ public class Project {
             details.setMerchantData(ownerData.toByteString());
         }
         details.setMemo(memo);
-        details.setNetwork("test");
+        details.setNetwork(params.getPaymentProtocolId());
         LHProtos.Output.Builder output = details.addOutputsBuilder();
         output.setAmount(value.value);
         output.setScript(ByteString.copyFrom(ScriptBuilder.createOutputScript(to).getProgram()));
