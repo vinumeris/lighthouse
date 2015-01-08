@@ -47,7 +47,7 @@ import static lighthouse.utils.MoreBindings.*;
 public class ProjectView extends HBox {
     private static final Logger log = LoggerFactory.getLogger(ProjectView.class);
 
-    private static final String BLOCK_EXPLORER_SITE = "https://www.biteasy.com/blockchain/transactions/%s";
+    private static final String BLOCK_EXPLORER_SITE = "https://blockchain.info/tx/%s";
     private static final String BLOCK_EXPLORER_SITE_TESTNET = "https://www.biteasy.com/testnet/transactions/%s";
 
     @FXML Label projectTitle;
