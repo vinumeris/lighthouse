@@ -1006,7 +1006,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
 
     public void checkForRevocation(Transaction t) {
-        log.info("Checking {} to see if it's a revocation", t.getHash());
+        log.debug("Checking {} to see if it's a revocation", t.getHash());
         List<LHProtos.Pledge> revoked = whichPledgesAreRevokedBy(t);
         if (revoked.isEmpty()) return;
         for (ObservableSet<LHProtos.Pledge> pledges : openPledges.values()) {
