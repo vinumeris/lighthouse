@@ -1,74 +1,45 @@
 package lighthouse.controls;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import com.google.common.base.*;
+import com.google.common.collect.*;
+import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.ObjectBinding;
-import javafx.beans.binding.StringExpression;
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.binding.*;
+import javafx.beans.property.*;
 import javafx.collections.*;
-import javafx.collections.transformation.SortedList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.scene.chart.PieChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.image.Image;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.MouseEvent;
+import javafx.collections.transformation.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.geometry.*;
+import javafx.scene.chart.*;
+import javafx.scene.control.*;
+import javafx.scene.effect.*;
+import javafx.scene.image.*;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
-import javafx.stage.FileChooser;
-import lighthouse.LighthouseBackend;
-import lighthouse.Main;
-import lighthouse.protocol.Ex;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.LHUtils;
-import lighthouse.protocol.Project;
+import javafx.scene.text.*;
+import javafx.stage.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
-import lighthouse.threading.AffinityExecutor;
-import lighthouse.utils.ConcatenatingList;
-import lighthouse.utils.GuiUtils;
-import lighthouse.utils.MappedList;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.params.TestNet3Params;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lighthouse.threading.*;
+import lighthouse.utils.*;
+import org.bitcoinj.core.*;
+import org.bitcoinj.params.*;
+import org.slf4j.*;
 
-import javax.annotation.Nullable;
+import javax.annotation.*;
 import java.io.*;
-import java.nio.file.Files;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
+import java.nio.file.*;
+import java.time.*;
+import java.time.format.*;
+import java.util.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 import static javafx.beans.binding.Bindings.*;
-import static javafx.collections.FXCollections.singletonObservableList;
-import static lighthouse.utils.GuiUtils.getResource;
-import static lighthouse.utils.GuiUtils.informationalAlert;
-import static lighthouse.utils.MoreBindings.bindSetToList;
-import static lighthouse.utils.MoreBindings.mergeSets;
+import static javafx.collections.FXCollections.*;
+import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.MoreBindings.*;
 
 /**
  * The main content area that shows project details, pledges, a pie chart, buttons etc.
@@ -138,7 +109,7 @@ public class ProjectView extends HBox {
                 setModeFor(project.get(), pledgedValue.get());
             });
 
-            //pledges = fakePledges();
+//            pledges = fakePledges();
             ObservableSet<LHProtos.Pledge> openPledges = Main.backend.mirrorOpenPledges(project.get(), AffinityExecutor.UI_THREAD);
             ObservableSet<LHProtos.Pledge> claimedPledges = Main.backend.mirrorClaimedPledges(project.get(), AffinityExecutor.UI_THREAD);
             pledges = mergeSets(openPledges, claimedPledges);
@@ -318,11 +289,11 @@ public class ProjectView extends HBox {
                 actionButton.setText("View claim transaction");
                 ColorAdjust effect = new ColorAdjust();
                 coverImage.setEffect(effect);
-                if (priorMode != Mode.CLAIMED) {
+                if (priorMode == Mode.CLAIMED) {
+                    effect.setSaturation(-0.9);
+                } else {
                     Timeline timeline = new Timeline(new KeyFrame(GuiUtils.UI_ANIMATION_TIME.multiply(3), new KeyValue(effect.saturationProperty(), -0.9)));
                     timeline.play();
-                } else {
-                    effect.setSaturation(-0.9);
                 }
                 break;
         }
@@ -355,18 +326,34 @@ public class ProjectView extends HBox {
         for (int i = 0; i < 1; i++) {
             builder.setTotalInputValue(Coin.CENT.value * 70);
             builder.setTimestamp(now++);
-            list.add(builder.build());
-            builder.setTotalInputValue(Coin.CENT.value * 20);
-            builder.setTimestamp(now++);
-            list.add(builder.build());
-            builder.setTotalInputValue(Coin.CENT.value * 10);
-            builder.setTimestamp(now++);
+            builder.getPledgeDetailsBuilder().setContactAddress("pinkponies87@gmail.com");
+            builder.getPledgeDetailsBuilder().setMemo("Great idea! I'll have the t-shirt please!");
             list.add(builder.build());
             builder.setTotalInputValue(Coin.CENT.value * 30);
             builder.setTimestamp(now++);
+            builder.getPledgeDetailsBuilder().setContactAddress("satoshin@gmx.com");
+            builder.getPledgeDetailsBuilder().setMemo("There’s always going to be one more thing to do.");
+            list.add(builder.build());
+            builder.setTotalInputValue(Coin.CENT.value * 20);
+            builder.setTimestamp(now++);
+            builder.getPledgeDetailsBuilder().setContactAddress("bill.gates@microsoft.com");
+            builder.getPledgeDetailsBuilder().setMemo("Charity begins at home");
+            list.add(builder.build());
+            builder.setTotalInputValue(Coin.CENT.value * 10);
+            builder.setTimestamp(now++);
+            builder.getPledgeDetailsBuilder().setContactAddress("hearn@vinumeris.com");
+            builder.getPledgeDetailsBuilder().setMemo("My evil plan is working!!!1!");
             list.add(builder.build());
         }
-        return FXCollections.observableSet(new HashSet<>(list.build()));
+        ObservableSet<LHProtos.Pledge> set = FXCollections.observableSet(new HashSet<>(list.build()));
+        Main.instance.scene.getAccelerators().put(KeyCombination.keyCombination("Shortcut+P"), () -> {
+            LHProtos.Pledge.Builder pledge = LHProtos.Pledge.newBuilder();
+            pledge.setProjectId("abc");
+            pledge.setTotalInputValue(Coin.CENT.value * 110);
+            pledge.setTimestamp(Instant.now().getEpochSecond());
+            set.add(pledge.build());
+        });
+        return set;
     }
 
     private void setupFXML() {
