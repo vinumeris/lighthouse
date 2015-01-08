@@ -982,7 +982,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             for (TransactionOutPoint pledge : allPledges.keySet()) {
                 filter.insert(pledge.bitcoinSerialize());
             }
-            log.info("Calculated Bloom filter for detecting revocations and claims");
+            log.debug("Calculated Bloom filter for detecting revocations and claims");
             return filter;
         }
 
