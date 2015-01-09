@@ -391,6 +391,10 @@ public class Main extends Application {
                 // to randomly merge their answers and reduce the influence of any one seed. Additionally if
                 // more people run Bitcoin XT nodes we can bump up the number we search for here to again
                 // reduce the influence of any one node. But this needs people to help decentralise.
+
+
+                // TODO: This logic isn't right.
+
                 PeerDiscovery disco = new HttpDiscovery(params,
                         unchecked(() -> new URI("http://main.seed.vinumeris.com:8081/peers?srvmask=3&getutxo=true")),
                         // auth key used to sign responses.
@@ -400,7 +404,7 @@ public class Main extends Application {
                 vPeerGroup.addPeerDiscovery(disco);
                 vPeerGroup.setMaxConnections(2);
                 vPeerGroup.setConnectTimeoutMillis(10000);
-                vPeerGroup.waitForPeersOfVersion(2, GetUTXOsMessage.MIN_PROTOCOL_VERSION).addListener(() -> {
+                vPeerGroup.waitForPeersWithServiceMask(2, GetUTXOsMessage.SERVICE_FLAGS_REQUIRED).addListener(() -> {
                     vPeerGroup.addPeerDiscovery(new DnsDiscovery(params));
                     vPeerGroup.setMaxConnections(6);
                     // Six peers is a tradeoff between reliability, trust and need to be gentle with network

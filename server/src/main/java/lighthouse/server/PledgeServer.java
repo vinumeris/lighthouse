@@ -84,9 +84,8 @@ public class PledgeServer {
         log.info("bitcoinj initialised");
 
         // Don't start up fully until we're properly set up. Eventually this can go away.
-        // TODO: Make this also check for NODE_GETUTXOS flag.
-        log.info("Waiting to find a peer that supports getutxo");
-        kit.peerGroup().waitForPeersOfVersion(minPeersSupportingGetUTXO, GetUTXOsMessage.MIN_PROTOCOL_VERSION).get();
+        log.info("Waiting to find {} peer(s) that supports getutxo", minPeersSupportingGetUTXO);
+        kit.peerGroup().waitForPeersWithServiceMask(minPeersSupportingGetUTXO, GetUTXOsMessage.SERVICE_FLAGS_REQUIRED).get();
         log.info("Found ... starting web server on port {}", portFlag.value(options));
 
         // This app is mostly single threaded. It handles all requests and state changes on a single thread.
