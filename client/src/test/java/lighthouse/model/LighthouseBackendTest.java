@@ -618,7 +618,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         for (int i = 0; i < 6; i++) {
             Message m = waitForOutbound(p2);
             if (m instanceof GetUTXOsMessage) {
-                doGetUTXOAnswer(q++ == 0 ? data.getValue0().getOutput(0) : data2.getValue0().getOutput(0), p2);
+                doGetUTXOAnswer(p2, q++ == 0 ? data.getValue0().getOutput(0) : data2.getValue0().getOutput(0));
             }
         }
 
@@ -700,10 +700,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         for (int i = 0; i < 3; i++) {
             Message m = waitForOutbound(p1);
             if (m instanceof GetUTXOsMessage)
-                doGetUTXOAnswer(output, p1);
+                doGetUTXOAnswer(p1, output);
             m = waitForOutbound(p2);
             if (m instanceof GetUTXOsMessage)
-                doGetUTXOAnswer(output, p2);
+                doGetUTXOAnswer(p2, output);
         }
         gate.waitAndRun();   // statuses (start lookup)
         gate.waitAndRun();   // openPledges
@@ -721,10 +721,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         for (int i = 0; i < 3; i++) {
             Message m = waitForOutbound(p1);
             if (m instanceof GetUTXOsMessage)
-                doGetUTXOAnswer(output, p1);
+                doGetUTXOAnswer(p1, output);
             m = waitForOutbound(p2);
             if (m instanceof GetUTXOsMessage)
-                doGetUTXOAnswer(output, p2);
+                doGetUTXOAnswer(p2, output);
         }
 
         // Wait for check status to update.
@@ -808,9 +808,9 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         return pledge;
     }
 
-    private void doGetUTXOAnswer(TransactionOutput output, InboundMessageQueuer p) throws InterruptedException, BlockStoreException {
+    private void doGetUTXOAnswer(InboundMessageQueuer p, TransactionOutput... outputs) throws InterruptedException, BlockStoreException {
         inbound(p, new UTXOsMessage(params,
-                ImmutableList.of(output),
+                Lists.newArrayList(outputs),
                 new long[]{UTXOsMessage.MEMPOOL_HEIGHT},
                 blockStore.getChainHead().getHeader().getHash(),
                 blockStore.getChainHead().getHeight()));
