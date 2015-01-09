@@ -153,9 +153,9 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         exchange.close();
     }
 
-    private LHProtos.Pledge makeScrubbedPledge() {
+    private LHProtos.Pledge makeScrubbedPledge(Coin pledgedCoin) {
         final LHProtos.Pledge pledge = LHProtos.Pledge.newBuilder()
-                .setTotalInputValue(Coin.COIN.value)
+                .setTotalInputValue(pledgedCoin.value)
                 .setProjectId(project.getID())
                 .setTimestamp(Utils.currentTimeSeconds())
                 .addTransactions(ByteString.copyFromUtf8("not a real tx"))
@@ -188,7 +188,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         projectModel.serverName.set("localhost");
         project = projectModel.getProject();
-        final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge();
+        final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge(Coin.COIN);
 
         ObservableList<Project> projects = backend.mirrorProjects(gate);
         assertEquals(0, projects.size());
@@ -236,7 +236,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // Check that the server status map is updated correctly.
         projectModel.serverName.set("localhost");
         project = projectModel.getProject();
-        final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge();
+        final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge(Coin.COIN);
         ObservableMap<Project, LighthouseBackend.CheckStatus> statuses = backend.mirrorCheckStatuses(gate);
         assertEquals(0, statuses.size());
         writeProjectToDisk();
@@ -736,24 +736,63 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
     @Test
     public void serverPledgeSync() throws Exception {
+        Utils.setMockClock();
         // Test that the client backend stays in sync with the server as pledges are added and revoked.
         projectModel.serverName.set("localhost");
         project = projectModel.getProject();
         ObservableSet<LHProtos.Pledge> openPledges = backend.mirrorOpenPledges(project, gate);
-        final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge();
+        ObservableSet<LHProtos.Pledge> claimedPledges = backend.mirrorClaimedPledges(project, gate);
+        final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge(Coin.COIN);
         writeProjectToDisk();
         gate.waitAndRun();
+
         // Is now loaded from disk and doing request to server.
         HttpExchange exchange = httpReqs.take();
         sendServerStatus(exchange, scrubbedPledge);
         gate.waitAndRun();
         assertEquals(1, openPledges.size());
+        assertEquals(0, claimedPledges.size());
+
         // Pledge gets revoked.
         backend.refreshProjectStatusFromServer(project);
         gate.waitAndRun();
         sendServerStatus(httpReqs.take());
         gate.waitAndRun();
         assertEquals(0, openPledges.size());
+        assertEquals(0, claimedPledges.size());
+
+        // New pledges are made.
+        Utils.rollMockClock(60);
+        LHProtos.Pledge scrubbedPledge2 = makeScrubbedPledge(Coin.COIN.divide(2));
+        Utils.rollMockClock(60);
+        LHProtos.Pledge scrubbedPledge3 = makeScrubbedPledge(Coin.COIN.divide(2));
+        backend.refreshProjectStatusFromServer(project);
+        gate.waitAndRun();
+        sendServerStatus(httpReqs.take(), scrubbedPledge2, scrubbedPledge3);
+        gate.waitAndRun();
+        gate.waitAndRun();
+        assertEquals(2, openPledges.size());
+        assertEquals(0, claimedPledges.size());
+
+        // And now the project is claimed.
+        backend.refreshProjectStatusFromServer(project);
+        gate.waitAndRun();
+        LHProtos.ProjectStatus.Builder status = LHProtos.ProjectStatus.newBuilder();
+        status.setId(project.getID());
+        status.setTimestamp(Instant.now().getEpochSecond());
+        status.setValuePledgedSoFar(Coin.COIN.value);
+        status.addPledges(scrubbedPledge2);
+        status.addPledges(scrubbedPledge3);
+        status.setClaimedBy(ByteString.copyFrom(Sha256Hash.ZERO_HASH.getBytes()));
+        byte[] bits = status.build().toByteArray();
+        exchange = httpReqs.take();
+        exchange.sendResponseHeaders(HTTP_OK, bits.length);
+        exchange.getResponseBody().write(bits);
+        exchange.close();
+        // Must do this four times because observable sets don't collapse notifications :(
+        for (int i = 0; i < 4; i++) gate.waitAndRun();
+        assertEquals(0, openPledges.size());
+        assertEquals(2, claimedPledges.size());
     }
 
     private LHProtos.Pledge.Builder makeSimpleHalfPledge(ECKey signingKey, TransactionOutput output) {

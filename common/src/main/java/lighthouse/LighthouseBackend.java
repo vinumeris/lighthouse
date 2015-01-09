@@ -235,6 +235,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
 
     private boolean checkClaimConfidence(Transaction transaction, TransactionConfidence conf, Project project) {
+        executor.checkOnThread();
         switch (conf.getConfidenceType()) {
             case PENDING:
                 int seenBy = conf.numBroadcastPeers();
@@ -245,12 +246,18 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             case BUILDING:
                 if (conf.getDepthInBlocks() > 3)
                     return true;  // Don't care about watching this anymore.
-                log.info("Claim propagated or mined");
-                if (project.getPaymentURL() == null || mode == Mode.SERVER)
-                    movePledgesFromOpenToClaimed(transaction, project);
-                else
-                    refreshProjectStatusFromServer(project);
-                diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED, transaction.getHash()));
+                if (diskManager.getProjectState(project).state != ProjectState.CLAIMED) {
+                    log.info("Claim propagated or mined");
+                    diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED, transaction.getHash()));
+                    if (project.getPaymentURL() == null || mode == Mode.SERVER) {
+                        // We have pledge data in this case, so we can consult the claim tx to see which were used.
+                        movePledgesFromOpenToClaimed(transaction, project);
+                    } else {
+                        // We (probably) don't have pledge data in this case, so put us on the regular server update
+                        // code path, where the pledges will all be marked as as claimed.
+                        jitteredServerRequery(project);   // Allow the server time to notice the claim tx as well.
+                    }
+                }
                 break;
             case DEAD:
                 log.warn("Claim double spent! Overridden by {}", conf.getOverridingTransaction());
@@ -263,6 +270,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
 
     private void movePledgesFromOpenToClaimed(Transaction claim, Project project) {
+        // This only works if we have the actual pledge data.
         executor.checkOnThread();
         List<LHProtos.Pledge> taken = new ArrayList<>();
         for (LHProtos.Pledge pledge : getOpenPledgesFor(project)) {
@@ -347,6 +355,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 log.info("New pledge found on disk for {}", project);
                 // Jitter to give the dependency txns time to propagate in case somehow our source of pledges
                 // is faster than the P2P network (e.g. local network drive or in regtesting mode).
+                // TODO: This delay is pointless when we reach here during startup.
                 jitteredExecute(() -> checkPledgeAgainstP2PNetwork(project, added), TX_PROPAGATION_TIME_SECS);
             }
         }
@@ -366,16 +375,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return false;
     }
 
-    // Completes with either the given pledge, or with null if it failed verification (reason not available here).
-    private CompletableFuture<LHProtos.Pledge> checkPledgeAgainstP2PNetwork(Project project, LHProtos.Pledge pledge) {
+    private void checkPledgeAgainstP2PNetwork(Project project, LHProtos.Pledge pledge) {
         // Can be on any thread.
-        return checkPledgesAgainstP2PNetwork(project, FXCollections.observableSet(pledge), false).thenApply(results ->
-        {
-            if (results.isEmpty())
-                return null;
-            else
-                return results.iterator().next();
-        });
+        checkPledgesAgainstP2PNetwork(project, FXCollections.observableSet(pledge), false);
     }
 
     // Completes with the set of pledges that passed verification.
@@ -416,10 +418,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 @Override
                 public void onSuccess(@Nullable List<Peer> peers) {
                     log.info("Peers available: {}", peers);
-                    // On backend thread here. We must be because we need to ensure only a single UTXO query is in flight
-                    // on the P2P network at once and only triggering such queries from the backend thread is a simple
-                    // way to achieve that. It means we block the backend thread until the query completes or times out
-                    // but that's OK - the other tasks can wait.
                     executor.checkOnThread();
                     checkNotNull(peers);
                     // Do a fast delete of any peers that claim they don't support NODE_GETUTXOS. We ensure we always
@@ -471,7 +469,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         executor.checkOnThread();
         try {
             // The multiplexor issues the same query to multiple peers and verifies they're all consistent.
-            log.info("Querying {} peers", peers.size());
+            log.info("Querying {} peers {}", peers.size(), checkingAllPledges ? "(checking all pledges)" : "");
             PeerUTXOMultiplexor multiplexor = new PeerUTXOMultiplexor(peers);
             // The batcher queues up queries from project.verifyPledge and combines them into a single query, to
             // speed things up and minimise network traffic.
@@ -558,20 +556,41 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                     future.completeExceptionally(ex);
                 } else {
                     try {
-                        // Status contains a new list of pledges. We should update our own observable list by touching it
-                        // as little as possible. This ensures that as updates flow through to the UI any animations look
-                        // good (as opposed to total replacement which would animate poorly).
                         log.info("Processing project status:\n{}", status);
-                        syncPledges(project, new HashSet<>(status.getPledgesList()), status.getPledgesList());
+                        executor.checkOnThread();
                         // Server's view of the truth overrides our own for UI purposes, as we might have failed to
                         // observe the contract/claim tx if the user imported the project post-claim.
-                        if (status.hasClaimedBy() && diskManager.getProjectState(project).state != ProjectState.CLAIMED) {
-                            diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED,
-                                    new Sha256Hash(status.getClaimedBy().toByteArray())));
+                        //
+                        // WARNING! During app startup we can end up with the p2p network racing with the server to
+                        // tell us that the project was claimed. This is inherent - we're catching up with the block
+                        // chain and are about to see the claim, whilst simultaneously we're asking the server for
+                        // the status (because we don't want to wait for the block chain to sync before showing the
+                        // user existing pledges). The code paths are slightly different because when we see the claim
+                        // tx from the p2p network we only mark the pledges that appear in that tx as claimed, whereas
+                        // here we mark all of them. This is due to the difference between serverless and server assisted
+                        // projects (serverless can have open pledges even after a claim).
+                        if (status.hasClaimedBy()) {
+                            if (diskManager.getProjectState(project).state != ProjectState.CLAIMED) {
+                                diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED,
+                                        new Sha256Hash(status.getClaimedBy().toByteArray())));
+                            }
+                            ObservableSet<LHProtos.Pledge> curOpenPledges = getOpenPledgesFor(project);
+                            ObservableSet<LHProtos.Pledge> curClaimedPledges = getClaimedPledgesFor(project);
+                            log.info("Project is claimed ({}/{})", curOpenPledges.size(), curClaimedPledges.size());
+                            curClaimedPledges.clear();
+                            curClaimedPledges.addAll(status.getPledgesList());
+                            curOpenPledges.clear();
+                        } else {
+                            // Status contains a new list of pledges. We should update our own observable list by touching it
+                            // as little as possible. This ensures that as updates flow through to the UI any animations look
+                            // good (as opposed to total replacement which would animate poorly).
+                            syncPledges(project, new HashSet<>(status.getPledgesList()), status.getPledgesList());
                         }
                         markAsCheckDone(project);
                         future.complete(status);
+                        log.info("Processing of project status from server complete");
                     } catch (Throwable t) {
+                        log.error("Caught exception whilst processing status", t);
                         future.completeExceptionally(t);
                     }
                 }
@@ -581,6 +600,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
 
     private void syncPledges(Project forProject, Set<LHProtos.Pledge> testedPledges, List<LHProtos.Pledge> verifiedPledges) {
+        // TODO: This whole function is too complicated and fragile. It should probably be split up for different server
+        // vs client vs serverless codepaths.
+
         executor.checkOnThread();
         final ObservableSet<LHProtos.Pledge> curOpenPledges = getOpenPledgesFor(forProject);
 
@@ -595,8 +617,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         newlyOpen.removeAll(curOpenPledges);
         if (mode == Mode.CLIENT) {
             // Servers should of course ideally not give us revoked pledges, but it may take a bit of time for the
-            // server to notice, especially because currently we wait for a block confirmation before noticing the
-            // double spends. So there can be a window of time in which we know we revoked our own pledge, but the
+            // server to notice. So there can be a window of time in which we know we revoked our own pledge, but the
             // server keeps sending it to us.
             newlyOpen.removeIf(wallet::wasPledgeRevoked);
             // Remove if this is a scrubbed version of a pledge we already have i.e. because we created it, uploaded it
@@ -777,6 +798,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         // any pledges were revoked). This also ensures the project page can be left open and it'll update from
         // time to time, which is nice if you just want it running in the corner of a room or on a projector,
         // etc.
+
+        // TODO: Get rid of this and just use a scheduled job (issue 110).
+
         if (mode == Mode.CLIENT) {
             // Don't bother with pointless/noisy server requeries until we're caught up with the chain tip.
             if (block.getHeight() > peerGroup.getMostCommonChainHeight() - 2) {
