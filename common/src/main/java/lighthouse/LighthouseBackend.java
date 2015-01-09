@@ -323,7 +323,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                     log.info("Checking newly found project against P2P network: {}", project);
                     ObservableSet<LHProtos.Pledge> unverifiedPledges = diskManager.getPledgesOrCreate(project);
                     unverifiedPledges.addListener((SetChangeListener<LHProtos.Pledge>) change2 -> diskPledgesChanged(change2, project));
-                    checkPledgesAgainstP2PNetwork(project, unverifiedPledges, true);
+                    checkPledgesAgainstP2PNetwork(project, unverifiedPledges);
                 }
             }
         }
@@ -343,8 +343,12 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             } else {
                 // Bye bye .... even if the pledge was claimed, we're about to lose our knowlege of it because the
                 // user removed it from disk, so we can't keep track of it reliably afterwards anyway.
+                log.info("Pledge on disk disappeared.");
                 openPledges.get(project).remove(removedPledge);
                 getClaimedPledgesFor(project).remove(removedPledge);
+                // If the project was in error because of this pledge (e.g. it was a duplicate), kick off a recheck.
+                if (checkStatuses.get(project).error != null)
+                    checkPledgesAgainstP2PNetwork(project, openPledges.get(project));
             }
         }
         if (change.wasAdded()) {
@@ -375,23 +379,26 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return false;
     }
 
+    /**
+     * This method does a check of all current pledges + the given pledge. If it's found to be good, it'll be added
+     * to our open pledges list ... or not. This is used when a pledge is found on disk or submitted to the server.
+     */
     private void checkPledgeAgainstP2PNetwork(Project project, LHProtos.Pledge pledge) {
-        // Can be on any thread.
-        checkPledgesAgainstP2PNetwork(project, FXCollections.observableSet(pledge), false);
+        executor.checkOnThread();
+        ObservableSet<LHProtos.Pledge> create = diskManager.getPledgesOrCreate(project);
+        Set<LHProtos.Pledge> both = new HashSet<>(create);
+        both.add(pledge);
+        checkPledgesAgainstP2PNetwork(project, both);
     }
 
     // Completes with the set of pledges that passed verification.
     // If checkingAllPledges is false then pledges contains a single item, otherwise it contains all pledges for the
     // project together.
-    private CompletableFuture<Set<LHProtos.Pledge>> checkPledgesAgainstP2PNetwork(Project project,
-                                                                                  final ObservableSet<LHProtos.Pledge> pledges,
-                                                                                  boolean checkingAllPledges) {
+    private CompletableFuture<Set<LHProtos.Pledge>> checkPledgesAgainstP2PNetwork(Project project, final Set<LHProtos.Pledge> pledges) {
         if (pledges.isEmpty()) {
             log.info("No pledges to check");
             return CompletableFuture.completedFuture(Collections.EMPTY_SET);
         }
-        if (!checkingAllPledges)
-            checkState(pledges.size() == 1);
         CompletableFuture<Set<LHProtos.Pledge>> result = new CompletableFuture<>();
         if (mode == Mode.CLIENT) {
             // If we're running inside the desktop app, forbid pledges with dependencies for now. It simplifies things:
@@ -405,7 +412,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             }
         }
         executor.executeASAP(() -> {
-            log.info("Checking {} pledge(s) against P2P network for {}", pledges.size(), project);
+            log.info("Checking {} pledge(s) against P2P network for '{}'", pledges.size(), project);
             markAsInProgress(project);
             ListenableFuture<List<Peer>> peerFuture = peerGroup.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION);
             if (!peerFuture.isDone()) {
@@ -434,7 +441,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                     }
                     if (peers.size() != origSize)
                         log.info("Dropped {} peers for not supporting NODE_GETUTXOS, now have {}", peers.size() - origSize, peers.size());
-                    doUTXOLookupsForPledges(project, pledges, peers, checkingAllPledges, result);
+                    doUTXOLookupsForPledges(project, pledges, peers, result);
                 }
 
                 @Override
@@ -464,12 +471,12 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         checkStatuses.remove(project);
     }
 
-    private void doUTXOLookupsForPledges(Project project, ObservableSet<LHProtos.Pledge> pledges, List<Peer> peers,
-                                         boolean checkingAllPledges, CompletableFuture<Set<LHProtos.Pledge>> result) {
+    private void doUTXOLookupsForPledges(Project project, Set<LHProtos.Pledge> pledges, List<Peer> peers,
+                                         CompletableFuture<Set<LHProtos.Pledge>> result) {
         executor.checkOnThread();
         try {
             // The multiplexor issues the same query to multiple peers and verifies they're all consistent.
-            log.info("Querying {} peers {}", peers.size(), checkingAllPledges ? "(checking all pledges)" : "");
+            log.info("Querying {} peers", peers.size());
             PeerUTXOMultiplexor multiplexor = new PeerUTXOMultiplexor(peers);
             // The batcher queues up queries from project.verifyPledge and combines them into a single query, to
             // speed things up and minimise network traffic.
@@ -483,7 +490,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             } catch (TimeoutException e) {
                 // Some peer(s) didn't get back to us fast enough, they'll be filtered out below.
             }
-            Set<TransactionOutPoint> allOutpoints = checkingAllPledges ? new HashSet<>() : getAllPledgedOutPointsFor(project);
+            Set<TransactionOutPoint> allOutpoints = new HashSet<>();
             List<LHProtos.Pledge> verifiedPledges = new ArrayList<>(futures.size());
             for (CompletableFuture<LHProtos.Pledge> future : futures) {
                 if (!future.isDone()) {
@@ -520,20 +527,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             markAsErrored(project, e);
             result.completeExceptionally(e);
         }
-    }
-
-    private HashSet<TransactionOutPoint> getAllPledgedOutPointsFor(Project project) {
-        HashSet<TransactionOutPoint> results = new HashSet<>();
-        for (LHProtos.Pledge pledge : getOpenPledgesFor(project)) {
-            Transaction tx = project.fastSanityCheck(pledge);
-            for (TransactionInput input : tx.getInputs()) {
-                TransactionOutPoint op = input.getOutpoint();
-                if (results.contains(op))
-                    throw new VerificationException.DuplicatedOutPoint();
-                results.add(op);
-            }
-        }
-        return results;
     }
 
     /** Invokes a manual refresh by going back to the server. Can be called from any thread. */

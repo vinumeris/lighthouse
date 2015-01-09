@@ -1,44 +1,25 @@
 package lighthouse.wallet;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.AsyncFunction;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.protobuf.ByteString;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.LHUtils;
-import lighthouse.protocol.Project;
-import net.jcip.annotations.GuardedBy;
+import com.google.common.collect.*;
+import com.google.common.util.concurrent.*;
+import com.google.protobuf.*;
+import lighthouse.protocol.*;
+import net.jcip.annotations.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.crypto.ChildNumber;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDUtils;
-import org.bitcoinj.crypto.TransactionSignature;
-import org.bitcoinj.params.UnitTestParams;
-import org.bitcoinj.script.Script;
-import org.bitcoinj.script.ScriptBuilder;
-import org.bitcoinj.store.UnreadableWalletException;
-import org.bitcoinj.store.WalletProtobufSerializer;
-import org.bitcoinj.utils.ListenerRegistration;
-import org.bitcoinj.wallet.CoinSelection;
-import org.bitcoinj.wallet.DefaultCoinSelector;
-import org.bitcoinj.wallet.KeyChain;
-import org.bitcoinj.wallet.KeyChainGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.params.KeyParameter;
+import org.bitcoinj.crypto.*;
+import org.bitcoinj.params.*;
+import org.bitcoinj.script.*;
+import org.bitcoinj.store.*;
+import org.bitcoinj.utils.*;
+import org.bitcoinj.wallet.*;
+import org.slf4j.*;
+import org.spongycastle.crypto.params.*;
 
-import javax.annotation.Nullable;
+import javax.annotation.*;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.concurrent.*;
+import java.util.function.*;
+import java.util.stream.*;
 
 import static com.google.common.base.Preconditions.*;
 import static lighthouse.protocol.LHUtils.*;
@@ -177,6 +158,7 @@ public class PledgingWallet extends Wallet {
         public final long feesRequired;
         public final Project project;
         public final LHProtos.PledgeDetails details;
+        public final long timestamp;
 
         private boolean committed = false;
 
@@ -187,6 +169,7 @@ public class PledgingWallet extends Wallet {
             this.pledge = pledge;
             this.feesRequired = feesRequired;
             this.details = details;
+            this.timestamp = Utils.currentTimeSeconds();
         }
 
         public LHProtos.Pledge getData() {
@@ -197,7 +180,7 @@ public class PledgingWallet extends Wallet {
                 proto.addTransactions(ByteString.copyFrom(dependency.bitcoinSerialize()));
             proto.addTransactions(ByteString.copyFrom(pledge.bitcoinSerialize()));
             proto.setTotalInputValue(stub.getValue().longValue());
-            proto.setTimestamp(Utils.currentTimeSeconds());
+            proto.setTimestamp(timestamp);
             proto.setProjectId(project.getID());
             proto.setPledgeDetails(details);
             return proto.build();
@@ -206,10 +189,6 @@ public class PledgingWallet extends Wallet {
         public LHProtos.Pledge commit(boolean andBroadcastDependencies) {
             // Commit and broadcast the dependency.
             LHProtos.Pledge data = getData();
-            return commit(andBroadcastDependencies, data);
-        }
-
-        public LHProtos.Pledge commit(boolean andBroadcastDependencies, LHProtos.Pledge data) {
             final TransactionOutput stub = pledge.getInput(0).getConnectedOutput();
             checkNotNull(stub);
             checkState(!committed);

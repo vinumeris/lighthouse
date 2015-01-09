@@ -555,11 +555,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertEquals(pledgeTx.getInput(0).getOutpoint(), getutxos.getOutPoints().get(0));
 
         // We reply with the data it expects.
-        inbound(p2, new UTXOsMessage(params,
-                ImmutableList.of(stubTx.getOutput(0)),
-                new long[]{UTXOsMessage.MEMPOOL_HEIGHT},
-                blockStore.getChainHead().getHeader().getHash(),
-                blockStore.getChainHead().getHeight()));
+        doGetUTXOAnswer(p2, stubTx.getOutput(0));
 
         // We got a pledge list update relayed into our thread.
         AtomicBoolean flag = new AtomicBoolean(false);
@@ -614,11 +610,14 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
             pledge2.writeTo(stream);
         }
 
-        int q = 0;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 4; i++) {
             Message m = waitForOutbound(p2);
             if (m instanceof GetUTXOsMessage) {
-                doGetUTXOAnswer(p2, q++ == 0 ? data.getValue0().getOutput(0) : data2.getValue0().getOutput(0));
+                // query order is not stable.
+                if (((GetUTXOsMessage)m).getOutPoints().get(0).equals(data.getValue0().getOutput(0).getOutPointFor()))
+                    doGetUTXOAnswer(p2, data.getValue0().getOutput(0), data2.getValue0().getOutput(0));
+                else
+                    doGetUTXOAnswer(p2, data2.getValue0().getOutput(0), data.getValue0().getOutput(0));
             }
         }
 
@@ -721,10 +720,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         for (int i = 0; i < 3; i++) {
             Message m = waitForOutbound(p1);
             if (m instanceof GetUTXOsMessage)
-                doGetUTXOAnswer(p1, output);
+                doGetUTXOAnswer(p1, output, output);
             m = waitForOutbound(p2);
             if (m instanceof GetUTXOsMessage)
-                doGetUTXOAnswer(p2, output);
+                doGetUTXOAnswer(p2, output, output);
         }
 
         // Wait for check status to update.

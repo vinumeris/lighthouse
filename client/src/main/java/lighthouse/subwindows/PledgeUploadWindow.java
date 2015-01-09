@@ -1,27 +1,21 @@
 package lighthouse.subwindows;
 
-import com.google.common.base.Throwables;
-import de.jensd.fx.fontawesome.AwesomeDude;
-import de.jensd.fx.fontawesome.AwesomeIcon;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import lighthouse.Main;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.Project;
-import lighthouse.utils.GuiUtils;
-import lighthouse.wallet.PledgingWallet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.base.*;
+import de.jensd.fx.fontawesome.*;
+import javafx.concurrent.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import lighthouse.utils.*;
+import lighthouse.wallet.*;
+import org.slf4j.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
+import java.io.*;
+import java.net.*;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 public class PledgeUploadWindow {
     private static final Logger log = LoggerFactory.getLogger(PledgeUploadWindow.class);
@@ -79,10 +73,7 @@ public class PledgeUploadWindow {
                             throw new Exception(String.format("Server said %d %s", connection.getResponseCode(), connection.getResponseMessage()));
                         } else {
                             log.info("Server accepted, committing");
-                            // We must NOT use the single arg version here, as that would re-generate the protobuf
-                            // with a possibly different timestamp to the one we just uploaded. That would cause
-                            // problems as the server would have seen a different pledge protobuf to what we did.
-                            pledge.commit(false, data);
+                            pledge.commit(false);
                         }
                     }
                     return null;
