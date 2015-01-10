@@ -1,32 +1,23 @@
 package lighthouse.subwindows;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.vinumeris.crashfx.CrashWindow;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import lighthouse.Main;
-import lighthouse.protocol.Ex;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.Project;
-import lighthouse.wallet.PledgingWallet;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.InsufficientMoneyException;
-import org.bitcoinj.core.Transaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.params.KeyParameter;
+import com.google.common.util.concurrent.*;
+import com.vinumeris.crashfx.*;
+import javafx.application.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import lighthouse.wallet.*;
+import org.bitcoinj.core.*;
+import org.slf4j.*;
+import org.spongycastle.crypto.params.*;
 
-import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
+import javax.annotation.*;
+import java.util.*;
 
-import static com.google.common.base.Preconditions.checkState;
-import static lighthouse.utils.GuiUtils.informationalAlert;
+import static com.google.common.base.Preconditions.*;
+import static lighthouse.utils.GuiUtils.*;
 
 /**
  * Tells the user there's a fee to pay and shows a progress bar that tracks network propagation. Possibly request the
@@ -161,7 +152,8 @@ public class RevokeAndClaimWindow {
             };
             progress.txFuture.handleAsync((t, ex) -> {
                 if (ex != null) {
-                    CrashWindow.open(ex);
+                    informationalAlert("Transaction acceptance issue",
+                            "At least one peer reported a problem with the transaction: %s", ex);
                 } else {
                     onSuccess.run();
                 }
