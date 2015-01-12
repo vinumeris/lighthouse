@@ -688,9 +688,25 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
 
     public void importProjectFrom(Path file) throws IOException {
+        // TODO: Simplify this right down. Just rip out the directory watching for projects entirely.
         // Can be on any thread here. Do file IO on calling thread so IO error handling is easier.
         checkState(Files.isRegularFile(file));
         Path destPath = AppDirectory.dir().resolve(file.getFileName());
+
+        if (Files.exists(destPath)) {
+            // Temp hack to fix a bug on Windows before beta. Do nothing if the file is identical to one we already
+            // imported. Otherwise main UI gets a bit messed up. This is a dumb workaround though, the real fix is
+            // to scrap the directory watching crap for projects entirely. This hack fails if the project you're
+            // importing is a later version of a project you already have - the bottom section of the UI might go
+            // walkies until the next restart!
+            Sha256Hash theirHash = Sha256Hash.hashFileContents(file.toFile());
+            Sha256Hash ourHash = Sha256Hash.hashFileContents(destPath.toFile());
+            if (theirHash.equals(ourHash)) {
+                log.info("Attempted import of a project we already have, skipping");
+                return;
+            }
+        }
+
         Path tmpPath = Paths.get(destPath + ".tmp");
         // Copy and rename to avoid superfluous directory change notifications.
         Files.copy(file, tmpPath, StandardCopyOption.REPLACE_EXISTING);

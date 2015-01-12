@@ -123,6 +123,7 @@ public class MainWindow {
                     slideInNewProject(change.getAddedSubList().get(0));
                 } else if (change.wasRemoved()) {
                     log.warn("Cannot animate project remove yet: {}", change);
+                    projectsVBox.getChildren().remove(projectsVBox.getChildren().size() - 2 - change.getFrom());
                 }
             }
         });
@@ -154,6 +155,7 @@ public class MainWindow {
 
     // Triggered by the project disk model being adjusted.
     private void updateExistingProject(int index, Project newProject, Project prevProject) {
+        log.info("Update at index {}", index);
         projectsVBox.getChildren().set(projectsVBox.getChildren().size() - 2 - index, buildProjectWidget(newProject));
         if (inProjectView.get() && projectView.getProject().equals(prevProject)) {
             projectView.setProject(newProject);
