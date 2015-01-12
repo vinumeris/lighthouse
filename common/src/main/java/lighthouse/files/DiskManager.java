@@ -369,7 +369,7 @@ public class DiskManager {
     public Project saveProject(LHProtos.Project project, String fileID) throws IOException {
         // Probably on the UI thread here. Do the IO write on the UI thread to simplify error handling.
         final Project obj = unchecked(() -> new Project(project));
-        final Path filename = Paths.get(fileID + PROJECT_FILE_EXTENSION);
+        final Path filename = Paths.get(obj.getSuggestedFileName());
         final Path path = AppDirectory.dir().resolve(filename + ".tmp");
         log.info("Saving project to: {}", path);
         // Do a write to a temp file name here to ensure a project file is not partially written and becomes partially

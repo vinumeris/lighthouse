@@ -116,7 +116,6 @@ public class ExportWindow {
     }
 
     private String getFileName() {
-        // TODO: Sanitize the project name for files.
         if (pledge != null) {
             final String FILE_NAME = "Pledge by %s for %s%s";
             return String.format(FILE_NAME, Main.demoName == null ? System.getProperty("user.name") : Main.demoName, project.getTitle(), DiskManager.PLEDGE_FILE_EXTENSION);

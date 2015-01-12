@@ -185,7 +185,7 @@ public class EditProjectWindow {
         // Quick check that they haven't duplicated the title as otherwise that results in file name clashes
         // We could add (2) after the file name or whatever to avoid this, but multiple different projects with
         // the same title would be confusing anyway so just forbid it.
-        if (!editing && Files.exists(AppDirectory.dir().resolve(model.title.get() + DiskManager.PROJECT_FILE_EXTENSION))) {
+        if (!editing && Files.exists(AppDirectory.dir().resolve(Project.getSuggestedFileName(model.title.get())))) {
             informationalAlert("Title conflict",
                     "You already have a project with that title. Please choose another. If you are trying to create a " +
                             "different version, consider putting the date or a number in the title so people can distinguish them.");

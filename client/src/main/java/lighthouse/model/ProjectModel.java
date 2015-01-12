@@ -1,6 +1,7 @@
 package lighthouse.model;
 
 import com.google.protobuf.*;
+import javafx.beans.*;
 import javafx.beans.property.*;
 import lighthouse.protocol.*;
 import lighthouse.wallet.*;
@@ -51,7 +52,18 @@ public class ProjectModel {
         }
 
         // Connect the properties.
-        title.addListener(o -> proto.getExtraDetailsBuilder().setTitle(title.get()));
+        InvalidationListener pathSetter = o -> {
+            final String name = serverName.get();
+            if (name.isEmpty())
+                proto.clearPaymentUrl();
+            else
+                proto.setPaymentUrl(LHUtils.makeServerPath(name, LHUtils.titleToUrlString(title.get())));
+        };
+        serverName.addListener(pathSetter);
+        title.addListener(o -> {
+            proto.getExtraDetailsBuilder().setTitle(title.get());
+            pathSetter.invalidated(null);
+        });
         memo.addListener(o -> proto.setMemo(memo.get()));
         // Just adjust the first output. GUI doesn't handle multioutput contracts right now (they're useless anyway).
         goalAmount.addListener(o -> {
@@ -61,14 +73,6 @@ public class ProjectModel {
         });
 
         minPledgeAmount.addListener(o -> proto.getExtraDetailsBuilder().setMinPledgeSize(minPledgeAmountProperty().get()));
-
-        serverName.addListener(o -> {
-            final String name = serverName.get();
-            if (name.isEmpty())
-                proto.clearPaymentUrl();
-            else
-                proto.setPaymentUrl(LHUtils.makeServerPath(name, LHUtils.titleToUrlString(title.get())));
-        });
 
         TransactionOutput output = project.getOutputs().get(0);
         Address addr = output.getAddressFromP2PKHScript(project.getParams());

@@ -437,7 +437,11 @@ public class Project {
     }
 
     public String getSuggestedFileName() {
-        return getTitle() + DiskManager.PROJECT_FILE_EXTENSION;
+        return getSuggestedFileName(getTitle());
+    }
+
+    public static String getSuggestedFileName(String title) {
+        return LHUtils.titleToUrlString(title) + DiskManager.PROJECT_FILE_EXTENSION;
     }
 
     public Coin getMinPledgeAmount() {
