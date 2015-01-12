@@ -1,5 +1,6 @@
 package lighthouse.protocol;
 
+import com.google.common.base.*;
 import com.google.common.collect.*;
 import com.google.protobuf.*;
 import lighthouse.files.*;
@@ -49,8 +50,7 @@ public class Project {
     private final byte[] authKey;
     private final int authKeyIndex;
 
-    // For the User-Agent string in getStatus
-    public static String VERSION_CODE = "";
+    public static String GET_STATUS_USER_AGENT = "";
 
     public Project(LHProtos.ProjectDetails details) throws PaymentProtocolException, InvalidProtocolBufferException {
         this(wrapDetails(details).build());
@@ -110,6 +110,8 @@ public class Project {
         }
         details.setMemo(memo);
         details.setNetwork(params.getPaymentProtocolId());
+        // Default to the vinumeris.com server in the user interface.
+        details.setPaymentUrl(LHUtils.makeServerPath("vinumeris.com:13765", LHUtils.titleToUrlString(title)));
         LHProtos.Output.Builder output = details.addOutputsBuilder();
         output.setAmount(value.value);
         output.setScript(ByteString.copyFrom(ScriptBuilder.createOutputScript(to).getProgram()));
@@ -375,17 +377,18 @@ public class Project {
         CompletableFuture<LHProtos.ProjectStatus> future = new CompletableFuture<>();
         Thread thread = new Thread(() -> {
             try {
+                final int TIMEOUT_MS = 10 * 1000;
                 URLConnection connection = getServerQueryURL(wallet, key).openConnection();
                 connection.setDoOutput(true);
-                connection.setConnectTimeout(10 * 1000);
-                connection.addRequestProperty("User-Agent", "Lighthouse/1.0");
+                connection.setConnectTimeout(TIMEOUT_MS);
+                connection.setReadTimeout(TIMEOUT_MS);
+                connection.addRequestProperty("User-Agent", GET_STATUS_USER_AGENT);
                 connection.connect();
                 byte[] bits = Streams.readAllLimited(connection.getInputStream(), 1024 * 1024);  // 1mb limit.
-                LHProtos.ProjectStatus status = LHProtos.ProjectStatus.parseFrom(bits);
-                future.complete(status);
+                future.complete(LHProtos.ProjectStatus.parseFrom(bits));
             } catch (Exception e) {
                 log.error("Failed download from server " + paymentURL, e);
-                future.completeExceptionally(e);
+                future.completeExceptionally(Throwables.getRootCause(e));
             }
         }, "Project downloader");
         thread.setDaemon(true);

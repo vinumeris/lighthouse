@@ -34,6 +34,7 @@ import java.nio.file.*;
 import java.time.*;
 import java.time.format.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 import static com.google.common.base.Preconditions.*;
 import static javafx.beans.binding.Bindings.*;
@@ -171,9 +172,14 @@ public class ProjectView extends HBox {
             // Make the info bar appear if there's an error
             checkStatus = valueAt(statusMap, project);
             checkStatus.addListener(o -> updateInfoBar());
-            // Don't let the user perform an action whilst loading or if there's an error.
+            // Don't let the user perform an action whilst loading or if there's an error, unless that action would
+            // be revoke: users must be able to revoke even if the server is dead.
             actionButton.disableProperty().unbind();
-            actionButton.disableProperty().bind(isFullyFundedAndNotParticipating.or(checkStatus.isNotNull()));
+            actionButton.disableProperty().bind(
+                    isFullyFundedAndNotParticipating.or(
+                            checkStatus.isNotNull().and(mode.isNotEqualTo(Mode.PLEDGED))
+                    )
+            );
             updateInfoBar();
         } else {
             // Take the back keyboard shortcut out later, because removing an accelerator whilst its callback is being
@@ -252,6 +258,8 @@ public class ProjectView extends HBox {
                 msg = "Server error: 404 Not Found: project is not known";
             else if (status.error instanceof Ex.InconsistentUTXOAnswers)
                 msg = "Bitcoin P2P network returned inconsistent answers, please contact support";
+            else if (status.error instanceof TimeoutException)
+                msg = "Server error: Timed out";
             else //noinspection ConstantConditions
                 if (msg == null)
                     msg = "Internal error: " + status.error.getClass().getName();

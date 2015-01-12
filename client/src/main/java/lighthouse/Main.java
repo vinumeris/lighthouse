@@ -126,7 +126,7 @@ public class Main extends Application {
         // This is fixed in 8u40+, I think.
         Thread.currentThread().setContextClassLoader(Main.class.getClassLoader());
         instance = this;
-        Project.VERSION_CODE = "" + VERSION;
+        Project.GET_STATUS_USER_AGENT = APP_NAME + "/" + VERSION;
         // Set up the app dir + logging again, because the first time we did this (in main) could have been in the
         // context of another class loader if we're now running a different app version to the one the user installed.
         // Anything that happened in main() therefore might have now been wiped.

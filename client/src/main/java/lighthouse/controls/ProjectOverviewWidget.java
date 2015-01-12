@@ -1,45 +1,30 @@
 package lighthouse.controls;
 
-import de.jensd.fx.fontawesome.AwesomeDude;
-import de.jensd.fx.fontawesome.AwesomeIcon;
-import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.NumberBinding;
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.Tooltip;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.GaussianBlur;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
-import lighthouse.LighthouseBackend;
-import lighthouse.Main;
-import lighthouse.protocol.Project;
-import lighthouse.subwindows.ExportWindow;
-import lighthouse.utils.GuiUtils;
-import lighthouse.utils.ReactiveCoinFormatter;
-import org.bitcoinj.utils.MonetaryFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.jensd.fx.fontawesome.*;
+import javafx.beans.binding.*;
+import javafx.beans.property.*;
+import javafx.beans.value.*;
+import javafx.fxml.*;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.effect.*;
+import javafx.scene.image.*;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
+import javafx.scene.shape.*;
+import javafx.scene.text.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import lighthouse.subwindows.*;
+import lighthouse.utils.*;
+import org.bitcoinj.utils.*;
+import org.slf4j.*;
 
-import javax.annotation.Nullable;
+import javax.annotation.*;
 
 import static javafx.beans.binding.Bindings.*;
-import static lighthouse.protocol.LHUtils.uncheck;
-import static lighthouse.utils.GuiUtils.animatedBind;
+import static lighthouse.protocol.LHUtils.*;
+import static lighthouse.utils.GuiUtils.*;
 
 /** An entry in the project list that is shown on the overview page */
 public class ProjectOverviewWidget extends HBox {
@@ -56,7 +41,7 @@ public class ProjectOverviewWidget extends HBox {
     @FXML ProgressIndicator loadingIndicator;
 
     private Project project;
-    private final SimpleBooleanProperty isLoading;
+    private final SimpleBooleanProperty isLoading = new SimpleBooleanProperty();
 
     public ProjectOverviewWidget(Project project, LongProperty pledgedAmount,
                                  ObservableObjectValue<LighthouseBackend.ProjectState> state) {
@@ -77,15 +62,15 @@ public class ProjectOverviewWidget extends HBox {
             titleHBox.getChildren().remove(ownershipIcon);
         }
 
-        isLoading = new SimpleBooleanProperty();
-
         // Make the cover image go grey when claimed and blurred when loading. Make a loading indicator fade in/out.
         final Image image = new Image(project.getCoverImage().newInput());
         ColorAdjust colorAdjust = new ColorAdjust();
-        colorAdjust.saturationProperty().bind(when(
-                or(
-                        equal(state, LighthouseBackend.ProjectState.CLAIMED),
-                        equal(state, LighthouseBackend.ProjectState.UNKNOWN))
+        colorAdjust.saturationProperty().bind(
+                when(
+                        or(
+                                equal(state, LighthouseBackend.ProjectState.CLAIMED),
+                                equal(state, LighthouseBackend.ProjectState.UNKNOWN)
+                        )
                 ).then(-0.9).otherwise(0.0)
         );
         if (GuiUtils.isSoftwarePipeline()) {
