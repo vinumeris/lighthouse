@@ -157,7 +157,6 @@ public class ProjectHandler implements HttpHandler {
         LHProtos.ProjectStatus.Builder status = LHProtos.ProjectStatus.newBuilder();
         status.setId(project.getID());
         status.setTimestamp(Instant.now().getEpochSecond());
-        status.setValuePledgedSoFar(Database.getInstance().getPledgedValue(project));
 
         Map<String, String> params;
         String queryParams = httpExchange.getRequestURI().getRawQuery();
