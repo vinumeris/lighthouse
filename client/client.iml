@@ -32,7 +32,7 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.6" level="project" />
     <orderEntry type="library" name="Maven: net.sf.trove4j:trove4j:3.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.51" level="project" />
-    <orderEntry type="library" name="Maven: com.vinumeris:crashfx-client:1.0" level="project" />
+    <orderEntry type="library" name="Maven: com.vinumeris:crashfx-client:1.1" level="project" />
     <orderEntry type="library" name="Maven: net.sf.proguard:proguard-base:5.0" level="project" />
     <orderEntry type="library" name="Maven: org.bitcoinj:bitcoinj-core:0.13-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
