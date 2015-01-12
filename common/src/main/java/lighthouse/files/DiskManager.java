@@ -166,7 +166,7 @@ public class DiskManager {
                 if (pledge != null) {
                     log.info("Pledge file deleted/modified: {}", path);
                     synchronized (this) {
-                        Project project = projectsById.get(pledge.getProjectId());
+                        Project project = projectsById.get(pledge.getPledgeDetails().getProjectId());
                         ObservableSet<LHProtos.Pledge> projectPledges = this.getPledgesFor(project);
                         checkNotNull(projectPledges);  // Project should be in both sets or neither.
                         projectPledges.remove(pledge);
@@ -193,7 +193,7 @@ public class DiskManager {
     private void tryLoadPledge(Path path) {
         LHProtos.Pledge pledge = loadPledge(path);
         if (pledge != null) {
-            Project project = getProjectById(pledge.getProjectId());
+            Project project = getProjectById(pledge.getPledgeDetails().getProjectId());
             if (project != null) {
                 pledgesByPath.put(path, pledge);
                 getPledgesOrCreate(project).add(pledge);

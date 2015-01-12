@@ -1,48 +1,33 @@
 package lighthouse.subwindows;
 
-import com.google.common.io.ByteStreams;
-import com.google.protobuf.ByteString;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import com.google.common.io.*;
+import com.google.protobuf.*;
+import javafx.embed.swing.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.*;
+import javafx.scene.canvas.*;
 import javafx.scene.control.*;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.stage.FileChooser;
-import lighthouse.Main;
-import lighthouse.files.AppDirectory;
-import lighthouse.files.DiskManager;
-import lighthouse.model.ProjectModel;
-import lighthouse.protocol.LHUtils;
-import lighthouse.protocol.Project;
-import lighthouse.utils.DownloadProgress;
-import lighthouse.utils.ValidationLink;
-import org.bitcoinj.core.Coin;
-import org.controlsfx.control.PopOver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javafx.scene.effect.*;
+import javafx.scene.image.*;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
+import javafx.stage.*;
+import lighthouse.*;
+import lighthouse.files.*;
+import lighthouse.model.*;
+import lighthouse.protocol.*;
+import lighthouse.utils.*;
+import org.bitcoinj.core.*;
+import org.controlsfx.control.*;
+import org.slf4j.*;
 
-import javax.imageio.ImageIO;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import javax.imageio.*;
+import java.io.*;
+import java.net.*;
 import java.nio.file.Files;
 
-import static lighthouse.protocol.LHUtils.uncheck;
-import static lighthouse.protocol.LHUtils.unchecked;
+import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
 
 /**
@@ -72,7 +57,9 @@ public class EditProjectWindow {
     private boolean editing;
 
     public static void openForCreate() {
-        open(new ProjectModel(Main.wallet), "Create new project", false);
+        ProjectModel projectModel = new ProjectModel(Main.wallet);
+        projectModel.serverName.set("vinumeris.com");  // By default.
+        open(projectModel, "Create new project", false);
     }
 
     public static void openForCreate(ProjectModel project) {

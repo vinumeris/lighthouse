@@ -1,21 +1,16 @@
 package lighthouse.subwindows;
 
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import lighthouse.Main;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.LHUtils;
-import lighthouse.protocol.Project;
-import lighthouse.wallet.PledgingWallet;
-import org.bitcoinj.core.Coin;
+import javafx.application.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import lighthouse.wallet.*;
+import org.bitcoinj.core.*;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.time.*;
+import java.time.format.*;
 
 /**
  * Allows the user to view the details of the pledge and copy/paste the
@@ -39,7 +34,7 @@ public class ShowPledgeWindow {
     }
 
     private void init(Project project, LHProtos.Pledge pledge) {
-        amountLabel.setText(Coin.valueOf(pledge.getTotalInputValue()).toFriendlyString());
+        amountLabel.setText(Coin.valueOf(pledge.getPledgeDetails().getTotalInputValue()).toFriendlyString());
         if (pledge.hasPledgeDetails()) {
             contactLabel.setText(pledge.getPledgeDetails().getContactAddress());
             // Looks like an email address?
@@ -52,7 +47,7 @@ public class ShowPledgeWindow {
             contactLabel.setText("<unknown>");
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM uuuu HH:mm");
-        LocalDateTime time = LocalDateTime.ofEpochSecond(pledge.getTimestamp(), 0, ZoneOffset.UTC);
+        LocalDateTime time = LocalDateTime.ofEpochSecond(pledge.getPledgeDetails().getTimestamp(), 0, ZoneOffset.UTC);
         dateLabel.setText(time.format(formatter));
         this.project = project;
         this.pledge = pledge;

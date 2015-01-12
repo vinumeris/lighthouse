@@ -87,6 +87,15 @@ message X509Certificates {
 message PledgeDetails {
     optional string memo = 1; // Human-readable message for the project owner.
     optional string contact_address = 2;  // Email address or so on.
+    // This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+    required uint64 total_input_value = 3;
+    required string project_id = 4;
+    // Time in seconds.
+    required uint64 timestamp = 5;
+    // Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+    // pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+    // twice, and check if it was already revoked in case the server didn't catch up yet.
+    optional bytes orig_hash = 104;
 }
 
 // Modified Payment message.
@@ -99,21 +108,10 @@ message Pledge {
     // see the dependency yet.
     repeated bytes transactions = 2;
 
-    // TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
-    // This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
-    required uint64 total_input_value = 101;
-    required string project_id = 102;
-    // Time in seconds.
-    required uint64 timestamp = 103;
-    // Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
-    // pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
-    // twice, and check if it was already revoked in case the server didn't catch up yet.
-    optional bytes orig_hash = 104;
-
-    optional PledgeDetails pledge_details = 100;
-
     // Ignored
     repeated Output refund_to = 3;
+
+    optional PledgeDetails pledge_details = 100;
 }
 
 message PledgeACK {

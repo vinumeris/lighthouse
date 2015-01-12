@@ -110,8 +110,6 @@ public class Project {
         }
         details.setMemo(memo);
         details.setNetwork(params.getPaymentProtocolId());
-        // Default to the vinumeris.com server in the user interface.
-        details.setPaymentUrl(LHUtils.makeServerPath("vinumeris.com:13765", LHUtils.titleToUrlString(title)));
         LHProtos.Output.Builder output = details.addOutputsBuilder();
         output.setAmount(value.value);
         output.setScript(ByteString.copyFrom(ScriptBuilder.createOutputScript(to).getProgram()));
@@ -221,7 +219,7 @@ public class Project {
         // Verify that the pledge total_input_value field is consistent with the fetched UTXOs.
         long totalValue = 0;
         for (TransactionOutput output : result) totalValue += output.getValue().longValue();
-        if (pledge.getTotalInputValue() != totalValue || totalValue == 0)
+        if (pledge.getPledgeDetails().getTotalInputValue() != totalValue || totalValue == 0)
             throw new Ex.CachedValueMismatch();
         if (totalValue < minPledgeAmount)
             throw new Ex.PledgeTooSmall(minPledgeAmount - totalValue);
@@ -358,7 +356,7 @@ public class Project {
     public Transaction completeContract(Set<LHProtos.Pledge> pledges) {
         Transaction contract = new Transaction(params);
         outputs.forEach(contract::addOutput);
-        long allPledgesValue = pledges.stream().mapToLong(LHProtos.Pledge::getTotalInputValue).sum();
+        long allPledgesValue = pledges.stream().mapToLong(pledge -> pledge.getPledgeDetails().getTotalInputValue()).sum();
         if (allPledgesValue != goalAmount)
             throw new Ex.ValueMismatch(allPledgesValue - goalAmount);
         pledges.stream().map(this::fastSanityCheck).forEach(pledge -> {

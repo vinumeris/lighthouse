@@ -1,14 +1,10 @@
 package lighthouse.server;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.Project;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.collect.*;
+import lighthouse.protocol.*;
+import org.slf4j.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 public class Database {
     private static final Logger log = LoggerFactory.getLogger(Database.class);
@@ -35,7 +31,7 @@ public class Database {
 
     public synchronized long getPledgedValue(Project project) {
         Collection<Row> rows = getPledges(project);
-        return rows.stream().mapToLong(row -> row.pledge.getTotalInputValue()).sum();
+        return rows.stream().mapToLong(row -> row.pledge.getPledgeDetails().getTotalInputValue()).sum();
     }
 
     public synchronized void removePledge(Project project, LHProtos.Pledge pledge) {

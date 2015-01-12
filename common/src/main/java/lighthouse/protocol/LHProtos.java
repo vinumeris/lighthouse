@@ -5423,6 +5423,79 @@ public final class LHProtos {
      */
     com.google.protobuf.ByteString
         getContactAddressBytes();
+
+    // required uint64 total_input_value = 3;
+    /**
+     * <code>required uint64 total_input_value = 3;</code>
+     *
+     * <pre>
+     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+     * </pre>
+     */
+    boolean hasTotalInputValue();
+    /**
+     * <code>required uint64 total_input_value = 3;</code>
+     *
+     * <pre>
+     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+     * </pre>
+     */
+    long getTotalInputValue();
+
+    // required string project_id = 4;
+    /**
+     * <code>required string project_id = 4;</code>
+     */
+    boolean hasProjectId();
+    /**
+     * <code>required string project_id = 4;</code>
+     */
+    java.lang.String getProjectId();
+    /**
+     * <code>required string project_id = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getProjectIdBytes();
+
+    // required uint64 timestamp = 5;
+    /**
+     * <code>required uint64 timestamp = 5;</code>
+     *
+     * <pre>
+     * Time in seconds.
+     * </pre>
+     */
+    boolean hasTimestamp();
+    /**
+     * <code>required uint64 timestamp = 5;</code>
+     *
+     * <pre>
+     * Time in seconds.
+     * </pre>
+     */
+    long getTimestamp();
+
+    // optional bytes orig_hash = 104;
+    /**
+     * <code>optional bytes orig_hash = 104;</code>
+     *
+     * <pre>
+     * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+     * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+     * twice, and check if it was already revoked in case the server didn't catch up yet.
+     * </pre>
+     */
+    boolean hasOrigHash();
+    /**
+     * <code>optional bytes orig_hash = 104;</code>
+     *
+     * <pre>
+     * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+     * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+     * twice, and check if it was already revoked in case the server didn't catch up yet.
+     * </pre>
+     */
+    com.google.protobuf.ByteString getOrigHash();
   }
   /**
    * Protobuf type {@code lighthouse.PledgeDetails}
@@ -5483,6 +5556,26 @@ public final class LHProtos {
             case 18: {
               bitField0_ |= 0x00000002;
               contactAddress_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              totalInputValue_ = input.readUInt64();
+              break;
+            }
+            case 34: {
+              bitField0_ |= 0x00000008;
+              projectId_ = input.readBytes();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              timestamp_ = input.readUInt64();
+              break;
+            }
+            case 834: {
+              bitField0_ |= 0x00000020;
+              origHash_ = input.readBytes();
               break;
             }
           }
@@ -5635,15 +5728,150 @@ public final class LHProtos {
       }
     }
 
+    // required uint64 total_input_value = 3;
+    public static final int TOTAL_INPUT_VALUE_FIELD_NUMBER = 3;
+    private long totalInputValue_;
+    /**
+     * <code>required uint64 total_input_value = 3;</code>
+     *
+     * <pre>
+     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+     * </pre>
+     */
+    public boolean hasTotalInputValue() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>required uint64 total_input_value = 3;</code>
+     *
+     * <pre>
+     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+     * </pre>
+     */
+    public long getTotalInputValue() {
+      return totalInputValue_;
+    }
+
+    // required string project_id = 4;
+    public static final int PROJECT_ID_FIELD_NUMBER = 4;
+    private java.lang.Object projectId_;
+    /**
+     * <code>required string project_id = 4;</code>
+     */
+    public boolean hasProjectId() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required string project_id = 4;</code>
+     */
+    public java.lang.String getProjectId() {
+      java.lang.Object ref = projectId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          projectId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string project_id = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getProjectIdBytes() {
+      java.lang.Object ref = projectId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        projectId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // required uint64 timestamp = 5;
+    public static final int TIMESTAMP_FIELD_NUMBER = 5;
+    private long timestamp_;
+    /**
+     * <code>required uint64 timestamp = 5;</code>
+     *
+     * <pre>
+     * Time in seconds.
+     * </pre>
+     */
+    public boolean hasTimestamp() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>required uint64 timestamp = 5;</code>
+     *
+     * <pre>
+     * Time in seconds.
+     * </pre>
+     */
+    public long getTimestamp() {
+      return timestamp_;
+    }
+
+    // optional bytes orig_hash = 104;
+    public static final int ORIG_HASH_FIELD_NUMBER = 104;
+    private com.google.protobuf.ByteString origHash_;
+    /**
+     * <code>optional bytes orig_hash = 104;</code>
+     *
+     * <pre>
+     * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+     * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+     * twice, and check if it was already revoked in case the server didn't catch up yet.
+     * </pre>
+     */
+    public boolean hasOrigHash() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional bytes orig_hash = 104;</code>
+     *
+     * <pre>
+     * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+     * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+     * twice, and check if it was already revoked in case the server didn't catch up yet.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString getOrigHash() {
+      return origHash_;
+    }
+
     private void initFields() {
       memo_ = "";
       contactAddress_ = "";
+      totalInputValue_ = 0L;
+      projectId_ = "";
+      timestamp_ = 0L;
+      origHash_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
+      if (!hasTotalInputValue()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasProjectId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasTimestamp()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -5656,6 +5884,18 @@ public final class LHProtos {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeBytes(2, getContactAddressBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeUInt64(3, totalInputValue_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, getProjectIdBytes());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeUInt64(5, timestamp_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBytes(104, origHash_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -5673,6 +5913,22 @@ public final class LHProtos {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, getContactAddressBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(3, totalInputValue_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, getProjectIdBytes());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(5, timestamp_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(104, origHash_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -5794,6 +6050,14 @@ public final class LHProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         contactAddress_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
+        totalInputValue_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        projectId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000008);
+        timestamp_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        origHash_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -5830,6 +6094,22 @@ public final class LHProtos {
           to_bitField0_ |= 0x00000002;
         }
         result.contactAddress_ = contactAddress_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.totalInputValue_ = totalInputValue_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.projectId_ = projectId_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.timestamp_ = timestamp_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.origHash_ = origHash_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -5856,11 +6136,37 @@ public final class LHProtos {
           contactAddress_ = other.contactAddress_;
           onChanged();
         }
+        if (other.hasTotalInputValue()) {
+          setTotalInputValue(other.getTotalInputValue());
+        }
+        if (other.hasProjectId()) {
+          bitField0_ |= 0x00000008;
+          projectId_ = other.projectId_;
+          onChanged();
+        }
+        if (other.hasTimestamp()) {
+          setTimestamp(other.getTimestamp());
+        }
+        if (other.hasOrigHash()) {
+          setOrigHash(other.getOrigHash());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
+        if (!hasTotalInputValue()) {
+          
+          return false;
+        }
+        if (!hasProjectId()) {
+          
+          return false;
+        }
+        if (!hasTimestamp()) {
+          
+          return false;
+        }
         return true;
       }
 
@@ -6079,6 +6385,238 @@ public final class LHProtos {
         return this;
       }
 
+      // required uint64 total_input_value = 3;
+      private long totalInputValue_ ;
+      /**
+       * <code>required uint64 total_input_value = 3;</code>
+       *
+       * <pre>
+       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+       * </pre>
+       */
+      public boolean hasTotalInputValue() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required uint64 total_input_value = 3;</code>
+       *
+       * <pre>
+       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+       * </pre>
+       */
+      public long getTotalInputValue() {
+        return totalInputValue_;
+      }
+      /**
+       * <code>required uint64 total_input_value = 3;</code>
+       *
+       * <pre>
+       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+       * </pre>
+       */
+      public Builder setTotalInputValue(long value) {
+        bitField0_ |= 0x00000004;
+        totalInputValue_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required uint64 total_input_value = 3;</code>
+       *
+       * <pre>
+       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
+       * </pre>
+       */
+      public Builder clearTotalInputValue() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        totalInputValue_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // required string project_id = 4;
+      private java.lang.Object projectId_ = "";
+      /**
+       * <code>required string project_id = 4;</code>
+       */
+      public boolean hasProjectId() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required string project_id = 4;</code>
+       */
+      public java.lang.String getProjectId() {
+        java.lang.Object ref = projectId_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          projectId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string project_id = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getProjectIdBytes() {
+        java.lang.Object ref = projectId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          projectId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string project_id = 4;</code>
+       */
+      public Builder setProjectId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        projectId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string project_id = 4;</code>
+       */
+      public Builder clearProjectId() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        projectId_ = getDefaultInstance().getProjectId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string project_id = 4;</code>
+       */
+      public Builder setProjectIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        projectId_ = value;
+        onChanged();
+        return this;
+      }
+
+      // required uint64 timestamp = 5;
+      private long timestamp_ ;
+      /**
+       * <code>required uint64 timestamp = 5;</code>
+       *
+       * <pre>
+       * Time in seconds.
+       * </pre>
+       */
+      public boolean hasTimestamp() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required uint64 timestamp = 5;</code>
+       *
+       * <pre>
+       * Time in seconds.
+       * </pre>
+       */
+      public long getTimestamp() {
+        return timestamp_;
+      }
+      /**
+       * <code>required uint64 timestamp = 5;</code>
+       *
+       * <pre>
+       * Time in seconds.
+       * </pre>
+       */
+      public Builder setTimestamp(long value) {
+        bitField0_ |= 0x00000010;
+        timestamp_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required uint64 timestamp = 5;</code>
+       *
+       * <pre>
+       * Time in seconds.
+       * </pre>
+       */
+      public Builder clearTimestamp() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        timestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // optional bytes orig_hash = 104;
+      private com.google.protobuf.ByteString origHash_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes orig_hash = 104;</code>
+       *
+       * <pre>
+       * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+       * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+       * twice, and check if it was already revoked in case the server didn't catch up yet.
+       * </pre>
+       */
+      public boolean hasOrigHash() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional bytes orig_hash = 104;</code>
+       *
+       * <pre>
+       * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+       * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+       * twice, and check if it was already revoked in case the server didn't catch up yet.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString getOrigHash() {
+        return origHash_;
+      }
+      /**
+       * <code>optional bytes orig_hash = 104;</code>
+       *
+       * <pre>
+       * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+       * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+       * twice, and check if it was already revoked in case the server didn't catch up yet.
+       * </pre>
+       */
+      public Builder setOrigHash(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+        origHash_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes orig_hash = 104;</code>
+       *
+       * <pre>
+       * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
+       * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
+       * twice, and check if it was already revoked in case the server didn't catch up yet.
+       * </pre>
+       */
+      public Builder clearOrigHash() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        origHash_ = getDefaultInstance().getOrigHash();
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:lighthouse.PledgeDetails)
     }
 
@@ -6146,95 +6684,6 @@ public final class LHProtos {
      */
     com.google.protobuf.ByteString getTransactions(int index);
 
-    // required uint64 total_input_value = 101;
-    /**
-     * <code>required uint64 total_input_value = 101;</code>
-     *
-     * <pre>
-     * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
-     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
-     * </pre>
-     */
-    boolean hasTotalInputValue();
-    /**
-     * <code>required uint64 total_input_value = 101;</code>
-     *
-     * <pre>
-     * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
-     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
-     * </pre>
-     */
-    long getTotalInputValue();
-
-    // required string project_id = 102;
-    /**
-     * <code>required string project_id = 102;</code>
-     */
-    boolean hasProjectId();
-    /**
-     * <code>required string project_id = 102;</code>
-     */
-    java.lang.String getProjectId();
-    /**
-     * <code>required string project_id = 102;</code>
-     */
-    com.google.protobuf.ByteString
-        getProjectIdBytes();
-
-    // required uint64 timestamp = 103;
-    /**
-     * <code>required uint64 timestamp = 103;</code>
-     *
-     * <pre>
-     * Time in seconds.
-     * </pre>
-     */
-    boolean hasTimestamp();
-    /**
-     * <code>required uint64 timestamp = 103;</code>
-     *
-     * <pre>
-     * Time in seconds.
-     * </pre>
-     */
-    long getTimestamp();
-
-    // optional bytes orig_hash = 104;
-    /**
-     * <code>optional bytes orig_hash = 104;</code>
-     *
-     * <pre>
-     * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
-     * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
-     * twice, and check if it was already revoked in case the server didn't catch up yet.
-     * </pre>
-     */
-    boolean hasOrigHash();
-    /**
-     * <code>optional bytes orig_hash = 104;</code>
-     *
-     * <pre>
-     * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
-     * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
-     * twice, and check if it was already revoked in case the server didn't catch up yet.
-     * </pre>
-     */
-    com.google.protobuf.ByteString getOrigHash();
-
-    // optional .lighthouse.PledgeDetails pledge_details = 100;
-    /**
-     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-     */
-    boolean hasPledgeDetails();
-    /**
-     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-     */
-    lighthouse.protocol.LHProtos.PledgeDetails getPledgeDetails();
-    /**
-     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-     */
-    lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder getPledgeDetailsOrBuilder();
-
     // repeated .lighthouse.Output refund_to = 3;
     /**
      * <code>repeated .lighthouse.Output refund_to = 3;</code>
@@ -6279,6 +6728,20 @@ public final class LHProtos {
      */
     lighthouse.protocol.LHProtos.OutputOrBuilder getRefundToOrBuilder(
         int index);
+
+    // optional .lighthouse.PledgeDetails pledge_details = 100;
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    boolean hasPledgeDetails();
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    lighthouse.protocol.LHProtos.PledgeDetails getPledgeDetails();
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder getPledgeDetailsOrBuilder();
   }
   /**
    * Protobuf type {@code lighthouse.Pledge}
@@ -6349,16 +6812,16 @@ public final class LHProtos {
               break;
             }
             case 26: {
-              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
                 refundTo_ = new java.util.ArrayList<lighthouse.protocol.LHProtos.Output>();
-                mutable_bitField0_ |= 0x00000080;
+                mutable_bitField0_ |= 0x00000004;
               }
               refundTo_.add(input.readMessage(lighthouse.protocol.LHProtos.Output.PARSER, extensionRegistry));
               break;
             }
             case 802: {
               lighthouse.protocol.LHProtos.PledgeDetails.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000020) == 0x00000020)) {
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
                 subBuilder = pledgeDetails_.toBuilder();
               }
               pledgeDetails_ = input.readMessage(lighthouse.protocol.LHProtos.PledgeDetails.PARSER, extensionRegistry);
@@ -6366,27 +6829,7 @@ public final class LHProtos {
                 subBuilder.mergeFrom(pledgeDetails_);
                 pledgeDetails_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000020;
-              break;
-            }
-            case 808: {
               bitField0_ |= 0x00000002;
-              totalInputValue_ = input.readUInt64();
-              break;
-            }
-            case 818: {
-              bitField0_ |= 0x00000004;
-              projectId_ = input.readBytes();
-              break;
-            }
-            case 824: {
-              bitField0_ |= 0x00000008;
-              timestamp_ = input.readUInt64();
-              break;
-            }
-            case 834: {
-              bitField0_ |= 0x00000010;
-              origHash_ = input.readBytes();
               break;
             }
           }
@@ -6400,7 +6843,7 @@ public final class LHProtos {
         if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
           transactions_ = java.util.Collections.unmodifiableList(transactions_);
         }
-        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
           refundTo_ = java.util.Collections.unmodifiableList(refundTo_);
         }
         this.unknownFields = unknownFields.build();
@@ -6503,149 +6946,6 @@ public final class LHProtos {
       return transactions_.get(index);
     }
 
-    // required uint64 total_input_value = 101;
-    public static final int TOTAL_INPUT_VALUE_FIELD_NUMBER = 101;
-    private long totalInputValue_;
-    /**
-     * <code>required uint64 total_input_value = 101;</code>
-     *
-     * <pre>
-     * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
-     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
-     * </pre>
-     */
-    public boolean hasTotalInputValue() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>required uint64 total_input_value = 101;</code>
-     *
-     * <pre>
-     * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
-     * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
-     * </pre>
-     */
-    public long getTotalInputValue() {
-      return totalInputValue_;
-    }
-
-    // required string project_id = 102;
-    public static final int PROJECT_ID_FIELD_NUMBER = 102;
-    private java.lang.Object projectId_;
-    /**
-     * <code>required string project_id = 102;</code>
-     */
-    public boolean hasProjectId() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>required string project_id = 102;</code>
-     */
-    public java.lang.String getProjectId() {
-      java.lang.Object ref = projectId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          projectId_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string project_id = 102;</code>
-     */
-    public com.google.protobuf.ByteString
-        getProjectIdBytes() {
-      java.lang.Object ref = projectId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        projectId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    // required uint64 timestamp = 103;
-    public static final int TIMESTAMP_FIELD_NUMBER = 103;
-    private long timestamp_;
-    /**
-     * <code>required uint64 timestamp = 103;</code>
-     *
-     * <pre>
-     * Time in seconds.
-     * </pre>
-     */
-    public boolean hasTimestamp() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>required uint64 timestamp = 103;</code>
-     *
-     * <pre>
-     * Time in seconds.
-     * </pre>
-     */
-    public long getTimestamp() {
-      return timestamp_;
-    }
-
-    // optional bytes orig_hash = 104;
-    public static final int ORIG_HASH_FIELD_NUMBER = 104;
-    private com.google.protobuf.ByteString origHash_;
-    /**
-     * <code>optional bytes orig_hash = 104;</code>
-     *
-     * <pre>
-     * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
-     * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
-     * twice, and check if it was already revoked in case the server didn't catch up yet.
-     * </pre>
-     */
-    public boolean hasOrigHash() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional bytes orig_hash = 104;</code>
-     *
-     * <pre>
-     * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
-     * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
-     * twice, and check if it was already revoked in case the server didn't catch up yet.
-     * </pre>
-     */
-    public com.google.protobuf.ByteString getOrigHash() {
-      return origHash_;
-    }
-
-    // optional .lighthouse.PledgeDetails pledge_details = 100;
-    public static final int PLEDGE_DETAILS_FIELD_NUMBER = 100;
-    private lighthouse.protocol.LHProtos.PledgeDetails pledgeDetails_;
-    /**
-     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-     */
-    public boolean hasPledgeDetails() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
-    }
-    /**
-     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-     */
-    public lighthouse.protocol.LHProtos.PledgeDetails getPledgeDetails() {
-      return pledgeDetails_;
-    }
-    /**
-     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-     */
-    public lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder getPledgeDetailsOrBuilder() {
-      return pledgeDetails_;
-    }
-
     // repeated .lighthouse.Output refund_to = 3;
     public static final int REFUND_TO_FIELD_NUMBER = 3;
     private java.util.List<lighthouse.protocol.LHProtos.Output> refundTo_;
@@ -6702,35 +7002,47 @@ public final class LHProtos {
       return refundTo_.get(index);
     }
 
+    // optional .lighthouse.PledgeDetails pledge_details = 100;
+    public static final int PLEDGE_DETAILS_FIELD_NUMBER = 100;
+    private lighthouse.protocol.LHProtos.PledgeDetails pledgeDetails_;
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    public boolean hasPledgeDetails() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    public lighthouse.protocol.LHProtos.PledgeDetails getPledgeDetails() {
+      return pledgeDetails_;
+    }
+    /**
+     * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+     */
+    public lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder getPledgeDetailsOrBuilder() {
+      return pledgeDetails_;
+    }
+
     private void initFields() {
       merchantData_ = com.google.protobuf.ByteString.EMPTY;
       transactions_ = java.util.Collections.emptyList();
-      totalInputValue_ = 0L;
-      projectId_ = "";
-      timestamp_ = 0L;
-      origHash_ = com.google.protobuf.ByteString.EMPTY;
-      pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
       refundTo_ = java.util.Collections.emptyList();
+      pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
 
-      if (!hasTotalInputValue()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasProjectId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasTimestamp()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       for (int i = 0; i < getRefundToCount(); i++) {
         if (!getRefundTo(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasPledgeDetails()) {
+        if (!getPledgeDetails().isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -6751,20 +7063,8 @@ public final class LHProtos {
       for (int i = 0; i < refundTo_.size(); i++) {
         output.writeMessage(3, refundTo_.get(i));
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeMessage(100, pledgeDetails_);
-      }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeUInt64(101, totalInputValue_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(102, getProjectIdBytes());
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeUInt64(103, timestamp_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeBytes(104, origHash_);
+        output.writeMessage(100, pledgeDetails_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -6792,25 +7092,9 @@ public final class LHProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, refundTo_.get(i));
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(100, pledgeDetails_);
-      }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(101, totalInputValue_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(102, getProjectIdBytes());
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(103, timestamp_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(104, origHash_);
+          .computeMessageSize(100, pledgeDetails_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -6924,8 +7208,8 @@ public final class LHProtos {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getPledgeDetailsFieldBuilder();
           getRefundToFieldBuilder();
+          getPledgeDetailsFieldBuilder();
         }
       }
       private static Builder create() {
@@ -6938,26 +7222,18 @@ public final class LHProtos {
         bitField0_ = (bitField0_ & ~0x00000001);
         transactions_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);
-        totalInputValue_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000004);
-        projectId_ = "";
-        bitField0_ = (bitField0_ & ~0x00000008);
-        timestamp_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000010);
-        origHash_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000020);
+        if (refundToBuilder_ == null) {
+          refundTo_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        } else {
+          refundToBuilder_.clear();
+        }
         if (pledgeDetailsBuilder_ == null) {
           pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
         } else {
           pledgeDetailsBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000040);
-        if (refundToBuilder_ == null) {
-          refundTo_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000080);
-        } else {
-          refundToBuilder_.clear();
-        }
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -6995,38 +7271,22 @@ public final class LHProtos {
           bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.transactions_ = transactions_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000002;
+        if (refundToBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+            refundTo_ = java.util.Collections.unmodifiableList(refundTo_);
+            bitField0_ = (bitField0_ & ~0x00000004);
+          }
+          result.refundTo_ = refundTo_;
+        } else {
+          result.refundTo_ = refundToBuilder_.build();
         }
-        result.totalInputValue_ = totalInputValue_;
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.projectId_ = projectId_;
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.timestamp_ = timestamp_;
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        result.origHash_ = origHash_;
-        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
-          to_bitField0_ |= 0x00000020;
+          to_bitField0_ |= 0x00000002;
         }
         if (pledgeDetailsBuilder_ == null) {
           result.pledgeDetails_ = pledgeDetails_;
         } else {
           result.pledgeDetails_ = pledgeDetailsBuilder_.build();
-        }
-        if (refundToBuilder_ == null) {
-          if (((bitField0_ & 0x00000080) == 0x00000080)) {
-            refundTo_ = java.util.Collections.unmodifiableList(refundTo_);
-            bitField0_ = (bitField0_ & ~0x00000080);
-          }
-          result.refundTo_ = refundTo_;
-        } else {
-          result.refundTo_ = refundToBuilder_.build();
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -7057,28 +7317,11 @@ public final class LHProtos {
           }
           onChanged();
         }
-        if (other.hasTotalInputValue()) {
-          setTotalInputValue(other.getTotalInputValue());
-        }
-        if (other.hasProjectId()) {
-          bitField0_ |= 0x00000008;
-          projectId_ = other.projectId_;
-          onChanged();
-        }
-        if (other.hasTimestamp()) {
-          setTimestamp(other.getTimestamp());
-        }
-        if (other.hasOrigHash()) {
-          setOrigHash(other.getOrigHash());
-        }
-        if (other.hasPledgeDetails()) {
-          mergePledgeDetails(other.getPledgeDetails());
-        }
         if (refundToBuilder_ == null) {
           if (!other.refundTo_.isEmpty()) {
             if (refundTo_.isEmpty()) {
               refundTo_ = other.refundTo_;
-              bitField0_ = (bitField0_ & ~0x00000080);
+              bitField0_ = (bitField0_ & ~0x00000004);
             } else {
               ensureRefundToIsMutable();
               refundTo_.addAll(other.refundTo_);
@@ -7091,7 +7334,7 @@ public final class LHProtos {
               refundToBuilder_.dispose();
               refundToBuilder_ = null;
               refundTo_ = other.refundTo_;
-              bitField0_ = (bitField0_ & ~0x00000080);
+              bitField0_ = (bitField0_ & ~0x00000004);
               refundToBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getRefundToFieldBuilder() : null;
@@ -7100,25 +7343,22 @@ public final class LHProtos {
             }
           }
         }
+        if (other.hasPledgeDetails()) {
+          mergePledgeDetails(other.getPledgeDetails());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
-        if (!hasTotalInputValue()) {
-          
-          return false;
-        }
-        if (!hasProjectId()) {
-          
-          return false;
-        }
-        if (!hasTimestamp()) {
-          
-          return false;
-        }
         for (int i = 0; i < getRefundToCount(); i++) {
           if (!getRefundTo(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasPledgeDetails()) {
+          if (!getPledgeDetails().isInitialized()) {
             
             return false;
           }
@@ -7318,366 +7558,13 @@ public final class LHProtos {
         return this;
       }
 
-      // required uint64 total_input_value = 101;
-      private long totalInputValue_ ;
-      /**
-       * <code>required uint64 total_input_value = 101;</code>
-       *
-       * <pre>
-       * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
-       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
-       * </pre>
-       */
-      public boolean hasTotalInputValue() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>required uint64 total_input_value = 101;</code>
-       *
-       * <pre>
-       * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
-       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
-       * </pre>
-       */
-      public long getTotalInputValue() {
-        return totalInputValue_;
-      }
-      /**
-       * <code>required uint64 total_input_value = 101;</code>
-       *
-       * <pre>
-       * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
-       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
-       * </pre>
-       */
-      public Builder setTotalInputValue(long value) {
-        bitField0_ |= 0x00000004;
-        totalInputValue_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required uint64 total_input_value = 101;</code>
-       *
-       * <pre>
-       * TODO: Move this stuff to the PledgeDetails submessage once we switch to beta.
-       * This should be sum(transactions.connected_outputs.value), i.e. the amount of money put into the tx.
-       * </pre>
-       */
-      public Builder clearTotalInputValue() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        totalInputValue_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      // required string project_id = 102;
-      private java.lang.Object projectId_ = "";
-      /**
-       * <code>required string project_id = 102;</code>
-       */
-      public boolean hasProjectId() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      /**
-       * <code>required string project_id = 102;</code>
-       */
-      public java.lang.String getProjectId() {
-        java.lang.Object ref = projectId_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          projectId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>required string project_id = 102;</code>
-       */
-      public com.google.protobuf.ByteString
-          getProjectIdBytes() {
-        java.lang.Object ref = projectId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          projectId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string project_id = 102;</code>
-       */
-      public Builder setProjectId(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
-        projectId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string project_id = 102;</code>
-       */
-      public Builder clearProjectId() {
-        bitField0_ = (bitField0_ & ~0x00000008);
-        projectId_ = getDefaultInstance().getProjectId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string project_id = 102;</code>
-       */
-      public Builder setProjectIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
-        projectId_ = value;
-        onChanged();
-        return this;
-      }
-
-      // required uint64 timestamp = 103;
-      private long timestamp_ ;
-      /**
-       * <code>required uint64 timestamp = 103;</code>
-       *
-       * <pre>
-       * Time in seconds.
-       * </pre>
-       */
-      public boolean hasTimestamp() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
-      }
-      /**
-       * <code>required uint64 timestamp = 103;</code>
-       *
-       * <pre>
-       * Time in seconds.
-       * </pre>
-       */
-      public long getTimestamp() {
-        return timestamp_;
-      }
-      /**
-       * <code>required uint64 timestamp = 103;</code>
-       *
-       * <pre>
-       * Time in seconds.
-       * </pre>
-       */
-      public Builder setTimestamp(long value) {
-        bitField0_ |= 0x00000010;
-        timestamp_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required uint64 timestamp = 103;</code>
-       *
-       * <pre>
-       * Time in seconds.
-       * </pre>
-       */
-      public Builder clearTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00000010);
-        timestamp_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      // optional bytes orig_hash = 104;
-      private com.google.protobuf.ByteString origHash_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes orig_hash = 104;</code>
-       *
-       * <pre>
-       * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
-       * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
-       * twice, and check if it was already revoked in case the server didn't catch up yet.
-       * </pre>
-       */
-      public boolean hasOrigHash() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
-      }
-      /**
-       * <code>optional bytes orig_hash = 104;</code>
-       *
-       * <pre>
-       * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
-       * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
-       * twice, and check if it was already revoked in case the server didn't catch up yet.
-       * </pre>
-       */
-      public com.google.protobuf.ByteString getOrigHash() {
-        return origHash_;
-      }
-      /**
-       * <code>optional bytes orig_hash = 104;</code>
-       *
-       * <pre>
-       * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
-       * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
-       * twice, and check if it was already revoked in case the server didn't catch up yet.
-       * </pre>
-       */
-      public Builder setOrigHash(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000020;
-        origHash_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bytes orig_hash = 104;</code>
-       *
-       * <pre>
-       * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
-       * pledge in the scrubbed status report provided by the server so we don't show the same pledge in the UI
-       * twice, and check if it was already revoked in case the server didn't catch up yet.
-       * </pre>
-       */
-      public Builder clearOrigHash() {
-        bitField0_ = (bitField0_ & ~0x00000020);
-        origHash_ = getDefaultInstance().getOrigHash();
-        onChanged();
-        return this;
-      }
-
-      // optional .lighthouse.PledgeDetails pledge_details = 100;
-      private lighthouse.protocol.LHProtos.PledgeDetails pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          lighthouse.protocol.LHProtos.PledgeDetails, lighthouse.protocol.LHProtos.PledgeDetails.Builder, lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder> pledgeDetailsBuilder_;
-      /**
-       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-       */
-      public boolean hasPledgeDetails() {
-        return ((bitField0_ & 0x00000040) == 0x00000040);
-      }
-      /**
-       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-       */
-      public lighthouse.protocol.LHProtos.PledgeDetails getPledgeDetails() {
-        if (pledgeDetailsBuilder_ == null) {
-          return pledgeDetails_;
-        } else {
-          return pledgeDetailsBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-       */
-      public Builder setPledgeDetails(lighthouse.protocol.LHProtos.PledgeDetails value) {
-        if (pledgeDetailsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          pledgeDetails_ = value;
-          onChanged();
-        } else {
-          pledgeDetailsBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      /**
-       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-       */
-      public Builder setPledgeDetails(
-          lighthouse.protocol.LHProtos.PledgeDetails.Builder builderForValue) {
-        if (pledgeDetailsBuilder_ == null) {
-          pledgeDetails_ = builderForValue.build();
-          onChanged();
-        } else {
-          pledgeDetailsBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      /**
-       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-       */
-      public Builder mergePledgeDetails(lighthouse.protocol.LHProtos.PledgeDetails value) {
-        if (pledgeDetailsBuilder_ == null) {
-          if (((bitField0_ & 0x00000040) == 0x00000040) &&
-              pledgeDetails_ != lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance()) {
-            pledgeDetails_ =
-              lighthouse.protocol.LHProtos.PledgeDetails.newBuilder(pledgeDetails_).mergeFrom(value).buildPartial();
-          } else {
-            pledgeDetails_ = value;
-          }
-          onChanged();
-        } else {
-          pledgeDetailsBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      /**
-       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-       */
-      public Builder clearPledgeDetails() {
-        if (pledgeDetailsBuilder_ == null) {
-          pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
-          onChanged();
-        } else {
-          pledgeDetailsBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000040);
-        return this;
-      }
-      /**
-       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-       */
-      public lighthouse.protocol.LHProtos.PledgeDetails.Builder getPledgeDetailsBuilder() {
-        bitField0_ |= 0x00000040;
-        onChanged();
-        return getPledgeDetailsFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-       */
-      public lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder getPledgeDetailsOrBuilder() {
-        if (pledgeDetailsBuilder_ != null) {
-          return pledgeDetailsBuilder_.getMessageOrBuilder();
-        } else {
-          return pledgeDetails_;
-        }
-      }
-      /**
-       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          lighthouse.protocol.LHProtos.PledgeDetails, lighthouse.protocol.LHProtos.PledgeDetails.Builder, lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder> 
-          getPledgeDetailsFieldBuilder() {
-        if (pledgeDetailsBuilder_ == null) {
-          pledgeDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              lighthouse.protocol.LHProtos.PledgeDetails, lighthouse.protocol.LHProtos.PledgeDetails.Builder, lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder>(
-                  pledgeDetails_,
-                  getParentForChildren(),
-                  isClean());
-          pledgeDetails_ = null;
-        }
-        return pledgeDetailsBuilder_;
-      }
-
       // repeated .lighthouse.Output refund_to = 3;
       private java.util.List<lighthouse.protocol.LHProtos.Output> refundTo_ =
         java.util.Collections.emptyList();
       private void ensureRefundToIsMutable() {
-        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
           refundTo_ = new java.util.ArrayList<lighthouse.protocol.LHProtos.Output>(refundTo_);
-          bitField0_ |= 0x00000080;
+          bitField0_ |= 0x00000004;
          }
       }
 
@@ -7870,7 +7757,7 @@ public final class LHProtos {
       public Builder clearRefundTo() {
         if (refundToBuilder_ == null) {
           refundTo_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000080);
+          bitField0_ = (bitField0_ & ~0x00000004);
           onChanged();
         } else {
           refundToBuilder_.clear();
@@ -7975,12 +7862,129 @@ public final class LHProtos {
           refundToBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               lighthouse.protocol.LHProtos.Output, lighthouse.protocol.LHProtos.Output.Builder, lighthouse.protocol.LHProtos.OutputOrBuilder>(
                   refundTo_,
-                  ((bitField0_ & 0x00000080) == 0x00000080),
+                  ((bitField0_ & 0x00000004) == 0x00000004),
                   getParentForChildren(),
                   isClean());
           refundTo_ = null;
         }
         return refundToBuilder_;
+      }
+
+      // optional .lighthouse.PledgeDetails pledge_details = 100;
+      private lighthouse.protocol.LHProtos.PledgeDetails pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          lighthouse.protocol.LHProtos.PledgeDetails, lighthouse.protocol.LHProtos.PledgeDetails.Builder, lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder> pledgeDetailsBuilder_;
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public boolean hasPledgeDetails() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public lighthouse.protocol.LHProtos.PledgeDetails getPledgeDetails() {
+        if (pledgeDetailsBuilder_ == null) {
+          return pledgeDetails_;
+        } else {
+          return pledgeDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public Builder setPledgeDetails(lighthouse.protocol.LHProtos.PledgeDetails value) {
+        if (pledgeDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          pledgeDetails_ = value;
+          onChanged();
+        } else {
+          pledgeDetailsBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public Builder setPledgeDetails(
+          lighthouse.protocol.LHProtos.PledgeDetails.Builder builderForValue) {
+        if (pledgeDetailsBuilder_ == null) {
+          pledgeDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          pledgeDetailsBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public Builder mergePledgeDetails(lighthouse.protocol.LHProtos.PledgeDetails value) {
+        if (pledgeDetailsBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+              pledgeDetails_ != lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance()) {
+            pledgeDetails_ =
+              lighthouse.protocol.LHProtos.PledgeDetails.newBuilder(pledgeDetails_).mergeFrom(value).buildPartial();
+          } else {
+            pledgeDetails_ = value;
+          }
+          onChanged();
+        } else {
+          pledgeDetailsBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public Builder clearPledgeDetails() {
+        if (pledgeDetailsBuilder_ == null) {
+          pledgeDetails_ = lighthouse.protocol.LHProtos.PledgeDetails.getDefaultInstance();
+          onChanged();
+        } else {
+          pledgeDetailsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public lighthouse.protocol.LHProtos.PledgeDetails.Builder getPledgeDetailsBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getPledgeDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      public lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder getPledgeDetailsOrBuilder() {
+        if (pledgeDetailsBuilder_ != null) {
+          return pledgeDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return pledgeDetails_;
+        }
+      }
+      /**
+       * <code>optional .lighthouse.PledgeDetails pledge_details = 100;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          lighthouse.protocol.LHProtos.PledgeDetails, lighthouse.protocol.LHProtos.PledgeDetails.Builder, lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder> 
+          getPledgeDetailsFieldBuilder() {
+        if (pledgeDetailsBuilder_ == null) {
+          pledgeDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              lighthouse.protocol.LHProtos.PledgeDetails, lighthouse.protocol.LHProtos.PledgeDetails.Builder, lighthouse.protocol.LHProtos.PledgeDetailsOrBuilder>(
+                  pledgeDetails_,
+                  getParentForChildren(),
+                  isClean());
+          pledgeDetails_ = null;
+        }
+        return pledgeDetailsBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:lighthouse.Pledge)
@@ -10226,20 +10230,20 @@ public final class LHProtos {
       "n\030\001 \001(\r:\0011\022\026\n\010pki_type\030\002 \001(\t:\004none\022\020\n\010pk" +
       "i_data\030\003 \001(\014\022\"\n\032serialized_payment_detai" +
       "ls\030\004 \002(\014\022\021\n\tsignature\030\005 \001(\014\"\'\n\020X509Certi" +
-      "ficates\022\023\n\013certificate\030\001 \003(\014\"6\n\rPledgeDe" +
-      "tails\022\014\n\004memo\030\001 \001(\t\022\027\n\017contact_address\030\002" +
-      " \001(\t\"\344\001\n\006Pledge\022\025\n\rmerchant_data\030\001 \001(\014\022\024" +
-      "\n\014transactions\030\002 \003(\014\022\031\n\021total_input_valu" +
-      "e\030e \002(\004\022\022\n\nproject_id\030f \002(\t\022\021\n\ttimestamp",
-      "\030g \002(\004\022\021\n\torig_hash\030h \001(\014\0221\n\016pledge_deta" +
-      "ils\030d \001(\0132\031.lighthouse.PledgeDetails\022%\n\t" +
-      "refund_to\030\003 \003(\0132\022.lighthouse.Output\">\n\tP" +
-      "ledgeACK\022#\n\007payment\030\001 \002(\0132\022.lighthouse.P" +
-      "ledge\022\014\n\004memo\030\002 \001(\t\"\205\001\n\rProjectStatus\022\n\n" +
-      "\002id\030\001 \002(\t\022\021\n\ttimestamp\030\002 \002(\004\022\034\n\024value_pl" +
-      "edged_so_far\030\003 \002(\004\022#\n\007pledges\030\004 \003(\0132\022.li" +
-      "ghthouse.Pledge\022\022\n\nclaimed_by\030\005 \001(\014B!\n\023l" +
-      "ighthouse.protocolB\010LHProtosH\001"
+      "ficates\022\023\n\013certificate\030\001 \003(\014\"\213\001\n\rPledgeD" +
+      "etails\022\014\n\004memo\030\001 \001(\t\022\027\n\017contact_address\030" +
+      "\002 \001(\t\022\031\n\021total_input_value\030\003 \002(\004\022\022\n\nproj" +
+      "ect_id\030\004 \002(\t\022\021\n\ttimestamp\030\005 \002(\004\022\021\n\torig_" +
+      "hash\030h \001(\014\"\217\001\n\006Pledge\022\025\n\rmerchant_data\030\001",
+      " \001(\014\022\024\n\014transactions\030\002 \003(\014\022%\n\trefund_to\030" +
+      "\003 \003(\0132\022.lighthouse.Output\0221\n\016pledge_deta" +
+      "ils\030d \001(\0132\031.lighthouse.PledgeDetails\">\n\t" +
+      "PledgeACK\022#\n\007payment\030\001 \002(\0132\022.lighthouse." +
+      "Pledge\022\014\n\004memo\030\002 \001(\t\"\205\001\n\rProjectStatus\022\n" +
+      "\n\002id\030\001 \002(\t\022\021\n\ttimestamp\030\002 \002(\004\022\034\n\024value_p" +
+      "ledged_so_far\030\003 \002(\004\022#\n\007pledges\030\004 \003(\0132\022.l" +
+      "ighthouse.Pledge\022\022\n\nclaimed_by\030\005 \001(\014B!\n\023" +
+      "lighthouse.protocolB\010LHProtosH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -10287,13 +10291,13 @@ public final class LHProtos {
           internal_static_lighthouse_PledgeDetails_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_lighthouse_PledgeDetails_descriptor,
-              new java.lang.String[] { "Memo", "ContactAddress", });
+              new java.lang.String[] { "Memo", "ContactAddress", "TotalInputValue", "ProjectId", "Timestamp", "OrigHash", });
           internal_static_lighthouse_Pledge_descriptor =
             getDescriptor().getMessageTypes().get(7);
           internal_static_lighthouse_Pledge_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_lighthouse_Pledge_descriptor,
-              new java.lang.String[] { "MerchantData", "Transactions", "TotalInputValue", "ProjectId", "Timestamp", "OrigHash", "PledgeDetails", "RefundTo", });
+              new java.lang.String[] { "MerchantData", "Transactions", "RefundTo", "PledgeDetails", });
           internal_static_lighthouse_PledgeACK_descriptor =
             getDescriptor().getMessageTypes().get(8);
           internal_static_lighthouse_PledgeACK_fieldAccessorTable = new

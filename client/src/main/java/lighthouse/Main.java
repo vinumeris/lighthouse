@@ -357,8 +357,6 @@ public class Main extends Application {
                 walletLoadedLatch.countDown();
 
                 if (params == RegTestParams.get()) {
-                    vPeerGroup.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort()));
-                    vPeerGroup.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort() + 1));
                     vPeerGroup.setMinBroadcastConnections(1);
                     vPeerGroup.setUseLocalhostPeerWhenPossible(false);
                 }
@@ -380,6 +378,12 @@ public class Main extends Application {
             bitcoin.setCheckpoints(getClass().getResourceAsStream("checkpoints"));
         } else if (params == TestNet3Params.get()) {
             bitcoin.setCheckpoints(getClass().getResourceAsStream("checkpoints.testnet"));
+        } else if (params == RegTestParams.get()) {
+            InetAddress local = unchecked(InetAddress::getLocalHost);
+            bitcoin.setPeerNodes(
+                    new PeerAddress(local, RegTestParams.get().getPort()),
+                    new PeerAddress(local, RegTestParams.get().getPort() + 1)
+            );
         }
         bitcoin.setBlockingStartup(false)
                .setDownloadListener(MainWindow.bitcoinUIModel.getDownloadListener())
@@ -409,6 +413,7 @@ public class Main extends Application {
             xtPeers.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort()));
             xtPeers.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort() + 1));
             xtPeers.setUseLocalhostPeerWhenPossible(false);
+            xtPeers.startAsync();
         } else {
             // Just a quick check to see if we can resolve DNS names.
             if (new InetSocketAddress("google.com", 80).getAddress() == null) {
@@ -628,10 +633,14 @@ public class Main extends Application {
     @Override
     public void stop() throws Exception {
         if (bitcoin != null && bitcoin.isRunning()) {
-            backend.shutdown();
-            xtPeers.stopAsync();
-            bitcoin.stopAsync();
-            bitcoin.awaitTerminated();
+            try {
+                backend.shutdown();
+                xtPeers.stopAsync();
+                bitcoin.stopAsync();
+                bitcoin.awaitTerminated();
+            } catch (Exception e) {
+                // Don't care.
+            }
         }
         super.stop();
     }

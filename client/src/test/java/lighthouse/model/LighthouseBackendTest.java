@@ -155,17 +155,17 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
     private LHProtos.Pledge makeScrubbedPledge(Coin pledgedCoin) {
         final LHProtos.Pledge pledge = LHProtos.Pledge.newBuilder()
-                .setTotalInputValue(pledgedCoin.value)
-                .setProjectId(project.getID())
-                .setTimestamp(Utils.currentTimeSeconds())
                 .addTransactions(ByteString.copyFromUtf8("not a real tx"))
-                .setPledgeDetails(LHProtos.PledgeDetails.newBuilder().build())
+                .setPledgeDetails(LHProtos.PledgeDetails.newBuilder()
+                            .setTotalInputValue(pledgedCoin.value)
+                            .setProjectId(project.getID())
+                            .setTimestamp(Utils.currentTimeSeconds())
+                        .build())
                 .build();
         final Sha256Hash origHash = Sha256Hash.create(pledge.toByteArray());
-        return pledge.toBuilder()
-                .clearTransactions()
-                .setOrigHash(ByteString.copyFrom(origHash.getBytes()))
-                .build();
+        LHProtos.Pledge.Builder builder = pledge.toBuilder().clearTransactions();
+        builder.getPledgeDetailsBuilder().setOrigHash(ByteString.copyFrom(origHash.getBytes()));
+        return builder.build();
     }
 
     private Path writeProjectToDisk() throws IOException {
@@ -214,7 +214,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         });
         gate.waitAndRun();
         assertEquals(1, pledges.size());
-        assertEquals(Coin.COIN.value, pledges.iterator().next().getTotalInputValue());
+        assertEquals(Coin.COIN.value, pledges.iterator().next().getPledgeDetails().getTotalInputValue());
     }
 
     @Test
@@ -276,17 +276,17 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         projectModel.serverName.set("localhost");
         project = projectModel.getProject();
         final LHProtos.Pledge pledge = LHProtos.Pledge.newBuilder()
-                .setTotalInputValue(Coin.COIN.value)
-                .setProjectId(project.getID())
-                .setTimestamp(Utils.currentTimeSeconds())
                 .addTransactions(ByteString.copyFromUtf8("not a real tx"))
-                .setPledgeDetails(LHProtos.PledgeDetails.newBuilder().build())
+                .setPledgeDetails(LHProtos.PledgeDetails.newBuilder()
+                        .setTotalInputValue(Coin.COIN.value)
+                        .setProjectId(project.getID())
+                        .setTimestamp(Utils.currentTimeSeconds())
+                        .build())
                 .build();
         final Sha256Hash origHash = Sha256Hash.create(pledge.toByteArray());
-        final LHProtos.Pledge scrubbedPledge = pledge.toBuilder()
-                .clearTransactions()
-                .setOrigHash(ByteString.copyFrom(origHash.getBytes()))
-                .build();
+        final LHProtos.Pledge.Builder scrubbedPledgeBuilder = pledge.toBuilder().clearTransactions();
+        scrubbedPledgeBuilder.getPledgeDetailsBuilder().setOrigHash(ByteString.copyFrom(origHash.getBytes()));
+        final LHProtos.Pledge scrubbedPledge = scrubbedPledgeBuilder.build();
 
         // Make the wallet return the above pledge without having to screw around with actually using the wallet.
         injectedPledge = pledge;
@@ -380,7 +380,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertTrue(flag.get());
         assertEquals(1, pledges.size());
         final LHProtos.Pledge pledge2 = pledges.iterator().next();
-        assertEquals(Coin.COIN.value / 2, pledge2.getTotalInputValue());
+        assertEquals(Coin.COIN.value / 2, pledge2.getPledgeDetails().getTotalInputValue());
 
         // New block: let's pretend this block contains a revocation transaction. LighthouseBackend should recheck.
         Transaction revocation = new Transaction(params);
@@ -566,7 +566,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertTrue(flag.get());
         assertEquals(1, pledges.size());
         final LHProtos.Pledge pledge2 = pledges.iterator().next();
-        assertEquals(Coin.COIN.value / 2, pledge2.getTotalInputValue());
+        assertEquals(Coin.COIN.value / 2, pledge2.getPledgeDetails().getTotalInputValue());
 
         future.get();
 
@@ -800,10 +800,9 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         tx.addOutput(project.getOutputs().get(0));   // Project output.
         tx.addSignedInput(output, signingKey, Transaction.SigHash.ALL, true);
         pledge.addTransactions(ByteString.copyFrom(tx.bitcoinSerialize()));
-        pledge.setTotalInputValue(Coin.COIN.divide(2).value);
-        pledge.setProjectId(project.getID());
-        pledge.setTimestamp(Utils.currentTimeSeconds());
-        pledge.getPledgeDetailsBuilder();
+        pledge.getPledgeDetailsBuilder().setTotalInputValue(Coin.COIN.divide(2).value);
+        pledge.getPledgeDetailsBuilder().setProjectId(project.getID());
+        pledge.getPledgeDetailsBuilder().setTimestamp(Utils.currentTimeSeconds());
         return pledge;
     }
 

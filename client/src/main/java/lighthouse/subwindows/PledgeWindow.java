@@ -1,30 +1,22 @@
 package lighthouse.subwindows;
 
-import com.vinumeris.crashfx.CrashWindow;
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
-import lighthouse.Main;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.Project;
-import lighthouse.utils.ValidationLink;
-import lighthouse.wallet.PledgingWallet;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.InsufficientMoneyException;
-import org.bitcoinj.core.Transaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.params.KeyParameter;
+import com.vinumeris.crashfx.*;
+import javafx.application.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import javafx.scene.input.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import lighthouse.utils.*;
+import lighthouse.wallet.*;
+import org.bitcoinj.core.*;
+import org.slf4j.*;
+import org.spongycastle.crypto.params.*;
 
-import javax.annotation.Nullable;
+import javax.annotation.*;
 
-import static com.google.common.base.Preconditions.checkState;
-import static lighthouse.utils.GuiUtils.valueOrNull;
-import static lighthouse.utils.GuiUtils.valueOrThrow;
+import static com.google.common.base.Preconditions.*;
+import static lighthouse.utils.GuiUtils.*;
 
 /**
  * Window which asks user to specify the amount they want to pledge.
@@ -99,7 +91,7 @@ public class PledgeWindow extends InnerWindow {
             }
             if (!messageEdit.getText().isEmpty())
                 details.setMemo(messageEdit.getText());
-            PledgingWallet.PendingPledge pledge = Main.wallet.createPledge(project, valueOrThrow(amountEdit.getText()), aesKey, details.build());
+            PledgingWallet.PendingPledge pledge = Main.wallet.createPledge(project, valueOrThrow(amountEdit.getText()), aesKey, details.buildPartial());
             log.info("Created pledge is {}", pledge);
             if (project.getPaymentURL() == null) {
                 // Show drag/drop icon and file save button. This will automatically finish this overlay UI too.

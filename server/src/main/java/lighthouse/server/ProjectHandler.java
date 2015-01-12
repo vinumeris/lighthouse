@@ -1,36 +1,24 @@
 package lighthouse.server;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
-import com.google.common.base.Throwables;
-import com.google.common.io.ByteStreams;
-import com.google.protobuf.ByteString;
-import com.googlecode.protobuf.format.HtmlFormat;
-import com.googlecode.protobuf.format.JsonFormat;
-import com.googlecode.protobuf.format.XmlFormat;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import javafx.collections.ObservableMap;
-import javafx.collections.ObservableSet;
-import lighthouse.LighthouseBackend;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.LHUtils;
-import lighthouse.protocol.Project;
-import lighthouse.threading.AffinityExecutor;
-import org.bitcoinj.core.Sha256Hash;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.base.*;
+import com.google.common.io.*;
+import com.google.protobuf.*;
+import com.googlecode.protobuf.format.*;
+import com.sun.net.httpserver.*;
+import javafx.collections.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import lighthouse.threading.*;
+import org.bitcoinj.core.*;
+import org.slf4j.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.security.SignatureException;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.net.*;
+import java.security.*;
+import java.time.*;
+import java.util.*;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 import static java.net.HttpURLConnection.*;
 
 /**
@@ -202,12 +190,11 @@ public class ProjectHandler implements HttpHandler {
                 // In future we may wish to optionally relax this constraint so anyone who can observe the project
                 // can prove to themselves the pledges really exist, and the contract can be closed by any user.
                 Sha256Hash origHash = LHUtils.hashFromPledge(pledge);
-                LHProtos.Pledge.Builder scrubbedPledge = pledge.toBuilder()
-                        .clearTransactions()
-                        .setOrigHash(ByteString.copyFrom(origHash.getBytes()));
+                LHProtos.Pledge.Builder scrubbedPledge = pledge.toBuilder().clearTransactions();
+                scrubbedPledge.getPledgeDetailsBuilder().setOrigHash(ByteString.copyFrom(origHash.getBytes()));
                 status.addPledges(scrubbedPledge);
             }
-            totalPledged += pledge.getTotalInputValue();
+            totalPledged += pledge.getPledgeDetails().getTotalInputValue();
         }
 
         // Include the full contents of claimed pledges always, as by then the contract is visible on the block

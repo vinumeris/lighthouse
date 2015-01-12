@@ -141,7 +141,7 @@ public class PledgingWallet extends Wallet {
         for (LHProtos.Pledge pledge : pledges.values()) {
             builder.append(String.format("Pledge:%n%s%nTotal input value: %d%nFor project: %s%n%n",
                     new Transaction(params, pledge.getTransactions(0).toByteArray()),
-                    pledge.getTotalInputValue(),
+                    pledge.getPledgeDetails().getTotalInputValue(),
                     mapPledgeProject.get(pledge)));
         }
         return builder.toString();
@@ -179,10 +179,10 @@ public class PledgingWallet extends Wallet {
             if (dependency != null)
                 proto.addTransactions(ByteString.copyFrom(dependency.bitcoinSerialize()));
             proto.addTransactions(ByteString.copyFrom(pledge.bitcoinSerialize()));
-            proto.setTotalInputValue(stub.getValue().longValue());
-            proto.setTimestamp(timestamp);
-            proto.setProjectId(project.getID());
-            proto.setPledgeDetails(details);
+            proto.getPledgeDetailsBuilder().mergeFrom(details);
+            proto.getPledgeDetailsBuilder().setTotalInputValue(stub.getValue().longValue());
+            proto.getPledgeDetailsBuilder().setTimestamp(timestamp);
+            proto.getPledgeDetailsBuilder().setProjectId(project.getID());
             return proto.build();
         }
 
@@ -325,7 +325,7 @@ public class PledgingWallet extends Wallet {
 
     public long getPledgedAmountFor(Project project) {
         LHProtos.Pledge pledge = getPledgeFor(project);
-        return pledge == null ? 0 : pledge.getTotalInputValue();
+        return pledge == null ? 0 : pledge.getPledgeDetails().getTotalInputValue();
     }
 
     // Returns a spendable output of exactly the given value.

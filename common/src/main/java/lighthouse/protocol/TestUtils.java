@@ -1,11 +1,11 @@
 package lighthouse.protocol;
 
+import com.google.protobuf.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.crypto.TransactionSignature;
-import org.bitcoinj.params.UnitTestParams;
-import org.bitcoinj.script.ScriptBuilder;
-import com.google.protobuf.ByteString;
-import org.javatuples.Triplet;
+import org.bitcoinj.crypto.*;
+import org.bitcoinj.params.*;
+import org.bitcoinj.script.*;
+import org.javatuples.*;
 
 public class TestUtils {
     private static byte[] counter = new byte[1];
@@ -22,9 +22,9 @@ public class TestUtils {
         tx1.addSignedInput(tx0.getOutput(0), key1, Transaction.SigHash.ALL, true);
         LHProtos.Pledge.Builder pledge = LHProtos.Pledge.newBuilder();
         pledge.addTransactions(ByteString.copyFrom(tx1.bitcoinSerialize()));
-        pledge.setTotalInputValue(pledgeVal.longValue());
-        pledge.setProjectId(forProject.getID());
-        pledge.setTimestamp(Utils.currentTimeSeconds());
+        pledge.getPledgeDetailsBuilder().setTotalInputValue(pledgeVal.longValue());
+        pledge.getPledgeDetailsBuilder().setProjectId(forProject.getID());
+        pledge.getPledgeDetailsBuilder().setTimestamp(Utils.currentTimeSeconds());
         pledge.getPledgeDetailsBuilder();
         return new Triplet<>(tx0, tx1, pledge.build());
     }

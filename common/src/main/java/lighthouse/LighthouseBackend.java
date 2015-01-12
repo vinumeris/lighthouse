@@ -152,11 +152,11 @@ public class LighthouseBackend extends AbstractBlockChainListener {
 
             // Load pledges found in the wallet.
             for (LHProtos.Pledge pledge : wallet.getPledges()) {
-                Project project = diskManager.getProjectById(pledge.getProjectId());
+                Project project = diskManager.getProjectById(pledge.getPledgeDetails().getProjectId());
                 if (project != null) {
                     getOpenPledgesFor(project).add(pledge);
                 } else {
-                    log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.getProjectId());
+                    log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.getPledgeDetails().getProjectId());
                 }
             }
             wallet.addOnPledgeHandler((project, pledge) -> {
@@ -165,11 +165,11 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 pledgesFor.add(pledge);
             }, executor);
             wallet.addOnRevokeHandler(pledge -> {
-                Project project = diskManager.getProjectById(pledge.getProjectId());
+                Project project = diskManager.getProjectById(pledge.getPledgeDetails().getProjectId());
                 if (project != null) {
                     getOpenPledgesFor(project).remove(pledge);
                 } else {
-                    log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.getProjectId());
+                    log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.getPledgeDetails().getProjectId());
                 }
             }, executor);
 
@@ -619,7 +619,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             // Remove if this is a scrubbed version of a pledge we already have i.e. because we created it, uploaded it
             // and are now seeing it come back to us.
             newlyOpen.removeIf(pledge ->
-                pledge.hasOrigHash() && hashes.get(hashFromPledge(pledge)) != null
+                pledge.getPledgeDetails().hasOrigHash() && hashes.get(hashFromPledge(pledge)) != null
             );
         }
         curOpenPledges.addAll(newlyOpen);
@@ -756,9 +756,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return executor.fetchFrom(() -> {
             Coin amount = Coin.ZERO;
             for (LHProtos.Pledge pledge : getOpenPledgesFor(project))
-                amount = amount.add(Coin.valueOf(pledge.getTotalInputValue()));
+                amount = amount.add(Coin.valueOf(pledge.getPledgeDetails().getTotalInputValue()));
             for (LHProtos.Pledge pledge : getClaimedPledgesFor(project))
-                amount = amount.add(Coin.valueOf(pledge.getTotalInputValue()));
+                amount = amount.add(Coin.valueOf(pledge.getPledgeDetails().getTotalInputValue()));
             return amount;
         });
     }
@@ -780,7 +780,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             private void update() {
                 long total = 0;
                 for (LHProtos.Pledge pledge : pledgesRef) {
-                    total += pledge.getTotalInputValue();
+                    total += pledge.getPledgeDetails().getTotalInputValue();
                 }
                 set(total);
             }
@@ -872,8 +872,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                         // are submitting pledges more or less in parallel - running on the backend thread here should
                         // eliminate any races from that and ensure only one pledge wins.
                         Coin total = fetchTotalPledged(project);
-                        if (total.add(Coin.valueOf(pledge.getTotalInputValue())).isGreaterThan(project.getGoalAmount())) {
-                            log.error("Too much money submitted! {} already vs {} in new pledge", total, pledge.getTotalInputValue());
+                        long value = pledge.getPledgeDetails().getTotalInputValue();
+                        if (total.add(Coin.valueOf(value)).isGreaterThan(project.getGoalAmount())) {
+                            log.error("Too much money submitted! {} already vs {} in new pledge", total, value);
                             throw new Ex.GoalExceeded();
                         }
                         // Once dependencies (if any) are handled, start the check process. This will update openPledges once
@@ -1104,7 +1105,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         Map<TransactionOutPoint, LHProtos.Pledge> result = new HashMap<>();
         for (ObservableSet<LHProtos.Pledge> pledges : openPledges.values()) {
             for (LHProtos.Pledge pledge : pledges) {
-                if (pledge.hasOrigHash()) continue;   // Can't watch for revocations of scrubbed pledges.
+                if (pledge.getPledgeDetails().hasOrigHash()) continue;   // Can't watch for revocations of scrubbed pledges.
                 Transaction tx = LHUtils.pledgeToTx(wallet.getParams(), pledge);
                 for (TransactionInput input : tx.getInputs()) {
                     result.put(input.getOutpoint(), pledge);

@@ -141,12 +141,12 @@ public class ProjectView extends HBox {
             //    - Put pledges into the list view.
             ObservableList<LHProtos.Pledge> list1 = FXCollections.observableArrayList();
             bindSetToList(pledges, list1);
-            sortedByTime = new SortedList<>(list1, (o1, o2) -> -Long.compareUnsigned(o1.getTimestamp(), o2.getTimestamp()));
+            sortedByTime = new SortedList<>(list1, (o1, o2) -> -Long.compareUnsigned(o1.getPledgeDetails().getTimestamp(), o2.getPledgeDetails().getTimestamp()));
             bindContent(pledgesList.getItems(), sortedByTime);
 
             //    - Convert pledges into pie slices.
             MappedList<PieChart.Data, LHProtos.Pledge> pledgeSlices = new MappedList<>(sortedByTime,
-                    pledge -> new PieChart.Data("", pledge.getTotalInputValue()));
+                    pledge -> new PieChart.Data("", pledge.getPledgeDetails().getTotalInputValue()));
 
             //    - Stick an invisible padding slice on the end so we can see through the unpledged part.
             slices = new ConcatenatingList<>(pledgeSlices, singletonObservableList(emptySlice));
@@ -327,28 +327,28 @@ public class ProjectView extends HBox {
     private ObservableSet<LHProtos.Pledge> fakePledges() {
         ImmutableList.Builder<LHProtos.Pledge> list = ImmutableList.builder();
         LHProtos.Pledge.Builder builder = LHProtos.Pledge.newBuilder();
-        builder.setProjectId("abc");
+        builder.getPledgeDetailsBuilder().setProjectId("abc");
 
         long now = Instant.now().getEpochSecond();
 
         for (int i = 0; i < 1; i++) {
-            builder.setTotalInputValue(Coin.CENT.value * 70);
-            builder.setTimestamp(now++);
+            builder.getPledgeDetailsBuilder().setTotalInputValue(Coin.CENT.value * 70);
+            builder.getPledgeDetailsBuilder().setTimestamp(now++);
             builder.getPledgeDetailsBuilder().setContactAddress("pinkponies87@gmail.com");
             builder.getPledgeDetailsBuilder().setMemo("Great idea! I'll have the t-shirt please!");
             list.add(builder.build());
-            builder.setTotalInputValue(Coin.CENT.value * 30);
-            builder.setTimestamp(now++);
+            builder.getPledgeDetailsBuilder().setTotalInputValue(Coin.CENT.value * 30);
+            builder.getPledgeDetailsBuilder().setTimestamp(now++);
             builder.getPledgeDetailsBuilder().setContactAddress("satoshin@gmx.com");
             builder.getPledgeDetailsBuilder().setMemo("There’s always going to be one more thing to do.");
             list.add(builder.build());
-            builder.setTotalInputValue(Coin.CENT.value * 20);
-            builder.setTimestamp(now++);
+            builder.getPledgeDetailsBuilder().setTotalInputValue(Coin.CENT.value * 20);
+            builder.getPledgeDetailsBuilder().setTimestamp(now++);
             builder.getPledgeDetailsBuilder().setContactAddress("bill.gates@microsoft.com");
             builder.getPledgeDetailsBuilder().setMemo("Charity begins at home");
             list.add(builder.build());
-            builder.setTotalInputValue(Coin.CENT.value * 10);
-            builder.setTimestamp(now++);
+            builder.getPledgeDetailsBuilder().setTotalInputValue(Coin.CENT.value * 10);
+            builder.getPledgeDetailsBuilder().setTimestamp(now++);
             builder.getPledgeDetailsBuilder().setContactAddress("hearn@vinumeris.com");
             builder.getPledgeDetailsBuilder().setMemo("My evil plan is working!!!1!");
             list.add(builder.build());
@@ -356,9 +356,9 @@ public class ProjectView extends HBox {
         ObservableSet<LHProtos.Pledge> set = FXCollections.observableSet(new HashSet<>(list.build()));
         Main.instance.scene.getAccelerators().put(KeyCombination.keyCombination("Shortcut+P"), () -> {
             LHProtos.Pledge.Builder pledge = LHProtos.Pledge.newBuilder();
-            pledge.setProjectId("abc");
-            pledge.setTotalInputValue(Coin.CENT.value * 110);
-            pledge.setTimestamp(Instant.now().getEpochSecond());
+            pledge.getPledgeDetailsBuilder().setProjectId("abc");
+            pledge.getPledgeDetailsBuilder().setTotalInputValue(Coin.CENT.value * 110);
+            pledge.getPledgeDetailsBuilder().setTimestamp(Instant.now().getEpochSecond());
             set.add(pledge.build());
         });
         return set;
@@ -508,13 +508,13 @@ public class ProjectView extends HBox {
                 return;
             }
             getGraphic().setVisible(true);
-            String msg = Coin.valueOf(pledge.getTotalInputValue()).toFriendlyString();
+            String msg = Coin.valueOf(pledge.getPledgeDetails().getTotalInputValue()).toFriendlyString();
             if (LHUtils.hashFromPledge(pledge).equals(myPledgeHash))
                 msg += " (yours)";
             status.setText(msg);
             email.setText(pledge.getPledgeDetails().getContactAddress());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            LocalDateTime time = LocalDateTime.ofEpochSecond(pledge.getTimestamp(), 0, ZoneOffset.UTC);
+            LocalDateTime time = LocalDateTime.ofEpochSecond(pledge.getPledgeDetails().getTimestamp(), 0, ZoneOffset.UTC);
             date.setText(time.format(formatter));
             memoSnippet.setText(pledge.getPledgeDetails().getMemo());
         }
@@ -556,9 +556,9 @@ public class ProjectView extends HBox {
         try (Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), Charsets.UTF_8)) {
             writer.append(String.format("num_satoshis,time,email,message%n"));
             for (LHProtos.Pledge pledge : pledgesList.getItems()) {
-                String time = Instant.ofEpochSecond(pledge.getTimestamp()).atZone(ZoneId.of("UTC")).format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(",", "");
+                String time = Instant.ofEpochSecond(pledge.getPledgeDetails().getTimestamp()).atZone(ZoneId.of("UTC")).format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(",", "");
                 String memo = pledge.getPledgeDetails().getMemo().replace('\n', ' ').replace(",", "");
-                writer.append(String.format("%d,%s,%s,%s%n", pledge.getTotalInputValue(), time, pledge.getPledgeDetails().getContactAddress(), memo));
+                writer.append(String.format("%d,%s,%s,%s%n", pledge.getPledgeDetails().getTotalInputValue(), time, pledge.getPledgeDetails().getContactAddress(), memo));
             }
             GuiUtils.informationalAlert("Export succeeded", "Pledges are stored in a CSV file, which can be loaded with any spreadsheet application. Amounts are specified in satoshis.");
         } catch (IOException e) {
