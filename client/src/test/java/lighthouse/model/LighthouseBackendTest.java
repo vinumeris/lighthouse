@@ -124,7 +124,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         gate = new AffinityExecutor.Gate();
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
         diskManager = new DiskManager(UnitTestParams.get(), executor);
-        backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
+        backend = new LighthouseBackend(CLIENT, peerGroup, peerGroup, blockChain, pledgingWallet, diskManager, executor);
         backend.setMinPeersForUTXOQuery(1);
         backend.setMaxJitterSeconds(0);
 
@@ -296,7 +296,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread 2");
         diskManager = new DiskManager(UnitTestParams.get(), executor);
         writeProjectToDisk();
-        backend = new LighthouseBackend(CLIENT, peerGroup, blockChain, pledgingWallet, diskManager, executor);
+        backend = new LighthouseBackend(CLIENT, peerGroup, peerGroup, blockChain, pledgingWallet, diskManager, executor);
 
         // Let's watch out for pledges from the server.
         ObservableSet<LHProtos.Pledge> pledges = backend.mirrorOpenPledges(project, gate);

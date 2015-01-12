@@ -47,7 +47,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
 
     private final DiskManager diskManager;
     public final AffinityExecutor.ServiceAffinityExecutor executor;
-    private final PeerGroup peerGroup;
+    // We have two separate sets of connections to the P2P network. One is unfussy about what kind of peers it has.
+    // We use this whenever possible, to get more diversity. The other is for peers that know how to answer getutxo.
+    private final PeerGroup regularP2P, xtP2P;
     private final PledgingWallet wallet;
     private final CompletableFuture<Boolean> initialized = new CompletableFuture<>();
 
@@ -111,20 +113,21 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     @GuardedBy("this")
     private final Map<String, Project> projectsByUrlPath;
 
-    public LighthouseBackend(Mode mode, PeerGroup peerGroup, AbstractBlockChain chain, PledgingWallet wallet) {
-        this(mode, peerGroup, chain, wallet, new AffinityExecutor.ServiceAffinityExecutor("LighthouseBackend"));
+    public LighthouseBackend(Mode mode, PeerGroup regularP2P, PeerGroup xtP2P, AbstractBlockChain chain, PledgingWallet wallet) {
+        this(mode, regularP2P, xtP2P, chain, wallet, new AffinityExecutor.ServiceAffinityExecutor("LighthouseBackend"));
     }
 
-    public LighthouseBackend(Mode mode, PeerGroup peerGroup, AbstractBlockChain chain, PledgingWallet wallet, AffinityExecutor.ServiceAffinityExecutor executor) {
+    public LighthouseBackend(Mode mode, PeerGroup regularP2P, PeerGroup xtP2P, AbstractBlockChain chain, PledgingWallet wallet, AffinityExecutor.ServiceAffinityExecutor executor) {
         // The disk manager should only auto load projects in server mode where we install/change them by dropping them
         // into the server directory. But in client mode we always want explicit import.
-        this(mode, peerGroup, chain, wallet, new DiskManager(wallet.getParams(), executor), executor);
+        this(mode, regularP2P, xtP2P, chain, wallet, new DiskManager(wallet.getParams(), executor), executor);
     }
 
-    public LighthouseBackend(Mode mode, PeerGroup peerGroup, AbstractBlockChain chain, PledgingWallet wallet, DiskManager diskManager, AffinityExecutor.ServiceAffinityExecutor executor) {
+    public LighthouseBackend(Mode mode, PeerGroup regularP2P, PeerGroup xtP2P, AbstractBlockChain chain, PledgingWallet wallet, DiskManager diskManager, AffinityExecutor.ServiceAffinityExecutor executor) {
         this.diskManager = diskManager;
         this.executor = executor;
-        this.peerGroup = peerGroup;
+        this.regularP2P = regularP2P;
+        this.xtP2P = xtP2P;
         this.openPledges = new HashMap<>();
         this.claimedPledges = new HashMap<>();
         this.wallet = wallet;
@@ -240,7 +243,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             case PENDING:
                 int seenBy = conf.numBroadcastPeers();
                 log.info("Claim seen by {} peers", seenBy);
-                if (seenBy < peerGroup.getMinBroadcastConnections())
+                if (seenBy < regularP2P.getMinBroadcastConnections())
                     break;
                 // Fall through ...
             case BUILDING:
@@ -414,10 +417,10 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         executor.executeASAP(() -> {
             log.info("Checking {} pledge(s) against P2P network for '{}'", pledges.size(), project);
             markAsInProgress(project);
-            ListenableFuture<List<Peer>> peerFuture = peerGroup.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION);
+            ListenableFuture<List<Peer>> peerFuture = xtP2P.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION);
             if (!peerFuture.isDone()) {
                 log.info("Waiting to find {} peers that support getutxo", minPeersForUTXOQuery);
-                for (Peer peer : peerGroup.getConnectedPeers()) {
+                for (Peer peer : xtP2P.getConnectedPeers()) {
                     log.info("Connected to: {}", peer);
                 }
             }
@@ -796,7 +799,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
 
         if (mode == Mode.CLIENT) {
             // Don't bother with pointless/noisy server requeries until we're caught up with the chain tip.
-            if (block.getHeight() > peerGroup.getMostCommonChainHeight() - 2) {
+            if (block.getHeight() > regularP2P.getMostCommonChainHeight() - 2) {
                 log.info("New block found, refreshing pledges");
                 diskManager.getProjects().stream().filter(project -> project.getPaymentURL() != null).forEach(this::jitteredServerRequery);
             }
@@ -932,7 +935,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                         // case of remote nodes (maybe we should forbid this later), it may block for a few seconds whilst
                         // the transactions propagate.
                         log.info("Broadcasting dependency {} with thirty second timeout", tx.getHash());
-                        peerGroup.broadcastTransaction(tx).get(30, TimeUnit.SECONDS);
+                        regularP2P.broadcastTransaction(tx).get(30, TimeUnit.SECONDS);
                     }
                     result.complete(pledge);
                 }
@@ -1079,21 +1082,21 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     private BloomFilterManager manager = new BloomFilterManager();
 
     private void installBloomFilterProvider() {
-        peerGroup.addPeerFilterProvider(manager);
-        peerGroup.addEventListener(manager, executor);
+        regularP2P.addPeerFilterProvider(manager);
+        regularP2P.addEventListener(manager, executor);
     }
 
     public void shutdown() {
         ignoreAndLog(() -> Uninterruptibles.getUninterruptibly(executor.service.submit(() -> {
-            peerGroup.removePeerFilterProvider(manager);
-            peerGroup.removeEventListener(manager);
+            regularP2P.removePeerFilterProvider(manager);
+            regularP2P.removeEventListener(manager);
             diskManager.shutdown();
             executor.service.shutdown();
         })));
     }
 
     public void refreshBloomFilter() {
-        peerGroup.recalculateFastCatchupAndFilter(PeerGroup.FilterRecalculateMode.SEND_IF_CHANGED);
+        regularP2P.recalculateFastCatchupAndFilter(PeerGroup.FilterRecalculateMode.SEND_IF_CHANGED);
     }
 
     private Map<TransactionOutPoint, LHProtos.Pledge> getAllOpenPledgedOutpoints() {

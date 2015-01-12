@@ -88,6 +88,7 @@ public class Main extends Application {
     public String updatesURL = UPDATES_BASE_URL;
 
     public static boolean offline = false;
+    private PeerGroup xtPeers;
 
     public static void main(String[] args) throws IOException {
         // Startup sequence: we use UpdateFX to allow for automatic online updates when the app is running. UpdateFX
@@ -334,6 +335,13 @@ public class Main extends Application {
         // we give to the app kit is currently an exception and runs on a library thread. It'll get fixed in
         // a future version.
         Threading.USER_THREAD = Platform::runLater;
+        // Bring up a dedicated P2P connection group for Bitcoin XT nodes only. It'll be used for getutxo and nothing
+        // else. Syncing to the network, Bloom filtering, etc, will be done by the WAK peer group. It's just easier
+        // to do it this way than try to always maintain the correct balance of peers in a single PeerGroup, which
+        // doesn't have great support for saying e.g. I want 1/3rd of peers to match this criteria and the other 2/3rds
+        // can be anything.
+        xtPeers = connectXTPeers();
+
         // Create the app kit. It won't do any heavyweight initialization until after we start it.
         bitcoin = new WalletAppKit(params, AppDirectory.dir().toFile(), APP_NAME) {
             {
@@ -343,7 +351,7 @@ public class Main extends Application {
             @Override
             protected void onSetupCompleted() {
                 wallet = (PledgingWallet) bitcoin.wallet();
-                backend = new LighthouseBackend(CLIENT, vPeerGroup, vChain, wallet);
+                backend = new LighthouseBackend(CLIENT, vPeerGroup, xtPeers, vChain, wallet);
 
                 reached("onSetupCompleted");
                 walletLoadedLatch.countDown();
@@ -353,63 +361,7 @@ public class Main extends Application {
                     vPeerGroup.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort() + 1));
                     vPeerGroup.setMinBroadcastConnections(1);
                     vPeerGroup.setUseLocalhostPeerWhenPossible(false);
-                } else {
-                    // Just a quick check to see if we can resolve DNS names.
-                    if (new InetSocketAddress("google.com", 80).getAddress() == null) {
-                        log.warn("User appears to be offline");
-                        offline = true;
-                    } else {
-                        setupPeerGroup();
-                    }
-                    vPeerGroup.addEventListener(new AbstractPeerEventListener() {
-                        @Override
-                        public void onPeerConnected(Peer peer, int peerCount) {
-                            if (peer.getAddress().getAddr().isLoopbackAddress() && !peer.getPeerVersionMessage().isGetUTXOsSupported()) {
-                                // We connected to localhost but it doesn't have what we need.
-                                log.warn("Localhost peer does not have support for NODE_GETUTXOS, ignoring");
-                                informationalAlert("Local Bitcoin node not usable",
-                                        "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support %s needs. %s will still " +
-                                            "work but will use the peer to peer network instead, so you won't get upgraded security. " +
-                                            "Try installing Bitcoin XT, which is a modified version of Bitcoin Core that has the upgraded protocol support.",
-                                        APP_NAME);
-                                vPeerGroup.setUseLocalhostPeerWhenPossible(false);
-                                setupPeerGroup();
-                            }
-                        }
-                    });
                 }
-            }
-
-            private void setupPeerGroup() {
-                // We need to find some peers that support the getutxo message, so pick two found via the
-                // vinumeris.com seed with a custom query, then pick another four from the other DNS seeds
-                // (i.e. any bitcoin peer). There's unfortunately no way to instruct the other seeds to
-                // search for a subset of the Bitcoin network so that's why we need to use a new more flexible
-                // HTTP based protocol here. The seed will find Bitcoin XT nodes as people start and stop them.
-                //
-                // Hopefully in future more people will run HTTP seeds, then we can use a MultiplexingDiscovery
-                // to randomly merge their answers and reduce the influence of any one seed. Additionally if
-                // more people run Bitcoin XT nodes we can bump up the number we search for here to again
-                // reduce the influence of any one node. But this needs people to help decentralise.
-
-
-                // TODO: This logic isn't right.
-
-                PeerDiscovery disco = new HttpDiscovery(params,
-                        unchecked(() -> new URI("http://main.seed.vinumeris.com:8081/peers?srvmask=3&getutxo=true")),
-                        // auth key used to sign responses.
-                        ECKey.fromPublicOnly(BaseEncoding.base16().decode(
-                                "027a79143a4de36341494d21b6593015af6b2500e720ad2eda1c0b78165f4f38c4".toUpperCase()
-                        )));
-                vPeerGroup.addPeerDiscovery(disco);
-                vPeerGroup.setMaxConnections(2);
-                vPeerGroup.setConnectTimeoutMillis(10000);
-                vPeerGroup.waitForPeersWithServiceMask(2, GetUTXOsMessage.SERVICE_FLAGS_REQUIRED).addListener(() -> {
-                    vPeerGroup.addPeerDiscovery(new DnsDiscovery(params));
-                    vPeerGroup.setMaxConnections(6);
-                    // Six peers is a tradeoff between reliability, trust and need to be gentle with network
-                    // resources. It could be higher and nothing would break though.
-                }, Threading.SAME_THREAD);
             }
         };
         if (bitcoin.isChainFileLocked()) {
@@ -429,8 +381,7 @@ public class Main extends Application {
         } else if (params == TestNet3Params.get()) {
             bitcoin.setCheckpoints(getClass().getResourceAsStream("checkpoints.testnet"));
         }
-        bitcoin.setPeerNodes()    // Hack to prevent WAK adding DnsDiscovery
-               .setBlockingStartup(false)
+        bitcoin.setBlockingStartup(false)
                .setDownloadListener(MainWindow.bitcoinUIModel.getDownloadListener())
                .setUserAgent(APP_NAME, "" + VERSION)
                .restoreWalletFromSeed(restoreFromSeed);
@@ -448,6 +399,61 @@ public class Main extends Application {
             }
         }, Threading.SAME_THREAD);
         bitcoin.startAsync();
+    }
+
+    public PeerGroup connectXTPeers() {
+        PeerGroup xtPeers = new PeerGroup(params);
+        final int XT_PEERS = 4;
+        if (params == RegTestParams.get()) {
+            // Use two local regtest nodes for testing.
+            xtPeers.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort()));
+            xtPeers.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort() + 1));
+            xtPeers.setUseLocalhostPeerWhenPossible(false);
+        } else {
+            // Just a quick check to see if we can resolve DNS names.
+            if (new InetSocketAddress("google.com", 80).getAddress() == null) {
+                log.warn("User appears to be offline");
+                offline = true;
+            } else {
+                // PeerGroup will use a local Bitcoin node if at all possible, but it may not have what we need.
+                xtPeers.addEventListener(new AbstractPeerEventListener() {
+                    @Override
+                    public void onPeerConnected(Peer peer, int peerCount) {
+                        if (peer.getAddress().getAddr().isLoopbackAddress() && !peer.getPeerVersionMessage().isGetUTXOsSupported()) {
+                            // We connected to localhost but it doesn't have what we need.
+                            log.warn("Localhost peer does not have support for NODE_GETUTXOS, ignoring");
+                            informationalAlert("Local Bitcoin node not usable",
+                                    "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support %s needs. %s will still " +
+                                            "work but will use the peer to peer network instead, so you won't get upgraded security. " +
+                                            "Try installing Bitcoin XT, which is a modified version of Bitcoin Core that has the upgraded protocol support.",
+                                    APP_NAME);
+                            xtPeers.setUseLocalhostPeerWhenPossible(false);
+                            xtPeers.setMaxConnections(XT_PEERS);
+                            peer.close();
+                        }
+                    }
+                });
+                // There's unfortunately no way to instruct the other seeds to search for a subset of the Bitcoin network
+                // so that's why we need to use a new more flexible HTTP based protocol here. The seed will find
+                // Bitcoin XT nodes as people start and stop them.
+                //
+                // Hopefully in future more people will run HTTP seeds, then we can use a MultiplexingDiscovery
+                // to randomly merge their answers and reduce the influence of any one seed. Additionally if
+                // more people run Bitcoin XT nodes we can bump up the number we search for here to again
+                // reduce the influence of any one node. But this needs people to help decentralise.
+                xtPeers.addPeerDiscovery(new HttpDiscovery(params,
+                                unchecked(() -> new URI("http://main.seed.vinumeris.com/peers?srvmask=3&getutxo=true")),
+                                // auth key used to sign responses.
+                                ECKey.fromPublicOnly(BaseEncoding.base16().decode(
+                                        "027a79143a4de36341494d21b6593015af6b2500e720ad2eda1c0b78165f4f38c4".toUpperCase()
+                                )))
+                );
+                xtPeers.setConnectTimeoutMillis(10000);
+                xtPeers.setMaxConnections(XT_PEERS);
+                xtPeers.startAsync();
+            }
+        }
+        return xtPeers;
     }
 
     private void refreshStylesheets(Scene scene) {
@@ -623,6 +629,7 @@ public class Main extends Application {
     public void stop() throws Exception {
         if (bitcoin != null && bitcoin.isRunning()) {
             backend.shutdown();
+            xtPeers.stopAsync();
             bitcoin.stopAsync();
             bitcoin.awaitTerminated();
         }

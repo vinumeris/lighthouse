@@ -93,7 +93,7 @@ public class PledgeServer {
         // we'll have to split the backend thread from the http server thread.
         AffinityExecutor.ServiceAffinityExecutor executor = new AffinityExecutor.ServiceAffinityExecutor("server");
         server.setExecutor(executor);
-        LighthouseBackend backend = new LighthouseBackend(SERVER, kit.peerGroup(), kit.chain(), (PledgingWallet) kit.wallet(), executor);
+        LighthouseBackend backend = new LighthouseBackend(SERVER, kit.peerGroup(), kit.peerGroup(), kit.chain(), (PledgingWallet) kit.wallet(), executor);
         backend.setMinPeersForUTXOQuery(minPeersSupportingGetUTXO);
         server.createContext(LHUtils.HTTP_PATH_PREFIX, new ProjectHandler(backend));
         server.createContext("/", exchange -> {
