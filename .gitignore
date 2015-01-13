@@ -6,3 +6,4 @@ deploy
 updates
 *.iml
 package/macosx/Info.plist
+win-build.ps1
