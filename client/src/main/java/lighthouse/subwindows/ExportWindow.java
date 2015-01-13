@@ -153,9 +153,15 @@ public class ExportWindow {
             log.info("Saving {} data to {}", pledge != null ? "pledge" : "project", file);
             try (OutputStream outputStream = new FileOutputStream(file)) {
                 data.writeTo(outputStream);
-                if (pledge != null)
+                if (savingPledge) {
                     pledge.commit(true);
-                overlayUI.done();   // Only if successful.
+                } else if (project.getPaymentURL() != null && project.getPaymentURL().getHost().equals("vinumeris.com")) {
+                    // Special last minute usability hack for this server only.
+                    // TODO: either generalise this or implement issue 31 (smoother upload/submit path to servers).
+                    ProjectSubmitInstructionsWindow.open("project-hosting@vinumeris.com");
+                    return;
+                }
+                overlayUI.done();
             } catch (IOException e) {
                 GuiUtils.informationalAlert("Failed to save file", e.getLocalizedMessage());
             }
