@@ -156,7 +156,14 @@ public class MainWindow {
     // Triggered by the project disk model being adjusted.
     private void updateExistingProject(int index, Project newProject, Project prevProject) {
         log.info("Update at index {}", index);
-        projectsVBox.getChildren().set(projectsVBox.getChildren().size() - 2 - index, buildProjectWidget(newProject));
+        int uiIndex =
+                projectsVBox.getChildren().size()
+                        - 1   // from size to index
+                        - 1   // the vbox for buttons at the bottom
+                        - index;
+        if (uiIndex < 0)
+            return;  // This can happen if the project which is updated is not even on screen yet; Windows fucks up sometimes and tells us this so just ignore it.
+        projectsVBox.getChildren().set(uiIndex, buildProjectWidget(newProject));
         if (inProjectView.get() && projectView.getProject().equals(prevProject)) {
             projectView.setProject(newProject);
         }

@@ -136,6 +136,9 @@ public class DiskManager {
 
         // Project files are only auto loaded from the app directory. If the user downloads a serverless project to their
         // Downloads folder, imports it, then downloads a second project, we don't want it to automatically appear.
+        //
+        // TODO: This is all a load of crap. Windows especially has weird habits when it comes to reporting file changes.
+        // We should just scrap file watching for projects at least, and do things the old fashioned way.
         if (isProject && path.getParent().equals(AppDirectory.dir())) {
             if (isDelete || isModify) {
                 log.info("Project file deleted/modified: {}", path);
@@ -143,7 +146,7 @@ public class DiskManager {
                 if (project != null) {
                     if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
                         log.info("Project file modified, reloading ...");
-                        this.tryLoadProject(path, projects.indexOf(project));
+                        tryLoadProject(path, projects.indexOf(project));
                     } else {
                         log.info("Project file deleted, removing ...");
                         projects.remove(project);
@@ -322,9 +325,20 @@ public class DiskManager {
         Project p = loadProject(path);
         if (p != null) {
             synchronized (this) {
-                if (projectsById.containsKey(p.getID()) && indexToReplace < 0) {
-                    log.info("Already have project id {}, skipping load", p.getID());
-                    return projectsById.get(p.getID());
+                Project preExisting = projectsById.get(p.getID());
+                if (preExisting != null) {
+                    if (indexToReplace < 0) {
+                        log.info("Already have project id {}, skipping load", p.getID());
+                        return preExisting;
+                    }
+                    if (preExisting.equals(p)) {
+                        // This can happen on Windows: the OS tells us the file was modified, but then we load it and
+                        // discover it's really not different at all. This seems to happen a lot just after a file was
+                        // created. Hack: to avoid weird races and problems elsewhere like the UI trying to update a
+                        // project ui widget that is waiting for an animation to finish, we just ignore this here.
+                        log.info("Got bogus project modify notification, ignoring");
+                        return null;   // Not used.
+                    }
                 }
                 projectsById.put(p.getID(), p);
             }
