@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="462.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.PledgeWindow">
+<?import javafx.scene.text.*?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="522.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.PledgeWindow">
     <bottom>
         <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
             <children>
@@ -37,17 +37,27 @@
             </Label>
                 <Label fx:id="allMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#allMoneyClicked" styleClass="link-label" text="Maximum amount possible" />
             <Label fx:id="minMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#minMoneyClicked" styleClass="link-label" text="Minimum amount possible" />
-            <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="15.0">
+            <GridPane hgap="15.0" minHeight="-Infinity" vgap="10.0">
+              <columnConstraints>
+                <ColumnConstraints fillWidth="false" hgrow="NEVER" minWidth="10.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" />
+                  <RowConstraints minHeight="10.0" />
+              </rowConstraints>
                <children>
-                  <Label text="Your email address" />
-                  <TextField fx:id="emailEdit" HBox.hgrow="ALWAYS" />
+                  <TextField fx:id="emailEdit" GridPane.columnIndex="1" />
+                  <Label minWidth="-Infinity" text="Email address" />
+                  <Label text="Name" GridPane.rowIndex="1" />
+                  <TextField fx:id="nameEdit" promptText="Anonymous" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                </children>
-               <padding>
-                  <Insets top="10.0" />
-               </padding>
-            </HBox>
+               <VBox.margin>
+                  <Insets bottom="10.0" top="10.0" />
+               </VBox.margin>
+            </GridPane>
             <TextArea fx:id="messageEdit" prefHeight="200.0" prefWidth="200.0" promptText="Message to project owner (optional)" wrapText="true" />
-            <Label maxWidth="1.7976931348623157E308" minWidth="-Infinity" style="-fx-text-fill: silver;" text="Contact details and message will be public." />
+            <Label fx:id="pubPrivLabel" maxWidth="1.7976931348623157E308" minWidth="-Infinity" style="-fx-text-fill: silver;" text="(public/private explainer label)" />
                 <Pane prefHeight="0.0" prefWidth="340.0" VBox.vgrow="ALWAYS" />
             </children>
             <padding>

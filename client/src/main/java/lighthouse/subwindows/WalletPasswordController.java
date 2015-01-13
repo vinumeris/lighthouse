@@ -1,26 +1,23 @@
 package lighthouse.subwindows;
 
-import com.google.common.primitives.Longs;
-import com.google.protobuf.ByteString;
-import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.layout.HBox;
-import lighthouse.Main;
-import lighthouse.utils.KeyDerivationTasks;
-import org.bitcoinj.crypto.KeyCrypterScrypt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.params.KeyParameter;
+import com.google.common.primitives.*;
+import com.google.protobuf.*;
+import javafx.application.*;
+import javafx.beans.property.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import lighthouse.*;
+import lighthouse.utils.*;
+import org.bitcoinj.crypto.*;
+import org.slf4j.*;
+import org.spongycastle.crypto.params.*;
 
-import java.time.Duration;
-import java.util.function.Consumer;
+import java.time.*;
+import java.util.function.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 import static lighthouse.utils.GuiUtils.*;
 
 /**
@@ -44,6 +41,16 @@ public class WalletPasswordController {
         Platform.runLater(pass1::requestFocus);
     }
 
+    public static void requestPasswordWithNextWindow(Consumer<KeyParameter> keyConsumer) {
+        Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", "Password");
+        pwd.controller.aesKeyProperty().addListener((observable, old, cur) -> {
+            // We only get here if the user found the right password. If they don't or they cancel, we end up back on
+            // the main UI screen.
+            checkGuiThread();
+            keyConsumer.accept(cur);
+        });
+    }
+
     public static void requestPassword(Consumer<KeyParameter> keyConsumer) {
         Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", "Password");
         pwd.controller.aesKeyProperty().addListener((observable, old, cur) -> {
@@ -51,6 +58,7 @@ public class WalletPasswordController {
             // the main UI screen.
             checkGuiThread();
             keyConsumer.accept(cur);
+            pwd.done();
         });
     }
 

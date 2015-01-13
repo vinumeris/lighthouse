@@ -75,7 +75,7 @@ public class RevokeAndClaimWindow {
     private void confirmClicked() {
         if (Main.wallet.isEncrypted()) {
             log.info("Wallet is encrypted, requesting password");
-            WalletPasswordController.requestPassword(key -> {
+            WalletPasswordController.requestPasswordWithNextWindow(key -> {
                 Main.OverlayUI<RevokeAndClaimWindow> screen = Main.instance.overlayUI("subwindows/revoke_and_claim.fxml", "Revoke pledge");
                 screen.controller.pledgeToRevoke = pledgeToRevoke;
                 screen.controller.projectToClaim = projectToClaim;

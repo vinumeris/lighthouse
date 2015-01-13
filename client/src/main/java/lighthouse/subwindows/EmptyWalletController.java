@@ -1,23 +1,19 @@
 package lighthouse.subwindows;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.vinumeris.crashfx.CrashWindow;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import lighthouse.Main;
-import lighthouse.controls.BitcoinAddressValidator;
+import com.google.common.util.concurrent.*;
+import com.vinumeris.crashfx.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import lighthouse.*;
+import lighthouse.controls.*;
 import org.bitcoinj.core.*;
-import org.spongycastle.crypto.params.KeyParameter;
+import org.spongycastle.crypto.params.*;
 
-import javax.annotation.Nullable;
+import javax.annotation.*;
 
-import static com.google.common.base.Preconditions.checkState;
-import static lighthouse.utils.GuiUtils.checkGuiThread;
-import static lighthouse.utils.GuiUtils.informationalAlert;
+import static com.google.common.base.Preconditions.*;
+import static lighthouse.utils.GuiUtils.*;
 
 public class EmptyWalletController {
     public Button sendBtn;
@@ -87,7 +83,7 @@ public class EmptyWalletController {
 
     private void askForPasswordAndRetry() {
         final String addressStr = address.getText();
-        WalletPasswordController.requestPassword(key -> {
+        WalletPasswordController.requestPasswordWithNextWindow(key -> {
             Main.OverlayUI<EmptyWalletController> screen = open();
             screen.controller.aesKey = key;
             screen.controller.address.setText(addressStr);

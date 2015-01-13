@@ -34,20 +34,19 @@ public class ShowPledgeWindow {
     }
 
     private void init(Project project, LHProtos.Pledge pledge) {
-        amountLabel.setText(Coin.valueOf(pledge.getPledgeDetails().getTotalInputValue()).toFriendlyString());
-        if (pledge.hasPledgeDetails()) {
-            contactLabel.setText(pledge.getPledgeDetails().getContactAddress());
-            // Looks like an email address?
-            if (contactLabel.getText().matches("[a-zA-Z0-9\\._]+@[^ ]+")) {
-                contactLabel.setStyle(contactLabel.getStyle() + "; -fx-cursor: hand; -fx-text-fill: blue; -fx-underline: true");
-                contactLabel.setOnMouseClicked(ev -> Main.instance.getHostServices().showDocument(String.format("mailto:%s", contactLabel.getText())));
-            }
-            messageField.setText(pledge.getPledgeDetails().getMemo());
-        } else {
-            contactLabel.setText("<unknown>");
+        LHProtos.PledgeDetails details = pledge.getPledgeDetails();
+        amountLabel.setText(Coin.valueOf(details.getTotalInputValue()).toFriendlyString());
+        String label = details.hasName() ? details.getName() : "Anonymous";
+        if (details.hasContactAddress())
+            label += " <" + details.getContactAddress() + ">";
+        contactLabel.setText(label);
+        if (details.hasContactAddress()) {
+            contactLabel.setStyle(contactLabel.getStyle() + "; -fx-cursor: hand; -fx-text-fill: blue; -fx-underline: true");
+            contactLabel.setOnMouseClicked(ev -> Main.instance.getHostServices().showDocument(String.format("mailto:%s", details.getContactAddress())));
         }
+        messageField.setText(details.getMemo());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM uuuu HH:mm");
-        LocalDateTime time = LocalDateTime.ofEpochSecond(pledge.getPledgeDetails().getTimestamp(), 0, ZoneOffset.UTC);
+        LocalDateTime time = LocalDateTime.ofEpochSecond(details.getTimestamp(), 0, ZoneOffset.UTC);
         dateLabel.setText(time.format(formatter));
         this.project = project;
         this.pledge = pledge;

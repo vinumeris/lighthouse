@@ -54,7 +54,7 @@ public class ProjectModel {
         // Connect the properties.
         InvalidationListener pathSetter = o -> {
             final String name = serverName.get();
-            if (name.isEmpty())
+            if (name == null || name.isEmpty())
                 proto.clearPaymentUrl();
             else
                 proto.setPaymentUrl(LHUtils.makeServerPath(name, LHUtils.titleToUrlString(title.get())));

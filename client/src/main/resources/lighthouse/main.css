@@ -244,7 +244,7 @@
     -fx-font-size: 13;
     -fx-font-weight: bold;
 }
-.pledge-cell-email {
+.pledge-cell-name {
     -fx-text-fill: darkgray;
 }
 .pledge-cell-date {

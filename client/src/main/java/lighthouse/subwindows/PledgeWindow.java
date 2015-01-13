@@ -27,8 +27,10 @@ public class PledgeWindow extends InnerWindow {
     @FXML TextField amountEdit;
     @FXML Button confirmButton;
     @FXML Label minersFeeLabel;
+    @FXML Label pubPrivLabel;
     @FXML TextArea messageEdit;
     @FXML TextField emailEdit;
+    @FXML TextField nameEdit;
 
     // Will be initialised by the ProjectView.
     public Project project;
@@ -55,6 +57,16 @@ public class PledgeWindow extends InnerWindow {
         minersFeeLabel.setText(String.format(minersFeeLabel.getText(), Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.toFriendlyString()));
     }
 
+    public void setProject(Project project) {
+        this.project = project;
+        // Until we do encryption of data in pledges, serverless projects are different to server assisted.
+        if (project.getPaymentURL() != null) {
+            pubPrivLabel.setText("Name and message will be public.");
+        } else {
+            pubPrivLabel.setText("Name, email and message will be public.");
+        }
+    }
+
     public void setLimits(Coin limit, Coin min) {
         // Note that we don't subtract the fee here because if the user pledges their entire balance, we should not
         // require a dependency tx as all outputs can be included in the pledge.
@@ -75,7 +87,7 @@ public class PledgeWindow extends InnerWindow {
         Platform.runLater(() -> {
             if (Main.wallet.isEncrypted()) {
                 log.info("Wallet is encrypted, requesting password");
-                WalletPasswordController.requestPassword(this::tryMakePledge);
+                WalletPasswordController.requestPasswordWithNextWindow(this::tryMakePledge);
             } else {
                 tryMakePledge(null);
             }
@@ -85,12 +97,12 @@ public class PledgeWindow extends InnerWindow {
     private void tryMakePledge(@Nullable KeyParameter aesKey) {
         try {
             LHProtos.PledgeDetails.Builder details = LHProtos.PledgeDetails.newBuilder();
-            if (!emailEdit.getText().isEmpty()) {
-                details.setContactAddress(emailEdit.getText());
-                Main.instance.prefs.setContactAddress(emailEdit.getText());
-            }
+            details.setContactAddress(emailEdit.getText());
+            Main.instance.prefs.setContactAddress(emailEdit.getText());
             if (!messageEdit.getText().isEmpty())
                 details.setMemo(messageEdit.getText());
+            if (!nameEdit.getText().isEmpty())
+                details.setName(nameEdit.getText());
             PledgingWallet.PendingPledge pledge = Main.wallet.createPledge(project, valueOrThrow(amountEdit.getText()), aesKey, details.buildPartial());
             log.info("Created pledge is {}", pledge);
             if (project.getPaymentURL() == null) {

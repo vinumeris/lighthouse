@@ -11,6 +11,7 @@ import javafx.collections.transformation.*;
 import javafx.event.*;
 import javafx.fxml.*;
 import javafx.geometry.*;
+import javafx.scene.*;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.effect.*;
@@ -420,7 +421,7 @@ public class ProjectView extends HBox {
     private void makePledge(Project p) {
         log.info("Invoking pledge screen");
         PledgeWindow window = Main.instance.<PledgeWindow>overlayUI("subwindows/pledge.fxml", "Pledge").controller;
-        window.project = p;
+        window.setProject(p);
         window.setLimits(p.getGoalAmount().subtract(Coin.valueOf(pledgedValue.get())), p.getMinPledgeAmount());
         window.onSuccess = () -> {
             mode.set(Mode.PLEDGED);
@@ -459,7 +460,7 @@ public class ProjectView extends HBox {
 
     // TODO: Should we show revoked pledges crossed out?
     private class PledgeListCell extends ListCell<LHProtos.Pledge> {
-        private Label status, email, memoSnippet, date;
+        private Label status, name, memoSnippet, date;
         private Label viewMore;
 
         public PledgeListCell() {
@@ -468,7 +469,7 @@ public class ProjectView extends HBox {
             VBox vbox = new VBox(
                     (status = new Label()),
                     (hbox = new HBox(
-                            (email = new Label()),
+                            (name = new Label()),
                             (pane = new Pane()),
                             (date = new Label())
                     )),
@@ -477,7 +478,7 @@ public class ProjectView extends HBox {
             );
             vbox.getStyleClass().add("pledge-cell");
             status.getStyleClass().add("pledge-cell-status");
-            email.getStyleClass().add("pledge-cell-email");
+            name.getStyleClass().add("pledge-cell-name");
             HBox.setHgrow(pane, Priority.ALWAYS);
             vbox.setFillWidth(true);
             hbox.maxWidthProperty().bind(vbox.widthProperty());
@@ -508,15 +509,16 @@ public class ProjectView extends HBox {
                 return;
             }
             getGraphic().setVisible(true);
-            String msg = Coin.valueOf(pledge.getPledgeDetails().getTotalInputValue()).toFriendlyString();
+            LHProtos.PledgeDetails details = pledge.getPledgeDetails();
+            String msg = Coin.valueOf(details.getTotalInputValue()).toFriendlyString();
             if (LHUtils.hashFromPledge(pledge).equals(myPledgeHash))
                 msg += " (yours)";
             status.setText(msg);
-            email.setText(pledge.getPledgeDetails().getContactAddress());
+            name.setText(details.hasName() ? details.getName() : "Anonymous");
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            LocalDateTime time = LocalDateTime.ofEpochSecond(pledge.getPledgeDetails().getTimestamp(), 0, ZoneOffset.UTC);
+            LocalDateTime time = LocalDateTime.ofEpochSecond(details.getTimestamp(), 0, ZoneOffset.UTC);
             date.setText(time.format(formatter));
-            memoSnippet.setText(pledge.getPledgeDetails().getMemo());
+            memoSnippet.setText(details.getMemo());
         }
     }
 
@@ -542,7 +544,30 @@ public class ProjectView extends HBox {
 
     @FXML
     public void exportPledgesClicked(MouseEvent event) {
-        log.info("Export pledges clicked for {}", project.get().getTitle());
+        Project project = this.project.get();
+        log.info("Export pledges clicked for {}", project.getTitle());
+        if (Main.wallet.isEncrypted()) {
+            log.info("Wallet is encrypted, requesting password");
+            WalletPasswordController.requestPassword(key -> {
+                // TODO: Should really throw something up on the screen here.
+                Main.instance.scene.setCursor(Cursor.WAIT);
+                project.getStatus(Main.wallet, key).handleAsync((status, ex) -> {
+                    Main.instance.scene.setCursor(Cursor.DEFAULT);
+                    if (ex != null) {
+                        log.error("Unable to fetch project status", ex);
+                        informationalAlert("Unable to fetch email addresses", "Could not fetch project status from server: %s", ex);
+                    } else {
+                        exportPledges(status.getPledgesList());
+                    }
+                    return null;
+                }, Platform::runLater);
+            });
+        } else {
+            exportPledges(pledgesList.getItems());
+        }
+    }
+
+    private void exportPledges(List<LHProtos.Pledge> pledges) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Export pledges to CSV file");
         chooser.setInitialFileName("pledges.csv");
@@ -554,11 +579,12 @@ public class ProjectView extends HBox {
         }
         log.info("Saving pledges as CSV to file {}", file);
         try (Writer writer = new OutputStreamWriter(Files.newOutputStream(file.toPath()), Charsets.UTF_8)) {
-            writer.append(String.format("num_satoshis,time,email,message%n"));
-            for (LHProtos.Pledge pledge : pledgesList.getItems()) {
+            writer.append(String.format("num_satoshis,time,name,email,message%n"));
+            for (LHProtos.Pledge pledge : pledges) {
                 String time = Instant.ofEpochSecond(pledge.getPledgeDetails().getTimestamp()).atZone(ZoneId.of("UTC")).format(DateTimeFormatter.RFC_1123_DATE_TIME).replace(",", "");
                 String memo = pledge.getPledgeDetails().getMemo().replace('\n', ' ').replace(",", "");
-                writer.append(String.format("%d,%s,%s,%s%n", pledge.getPledgeDetails().getTotalInputValue(), time, pledge.getPledgeDetails().getContactAddress(), memo));
+                writer.append(String.format("%d,%s,%s,%s,%s%n", pledge.getPledgeDetails().getTotalInputValue(),
+                        time, pledge.getPledgeDetails().getName(), pledge.getPledgeDetails().getContactAddress(), memo));
             }
             GuiUtils.informationalAlert("Export succeeded", "Pledges are stored in a CSV file, which can be loaded with any spreadsheet application. Amounts are specified in satoshis.");
         } catch (IOException e) {

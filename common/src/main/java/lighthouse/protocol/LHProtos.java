@@ -5402,7 +5402,7 @@ public final class LHProtos {
      * <code>optional string contact_address = 2;</code>
      *
      * <pre>
-     * Email address or so on.
+     * i.e. email address
      * </pre>
      */
     boolean hasContactAddress();
@@ -5410,7 +5410,7 @@ public final class LHProtos {
      * <code>optional string contact_address = 2;</code>
      *
      * <pre>
-     * Email address or so on.
+     * i.e. email address
      * </pre>
      */
     java.lang.String getContactAddress();
@@ -5418,7 +5418,7 @@ public final class LHProtos {
      * <code>optional string contact_address = 2;</code>
      *
      * <pre>
-     * Email address or so on.
+     * i.e. email address
      * </pre>
      */
     com.google.protobuf.ByteString
@@ -5475,9 +5475,9 @@ public final class LHProtos {
      */
     long getTimestamp();
 
-    // optional bytes orig_hash = 104;
+    // optional bytes orig_hash = 6;
     /**
-     * <code>optional bytes orig_hash = 104;</code>
+     * <code>optional bytes orig_hash = 6;</code>
      *
      * <pre>
      * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
@@ -5487,7 +5487,7 @@ public final class LHProtos {
      */
     boolean hasOrigHash();
     /**
-     * <code>optional bytes orig_hash = 104;</code>
+     * <code>optional bytes orig_hash = 6;</code>
      *
      * <pre>
      * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
@@ -5496,6 +5496,33 @@ public final class LHProtos {
      * </pre>
      */
     com.google.protobuf.ByteString getOrigHash();
+
+    // optional string name = 7;
+    /**
+     * <code>optional string name = 7;</code>
+     *
+     * <pre>
+     * Name or pseudonym. This is public data.
+     * </pre>
+     */
+    boolean hasName();
+    /**
+     * <code>optional string name = 7;</code>
+     *
+     * <pre>
+     * Name or pseudonym. This is public data.
+     * </pre>
+     */
+    java.lang.String getName();
+    /**
+     * <code>optional string name = 7;</code>
+     *
+     * <pre>
+     * Name or pseudonym. This is public data.
+     * </pre>
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
   }
   /**
    * Protobuf type {@code lighthouse.PledgeDetails}
@@ -5573,9 +5600,14 @@ public final class LHProtos {
               timestamp_ = input.readUInt64();
               break;
             }
-            case 834: {
+            case 50: {
               bitField0_ |= 0x00000020;
               origHash_ = input.readBytes();
+              break;
+            }
+            case 58: {
+              bitField0_ |= 0x00000040;
+              name_ = input.readBytes();
               break;
             }
           }
@@ -5680,7 +5712,7 @@ public final class LHProtos {
      * <code>optional string contact_address = 2;</code>
      *
      * <pre>
-     * Email address or so on.
+     * i.e. email address
      * </pre>
      */
     public boolean hasContactAddress() {
@@ -5690,7 +5722,7 @@ public final class LHProtos {
      * <code>optional string contact_address = 2;</code>
      *
      * <pre>
-     * Email address or so on.
+     * i.e. email address
      * </pre>
      */
     public java.lang.String getContactAddress() {
@@ -5711,7 +5743,7 @@ public final class LHProtos {
      * <code>optional string contact_address = 2;</code>
      *
      * <pre>
-     * Email address or so on.
+     * i.e. email address
      * </pre>
      */
     public com.google.protobuf.ByteString
@@ -5819,11 +5851,11 @@ public final class LHProtos {
       return timestamp_;
     }
 
-    // optional bytes orig_hash = 104;
-    public static final int ORIG_HASH_FIELD_NUMBER = 104;
+    // optional bytes orig_hash = 6;
+    public static final int ORIG_HASH_FIELD_NUMBER = 6;
     private com.google.protobuf.ByteString origHash_;
     /**
-     * <code>optional bytes orig_hash = 104;</code>
+     * <code>optional bytes orig_hash = 6;</code>
      *
      * <pre>
      * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
@@ -5835,7 +5867,7 @@ public final class LHProtos {
       return ((bitField0_ & 0x00000020) == 0x00000020);
     }
     /**
-     * <code>optional bytes orig_hash = 104;</code>
+     * <code>optional bytes orig_hash = 6;</code>
      *
      * <pre>
      * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
@@ -5847,6 +5879,61 @@ public final class LHProtos {
       return origHash_;
     }
 
+    // optional string name = 7;
+    public static final int NAME_FIELD_NUMBER = 7;
+    private java.lang.Object name_;
+    /**
+     * <code>optional string name = 7;</code>
+     *
+     * <pre>
+     * Name or pseudonym. This is public data.
+     * </pre>
+     */
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional string name = 7;</code>
+     *
+     * <pre>
+     * Name or pseudonym. This is public data.
+     * </pre>
+     */
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          name_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string name = 7;</code>
+     *
+     * <pre>
+     * Name or pseudonym. This is public data.
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
       memo_ = "";
       contactAddress_ = "";
@@ -5854,6 +5941,7 @@ public final class LHProtos {
       projectId_ = "";
       timestamp_ = 0L;
       origHash_ = com.google.protobuf.ByteString.EMPTY;
+      name_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -5895,7 +5983,10 @@ public final class LHProtos {
         output.writeUInt64(5, timestamp_);
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeBytes(104, origHash_);
+        output.writeBytes(6, origHash_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeBytes(7, getNameBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -5928,7 +6019,11 @@ public final class LHProtos {
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(104, origHash_);
+          .computeBytesSize(6, origHash_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(7, getNameBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -6058,6 +6153,8 @@ public final class LHProtos {
         bitField0_ = (bitField0_ & ~0x00000010);
         origHash_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000020);
+        name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -6110,6 +6207,10 @@ public final class LHProtos {
           to_bitField0_ |= 0x00000020;
         }
         result.origHash_ = origHash_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.name_ = name_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -6149,6 +6250,11 @@ public final class LHProtos {
         }
         if (other.hasOrigHash()) {
           setOrigHash(other.getOrigHash());
+        }
+        if (other.hasName()) {
+          bitField0_ |= 0x00000040;
+          name_ = other.name_;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -6293,7 +6399,7 @@ public final class LHProtos {
        * <code>optional string contact_address = 2;</code>
        *
        * <pre>
-       * Email address or so on.
+       * i.e. email address
        * </pre>
        */
       public boolean hasContactAddress() {
@@ -6303,7 +6409,7 @@ public final class LHProtos {
        * <code>optional string contact_address = 2;</code>
        *
        * <pre>
-       * Email address or so on.
+       * i.e. email address
        * </pre>
        */
       public java.lang.String getContactAddress() {
@@ -6321,7 +6427,7 @@ public final class LHProtos {
        * <code>optional string contact_address = 2;</code>
        *
        * <pre>
-       * Email address or so on.
+       * i.e. email address
        * </pre>
        */
       public com.google.protobuf.ByteString
@@ -6341,7 +6447,7 @@ public final class LHProtos {
        * <code>optional string contact_address = 2;</code>
        *
        * <pre>
-       * Email address or so on.
+       * i.e. email address
        * </pre>
        */
       public Builder setContactAddress(
@@ -6358,7 +6464,7 @@ public final class LHProtos {
        * <code>optional string contact_address = 2;</code>
        *
        * <pre>
-       * Email address or so on.
+       * i.e. email address
        * </pre>
        */
       public Builder clearContactAddress() {
@@ -6371,7 +6477,7 @@ public final class LHProtos {
        * <code>optional string contact_address = 2;</code>
        *
        * <pre>
-       * Email address or so on.
+       * i.e. email address
        * </pre>
        */
       public Builder setContactAddressBytes(
@@ -6557,10 +6663,10 @@ public final class LHProtos {
         return this;
       }
 
-      // optional bytes orig_hash = 104;
+      // optional bytes orig_hash = 6;
       private com.google.protobuf.ByteString origHash_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes orig_hash = 104;</code>
+       * <code>optional bytes orig_hash = 6;</code>
        *
        * <pre>
        * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
@@ -6572,7 +6678,7 @@ public final class LHProtos {
         return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
-       * <code>optional bytes orig_hash = 104;</code>
+       * <code>optional bytes orig_hash = 6;</code>
        *
        * <pre>
        * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
@@ -6584,7 +6690,7 @@ public final class LHProtos {
         return origHash_;
       }
       /**
-       * <code>optional bytes orig_hash = 104;</code>
+       * <code>optional bytes orig_hash = 6;</code>
        *
        * <pre>
        * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
@@ -6602,7 +6708,7 @@ public final class LHProtos {
         return this;
       }
       /**
-       * <code>optional bytes orig_hash = 104;</code>
+       * <code>optional bytes orig_hash = 6;</code>
        *
        * <pre>
        * Hash of the original pledge as submitted, including tx data. This is used by the client to find its own
@@ -6613,6 +6719,104 @@ public final class LHProtos {
       public Builder clearOrigHash() {
         bitField0_ = (bitField0_ & ~0x00000020);
         origHash_ = getDefaultInstance().getOrigHash();
+        onChanged();
+        return this;
+      }
+
+      // optional string name = 7;
+      private java.lang.Object name_ = "";
+      /**
+       * <code>optional string name = 7;</code>
+       *
+       * <pre>
+       * Name or pseudonym. This is public data.
+       * </pre>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional string name = 7;</code>
+       *
+       * <pre>
+       * Name or pseudonym. This is public data.
+       * </pre>
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string name = 7;</code>
+       *
+       * <pre>
+       * Name or pseudonym. This is public data.
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string name = 7;</code>
+       *
+       * <pre>
+       * Name or pseudonym. This is public data.
+       * </pre>
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string name = 7;</code>
+       *
+       * <pre>
+       * Name or pseudonym. This is public data.
+       * </pre>
+       */
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string name = 7;</code>
+       *
+       * <pre>
+       * Name or pseudonym. This is public data.
+       * </pre>
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+        name_ = value;
         onChanged();
         return this;
       }
@@ -10230,20 +10434,21 @@ public final class LHProtos {
       "n\030\001 \001(\r:\0011\022\026\n\010pki_type\030\002 \001(\t:\004none\022\020\n\010pk" +
       "i_data\030\003 \001(\014\022\"\n\032serialized_payment_detai" +
       "ls\030\004 \002(\014\022\021\n\tsignature\030\005 \001(\014\"\'\n\020X509Certi" +
-      "ficates\022\023\n\013certificate\030\001 \003(\014\"\213\001\n\rPledgeD" +
+      "ficates\022\023\n\013certificate\030\001 \003(\014\"\231\001\n\rPledgeD" +
       "etails\022\014\n\004memo\030\001 \001(\t\022\027\n\017contact_address\030" +
       "\002 \001(\t\022\031\n\021total_input_value\030\003 \002(\004\022\022\n\nproj" +
       "ect_id\030\004 \002(\t\022\021\n\ttimestamp\030\005 \002(\004\022\021\n\torig_" +
-      "hash\030h \001(\014\"\217\001\n\006Pledge\022\025\n\rmerchant_data\030\001",
-      " \001(\014\022\024\n\014transactions\030\002 \003(\014\022%\n\trefund_to\030" +
-      "\003 \003(\0132\022.lighthouse.Output\0221\n\016pledge_deta" +
-      "ils\030d \001(\0132\031.lighthouse.PledgeDetails\">\n\t" +
-      "PledgeACK\022#\n\007payment\030\001 \002(\0132\022.lighthouse." +
-      "Pledge\022\014\n\004memo\030\002 \001(\t\"\205\001\n\rProjectStatus\022\n" +
-      "\n\002id\030\001 \002(\t\022\021\n\ttimestamp\030\002 \002(\004\022\034\n\024value_p" +
-      "ledged_so_far\030\003 \002(\004\022#\n\007pledges\030\004 \003(\0132\022.l" +
-      "ighthouse.Pledge\022\022\n\nclaimed_by\030\005 \001(\014B!\n\023" +
-      "lighthouse.protocolB\010LHProtosH\001"
+      "hash\030\006 \001(\014\022\014\n\004name\030\007 \001(\t\"\217\001\n\006Pledge\022\025\n\rm",
+      "erchant_data\030\001 \001(\014\022\024\n\014transactions\030\002 \003(\014" +
+      "\022%\n\trefund_to\030\003 \003(\0132\022.lighthouse.Output\022" +
+      "1\n\016pledge_details\030d \001(\0132\031.lighthouse.Ple" +
+      "dgeDetails\">\n\tPledgeACK\022#\n\007payment\030\001 \002(\013" +
+      "2\022.lighthouse.Pledge\022\014\n\004memo\030\002 \001(\t\"\205\001\n\rP" +
+      "rojectStatus\022\n\n\002id\030\001 \002(\t\022\021\n\ttimestamp\030\002 " +
+      "\002(\004\022\034\n\024value_pledged_so_far\030\003 \002(\004\022#\n\007ple" +
+      "dges\030\004 \003(\0132\022.lighthouse.Pledge\022\022\n\nclaime" +
+      "d_by\030\005 \001(\014B!\n\023lighthouse.protocolB\010LHPro" +
+      "tosH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -10291,7 +10496,7 @@ public final class LHProtos {
           internal_static_lighthouse_PledgeDetails_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_lighthouse_PledgeDetails_descriptor,
-              new java.lang.String[] { "Memo", "ContactAddress", "TotalInputValue", "ProjectId", "Timestamp", "OrigHash", });
+              new java.lang.String[] { "Memo", "ContactAddress", "TotalInputValue", "ProjectId", "Timestamp", "OrigHash", "Name", });
           internal_static_lighthouse_Pledge_descriptor =
             getDescriptor().getMessageTypes().get(7);
           internal_static_lighthouse_Pledge_fieldAccessorTable = new

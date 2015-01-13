@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="551.0" prefWidth="481.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.ShowPledgeWindow">
@@ -20,7 +20,7 @@
          <children>
             <Label fx:id="amountLabel" style="-fx-font-size: 50;" text="Amount" />
             <Label styleClass="show-pledge-inner-label" text="pledged by" />
-            <Label fx:id="contactLabel" style="-fx-font-size: 30;" text="foo@bar.org" />
+            <Label fx:id="contactLabel" style="-fx-font-size: 20;" text="foo@bar.org" />
             <Label styleClass="show-pledge-inner-label" text="on" />
             <Label fx:id="dateLabel" style="-fx-font-size: 30;" text="Wednesday 7th July" />
             <Separator prefWidth="200.0" />

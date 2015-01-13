@@ -1,35 +1,26 @@
 package lighthouse.subwindows;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
+import com.google.common.base.*;
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextArea;
-import lighthouse.Main;
-import lighthouse.utils.TextFieldValidator;
-import org.bitcoinj.crypto.MnemonicCode;
-import org.bitcoinj.wallet.DeterministicSeed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.params.KeyParameter;
+import javafx.beans.binding.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import lighthouse.*;
+import lighthouse.utils.*;
+import org.bitcoinj.crypto.*;
+import org.bitcoinj.wallet.*;
+import org.slf4j.*;
+import org.spongycastle.crypto.params.*;
 
-import javax.annotation.Nullable;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.List;
+import javax.annotation.*;
+import java.time.*;
+import java.util.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 import static javafx.beans.binding.Bindings.*;
-import static lighthouse.protocol.LHUtils.didThrow;
-import static lighthouse.protocol.LHUtils.unchecked;
-import static lighthouse.utils.GuiUtils.checkGuiThread;
-import static lighthouse.utils.GuiUtils.informationalAlert;
+import static lighthouse.protocol.LHUtils.*;
+import static lighthouse.utils.GuiUtils.*;
 
 public class WalletSettingsController {
     private static final Logger log = LoggerFactory.getLogger(WalletSettingsController.class);
@@ -116,7 +107,7 @@ public class WalletSettingsController {
     }
 
     private void askForPasswordAndRetry() {
-        WalletPasswordController.requestPassword(key -> {
+        WalletPasswordController.requestPasswordWithNextWindow(key -> {
             checkGuiThread();
             Main.OverlayUI<WalletSettingsController> screen = Main.instance.overlayUI("subwindows/wallet_settings.fxml", "Wallet settings");
             screen.controller.initialize(key);

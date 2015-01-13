@@ -376,6 +376,7 @@ public class Project {
         Thread thread = new Thread(() -> {
             try {
                 final int TIMEOUT_MS = 10 * 1000;
+                Thread.sleep(5000);
                 URLConnection connection = getServerQueryURL(wallet, key).openConnection();
                 connection.setDoOutput(true);
                 connection.setConnectTimeout(TIMEOUT_MS);

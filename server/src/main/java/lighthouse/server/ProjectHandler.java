@@ -186,11 +186,18 @@ public class ProjectHandler implements HttpHandler {
                 status.addPledges(pledge);
             } else {
                 // Remove transactions so the contract can't be closed by anyone who requests the status.
+                // Also remove email addresses.
+                //
                 // In future we may wish to optionally relax this constraint so anyone who can observe the project
                 // can prove to themselves the pledges really exist, and the contract can be closed by any user.
+                //
+                // This should all be replaced with the use of encryption. The server doesn't need to know this
+                // stuff at all.
                 Sha256Hash origHash = LHUtils.hashFromPledge(pledge);
                 LHProtos.Pledge.Builder scrubbedPledge = pledge.toBuilder().clearTransactions();
-                scrubbedPledge.getPledgeDetailsBuilder().setOrigHash(ByteString.copyFrom(origHash.getBytes()));
+                LHProtos.PledgeDetails.Builder details = scrubbedPledge.getPledgeDetailsBuilder();
+                details.setOrigHash(ByteString.copyFrom(origHash.getBytes()));
+                details.clearContactAddress();
                 status.addPledges(scrubbedPledge);
             }
             totalPledged += pledge.getPledgeDetails().getTotalInputValue();
