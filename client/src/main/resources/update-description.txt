@@ -1,5 +1,16 @@
-Prepare for beta: switch to main network!
+Prepare for beta
 
-After this update all previous projects will disappear, along with your testnet balance. You can get it back by running the program with --net=test as a command line parameter.
-The server now supports JSON, XML and HTML formatted output. A bug fix for the case where a pledge is revoked whilst someone is sitting on a confirmation screen.
+This update switches Lighthouse to the main network. After this update all previous projects will disappear, along with your testnet balance. You can get it back by running the program with --net=test as a command line parameter. However previous pledges will no longer load.
+
+The server now supports JSON, XML and HTML formatted output.
+
 More decentralisation: Lighthouse now uses any two Bitcoin XT nodes instead of hard coded nodes.
+
+The contact email address required in pledges is now private (for server assisted projects only) and a new optional name field has been added, so you can control how you appear in the pledge list.
+
+The vinumeris.com server is now filled in by default and instructions for where to email the project are provided after saving it.
+
+File associations now work on Windows and MacOS, for people who redownload and reinstall the app.
+
+Many bug fixes, especially on Windows.
+
