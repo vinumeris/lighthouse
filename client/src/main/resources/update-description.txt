@@ -1,2 +1,2 @@
-Misc bug fixes
-This minor update includes some bug fixes for misbehaviours and crashes on Windows. It also improves file name conversion for project titles that have non-Latin characters in them.
+Bug fixes and faster first time start
+This update fixes an issue with the auto updater and speeds up the initial Bitcoin P2P sync.
