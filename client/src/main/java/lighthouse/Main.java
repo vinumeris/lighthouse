@@ -106,7 +106,13 @@ public class Main extends Application {
     private static java.util.logging.Logger logger;
     private static void setupLogging() {
         logger = java.util.logging.Logger.getLogger("");
-        final FileHandler handler = unchecked(() -> new FileHandler(AppDirectory.dir().resolve("log.txt").toString(), true));
+        final FileHandler handler;
+        try {
+            handler = new FileHandler(AppDirectory.dir().resolve("log.txt").toString(), true);
+            handler.setEncoding("UTF-8");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         handler.setFormatter(new BriefLogFormatter());
         logger.addHandler(handler);
         if (logToConsole) {
