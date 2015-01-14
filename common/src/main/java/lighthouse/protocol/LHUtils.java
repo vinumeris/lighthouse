@@ -49,7 +49,7 @@ public class LHUtils {
     }
 
     public static String titleToUrlString(String s) {
-        return s.replaceAll("[^a-zA-Z0-9 ]", "").replaceAll(" ", "-").toLowerCase();
+        return s.replaceAll("[!@#$%^&*()_+\\\\';:?=/.,\\[\\] \\n]", "-").replaceAll("-+", "-").replaceAll("(^-+|-+$)", "").toLowerCase();
     }
 
     public static boolean isUnix() {

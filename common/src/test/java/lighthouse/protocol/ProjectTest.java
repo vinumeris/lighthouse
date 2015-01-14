@@ -282,11 +282,6 @@ public class ProjectTest {
     }
 
     @Test
-    public void urlScrubber() throws Exception {
-        assertEquals("a-really-cool-20-title-with-lots-asdf-of-weird--chars", LHUtils.titleToUrlString("A really $cool %20 Title with ;;lots asdf\n of weird // chars"));
-    }
-
-    @Test
     public void authKeys() throws Exception {
         details = Project.makeDetails(
                 wallet.getParams(), "My cool project", "A project to make awesome things ... out of Lego!",
@@ -300,5 +295,13 @@ public class ProjectTest {
         } catch (SignatureException e) {
             // Expected.
         }
+    }
+
+    @Test
+    public void titleToPath() {
+        assertEquals("bbc-14-01-2015-eu-lawyer-approves-ecb-bond-buying-programme", titleToUrlString("BBC 14/01/2015 EU lawyer approves ECB bond-buying programme"));
+        assertEquals("bob-http-example-com-1378-foo-bar", titleToUrlString("Bob http://example.com:1378/?foo=bar"));
+        assertEquals("a-really-cool-20-title-with-lots-asdf-of-weird-chars", titleToUrlString("A really $cool %20 Title with ;;lots asdf\n of weird // chars"));
+        assertEquals("български-език", titleToUrlString("български език"));
     }
 }
