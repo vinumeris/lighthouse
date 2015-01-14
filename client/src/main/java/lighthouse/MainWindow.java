@@ -408,7 +408,7 @@ public class MainWindow {
             ((HBox)menuBtn.getParent()).getChildren().remove(menuBtn);
             return;
         }
-        updater = new Updater(Main.instance.updatesURL, Main.APP_NAME, Main.VERSION, AppDirectory.dir(),
+        updater = new Updater(Main.instance.updatesURL, Main.APP_NAME, Main.VERSION, Main.unadjustedAppDir,
                 UpdateFX.findCodePath(Main.class), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD);
 
         if (Main.offline) return;

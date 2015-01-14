@@ -1,40 +1,26 @@
 package lighthouse.subwindows;
 
-import com.google.common.util.concurrent.Futures;
-import com.vinumeris.updatefx.UFXProtocol;
-import com.vinumeris.updatefx.UpdateFX;
-import com.vinumeris.updatefx.UpdateSummary;
-import com.vinumeris.updatefx.Updater;
-import de.jensd.fx.fontawesome.AwesomeIcon;
-import de.jensd.fx.fontawesome.Icon;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.text.Text;
-import lighthouse.Main;
-import lighthouse.files.AppDirectory;
+import com.google.common.util.concurrent.*;
+import com.vinumeris.updatefx.*;
+import de.jensd.fx.fontawesome.*;
+import javafx.beans.property.*;
+import javafx.collections.*;
+import javafx.concurrent.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import javafx.scene.text.*;
+import lighthouse.*;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import javax.annotation.*;
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 import static java.lang.String.format;
-import static java.nio.file.Files.exists;
-import static lighthouse.utils.GuiUtils.informationalAlert;
-import static lighthouse.utils.GuiUtils.log;
+import static java.nio.file.Files.*;
+import static lighthouse.utils.GuiUtils.*;
 
 /**
  * Lets the user select a version to pin themselves to.
@@ -52,7 +38,7 @@ public class UpdateFXWindow {
     private UpdateSummary summary;
 
     public void initialize() {
-        currentPin.set(UpdateFX.getVersionPin(AppDirectory.dir()));
+        currentPin.set(UpdateFX.getVersionPin(Main.unadjustedAppDir));
 
         updatesList.setCellFactory(param -> new ListCell<UFXProtocol.Update>() {
             @Override
@@ -99,14 +85,14 @@ public class UpdateFXWindow {
     public void pinClicked(ActionEvent event) {
         UFXProtocol.Update selected = updatesList.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            UpdateFX.unpin(AppDirectory.dir());
+            UpdateFX.unpin(Main.unadjustedAppDir);
             currentPin.set(0);
             informationalAlert("Version change",
                     "You will be switched to always track the latest version. The app will now restart.");
             Main.restart();
         } else {
             int ver = selected.getVersion();
-            UpdateFX.pinToVersion(AppDirectory.dir(), ver);
+            UpdateFX.pinToVersion(Main.unadjustedAppDir, ver);
             currentPin.set(ver);
             informationalAlert("Version change",
                     "You will be switched to always use version %d. The app will now restart.", ver);
@@ -152,7 +138,7 @@ public class UpdateFXWindow {
         for (UFXProtocol.Update update : list) {
             // For each update in the index, check if we have it on disk (the index can contain updates older than
             // what we can roll back to).
-            if (exists(AppDirectory.dir().resolve(format("%d.jar", update.getVersion())))) {
+            if (exists(Main.unadjustedAppDir.resolve(format("%d.jar", update.getVersion())))) {
                 if (update.getDescriptionCount() > 0)
                     updates.add(update);
             }
@@ -163,7 +149,7 @@ public class UpdateFXWindow {
     // we are offline, or null if not found or some other error.
     @Nullable
     private UpdateSummary loadCachedIndex() {
-        try (InputStream is = Files.newInputStream(AppDirectory.dir().resolve(CACHED_UPDATE_SUMMARY))) {
+        try (InputStream is = Files.newInputStream(Main.unadjustedAppDir.resolve(CACHED_UPDATE_SUMMARY))) {
             return new UpdateSummary(Main.VERSION, UFXProtocol.Updates.parseDelimitedFrom(is));
         } catch (IOException e) {
             return null;
@@ -171,7 +157,7 @@ public class UpdateFXWindow {
     }
 
     public static void saveCachedIndex(UFXProtocol.Updates updates) {
-        try (OutputStream os = Files.newOutputStream(AppDirectory.dir().resolve(CACHED_UPDATE_SUMMARY))) {
+        try (OutputStream os = Files.newOutputStream(Main.unadjustedAppDir.resolve(CACHED_UPDATE_SUMMARY))) {
             updates.writeDelimitedTo(os);
         } catch (IOException e) {
             log.error("Failed to save cached update index", e);

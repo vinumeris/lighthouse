@@ -86,6 +86,7 @@ public class Main extends Application {
     private boolean useTor;
     private boolean slowGFX;
     public String updatesURL = UPDATES_BASE_URL;
+    public static Path unadjustedAppDir;   // ignoring which network we're on.
 
     public static boolean offline = false;
     private PeerGroup xtPeers;
@@ -137,6 +138,7 @@ public class Main extends Application {
         // context of another class loader if we're now running a different app version to the one the user installed.
         // Anything that happened in main() therefore might have now been wiped.
         AppDirectory.initAppDir(APP_NAME);
+        unadjustedAppDir = AppDirectory.dir();
         List<Path> filesToOpen = new ArrayList<>();
         if (!parseCommandLineArgs() || FileOpenRequests.requestFileOpen(getParameters(), filesToOpen)) {
             Platform.exit();
