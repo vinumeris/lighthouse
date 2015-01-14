@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.*?>
-<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
-<?import javafx.scene.shape.Rectangle?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.text.TextFlow?>
-<?import java.lang.String?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
 <fx:root prefHeight="495.0" prefWidth="846.0" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <VBox fx:id="root" maxHeight="Infinity" maxWidth="Infinity" minWidth="-Infinity" prefHeight="565.0" prefWidth="595.0" style="-fx-background-color: white;" HBox.hgrow="ALWAYS">
@@ -85,8 +83,9 @@
                                         <DropShadow color="#000000bb" />
                                     </effect>
                                 </PieChart>
-                                <HBox alignment="CENTER_RIGHT">
+                                <HBox alignment="CENTER_RIGHT" spacing="15.0">
                                     <children>
+                              <Label fx:id="copyDescriptionLink" onMouseClicked="#onCopyDescriptionClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="Copy description" />
                                         <Label alignment="CENTER_RIGHT" onMouseClicked="#onViewTechDetailsClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="View technical details" textFill="BLUE" />
                                     </children>
                                 </HBox>

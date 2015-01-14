@@ -65,6 +65,7 @@ public class ProjectView extends HBox {
     @FXML Label percentFundedLabel;
     @FXML Button editButton;
     @FXML VBox pledgesListVBox;
+    @FXML Label copyDescriptionLink;
 
     public final ObjectProperty<Project> project = new SimpleObjectProperty<>();
     public final ObjectProperty<EventHandler<ActionEvent>> onBackClickedProperty = new SimpleObjectProperty<>();
@@ -540,6 +541,16 @@ public class ProjectView extends HBox {
     public void onViewTechDetailsClicked(MouseEvent event) {
         log.info("View tech details of project clicked for {}", project.get().getTitle());
         ProjectTechDetailsWindow.open(project.get());
+    }
+
+    @FXML
+    public void onCopyDescriptionClicked(MouseEvent event) {
+        log.info("Copy description to clipboard clicked");
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(project.get().getMemo());
+        clipboard.setContent(content);
+        GuiUtils.arrowBubbleToNode(copyDescriptionLink, "Description copied to clipboard");
     }
 
     @FXML
