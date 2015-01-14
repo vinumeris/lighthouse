@@ -1,0 +1,2 @@
+Misc bug fixes
+This minor update includes some bug fixes for misbehaviours and crashes on Windows. It also improves file name conversion for project titles that have non-Latin characters in them.
