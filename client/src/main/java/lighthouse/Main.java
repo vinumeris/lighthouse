@@ -422,16 +422,21 @@ public class Main extends Application {
             } else {
                 // PeerGroup will use a local Bitcoin node if at all possible, but it may not have what we need.
                 xtPeers.addEventListener(new AbstractPeerEventListener() {
+                    boolean shownMessage = false;
+
                     @Override
                     public void onPeerConnected(Peer peer, int peerCount) {
                         if (peer.getAddress().getAddr().isLoopbackAddress() && !peer.getPeerVersionMessage().isGetUTXOsSupported()) {
                             // We connected to localhost but it doesn't have what we need.
                             log.warn("Localhost peer does not have support for NODE_GETUTXOS, ignoring");
-                            informationalAlert("Local Bitcoin node not usable",
-                                    "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support %s needs. %s will still " +
-                                            "work but will use the peer to peer network instead, so you won't get upgraded security. " +
-                                            "Try installing Bitcoin XT, which is a modified version of Bitcoin Core that has the upgraded protocol support.",
-                                    APP_NAME);
+                            if (!shownMessage) {
+                                shownMessage = true;
+                                informationalAlert("Local Bitcoin node not usable",
+                                        "You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support %s needs. %s will still " +
+                                                "work but will use the peer to peer network instead, so you won't get upgraded security. " +
+                                                "Try installing Bitcoin XT, which is a modified version of Bitcoin Core that has the upgraded protocol support.",
+                                        APP_NAME, APP_NAME);
+                            }
                             xtPeers.setUseLocalhostPeerWhenPossible(false);
                             xtPeers.setMaxConnections(XT_PEERS);
                             peer.close();
