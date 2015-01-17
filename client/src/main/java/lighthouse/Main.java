@@ -168,6 +168,7 @@ public class Main extends Application {
                     });
                 }
             }
+            runOnGuiThreadAfter(500, WalletSetPasswordController::estimateKeyDerivationTime);
         };
         runOnGuiThreadAfter(300, setup);
     }

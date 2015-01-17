@@ -1,19 +1,16 @@
 package lighthouse;
 
-import lighthouse.files.AppDirectory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lighthouse.files.*;
+import org.slf4j.*;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Properties;
+import javax.annotation.*;
+import java.io.*;
+import java.nio.file.*;
+import java.time.*;
+import java.util.*;
 
 /**
- * Stores user preferences (not many currently).
+ * Stores user preferences (not many currently). Access from UI thread.
  */
 public class UserPrefs {
     private static final Logger log = LoggerFactory.getLogger(UserPrefs.class);
@@ -45,6 +42,21 @@ public class UserPrefs {
 
     public void setContactAddress(String address) {
         prefs.setProperty("contact", address);
+        store();
+    }
+
+    @Nullable
+    public Duration getExpectedKeyDerivationTime() {
+        String time = prefs.getProperty("scryptTime");
+        if (time == null)
+            return null;
+        long timeMsec = Long.parseLong(time);
+        return Duration.ofMillis(timeMsec);
+    }
+
+    public void setExpectedKeyDerivationTime(Duration time) {
+        long msec = time.toMillis();
+        prefs.setProperty("scryptTime", Long.toString(msec));
         store();
     }
 }

@@ -1,5 +1,7 @@
 package lighthouse.subwindows;
 
+import com.google.protobuf.*;
+import javafx.application.*;
 import javafx.event.*;
 import javafx.fxml.*;
 import javafx.scene.control.*;
@@ -7,12 +9,12 @@ import javafx.scene.layout.*;
 import lighthouse.*;
 import lighthouse.utils.*;
 import org.bitcoinj.crypto.*;
+import org.bitcoinj.wallet.*;
 import org.slf4j.*;
 import org.spongycastle.crypto.params.*;
 
 import java.time.*;
 
-import static com.google.common.base.Preconditions.*;
 import static lighthouse.utils.GuiUtils.*;
 
 public class WalletSetPasswordController {
@@ -25,9 +27,41 @@ public class WalletSetPasswordController {
     public Label explanationLabel;
 
     public Main.OverlayUI overlayUI;
+    // These params were determined empirically on a top-range (as of 2014) MacBook Pro with native scrypt support,
+    // using the scryptenc command line tool from the original scrypt distribution, given a memory limit of 40mb.
+    public static final Protos.ScryptParameters SCRYPT_PARAMETERS = Protos.ScryptParameters.newBuilder()
+            .setP(6)
+            .setR(8)
+            .setN(32768)
+            .setSalt(ByteString.copyFrom(KeyCrypterScrypt.randomSalt()))
+            .build();
 
     public void initialize() {
         progressMeter.setOpacity(0);
+    }
+
+    public static Duration estimatedKeyDerivationTime = null;
+
+    public static void estimateKeyDerivationTime() {
+        // This is run in the background after startup. If we haven't recorded it before, do a key derivation to see
+        // how long it takes. This helps us produce better progress feedback, as on Windows we don't currently have a
+        // native Scrypt impl and the Java version is ~3 times slower, plus it depends a lot on CPU speed.
+        checkGuiThread();
+        estimatedKeyDerivationTime = Main.instance.prefs.getExpectedKeyDerivationTime();
+        if (estimatedKeyDerivationTime == null) {
+            new Thread(() -> {
+                log.info("Doing background test key derivation");
+                KeyCrypterScrypt scrypt = new KeyCrypterScrypt(SCRYPT_PARAMETERS);
+                long start = System.currentTimeMillis();
+                scrypt.deriveKey("test password");
+                long msec = System.currentTimeMillis() - start;
+                log.info("Background test key derivation took {}msec", msec);
+                Platform.runLater(() -> {
+                    estimatedKeyDerivationTime = Duration.ofMillis(msec);
+                    Main.instance.prefs.setExpectedKeyDerivationTime(estimatedKeyDerivationTime);
+                });
+            }).start();
+        }
     }
 
     @FXML
@@ -48,21 +82,18 @@ public class WalletSetPasswordController {
         fadeOut(explanationLabel);
         fadeOut(buttonHBox);
 
+        KeyCrypterScrypt scrypt = new KeyCrypterScrypt(SCRYPT_PARAMETERS);
 
-        // Figure out how fast this computer can scrypt. We do it on the UI thread because the delay should be small
-        // and so we don't really care about blocking here.
-        log.info("Starting CPU calibration");
-        IdealPasswordParameters params = new IdealPasswordParameters(password);
-        KeyCrypterScrypt scrypt = new KeyCrypterScrypt(params.realIterations);
-        // Write the target time to the wallet so we can make the progress bar work when entering the password.
-        WalletPasswordController.setTargetTime(params.realTargetTime);
-
-        // Deriving the actual key runs on a background thread.
-        KeyDerivationTasks tasks = new KeyDerivationTasks(scrypt, password, params.realTargetTime) {
+        // Deriving the actual key runs on a background thread. 500msec is empirical on my laptop (actual val is more like 333 but we give padding time).
+        KeyDerivationTasks tasks = new KeyDerivationTasks(scrypt, password, estimatedKeyDerivationTime) {
             @Override
-            protected void onFinish(KeyParameter aesKey) {
+            protected void onFinish(KeyParameter aesKey, int timeTakenMsec) {
+                // Write the target time to the wallet so we can make the progress bar work when entering the password.
+                WalletPasswordController.setTargetTime(Duration.ofMillis(timeTakenMsec));
                 // The actual encryption part doesn't take very long as most private keys are derived on demand.
+                log.info("Key derived, now encrypting");
                 Main.bitcoin.wallet().encrypt(scrypt, aesKey);
+                log.info("Encryption done");
                 informationalAlert("Wallet encrypted",
                         "You can remove the password at any time from the settings screen.");
                 overlayUI.done();
@@ -75,35 +106,5 @@ public class WalletSetPasswordController {
     @FXML
     public void closeClicked(ActionEvent event) {
         overlayUI.done();
-    }
-
-    private static class IdealPasswordParameters {
-        public final int realIterations;
-        public final Duration realTargetTime;
-
-        public IdealPasswordParameters(String password) {
-            final int targetTimeMsec = 2000;
-
-            int iterations = 16384;
-            KeyCrypterScrypt scrypt = new KeyCrypterScrypt(iterations);
-            long now = System.currentTimeMillis();
-            scrypt.deriveKey(password);
-            long time = System.currentTimeMillis() - now;
-            log.info("Initial iterations took {} msec", time);
-            checkState(time > 0);
-
-            // N can only be a power of two, so we keep shifting both iterations and doubling time taken
-            // until we are in sorta the right general area.
-            while (time < targetTimeMsec) {
-                iterations <<= 1;
-                time *= 2;
-            }
-
-            realIterations = iterations;
-            // Fudge it by +10% to ensure our progress meter is always a bit behind the real encryption. Plus
-            // without this it seems the real scrypting always takes a bit longer than we estimated for some reason.
-            realTargetTime = Duration.ofMillis((long) (time * 1.1));
-            log.info("Selected ideal iterations={} targetTime={}", realIterations, realTargetTime);
-        }
     }
 }
