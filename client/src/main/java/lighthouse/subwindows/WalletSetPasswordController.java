@@ -1,21 +1,18 @@
 package lighthouse.subwindows;
 
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import lighthouse.Main;
-import lighthouse.utils.KeyDerivationTasks;
-import org.bitcoinj.crypto.KeyCrypterScrypt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.params.KeyParameter;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import lighthouse.*;
+import lighthouse.utils.*;
+import org.bitcoinj.crypto.*;
+import org.slf4j.*;
+import org.spongycastle.crypto.params.*;
 
-import java.time.Duration;
+import java.time.*;
 
+import static com.google.common.base.Preconditions.*;
 import static lighthouse.utils.GuiUtils.*;
 
 public class WalletSetPasswordController {
@@ -51,8 +48,10 @@ public class WalletSetPasswordController {
         fadeOut(explanationLabel);
         fadeOut(buttonHBox);
 
+
         // Figure out how fast this computer can scrypt. We do it on the UI thread because the delay should be small
         // and so we don't really care about blocking here.
+        log.info("Starting CPU calibration");
         IdealPasswordParameters params = new IdealPasswordParameters(password);
         KeyCrypterScrypt scrypt = new KeyCrypterScrypt(params.realIterations);
         // Write the target time to the wallet so we can make the progress bar work when entering the password.
@@ -91,6 +90,7 @@ public class WalletSetPasswordController {
             scrypt.deriveKey(password);
             long time = System.currentTimeMillis() - now;
             log.info("Initial iterations took {} msec", time);
+            checkState(time > 0);
 
             // N can only be a power of two, so we keep shifting both iterations and doubling time taken
             // until we are in sorta the right general area.
@@ -103,6 +103,7 @@ public class WalletSetPasswordController {
             // Fudge it by +10% to ensure our progress meter is always a bit behind the real encryption. Plus
             // without this it seems the real scrypting always takes a bit longer than we estimated for some reason.
             realTargetTime = Duration.ofMillis((long) (time * 1.1));
+            log.info("Selected ideal iterations={} targetTime={}", realIterations, realTargetTime);
         }
     }
 }
