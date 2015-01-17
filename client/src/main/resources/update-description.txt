@@ -1,0 +1,2 @@
+Bug fixes
+Avoid crashing/running out of memory when setting wallet passwords. Don't crash when there's a local Bitcoin node.
