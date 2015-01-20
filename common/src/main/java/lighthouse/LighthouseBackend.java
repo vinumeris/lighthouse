@@ -350,7 +350,8 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 openPledges.get(project).remove(removedPledge);
                 getClaimedPledgesFor(project).remove(removedPledge);
                 // If the project was in error because of this pledge (e.g. it was a duplicate), kick off a recheck.
-                if (checkStatuses.get(project).error != null)
+                CheckStatus status = checkStatuses.get(project);
+                if (status != null && status.error != null)
                     checkPledgesAgainstP2PNetwork(project, openPledges.get(project));
             }
         }
