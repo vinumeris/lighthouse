@@ -26,6 +26,7 @@ import javax.imageio.*;
 import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
+import java.nio.file.*;
 
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
@@ -207,8 +208,12 @@ public class EditProjectWindow {
         chooser.setTitle("Select an image file");
         chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Images (JPG/PNG/GIF)", "*.jpg", "*.jpeg", "*.png", "*.gif"));
         platformFiddleChooser(chooser);
+        Path prevPath = Main.instance.prefs.getCoverPhotoFolder();
+        if (prevPath != null)
+            chooser.setInitialDirectory(prevPath.toFile());
         File result = chooser.showOpenDialog(Main.instance.mainStage);
         if (result == null) return;
+        Main.instance.prefs.setCoverPhotoFolder(result.toPath().getParent());
         setImageTo(unchecked(() -> result.toURI().toURL()));
     }
 

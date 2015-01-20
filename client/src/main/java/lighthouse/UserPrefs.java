@@ -59,4 +59,16 @@ public class UserPrefs {
         prefs.setProperty("scryptTime", Long.toString(msec));
         store();
     }
+
+    @Nullable
+    public Path getCoverPhotoFolder() {
+        String path = prefs.getProperty("coverPhotoFolder");
+        if (path == null) return null;
+        return Paths.get(path);
+    }
+
+    public void setCoverPhotoFolder(Path path) {
+        prefs.setProperty("coverPhotoFolder", path.toAbsolutePath().toString());
+        store();
+    }
 }
