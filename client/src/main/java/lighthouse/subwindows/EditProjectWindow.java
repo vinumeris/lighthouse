@@ -103,7 +103,7 @@ public class EditProjectWindow {
         // Bind UI back to model.
         this.model.title.bind(titleEdit.textProperty());
         this.model.memo.bind(descriptionEdit.textProperty());
-        this.model.address.bind(addressEdit.textProperty());
+        //this.model.address.bind(addressEdit.textProperty());
 
         coverPhotoSiteLink.setText(COVERPHOTO_SITE);
 
@@ -125,11 +125,17 @@ public class EditProjectWindow {
             // If min pledge == suggested amount it's ok, or if it's between min amount and goal.
             return coin.equals(amount) || (coin.isGreaterThan(amount) && coin.isLessThan(Coin.valueOf(this.model.goalAmount.get())));
         });
+        ValidationLink addressValid = new ValidationLink(addressEdit, str -> !didThrow(() -> new Address(Main.params, str)));
+        addressEdit.textProperty().addListener((obj, prev, cur) -> {
+            if (addressValid.isValid.get())
+                this.model.address.set(cur);
+        });
 
         ValidationLink.autoDisableButton(nextButton,
                 goalValid,
                 new ValidationLink(titleEdit, str -> !str.isEmpty()),
-                minPledgeValue);
+                minPledgeValue,
+                addressValid);
 
         roundCorners(coverImageView, 10);
 
