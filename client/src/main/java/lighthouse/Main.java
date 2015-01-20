@@ -350,7 +350,11 @@ public class Main extends Application {
         // to do it this way than try to always maintain the correct balance of peers in a single PeerGroup, which
         // doesn't have great support for saying e.g. I want 1/3rd of peers to match this criteria and the other 2/3rds
         // can be anything.
-        xtPeers = connectXTPeers();
+        if (xtPeers == null) {
+            xtPeers = connectXTPeers();
+        } else {
+            // Can be because bitcoinj appkit is being restarted for seed word restore.
+        }
 
         // Create the app kit. It won't do any heavyweight initialization until after we start it.
         bitcoin = new WalletAppKit(params, AppDirectory.dir().toFile(), APP_NAME) {

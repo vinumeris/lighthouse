@@ -141,9 +141,6 @@ public class WalletSettingsController {
                 "Your wallet will now be resynced from the Bitcoin network. This can take a long time for old wallets.");
         overlayUI.done();
 
-        // TODO: Fix chain sync animation and then trigger it here.
-        //Main.instance.controller.restoreFromSeedAnimation();
-
         long birthday = datePicker.getValue().atStartOfDay().toEpochSecond(ZoneOffset.UTC);
         DeterministicSeed seed = new DeterministicSeed(Splitter.on(' ').splitToList(wordsArea.getText()), null, "", birthday);
         // Shut down bitcoinj and restart it with the new seed.

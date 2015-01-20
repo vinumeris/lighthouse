@@ -1,14 +1,11 @@
 package lighthouse.model;
 
 
-import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.application.*;
+import javafx.beans.property.*;
 import org.bitcoinj.core.*;
 
-import java.util.Date;
+import java.util.*;
 
 /**
  * A class that exposes relevant bitcoin stuff as JavaFX bindable properties.
@@ -17,7 +14,6 @@ public class BitcoinUIModel {
     private SimpleObjectProperty<Address> address = new SimpleObjectProperty<>();
     private SimpleObjectProperty<Coin> balance = new SimpleObjectProperty<>(Coin.ZERO);
     private SimpleDoubleProperty syncProgress = new SimpleDoubleProperty(-1);
-    private ProgressBarUpdater syncProgressUpdater = new ProgressBarUpdater();
 
     public BitcoinUIModel() {
     }
@@ -27,6 +23,7 @@ public class BitcoinUIModel {
     }
 
     public void setWallet(Wallet wallet) {
+        syncProgress.set(-1);
         wallet.addEventListener(new AbstractWalletEventListener() {
             @Override
             public void onWalletChanged(Wallet wallet) {
@@ -56,7 +53,7 @@ public class BitcoinUIModel {
         }
     }
 
-    public DownloadProgressTracker getDownloadListener() { return syncProgressUpdater; }
+    public DownloadProgressTracker getDownloadListener() { return new ProgressBarUpdater(); }
 
     public ReadOnlyDoubleProperty syncProgressProperty() { return syncProgress; }
 

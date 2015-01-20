@@ -455,7 +455,7 @@ public class MainWindow {
         thread.start();
     }
 
-    private void showBitcoinSyncMessage() {
+    public void showBitcoinSyncMessage() {
         syncItem = Main.instance.notificationBar.displayNewItem("Synchronising with the Bitcoin network", bitcoinUIModel.syncProgressProperty());
     }
 
