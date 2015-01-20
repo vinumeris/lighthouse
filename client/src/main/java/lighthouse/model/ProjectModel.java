@@ -42,7 +42,11 @@ public class ProjectModel {
         title.set(project.getTitle());
         memo.set(project.getMemo());
         goalAmount.set(project.getGoalAmount().value);
-        minPledgeAmount.set(recalculateMinPledgeAmount(goalAmount.longValue()));
+
+        if (liveProto.getExtraDetails().hasMinPledgeSize())
+            minPledgeAmount.set(project.getMinPledgeAmount().value);
+        else
+            minPledgeAmount.set(recalculateMinPledgeAmount(goalAmount.longValue()));
 
         if (liveProto.hasPaymentUrl()) {
             String host = LHUtils.validateServerPath(liveProto.getPaymentUrl());
@@ -120,6 +124,12 @@ public class ProjectModel {
 
     public Coin getMinPledgeAmount() {
         return Coin.valueOf(minPledgeAmount.get());
+    }
+
+    public void setMinPledgeAmount(Coin value) { minPledgeAmount.setValue(value.value);}
+
+    public void resetMinPledgeAmount() {
+        minPledgeAmount.set(recalculateMinPledgeAmount(goalAmount.longValue()));
     }
 
     public ReadOnlyLongProperty minPledgeAmountProperty() {

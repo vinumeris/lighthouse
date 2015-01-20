@@ -92,7 +92,10 @@ public class EditProjectWindow {
         if (goalCoin.value != 1) {  // 1 satoshi is sentinel value meaning new project.
             goalAmountEdit.setText(goalCoin.toPlainString());
         }
-        minPledgeEdit.setPromptText(model.getMinPledgeAmount().toPlainString());
+        if (editing)
+            minPledgeEdit.setText(model.getMinPledgeAmount().toPlainString());
+        else
+            minPledgeEdit.setPromptText(model.getMinPledgeAmount().toPlainString());
         if (model.image.get() == null) {
             setupDefaultCoverImage();
         } else {
@@ -104,7 +107,6 @@ public class EditProjectWindow {
         // Bind UI back to model.
         this.model.title.bind(titleEdit.textProperty());
         this.model.memo.bind(descriptionEdit.textProperty());
-        //this.model.address.bind(addressEdit.textProperty());
 
         coverPhotoSiteLink.setText(COVERPHOTO_SITE);
 
@@ -125,6 +127,14 @@ public class EditProjectWindow {
             Coin amount = model.getMinPledgeAmount();
             // If min pledge == suggested amount it's ok, or if it's between min amount and goal.
             return coin.equals(amount) || (coin.isGreaterThan(amount) && coin.isLessThan(Coin.valueOf(this.model.goalAmount.get())));
+        });
+        minPledgeEdit.textProperty().addListener((obj, prev, cur) -> {
+            if (minPledgeValue.isValid.get()) {
+                if (cur.trim().equals(""))
+                    model.resetMinPledgeAmount();
+                else
+                    model.setMinPledgeAmount(valueOrThrow(cur));
+            }
         });
         ValidationLink addressValid = new ValidationLink(addressEdit, str -> !didThrow(() -> new Address(Main.params, str)));
         addressEdit.textProperty().addListener((obj, prev, cur) -> {
