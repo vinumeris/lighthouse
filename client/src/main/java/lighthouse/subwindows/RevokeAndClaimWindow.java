@@ -193,6 +193,7 @@ public class RevokeAndClaimWindow {
     private void revoke(@Nullable KeyParameter aesKey) {
         try {
             PledgingWallet.Revocation revocation = Main.wallet.revokePledge(pledgeToRevoke, aesKey);
+            progressBar.setProgress(-1);
             revocation.tx.getConfidence().addEventListener((conf, reason) -> {
                 progressBar.setProgress(conf.numBroadcastPeers() / (double) Main.bitcoin.peerGroup().getMinBroadcastConnections());
             }, Platform::runLater);
