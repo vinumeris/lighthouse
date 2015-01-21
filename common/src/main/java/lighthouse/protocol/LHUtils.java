@@ -1,12 +1,16 @@
 package lighthouse.protocol;
 
 import com.google.common.base.*;
+import com.google.common.io.*;
 import com.google.common.util.concurrent.*;
 import org.bitcoinj.core.*;
+import org.bitcoinj.net.discovery.*;
+import org.bitcoinj.params.*;
 import org.slf4j.*;
 
 import javax.annotation.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.nio.file.*;
 import java.time.*;
 import java.time.format.*;
@@ -62,6 +66,60 @@ public class LHUtils {
 
     public static boolean isMac() {
         return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
+    public static PeerGroup connectXTPeers(NetworkParameters params, boolean isOffline, Runnable onLocalNodeUnusable) {
+        PeerGroup xtPeers = new PeerGroup(params);
+        final int XT_PEERS = 4;
+        if (params == RegTestParams.get()) {
+            // Use two local regtest nodes for testing.
+            xtPeers.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort()));
+            xtPeers.addAddress(new PeerAddress(unchecked(InetAddress::getLocalHost), RegTestParams.get().getPort() + 1));
+            xtPeers.setUseLocalhostPeerWhenPossible(false);
+            xtPeers.startAsync();
+        } else {
+            // Just a quick check to see if we can resolve DNS names.
+            if (!isOffline) {
+                // PeerGroup will use a local Bitcoin node if at all possible, but it may not have what we need.
+                xtPeers.addEventListener(new AbstractPeerEventListener() {
+                    boolean shownMessage = false;
+
+                    @Override
+                    public void onPeerConnected(Peer peer, int peerCount) {
+                        if (peer.getAddress().getAddr().isLoopbackAddress() && !peer.getPeerVersionMessage().isGetUTXOsSupported()) {
+                            // We connected to localhost but it doesn't have what we need.
+                            log.warn("Localhost peer does not have support for NODE_GETUTXOS, ignoring");
+                            if (!shownMessage) {
+                                shownMessage = true;
+                                onLocalNodeUnusable.run();
+                            }
+                            xtPeers.setUseLocalhostPeerWhenPossible(false);
+                            xtPeers.setMaxConnections(XT_PEERS);
+                            peer.close();
+                        }
+                    }
+                });
+                // There's unfortunately no way to instruct the other seeds to search for a subset of the Bitcoin network
+                // so that's why we need to use a new more flexible HTTP based protocol here. The seed will find
+                // Bitcoin XT nodes as people start and stop them.
+                //
+                // Hopefully in future more people will run HTTP seeds, then we can use a MultiplexingDiscovery
+                // to randomly merge their answers and reduce the influence of any one seed. Additionally if
+                // more people run Bitcoin XT nodes we can bump up the number we search for here to again
+                // reduce the influence of any one node. But this needs people to help decentralise.
+                xtPeers.addPeerDiscovery(new HttpDiscovery(params,
+                                unchecked(() -> new URI("http://main.seed.vinumeris.com/peers?srvmask=3&getutxo=true")),
+                                // auth key used to sign responses.
+                                ECKey.fromPublicOnly(BaseEncoding.base16().decode(
+                                        "027a79143a4de36341494d21b6593015af6b2500e720ad2eda1c0b78165f4f38c4".toUpperCase()
+                                )))
+                );
+                xtPeers.setConnectTimeoutMillis(10000);
+                xtPeers.setMaxConnections(XT_PEERS);
+                xtPeers.startAsync();
+            }
+        }
+        return xtPeers;
     }
 
     //region Generic Java 8 enhancements
