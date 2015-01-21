@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <fx:root xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" type="VBox" spacing="20" VBox.vgrow="ALWAYS" alignment="CENTER" styleClass="content-vbox" onDragOver="#dragOver" onDragDropped="#dragDropped">
     <children>
@@ -14,6 +15,11 @@
                 </HBox>
                 <Label text="%You can also drop an existing project file here."/>
             </children>
+        </VBox>
+        <VBox alignment="CENTER" maxWidth="650" styleClass="reddit-ad" onMouseClicked="#onRedditAdClicked">
+            <ImageView fitWidth="290" fitHeight="90">
+                <Image url="@../reddit-ad.png"/>
+            </ImageView>
         </VBox>
         <Pane minHeight="320.0"/>
     </children>

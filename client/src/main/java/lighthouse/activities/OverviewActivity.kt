@@ -252,5 +252,11 @@ public class OverviewActivity : VBox(), Activity {
 
     override fun onStop() {}
 
+    FXML
+    public fun onRedditAdClicked(event: MouseEvent) {
+        log.info("reddit ad clicked")
+        Main.instance.getHostServices().showDocument("https://www.reddit.com/r/LighthouseProjects")
+    }
+
     private val log = LoggerFactory.getLogger(javaClass<OverviewActivity>())
 }
