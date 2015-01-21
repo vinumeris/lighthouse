@@ -1,19 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.*?>
-
 <fx:root type="javafx.scene.layout.AnchorPane" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
   <children>
     <HBox id="addressLabelBox" fx:id="box" alignment="CENTER_LEFT" layoutX="0.0" layoutY="0.0" prefHeight="21.0" spacing="10.0">
       <children>
-        <Label fx:id="addressLabel" onMouseClicked="#requestMoney" style="-fx-cursor: hand" text="&lt;address goes here&gt;" textFill="BLUE" underline="true">
+        <Label fx:id="addressLabel" onMouseClicked="#requestMoney" style="-fx-cursor: hand; -fx-text-fill: blue; -fx-underline: true" text="&lt;address goes here&gt;">
           <contextMenu>
             <ContextMenu fx:id="addressMenu">
               <items>

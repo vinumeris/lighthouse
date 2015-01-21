@@ -1,41 +1,33 @@
 package lighthouse.controls;
 
-import de.jensd.fx.fontawesome.AwesomeDude;
-import de.jensd.fx.fontawesome.AwesomeIcon;
-import javafx.beans.binding.StringExpression;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import de.jensd.fx.fontawesome.*;
+import javafx.beans.binding.*;
+import javafx.beans.property.*;
+import javafx.event.*;
+import javafx.fxml.*;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.geometry.*;
 import javafx.scene.Cursor;
-import javafx.scene.control.ContextMenu;
+import javafx.scene.control.*;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
-import lighthouse.Main;
-import lighthouse.subwindows.EmbeddedWindow;
-import lighthouse.utils.GuiUtils;
-import net.glxn.qrgen.QRCode;
-import net.glxn.qrgen.image.ImageType;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.uri.BitcoinURI;
+import javafx.scene.image.*;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import lighthouse.subwindows.*;
+import lighthouse.utils.*;
+import net.glxn.qrgen.*;
+import net.glxn.qrgen.image.*;
+import org.bitcoinj.core.*;
+import org.bitcoinj.uri.*;
 
 import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URI;
+import java.io.*;
+import java.net.*;
 
-import static javafx.beans.binding.Bindings.convert;
+import static javafx.beans.binding.Bindings.*;
 
 /**
  * A custom control that implements a clickable, copyable Bitcoin address. Clicking it opens a local wallet app. The
@@ -70,6 +62,10 @@ public class ClickableBitcoinAddress extends AnchorPane {
 
             addressStr = convert(address);
             addressLabel.textProperty().bind(addressStr);
+
+            // See below for why UNIX does not have clickable addresses.
+            if (LHUtils.isUnix())
+                addressLabel.setStyle("");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -108,6 +104,12 @@ public class ClickableBitcoinAddress extends AnchorPane {
             addressMenu.show(addressLabel, event.getScreenX(), event.getScreenY());
         } else {
             // User left clicked.
+            if (LHUtils.isUnix()) {
+                // Opening bitcoin URIs on Linux can result in hangs (issue #127). For now, we just make the link
+                // unclickable until someone has time to investigate what the underlying issue ie. Most Linux setups
+                // don't have configured URI handlers anyway.
+                return;
+            }
             try {
                 Desktop.getDesktop().browse(URI.create(uri()));
             } catch (IOException e) {

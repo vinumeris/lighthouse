@@ -146,6 +146,7 @@ public class Main extends Application {
         log.info("\n\n{} {} starting up. It is {}\n", APP_NAME, VERSION, LHUtils.nowAsString());
         log.info("App dir is {}. We have {} cores.", AppDirectory.dir(), Runtime.getRuntime().availableProcessors());
         log.info("Command line arguments are: {}", String.join(" ", getParameters().getRaw()));
+        log.info("We are running on: {}", System.getProperty("os.name"));
         // Show the crash dialog for any exceptions that we don't handle and that hit the main loop.
         CrashFX.setup();
         // Set up the basic window with an empty UI stack, and put a quick splash there.
