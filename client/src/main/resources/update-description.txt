@@ -1,8 +1,0 @@
-Bug fixes and small enhancements, introduce a link to the Lighthouse projects sub-reddit, a new project server.
-This update adds a link to the main screen to the first community-run project gallery, a Lighthouse specific sub-reddit.
-
-It also introduces a server picker, with the first community run project server by Joe Schmid (OneTap Software).
-
-Improves the infobar message for a new project that wasn't uploaded to the chosen server yet.
-
-Resolves 11 bugs found during the beta launch.
