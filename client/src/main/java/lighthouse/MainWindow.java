@@ -485,6 +485,12 @@ public class MainWindow {
         });
     }
 
+    @FXML
+    public void onRedditAdClicked(MouseEvent event) {
+        log.info("reddit ad clicked");
+        Main.instance.getHostServices().showDocument("https://www.reddit.com/r/LighthouseProjects");
+    }
+
     //region Generic Bitcoin wallet related code
     @FXML
     public void emptyWallet(ActionEvent event) {

@@ -270,3 +270,16 @@
 .hover-link:hover {
     -fx-underline: true;
 }
+
+.reddit-ad {
+    -fx-border-color: #ffffff;
+    -fx-border-radius: 6;
+    -fx-border-style: dashed;
+    -fx-background-radius: 6;
+    -fx-background-color: #ffffff33;
+    -fx-padding: 30px;
+    -fx-cursor: hand;
+}
+.reddit-ad:hover {
+    -fx-background-color: #ffffffcc;
+}
