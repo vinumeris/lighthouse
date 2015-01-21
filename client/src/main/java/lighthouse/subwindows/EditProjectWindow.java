@@ -59,7 +59,8 @@ public class EditProjectWindow {
 
     public static void openForCreate() {
         ProjectModel projectModel = new ProjectModel(Main.wallet);
-        projectModel.serverName.set("vinumeris.com");  // By default.
+        // Pick a random server as the default suggestion, to load balance across them more effectively.
+        projectModel.serverName.set(ServerList.pickRandom().hostName);  // By default.
         open(projectModel, "Create new project", false);
     }
 

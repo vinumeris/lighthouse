@@ -3,8 +3,7 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.*?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="603.0" prefWidth="708.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.AddProjectTypeWindow">
    <bottom>
       <HBox alignment="CENTER_RIGHT" prefHeight="81.0" prefWidth="750.0" spacing="10.0" styleClass="fat-buttons" BorderPane.alignment="CENTER">
@@ -37,13 +36,13 @@
                   <Insets />
                </VBox.margin>
                <children>
-                  <Text lineSpacing="15.0" strokeType="OUTSIDE" strokeWidth="0.0" text="This style of project involves a server that gathers pledges and keeps track of them for you. You need to either run a server yourself, or submit your project to someone else who runs one.&#10;&#10;If you have a server to use, enter its domain name here, and then upload the project file to it." />
+                  <Text lineSpacing="15.0" strokeType="OUTSIDE" strokeWidth="0.0" text="A server collects and monitors pledges on your behalf. You can use a community run server or run your own." />
                </children>
             </TextFlow>
             <HBox alignment="CENTER_LEFT" fillHeight="false" spacing="15.0">
                <children>
-                  <Label text="Server address" />
-                  <TextField fx:id="serverNameEdit" maxWidth="1.7976931348623157E308" prefHeight="26.0" promptText="e.g. vinumeris.com" HBox.hgrow="ALWAYS" />
+                  <Label text="Server name" />
+                  <ComboBox fx:id="serverNameCombo" editable="true" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
                </children>
                <VBox.margin>
                   <Insets bottom="60.0" />

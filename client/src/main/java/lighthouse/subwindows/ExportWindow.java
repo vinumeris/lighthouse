@@ -155,11 +155,15 @@ public class ExportWindow {
                 data.writeTo(outputStream);
                 if (savingPledge) {
                     pledge.commit(true);
-                } else if (project.getPaymentURL() != null && project.getPaymentURL().getHost().equals("vinumeris.com")) {
-                    // Special last minute usability hack for this server only.
-                    // TODO: either generalise this or implement issue 31 (smoother upload/submit path to servers).
-                    ProjectSubmitInstructionsWindow.open("project-hosting@vinumeris.com");
-                    return;
+                } else if (project.getPaymentURL() != null) {
+                    String host = project.getPaymentURL().getHost();
+                    ServerList.Entry entry = ServerList.hostnameToServer.get(host);
+                    if (entry != null) {
+                        // If we know about this server, i.e. because the user accepted our default, then show the
+                        // submit email address to them as guidance.
+                        ProjectSubmitInstructionsWindow.open(entry.emailAddress);
+                        return;
+                    }
                 }
                 overlayUI.done();
             } catch (IOException e) {

@@ -1,35 +1,26 @@
 package lighthouse.subwindows;
 
-import com.google.common.base.Throwables;
-import com.google.common.net.HostAndPort;
-import com.google.common.net.InternetDomainName;
-import com.vinumeris.crashfx.CrashFX;
+import com.google.common.base.*;
+import com.google.common.net.*;
+import com.vinumeris.crashfx.*;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
-import javafx.stage.DirectoryChooser;
-import lighthouse.Main;
-import lighthouse.model.ProjectModel;
-import lighthouse.protocol.LHProtos;
-import lighthouse.protocol.Project;
-import lighthouse.utils.GuiUtils;
-import lighthouse.utils.ValidationLink;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javafx.beans.property.*;
+import javafx.collections.*;
+import javafx.event.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import javafx.stage.*;
+import lighthouse.*;
+import lighthouse.model.*;
+import lighthouse.protocol.*;
+import lighthouse.utils.*;
+import org.slf4j.*;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.*;
+import java.nio.file.*;
 
-import static javafx.beans.binding.Bindings.not;
-import static lighthouse.utils.GuiUtils.informationalAlert;
-import static lighthouse.utils.GuiUtils.platformFiddleChooser;
+import static javafx.beans.binding.Bindings.*;
+import static lighthouse.utils.GuiUtils.*;
 
 /**
  * Screen where user chooses between server assisted and serverless mode.
@@ -39,7 +30,7 @@ public class AddProjectTypeWindow {
 
     @FXML RadioButton fullyDecentralised;
     @FXML RadioButton serverAssisted;
-    @FXML TextField serverNameEdit;
+    @FXML ComboBox<String> serverNameCombo;
     @FXML Button saveButton;
 
     private ProjectModel model;
@@ -58,28 +49,36 @@ public class AddProjectTypeWindow {
     private void setModel(ProjectModel model) {
         this.model = model;
         if (model.serverName.get() != null) {
-            serverNameEdit.setText(model.serverName.get());
+            serverNameCombo.setValue(model.serverName.get());
             serverAssisted.setSelected(true);
         } else {
             fullyDecentralised.setSelected(true);
         }
     }
 
+    private BooleanProperty isServerNameValid = new SimpleBooleanProperty(true);
+
     public void initialize() {
-        ValidationLink serverName = new ValidationLink(serverNameEdit, this::isServerNameValid);
-        serverNameEdit.textProperty().addListener(o -> {
+        ObservableList<String> hostnames = FXCollections.observableArrayList(ServerList.hostnameToServer.keySet());
+        serverNameCombo.itemsProperty().set(hostnames);
+
+        serverNameCombo.valueProperty().addListener(o -> {
             // Note that the validation link is updated AFTER this runs, so we must test directly.
-            final String text = serverNameEdit.getText();
-            if (isServerNameValid(text)) {
-                this.model.serverName.set(text);
+            final String text = serverNameCombo.getValue();
+            if (text == null) {
+                isServerNameValid.set(false);
+            } else {
+                isServerNameValid.set(isServerNameValid(text));
+                if (isServerNameValid.get())
+                    this.model.serverName.set(text);
             }
         });
         saveButton.disableProperty().bind(
             serverAssisted.selectedProperty().and(
-                serverNameEdit.textProperty().isEmpty().or(not(serverName.isValid))
+                serverNameCombo.valueProperty().isEqualTo("").or(not(isServerNameValid))
             )
         );
-        serverNameEdit.disableProperty().bind(fullyDecentralised.selectedProperty());
+        serverNameCombo.disableProperty().bind(fullyDecentralised.selectedProperty());
     }
 
     private boolean isServerNameValid(String str) {
@@ -155,6 +154,6 @@ public class AddProjectTypeWindow {
 
     @FXML
     public void fullyDecentralisedPress(ActionEvent event) {
-        serverNameEdit.setText("");
+        serverNameCombo.setValue(null);
     }
 }
