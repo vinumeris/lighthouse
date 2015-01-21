@@ -257,7 +257,7 @@ public class ProjectView extends HBox {
         if (status != null && status.error != null) {
             String msg = status.error.getLocalizedMessage();
             if (status.error instanceof FileNotFoundException)
-                msg = "Server error: 404 Not Found: project is not known";
+                msg = "Project is not on the server yet: email the project file to the operator";
             else if (status.error instanceof Ex.InconsistentUTXOAnswers)
                 msg = "Bitcoin P2P network returned inconsistent answers, please contact support";
             else if (status.error instanceof TimeoutException)
