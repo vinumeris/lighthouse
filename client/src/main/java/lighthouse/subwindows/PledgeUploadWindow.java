@@ -20,6 +20,8 @@ import static com.google.common.base.Preconditions.*;
 public class PledgeUploadWindow {
     private static final Logger log = LoggerFactory.getLogger(PledgeUploadWindow.class);
 
+    public static final int TIMEOUT_MSEC = 60 * 1000;  // 60 seconds: needs to be a long time to cover dep broadcast for servers with no local node.
+
     public Main.OverlayUI overlayUI;
 
     @FXML public Label uploadLabel;
@@ -51,9 +53,9 @@ public class PledgeUploadWindow {
                     HttpURLConnection connection = (HttpURLConnection) url.toURL().openConnection();
                     connection.setRequestMethod("POST");
                     connection.setDoOutput(true);
-                    connection.setConnectTimeout(10000);  // 10 seconds
+                    connection.setConnectTimeout(TIMEOUT_MSEC);
                     connection.setInstanceFollowRedirects(true);
-                    connection.setReadTimeout(10000);
+                    connection.setReadTimeout(TIMEOUT_MSEC);
                     try {
                         log.info("Connecting");
                         connection.connect();
