@@ -34,7 +34,7 @@ public class PledgeServer {
     public static void main(String[] args) throws Exception {
         OptionParser parser = new OptionParser();
         OptionSpec<String> dirFlag = parser.accepts("dir").withRequiredArg();
-        OptionSpec<String> netFlag = parser.accepts("net").withRequiredArg().defaultsTo("regtest");
+        OptionSpec<String> netFlag = parser.accepts("net").withRequiredArg().defaultsTo("main");
         OptionSpec<Short> portFlag = parser.accepts("port").withRequiredArg().ofType(Short.class).defaultsTo(DEFAULT_LOCALHOST_PORT);
         OptionSpec<String> keystoreFlag = parser.accepts("keystore").withRequiredArg();
         parser.accepts("local-node");
