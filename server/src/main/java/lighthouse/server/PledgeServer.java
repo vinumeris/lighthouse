@@ -85,21 +85,25 @@ public class PledgeServer {
 
         // Don't start up fully until we're properly set up. Eventually this can go away.
         log.info("Waiting to find {} peer(s) that supports getutxo", minPeersSupportingGetUTXO);
-        kit.peerGroup().waitForPeersWithServiceMask(minPeersSupportingGetUTXO, GetUTXOsMessage.SERVICE_FLAGS_REQUIRED).get();
-        log.info("Found ... starting web server on port {}", portFlag.value(options));
+        PeerGroup xtPeers = LHUtils.connectXTPeers(params, false /* server is never offline */, () -> {
+            log.warn("Your local Bitcoin node is not running Bitcoin XT, which is a patchset based on Bitcoin Core required for pledge checking.");
+            log.warn("Please get Bitcoin XT from https://github.com/bitcoinxt/bitcoinxt to use your local node. It is fully compatible.");
+        });
+        xtPeers.waitForPeersWithServiceMask(minPeersSupportingGetUTXO, GetUTXOsMessage.SERVICE_FLAGS_REQUIRED).get();
 
         // This app is mostly single threaded. It handles all requests and state changes on a single thread.
         // Speed should ideally not be an issue, as the backend blocks only rarely. If it's a problem then
         // we'll have to split the backend thread from the http server thread.
         AffinityExecutor.ServiceAffinityExecutor executor = new AffinityExecutor.ServiceAffinityExecutor("server");
         server.setExecutor(executor);
-        LighthouseBackend backend = new LighthouseBackend(SERVER, kit.peerGroup(), kit.peerGroup(), kit.chain(), (PledgingWallet) kit.wallet(), executor);
+        LighthouseBackend backend = new LighthouseBackend(SERVER, kit.peerGroup(), xtPeers, kit.chain(), (PledgingWallet) kit.wallet(), executor);
         backend.setMinPeersForUTXOQuery(minPeersSupportingGetUTXO);
         server.createContext(LHUtils.HTTP_PATH_PREFIX, new ProjectHandler(backend));
         server.createContext("/", exchange -> {
             log.warn("404 Not Found: {}", exchange.getRequestURI());
             exchange.sendResponseHeaders(404, -1);
         });
+        log.info("****** STARTING WEB SERVER ON PORT {} ******", portFlag.value(options));
         server.start();
     }
 
