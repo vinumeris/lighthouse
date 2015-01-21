@@ -179,9 +179,36 @@ public class ProjectHandler implements HttpHandler {
             authenticated = true;
         }
 
-        long totalPledged = 0;
+        // TODO: This pledge group stuff is no longer relevant as the protocol has evolved, and just opens up potential for bugs: remove it.
         PledgeGroup pledgeGroup = getPledgesFor(project);
-        for (LHProtos.Pledge pledge : pledgeGroup.open) {
+        long totalPledged = addPledgesToStatus(status, authenticated, pledgeGroup.open);
+        if (!pledgeGroup.claimed.isEmpty())
+            checkState(pledgeGroup.open.isEmpty());
+        addPledgesToStatus(status, authenticated, pledgeGroup.claimed);
+
+        LighthouseBackend.ProjectStateInfo info = projectStates.get(project.getID());
+        if (info.claimedBy != null) {
+            status.setClaimedBy(ByteString.copyFrom(info.claimedBy.getBytes()));
+        }
+
+        status.setValuePledgedSoFar(totalPledged);
+        final LHProtos.ProjectStatus proto = status.build();
+        byte[] bits;
+        switch (format) {
+            case PBUF: bits = proto.toByteArray(); break;
+            case JSON: bits = JsonFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
+            case HTML: bits = HtmlFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
+            case XML: bits = XmlFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
+            default: throw new AssertionError();
+        }
+        httpExchange.sendResponseHeaders(HTTP_OK, bits.length);
+        httpExchange.getResponseBody().write(bits);
+        httpExchange.close();
+    }
+
+    private long addPledgesToStatus(LHProtos.ProjectStatus.Builder status, boolean authenticated, Set<LHProtos.Pledge> pledges) {
+        long totalPledged = 0;
+        for (LHProtos.Pledge pledge : pledges) {
             if (authenticated) {
                 status.addPledges(pledge);
             } else {
@@ -202,31 +229,7 @@ public class ProjectHandler implements HttpHandler {
             }
             totalPledged += pledge.getPledgeDetails().getTotalInputValue();
         }
-
-        // Include the full contents of claimed pledges always, as by then the contract is visible on the block
-        // chain anyway and so the privacy and who-can-claim issues are gone.
-        if (!pledgeGroup.claimed.isEmpty())
-            checkState(pledgeGroup.open.isEmpty());
-        status.addAllPledges(pledgeGroup.claimed);
-
-        LighthouseBackend.ProjectStateInfo info = projectStates.get(project.getID());
-        if (info.claimedBy != null) {
-            status.setClaimedBy(ByteString.copyFrom(info.claimedBy.getBytes()));
-        }
-
-        status.setValuePledgedSoFar(totalPledged);
-        final LHProtos.ProjectStatus proto = status.build();
-        byte[] bits;
-        switch (format) {
-            case PBUF: bits = proto.toByteArray(); break;
-            case JSON: bits = JsonFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
-            case HTML: bits = HtmlFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
-            case XML: bits = XmlFormat.printToString(proto).getBytes(Charsets.UTF_8); break;
-            default: throw new AssertionError();
-        }
-        httpExchange.sendResponseHeaders(HTTP_OK, bits.length);
-        httpExchange.getResponseBody().write(bits);
-        httpExchange.close();
+        return totalPledged;
     }
 
     private void pledgeUpload(HttpExchange httpExchange, Project project) throws IOException {
