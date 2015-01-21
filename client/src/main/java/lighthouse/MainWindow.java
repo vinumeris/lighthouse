@@ -76,6 +76,8 @@ public class MainWindow {
 
     private SimpleBooleanProperty inProjectView = new SimpleBooleanProperty();
 
+    private int numInitialBoxes;
+
     private static Updater updater;
 
     enum Views {
@@ -85,6 +87,8 @@ public class MainWindow {
 
     // Called by FXMLLoader.
     public void initialize() {
+        numInitialBoxes = projectsVBox.getChildren().size();
+
         AwesomeDude.setIcon(emptyWalletBtn, AwesomeIcon.SIGN_OUT, "12pt", ContentDisplay.LEFT);
         Tooltip.install(emptyWalletBtn, new Tooltip("Send money out of the wallet"));
         AwesomeDude.setIcon(setupWalletBtn, AwesomeIcon.LOCK, "12pt", ContentDisplay.LEFT);
@@ -123,7 +127,7 @@ public class MainWindow {
                     slideInNewProject(change.getAddedSubList().get(0));
                 } else if (change.wasRemoved()) {
                     log.warn("Cannot animate project remove yet: {}", change);
-                    projectsVBox.getChildren().remove(projectsVBox.getChildren().size() - 2 - change.getFrom());
+                    projectsVBox.getChildren().remove(projectsVBox.getChildren().size() - 1 - numInitialBoxes - change.getFrom());
                 }
             }
         });
@@ -159,7 +163,7 @@ public class MainWindow {
         int uiIndex =
                 projectsVBox.getChildren().size()
                         - 1   // from size to index
-                        - 1   // the vbox for buttons at the bottom
+                        - numInitialBoxes   // the vbox for buttons at the bottom
                         - index;
         if (uiIndex < 0)
             return;  // This can happen if the project which is updated is not even on screen yet; Windows fucks up sometimes and tells us this so just ignore it.
