@@ -553,7 +553,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                     future.completeExceptionally(ex);
                 } else {
                     try {
-                        log.info("Processing project status:\n{}", status);
+                        log.info("Processing project status");
                         executor.checkOnThread();
                         // Server's view of the truth overrides our own for UI purposes, as we might have failed to
                         // observe the contract/claim tx if the user imported the project post-claim.
