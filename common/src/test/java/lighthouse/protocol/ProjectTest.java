@@ -303,5 +303,6 @@ public class ProjectTest {
         assertEquals("bob-http-example-com-1378-foo-bar", titleToUrlString("Bob http://example.com:1378/?foo=bar"));
         assertEquals("a-really-cool-20-title-with-lots-asdf-of-weird-chars", titleToUrlString("A really $cool %20 Title with ;;lots asdf\n of weird // chars"));
         assertEquals("български-език", titleToUrlString("български език"));
+        assertEquals("a-test-with-quotes-yeah", titleToUrlString("a test with \"quotes\" 'yeah'"));
     }
 }
