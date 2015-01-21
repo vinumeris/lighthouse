@@ -2,12 +2,10 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import lighthouse.controls.ClickableBitcoinAddress?>
-<?import lighthouse.controls.ProjectView?>
+<?import lighthouse.controls.*?>
 <VBox id="root" fx:id="root" alignment="CENTER" styleClass="cc-root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.MainWindow">
     <children>
         <HBox fx:id="topBox" minHeight="100" alignment="CENTER" styleClass="topbox">
@@ -92,6 +90,11 @@
                                                         </HBox>
                                                         <Label text="You can also drop an existing project file here."/>
                                                     </children>
+                                                </VBox>
+                                                <VBox alignment="CENTER" maxWidth="650" styleClass="reddit-ad" onMouseClicked="#onRedditAdClicked">
+                                                    <ImageView fitWidth="290" fitHeight="90">
+                                                        <Image url="@reddit-ad.png"/>
+                                                    </ImageView>
                                                 </VBox>
                                             </children>
                                             <padding>
