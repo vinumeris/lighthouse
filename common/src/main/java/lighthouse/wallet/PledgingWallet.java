@@ -448,7 +448,8 @@ public class PledgingWallet extends Wallet {
      */
     public CompletionProgress completeContractWithFee(Project project, Set<LHProtos.Pledge> pledges, @Nullable KeyParameter aesKey) throws InsufficientMoneyException {
         // The chances of having a fee shaped output are minimal, so we always create a dependency tx here.
-        final Coin feeSize = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
+        // We x2 it to avoid problems with sitting right on the dust threshold for older peers.
+        final Coin feeSize = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.multiply(2);
         log.info("Completing contract with fee: sending dependency tx");
         CompletionProgress progress = new CompletionProgress();
         TransactionConfidence.Listener broadcastListener = new TransactionConfidence.Listener() {
