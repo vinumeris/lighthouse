@@ -160,7 +160,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 }
             }
             wallet.addOnPledgeHandler((project, pledge) -> {
-                log.info("onPledgeHandler: {}", pledge);
                 final ObservableSet<LHProtos.Pledge> pledgesFor = getOpenPledgesFor(project);
                 pledgesFor.add(pledge);
             }, executor);
