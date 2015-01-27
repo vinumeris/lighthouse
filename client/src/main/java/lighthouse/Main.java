@@ -393,9 +393,10 @@ public class Main extends Application {
         if (bitcoin.isChainFileLocked()) {
             informationalAlert("Already running",
                     "This application is already running and cannot be started twice.");
-            Platform.exit();
             bitcoin = null;
+            xtPeers.stopAsync();
             walletLoadedLatch.countDown();
+            Platform.exit();
             return;
         }
         if (params == RegTestParams.get()) {
