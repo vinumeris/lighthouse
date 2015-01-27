@@ -22,7 +22,8 @@ public class ServerList {
 
     public static final List<Entry> servers = ImmutableList.of(
             new Entry("vinumeris.com", "project-hosting@vinumeris.com"),
-            new Entry("lighthouse.onetapsw.com", "lighthouse-projects@onetapsw.com")
+            new Entry("lighthouse.onetapsw.com", "lighthouse-projects@onetapsw.com"),
+            new Entry("lighthouseprojects.io", "projects@lighthouseprojects.io")
     );
     public static final Map<String, Entry> hostnameToServer;
 
