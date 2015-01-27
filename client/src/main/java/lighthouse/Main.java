@@ -83,6 +83,7 @@ public class Main extends Application {
 
     private boolean useTor;
     private boolean slowGFX;
+    @Nullable private PeerAddress[] cmdLineRequestedIPs;
     public String updatesURL = UPDATES_BASE_URL;
     public static Path unadjustedAppDir;   // ignoring which network we're on.
 
@@ -179,6 +180,7 @@ public class Main extends Application {
                     "  --use-tor:                      Enable experimental Tor mode (may freeze up)%n" +
                     "  --slow-gfx:                     Enable more eyecandy that may stutter on slow GFX cards%n" +
                     "  --net={regtest,main,test}:      Select Bitcoin network to operate on.%n" +
+                    "  --connect=ipaddr,ipaddr         Uses the given IP addresses for REGULAR (non-XT) Bitcoin usage.%n" +
                     "  --name=alice                    Name is put in titlebar and pledge filenames, useful for testing%n" +
                     "                                  multiple instances on the same machine.%n" +
                     "  --appdir=/path/to/dir           Overrides the usual directory used, useful for testing multiple%n" +
@@ -227,6 +229,20 @@ public class Main extends Application {
             }
         }
 
+        String cmdLineIps = getParameters().getNamed().get("connect");
+        if (cmdLineIps != null) {
+            List<String> ips = Splitter.on(',').splitToList(cmdLineIps);
+            cmdLineRequestedIPs = new PeerAddress[ips.size()];
+            for (int i = 0; i < ips.size(); i++) {
+                String ip = ips.get(i);
+                try {
+                    log.info("Resolving {} for usage", ip);
+                    cmdLineRequestedIPs[i] = new PeerAddress(InetAddress.getByName(ip), params.getPort());
+                } catch (UnknownHostException e) {
+                    log.error("Unrecognised IP/DNS address, ignoring: " + ip);
+                }
+            }
+        }
         return true;
     }
 
@@ -393,6 +409,10 @@ public class Main extends Application {
                .setDownloadListener(MainWindow.bitcoinUIModel.getDownloadListener())
                .setUserAgent(APP_NAME, "" + VERSION)
                .restoreWalletFromSeed(restoreFromSeed);
+
+        if (cmdLineRequestedIPs != null) {
+            bitcoin.setPeerNodes(cmdLineRequestedIPs);
+        }
 
         if (useTor && params != RegTestParams.get())
             bitcoin.useTor();
