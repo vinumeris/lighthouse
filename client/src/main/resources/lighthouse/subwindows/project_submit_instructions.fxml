@@ -19,8 +19,8 @@
    <center>
       <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Label style="-fx-font-size: 20;" text="To submit your project for hosting, email it to:" />
-            <Label fx:id="submitEmailAddr" style="-fx-font-size: 30; -fx-text-fill: blue; -fx-underline: true;" text="project-hosting@vinumeris.com">
+            <Label style="-fx-font-size: 20;" text="Now submit your project for hosting:" />
+            <Label fx:id="submitAddressLabel" style="-fx-font-size: 30; -fx-text-fill: blue; -fx-underline: true;" text="project-hosting@vinumeris.com">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>

@@ -8,6 +8,7 @@ import javafx.collections.*;
 import javafx.event.*;
 import javafx.fxml.*;
 import javafx.scene.control.*;
+import javafx.scene.text.*;
 import javafx.stage.*;
 import lighthouse.*;
 import lighthouse.model.*;
@@ -30,6 +31,7 @@ public class AddProjectTypeWindow {
     @FXML RadioButton serverAssisted;
     @FXML ComboBox<String> serverNameCombo;
     @FXML Button saveButton;
+    @FXML Text serverInstructionsLabel;
 
     private ProjectModel model;
     private boolean editing;
@@ -58,6 +60,15 @@ public class AddProjectTypeWindow {
         ObservableList<String> hostnames = FXCollections.observableArrayList(ServerList.hostnameToServer.keySet());
         serverNameCombo.itemsProperty().set(hostnames);
         serverNameCombo.disableProperty().bind(fullyDecentralised.selectedProperty());
+
+        serverNameCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
+            ServerList.Entry entry = ServerList.hostnameToServer.get(newValue);
+            if (entry != null) {
+                serverInstructionsLabel.setText(entry.instructions);
+            } else {
+                serverInstructionsLabel.setText("");
+            }
+        });
     }
 
     private boolean isServerNameValid(String str) {

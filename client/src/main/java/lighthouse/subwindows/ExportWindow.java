@@ -161,7 +161,7 @@ public class ExportWindow {
                     if (entry != null) {
                         // If we know about this server, i.e. because the user accepted our default, then show the
                         // submit email address to them as guidance.
-                        ProjectSubmitInstructionsWindow.open(entry.emailAddress);
+                        ProjectSubmitInstructionsWindow.open(entry.submitAddress, entry.submitType);
                         return;
                     }
                 }
