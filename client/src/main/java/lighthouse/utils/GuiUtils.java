@@ -1,51 +1,39 @@
 package lighthouse.utils;
 
-import com.google.common.util.concurrent.Uninterruptibles;
-import com.sun.prism.GraphicsPipeline;
-import com.sun.prism.sw.SWPipeline;
-import com.vinumeris.crashfx.CrashWindow;
+import com.google.common.util.concurrent.*;
+import com.sun.prism.*;
+import com.sun.prism.sw.*;
+import com.vinumeris.crashfx.*;
 import javafx.animation.*;
-import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.NumberBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.WritableDoubleValue;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.CacheHint;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.effect.BlurType;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.GaussianBlur;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.util.Duration;
-import lighthouse.Main;
-import lighthouse.protocol.LHUtils;
-import org.bitcoinj.core.Coin;
-import org.controlsfx.control.PopOver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javafx.application.*;
+import javafx.beans.binding.*;
+import javafx.beans.property.*;
+import javafx.beans.value.*;
+import javafx.fxml.*;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.effect.*;
+import javafx.scene.image.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.*;
+import javafx.scene.shape.*;
+import javafx.stage.*;
+import javafx.util.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import org.bitcoinj.core.*;
+import org.controlsfx.control.*;
+import org.slf4j.*;
 
-import javax.annotation.Nullable;
-import java.io.File;
-import java.net.URL;
+import javax.annotation.*;
+import java.io.*;
+import java.net.*;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.*;
 
-import static lighthouse.protocol.LHUtils.unchecked;
+import static lighthouse.protocol.LHUtils.*;
 
 public class GuiUtils {
     public static final Logger log = LoggerFactory.getLogger(GuiUtils.class);
@@ -335,7 +323,13 @@ public class GuiUtils {
         view.setClip(clipRect);
     }
 
+    private static HashMap<Node, Runnable> currentPops = new HashMap<>();
+
     public static CompletableFuture<Void> arrowBubbleToNode(Node target, String text) {
+        checkGuiThread();
+        // Make any bubble that's currently pointing to the same node finish up.
+        if (currentPops.get(target) != null)
+            currentPops.get(target).run();
         Label content = new Label(text);
         content.setStyle("-fx-font-size: 12; -fx-padding: 0 20 0 20");
         PopOver popover = new PopOver(content);
@@ -343,9 +337,29 @@ public class GuiUtils {
         popover.setArrowLocation(PopOver.ArrowLocation.TOP_CENTER);
         popover.show(target);
         CompletableFuture<Void> future = new CompletableFuture<>();
-        runOnGuiThreadAfter(4000, () -> {
-            popover.hide(UI_ANIMATION_TIME);
-            runOnGuiThreadAfter(UI_ANIMATION_TIME_MSEC, () -> future.complete(null));
+        Runnable finish = new Runnable() {
+            private boolean ran = false;
+
+            @Override
+            public void run() {
+                checkGuiThread();
+                if (!ran) {
+                    currentPops.remove(target);
+                    ran = true;
+                    popover.hide();
+                    runOnGuiThreadAfter(200 /* from PopOver sources */, () -> {
+                        if (!future.isDone()) future.complete(null);
+                    });
+                }
+            }
+        };
+        currentPops.put(target, finish);
+        // Make bubble disappear after 4 seconds.
+        runOnGuiThreadAfter(4000, finish);
+        // Make bubble disappear if the node it's pointing to disappears.
+        target.sceneProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null)
+                finish.run();
         });
         return future;
     }

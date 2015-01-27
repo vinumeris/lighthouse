@@ -48,7 +48,7 @@
                   <Insets bottom="60.0" />
                </VBox.margin>
             </HBox>
-            <RadioButton fx:id="fullyDecentralised" mnemonicParsing="false" onAction="#fullyDecentralisedPress" text="Fully decentralised" toggleGroup="$a">
+            <RadioButton fx:id="fullyDecentralised" mnemonicParsing="false" text="Fully decentralised" toggleGroup="$a">
                <VBox.margin>
                   <Insets left="-27.0" />
                </VBox.margin>

@@ -4,7 +4,6 @@ import com.google.common.base.*;
 import com.google.common.net.*;
 import com.vinumeris.crashfx.*;
 import javafx.application.Platform;
-import javafx.beans.property.*;
 import javafx.collections.*;
 import javafx.event.*;
 import javafx.fxml.*;
@@ -19,7 +18,6 @@ import org.slf4j.*;
 import java.io.*;
 import java.nio.file.*;
 
-import static javafx.beans.binding.Bindings.*;
 import static lighthouse.utils.GuiUtils.*;
 
 /**
@@ -56,34 +54,15 @@ public class AddProjectTypeWindow {
         }
     }
 
-    private BooleanProperty isServerNameValid = new SimpleBooleanProperty(true);
-
     public void initialize() {
         ObservableList<String> hostnames = FXCollections.observableArrayList(ServerList.hostnameToServer.keySet());
         serverNameCombo.itemsProperty().set(hostnames);
-
-        serverNameCombo.valueProperty().addListener(o -> {
-            // Note that the validation link is updated AFTER this runs, so we must test directly.
-            final String text = serverNameCombo.getValue();
-            if (text == null) {
-                isServerNameValid.set(false);
-            } else {
-                isServerNameValid.set(isServerNameValid(text));
-                if (isServerNameValid.get())
-                    this.model.serverName.set(text);
-            }
-        });
-        saveButton.disableProperty().bind(
-            serverAssisted.selectedProperty().and(
-                serverNameCombo.valueProperty().isEqualTo("").or(not(isServerNameValid))
-            )
-        );
         serverNameCombo.disableProperty().bind(fullyDecentralised.selectedProperty());
     }
 
     private boolean isServerNameValid(String str) {
         try {
-            if (str.isEmpty() || str.equals("localhost")) return true;
+            if (str.equals("localhost")) return true;
             HostAndPort hostAndPort = HostAndPort.fromString(str);
             return (InternetDomainName.isValid(hostAndPort.getHostText()) &&
                     InternetDomainName.from(hostAndPort.getHostText()).isUnderPublicSuffix());
@@ -92,10 +71,29 @@ public class AddProjectTypeWindow {
         }
     }
 
+    // Returns true if form is valid.
+    private boolean validateAndSync() {
+        if (serverAssisted.isSelected()) {
+            if (serverNameCombo.getValue() == null || serverNameCombo.getValue().equals("")) {
+                GuiUtils.arrowBubbleToNode(serverNameCombo, "You must pick a server.");
+                return false;
+            } else if (!isServerNameValid(serverNameCombo.getValue())) {
+                GuiUtils.arrowBubbleToNode(serverNameCombo, "The server name is not considered valid.");
+                return false;
+            }
+        }
+
+        model.serverName.set(serverAssisted.isSelected() ? serverNameCombo.getValue() : "");
+        return true;
+    }
+
     @FXML
     public void saveClicked(ActionEvent event) {
         // Work around ConcurrentModificationException error.
         Platform.runLater(() -> {
+            if (!validateAndSync())
+                return;
+
             final LHProtos.ProjectDetails detailsProto = model.getDetailsProto().build();
             log.info("Saving: {}", detailsProto.getExtraDetails().getTitle());
             try {
@@ -150,10 +148,5 @@ public class AddProjectTypeWindow {
             EditProjectWindow.openForEdit(model);
         else
             EditProjectWindow.openForCreate(model);
-    }
-
-    @FXML
-    public void fullyDecentralisedPress(ActionEvent event) {
-        serverNameCombo.setValue(null);
     }
 }
