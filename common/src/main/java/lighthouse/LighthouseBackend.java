@@ -241,8 +241,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         switch (conf.getConfidenceType()) {
             case PENDING:
                 int seenBy = conf.numBroadcastPeers();
-                log.info("Claim seen by {} peers", seenBy);
-                if (seenBy < regularP2P.getMinBroadcastConnections())
+                int minBroadcastConnections = regularP2P.getMinBroadcastConnections();
+                log.info("Claim seen by {}/{} peers", seenBy, minBroadcastConnections);
+                if (seenBy < minBroadcastConnections)
                     break;
                 // Fall through ...
             case BUILDING:
