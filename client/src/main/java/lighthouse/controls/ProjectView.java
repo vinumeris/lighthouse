@@ -209,7 +209,14 @@ public class ProjectView extends HBox {
         noPledgesLabel.visibleProperty().bind(isEmpty(pledgesList.getItems()));
 
         // Load and set up the cover image.
-        Image img = new Image(p.getCoverImage().newInput());
+	Image img = new Image(p.getCoverImage().newInput());
+        if (img.getException() != null) {
+	    try {
+	        img = new Image(getResource("default-cover-image.png").openStream());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+	}
         if (img.getException() != null)
             Throwables.propagate(img.getException());
         BackgroundSize cover = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, false, true);
