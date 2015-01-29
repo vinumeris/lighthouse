@@ -144,7 +144,7 @@ public class RevokeAndClaimWindow {
     private void broadcastClaim(Set<LHProtos.Pledge> pledges, @Nullable KeyParameter key) {
         try {
             PledgingWallet.CompletionProgress progress = Main.wallet.completeContractWithFee(projectToClaim, pledges, key);
-            double total = Main.bitcoin.peerGroup().getMinBroadcastConnections() * 2;  // two transactions.
+            double total = Main.bitcoin.peerGroup().getMinBroadcastConnections();
             progress.peersSeen = seen -> {
                 if (seen == -1) {
                     Platform.runLater(onSuccess::run);
