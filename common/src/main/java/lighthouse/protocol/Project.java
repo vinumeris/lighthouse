@@ -16,6 +16,7 @@ import org.spongycastle.crypto.params.*;
 import org.spongycastle.util.io.*;
 
 import javax.annotation.*;
+import java.io.*;
 import java.net.*;
 import java.security.*;
 import java.time.*;
@@ -385,7 +386,11 @@ public class Project {
                 byte[] bits = Streams.readAllLimited(connection.getInputStream(), 1024 * 1024);  // 1mb limit.
                 future.complete(LHProtos.ProjectStatus.parseFrom(bits));
             } catch (Exception e) {
-                log.error("Failed download from server " + paymentURL, e);
+                if (e instanceof FileNotFoundException) {
+                    log.warn("Project not yet on the server: 404 Not Found: {}", paymentURL);
+                } else {
+                    log.error("Failed download from server " + paymentURL, e);
+                }
                 future.completeExceptionally(Throwables.getRootCause(e));
             }
         }, "Project downloader");
