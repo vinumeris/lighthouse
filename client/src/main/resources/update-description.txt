@@ -1,0 +1,5 @@
+Two new pledge servers and bug fixes.
+Add lighthouse.bitseattle.com and lighthouseprojects.io as pledge server options and make the type selection screen more helpful.
+Fix creation of serverless projects. Fix clickable bitcoin address on Linux.
+Add a new command line flag that can be used to force usage of particular Bitcoin nodes.
+Various P2P networking tweaks and fixes. Attempted workaround for crash on Linux.
