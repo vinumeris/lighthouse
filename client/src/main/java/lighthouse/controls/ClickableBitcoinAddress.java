@@ -5,17 +5,13 @@ import javafx.beans.binding.*;
 import javafx.beans.property.*;
 import javafx.event.*;
 import javafx.fxml.*;
-import javafx.geometry.Insets;
 import javafx.geometry.*;
-import javafx.scene.Cursor;
+import javafx.scene.*;
 import javafx.scene.control.*;
-import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import lighthouse.*;
-import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
 import lighthouse.utils.*;
 import net.glxn.qrgen.*;
@@ -23,9 +19,7 @@ import net.glxn.qrgen.image.*;
 import org.bitcoinj.core.*;
 import org.bitcoinj.uri.*;
 
-import java.awt.*;
 import java.io.*;
-import java.net.*;
 
 import static javafx.beans.binding.Bindings.*;
 
@@ -62,10 +56,6 @@ public class ClickableBitcoinAddress extends AnchorPane {
 
             addressStr = convert(address);
             addressLabel.textProperty().bind(addressStr);
-
-            // See below for why UNIX does not have clickable addresses.
-            if (LHUtils.isUnix())
-                addressLabel.setStyle("");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -104,17 +94,7 @@ public class ClickableBitcoinAddress extends AnchorPane {
             addressMenu.show(addressLabel, event.getScreenX(), event.getScreenY());
         } else {
             // User left clicked.
-            if (LHUtils.isUnix()) {
-                // Opening bitcoin URIs on Linux can result in hangs (issue #127). For now, we just make the link
-                // unclickable until someone has time to investigate what the underlying issue ie. Most Linux setups
-                // don't have configured URI handlers anyway.
-                return;
-            }
-            try {
-                Desktop.getDesktop().browse(URI.create(uri()));
-            } catch (IOException e) {
-                GuiUtils.informationalAlert("Opening wallet app failed", "Perhaps you don't have one installed?");
-            }
+            Main.instance.getHostServices().showDocument(uri());
         }
     }
 
