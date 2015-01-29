@@ -1,6 +1,5 @@
 package lighthouse;
 
-import com.google.protobuf.*;
 import com.subgraph.orchid.*;
 import com.vinumeris.updatefx.*;
 import de.jensd.fx.fontawesome.*;
@@ -341,22 +340,18 @@ public class MainWindow {
         }
     }
 
-    private static final String LAST_VER_TAG = "com.vinumeris.lighthouse.lastVer";
     private void maybeShowReleaseNotes() {
         // Show release notes when we've upgraded to a new version (hard coded), but only if this is the first run
         // after the upgrade.
-        ByteString bytes = Main.wallet.maybeGetTag(LAST_VER_TAG);
-        if (bytes != null) {
-            int lastVer = Integer.parseInt(bytes.toStringUtf8());
-            if (Main.VERSION > lastVer) {
-                log.info("Was upgraded from v{} to v{}!", lastVer, Main.VERSION);
+        int lastRunVersion = Main.instance.prefs.getLastRunVersion();
+        if (lastRunVersion < Main.VERSION) {
+            log.info("Was upgraded from v{} to v{}!", lastRunVersion, Main.VERSION);
 
-                //
-                // No release notes currently.
-                //
-            }
+            //
+            // No release notes currently.
+            //
         }
-        Main.wallet.setTag(LAST_VER_TAG, ByteString.copyFromUtf8("" + Main.VERSION));
+        Main.instance.prefs.setLastRunVersion(Main.VERSION);
     }
 
     private void setupBitcoinSyncNotification() {

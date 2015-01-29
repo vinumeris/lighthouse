@@ -14,6 +14,7 @@ import java.util.*;
  */
 public class UserPrefs {
     private static final Logger log = LoggerFactory.getLogger(UserPrefs.class);
+
     private Properties prefs;
     private final Path path;
 
@@ -69,6 +70,15 @@ public class UserPrefs {
 
     public void setCoverPhotoFolder(Path path) {
         prefs.setProperty("coverPhotoFolder", path.toAbsolutePath().toString());
+        store();
+    }
+
+    public int getLastRunVersion() {
+        return Integer.parseInt(prefs.getProperty("lastRunVersion", "" + Main.VERSION));
+    }
+
+    public void setLastRunVersion(int version) {
+        prefs.setProperty("lastRunVersion", "" + version);
         store();
     }
 }
