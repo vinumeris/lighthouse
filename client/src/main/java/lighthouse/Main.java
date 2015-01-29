@@ -154,6 +154,7 @@ public class Main extends Application {
         reached("JFX initialised");
         prefs = new UserPrefs();
         initGUI(stage);
+        stage.setMaximized(true);
         stage.show();
         Runnable setup = () -> {
             uncheck(() -> initBitcoin(null));   // This will happen mostly async.
