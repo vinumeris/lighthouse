@@ -154,7 +154,6 @@ public class Main extends Application {
         reached("JFX initialised");
         prefs = new UserPrefs();
         initGUI(stage);
-        stage.setMaximized(true);
         stage.show();
         Runnable setup = () -> {
             uncheck(() -> initBitcoin(null));   // This will happen mostly async.
@@ -293,9 +292,12 @@ public class Main extends Application {
         stage.setMinWidth(800);
         stage.setMinHeight(600);
         stage.setWidth(1024);
-        // Kind of empirical hacks - we could also just start maximised but then animations can get slow on big retina
-        // displays. We try and fit on small screens with task bars / docks here.
+        // Kind of empirical hack.
         stage.setHeight(Math.max(750, Screen.getPrimary().getBounds().getHeight() - 150));
+
+        // This might overwrite the settings above and will maximize the window by default.
+        prefs.readStageSettings(stage);
+
         stage.setScene(scene);
 
         if (demoName != null) {
@@ -617,6 +619,7 @@ public class Main extends Application {
 
     @Override
     public void stop() throws Exception {
+        prefs.storeStageSettings(mainStage);
         if (bitcoin != null && bitcoin.isRunning()) {
             try {
                 backend.shutdown();
