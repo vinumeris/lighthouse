@@ -141,6 +141,7 @@ public class PledgeServer {
         } else {
             logger.removeHandler(logger.getHandlers()[0]);
         }
+        logger.setLevel(Level.INFO);
         loggerPin = logger;
     }
 }
