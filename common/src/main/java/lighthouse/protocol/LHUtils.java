@@ -264,9 +264,6 @@ public class LHUtils {
         AtomicInteger numPending = new AtomicInteger(futures.size());
         for (CompletableFuture<T> future : futures) {
             future.handle((v, ex) -> {
-                if (ex != null) {
-                    log.error("Future failed with an exception: {}", Throwables.getRootCause(ex).toString());
-                }
                 if (numPending.decrementAndGet() == 0)
                     result.complete(v);
                 return null;

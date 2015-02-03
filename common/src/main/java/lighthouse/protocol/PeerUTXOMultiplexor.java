@@ -1,22 +1,14 @@
 package lighthouse.protocol;
 
-import org.bitcoinj.core.Peer;
-import org.bitcoinj.core.TransactionOutPoint;
-import org.bitcoinj.core.UTXOsMessage;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.util.concurrent.*;
+import org.bitcoinj.core.*;
+import org.slf4j.*;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import javax.annotation.*;
+import java.util.*;
+import java.util.concurrent.*;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 /**
  * A UTXOSource that repeats the given query on all provided peers, waits for the response from all of them
@@ -44,12 +36,9 @@ public class PeerUTXOMultiplexor {
                 @Override
                 public void onSuccess(@Nullable List<UTXOsMessage> val) {
                     checkNotNull(val);
-                    log.info("Got {} UTXO responses", val.size());
                     // Verify they are all the same.
                     UTXOsMessage template = val.get(0);
-                    log.info("Template is: {}", template);
                     for (UTXOsMessage response : val) {
-                        log.info("response is: {}", response);
                         if (!response.equals(template)) {
                             log.error("Got inconsistent UTXO answers from peer: {}", response);
                             result.completeExceptionally(new Ex.InconsistentUTXOAnswers());

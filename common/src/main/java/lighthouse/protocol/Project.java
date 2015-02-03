@@ -189,15 +189,13 @@ public class Project {
      * representing the error.
      */
     public CompletableFuture<LHProtos.Pledge> verifyPledge(UTXOSource peer, LHProtos.Pledge pledge) {
+        Sha256Hash pledgeHash = LHUtils.hashFromPledge(pledge);
         try {
-            log.info("Checking pledge for project '{}' [{}]", getTitle(), getID());
+            log.debug("Checking pledge {} for project '{}' [{}]", pledgeHash, getTitle(), getID());
             Transaction tx = fastSanityCheck(pledge);
             return lookupUTXOs(peer, tx).thenApply((result) -> {
-                if (result.size() != tx.getInputs().size()) {
-                    log.error("Could not locate all pledge UTXOs: may be double spent. Found:\n{}\n ... " +
-                            " and pledge tx is...\n{}", result.toString(), tx);
+                if (result.size() != tx.getInputs().size())
                     throw new Ex.UnknownUTXO();
-                }
                 // The pledge matches some unspent outputs: now verify the scripts can spend and are signed with
                 // SIGHASH_ANYONECANPAY as appropriate.
                 verifyScripts(tx, result);
@@ -206,10 +204,11 @@ public class Project {
                 verifyValues(pledge, result);
                 // The pledge appears to be connected to unspent outputs and should be accepted by the network.
                 // So we think it's a success!
-                log.info("Pledge appears to be OK");
+                log.info("Pledge {} appears to be OK", pledgeHash);
                 return pledge;
             });
         } catch (Exception e) {
+            log.error("Pledge is invalid: {}: {}", pledgeHash, Throwables.getRootCause(e));
             CompletableFuture<LHProtos.Pledge> future = new CompletableFuture<>();
             future.completeExceptionally(e);
             return future;
@@ -377,14 +376,23 @@ public class Project {
         Thread thread = new Thread(() -> {
             try {
                 final int TIMEOUT_MS = 10 * 1000;
-                URLConnection connection = getServerQueryURL(wallet, key).openConnection();
+                HttpURLConnection connection = (HttpURLConnection) getServerQueryURL(wallet, key).openConnection();
                 connection.setDoOutput(true);
                 connection.setConnectTimeout(TIMEOUT_MS);
                 connection.setReadTimeout(TIMEOUT_MS);
                 connection.addRequestProperty("User-Agent", GET_STATUS_USER_AGENT);
                 connection.connect();
-                byte[] bits = Streams.readAllLimited(connection.getInputStream(), 1024 * 1024);  // 1mb limit.
-                future.complete(LHProtos.ProjectStatus.parseFrom(bits));
+                int responseCode = connection.getResponseCode();
+                if (responseCode == 200) {
+                    byte[] bits = Streams.readAllLimited(connection.getInputStream(), 1024 * 1024);  // 1mb limit.
+                    future.complete(LHProtos.ProjectStatus.parseFrom(bits));
+                } else {
+                    log.error("Failed download from server: error {}: {}", responseCode, paymentURL);
+                    if (responseCode == 404)
+                        throw new FileNotFoundException();
+                    else
+                        throw new IOException("Server returned HTTP response code " + responseCode);
+                }
             } catch (Exception e) {
                 if (e instanceof FileNotFoundException) {
                     log.warn("Project not yet on the server: 404 Not Found: {}", paymentURL);

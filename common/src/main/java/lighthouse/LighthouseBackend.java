@@ -485,8 +485,9 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             // The batcher queues up queries from project.verifyPledge and combines them into a single query, to
             // speed things up and minimise network traffic.
             BatchingUTXOSource utxoSource = new BatchingUTXOSource(multiplexor);
+            ArrayList<LHProtos.Pledge> pledgesInFixedOrder = new ArrayList<>(pledges);
             List<CompletableFuture<LHProtos.Pledge>> futures = new ArrayList<>(pledges.size());
-            for (LHProtos.Pledge pledge : pledges)
+            for (LHProtos.Pledge pledge : pledgesInFixedOrder)
                 futures.add(project.verifyPledge(utxoSource, pledge));
             try {
                 utxoSource.run();   // Actually send the query.
@@ -496,7 +497,8 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             }
             Set<TransactionOutPoint> allOutpoints = new HashSet<>();
             List<LHProtos.Pledge> verifiedPledges = new ArrayList<>(futures.size());
-            for (CompletableFuture<LHProtos.Pledge> future : futures) {
+            for (int i = 0; i < futures.size(); i++) {
+                CompletableFuture<LHProtos.Pledge> future = futures.get(i);
                 if (!future.isDone()) {
                     log.warn("getutxo lookup failed or timed out: {}", future);
                     continue;
@@ -515,10 +517,13 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                     }
                     verifiedPledges.add(pledge);
                 } catch (ExecutionException e) {
-                    // Unless pledge was merely revoked, we will expose the error to the UI and stop processing pledges.
-                    // We don't continue and try to process the rest.
-                    if (!(getRootCause(e) instanceof Ex.UnknownUTXO))
+                    // We ignore pledges if they are revoked, and throw a check error otherwise.
+                    Throwable cause = getRootCause(e);
+                    if (!(cause instanceof Ex.UnknownUTXO)) {
+                        LHProtos.Pledge pledge = pledgesInFixedOrder.get(i);
+                        log.error("Pledge has an error, putting project in error state: {}: {}\n", LHUtils.hashFromPledge(pledge), pledge);
                         throw e;
+                    }
                 }
             }
             log.info("{} of {} pledges verified (were not revoked/claimed)", verifiedPledges.size(), pledges.size());
@@ -527,7 +532,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             markAsCheckDone(project);
             result.complete(new HashSet<>(verifiedPledges));
         } catch (InterruptedException | ExecutionException e) {
-            log.error("Error looking up UTXOs", e);
+            log.error("Unexpected error checking pledge, marking project as in error state", e);
             markAsErrored(project, e);
             result.completeExceptionally(e);
         }
