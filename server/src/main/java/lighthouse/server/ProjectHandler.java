@@ -33,6 +33,7 @@ public class ProjectHandler implements HttpHandler {
     private final LighthouseBackend backend;
     private final AffinityExecutor executor;
     private final ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;
+    private final ObservableMap<Project, LighthouseBackend.CheckStatus> checkStates;
 
     // This ends up being mostly the same as LighthouseBackend.pledges and exists in case we want to run the web
     // server in a different thread to the backend in future.
@@ -59,6 +60,7 @@ public class ProjectHandler implements HttpHandler {
         // This might change in future so alias it to keep assertions simple.
         this.executor = backend.executor;
         this.projectStates = backend.mirrorProjectStates(executor);
+        this.checkStates = backend.mirrorCheckStatuses(executor);
     }
 
     public void sendError(HttpExchange exchange, int code) {
@@ -152,6 +154,19 @@ public class ProjectHandler implements HttpHandler {
             httpExchange.getResponseBody().write(bits);
             httpExchange.close();
             return;
+        }
+
+        LighthouseBackend.CheckStatus checkStatus = checkStates.get(project);
+        if (checkStatus != null) {
+            Throwable checkError = checkStatus.error;
+            if (checkError != null) {
+                log.error("Replying with 500 due to check error", checkError);
+                byte[] bits = ("Error when checking project: " + checkError).getBytes();
+                httpExchange.sendResponseHeaders(HTTP_INTERNAL_ERROR, bits.length);
+                httpExchange.getResponseBody().write(bits);
+                httpExchange.close();
+                return;
+            }
         }
 
         LHProtos.ProjectStatus.Builder status = LHProtos.ProjectStatus.newBuilder();
