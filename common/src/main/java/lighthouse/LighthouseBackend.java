@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Throwables.*;
 import static java.util.stream.Collectors.*;
 import static lighthouse.protocol.LHUtils.*;
-import static lighthouse.utils.MoreBindings.*;
 
 /**
  * Exposes observable data about pledges and projects that is based on combining the output of a wallet and
@@ -100,15 +99,13 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     }
     private final ObservableMap<Project, CheckStatus> checkStatuses;
 
-    // Non-revoked non-claimed pledges either:
+    // Non-revoked pledges either:
     //  - Fetched from the remote server, which is inherently trusted as it's run by the person you're
-    //    trying to give money to
+    //    trying to give money to (or is trusted by the person you're trying to give money to)
     //  - Checked against the P2P network, which is only semi-trusted but in practice should
     //    work well enough to just keep our UI consistent, which is all we use it for.
     //  - From the users wallet, which are trusted because we created it.
-    private final Map<Project, ObservableSet<LHProtos.Pledge>> openPledges;
-    // Pledges that don't show up in the UTXO set but did show up in a claim tx we're watching.
-    private final Map<Project, ObservableSet<LHProtos.Pledge>> claimedPledges;
+    private final Map<Project, ObservableSet<LHProtos.Pledge>> pledges;
 
     @GuardedBy("this")
     private final Map<String, Project> projectsByUrlPath;
@@ -128,8 +125,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         this.executor = executor;
         this.regularP2P = regularP2P;
         this.xtP2P = xtP2P;
-        this.openPledges = new HashMap<>();
-        this.claimedPledges = new HashMap<>();
+        this.pledges = new HashMap<>();
         this.wallet = wallet;
         this.mode = mode;
         this.checkStatuses = FXCollections.observableHashMap();
@@ -154,19 +150,19 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             for (LHProtos.Pledge pledge : wallet.getPledges()) {
                 Project project = diskManager.getProjectById(pledge.getPledgeDetails().getProjectId());
                 if (project != null) {
-                    getOpenPledgesFor(project).add(pledge);
+                    getPledgesFor(project).add(pledge);
                 } else {
                     log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.getPledgeDetails().getProjectId());
                 }
             }
             wallet.addOnPledgeHandler((project, pledge) -> {
-                final ObservableSet<LHProtos.Pledge> pledgesFor = getOpenPledgesFor(project);
+                final ObservableSet<LHProtos.Pledge> pledgesFor = getPledgesFor(project);
                 pledgesFor.add(pledge);
             }, executor);
             wallet.addOnRevokeHandler(pledge -> {
                 Project project = diskManager.getProjectById(pledge.getPledgeDetails().getProjectId());
                 if (project != null) {
-                    getOpenPledgesFor(project).remove(pledge);
+                    getPledgesFor(project).remove(pledge);
                 } else {
                     log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.getPledgeDetails().getProjectId());
                 }
@@ -184,7 +180,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 if (project != null) {
                     log.info("Loading stored claim {}", tx.getHash());
                     addClaimConfidenceListener(executor, tx, project);
-                    movePledgesFromOpenToClaimed(tx, project);
                 }
             }
 
@@ -252,14 +247,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 if (diskManager.getProjectState(project).state != ProjectState.CLAIMED) {
                     log.info("Claim propagated or mined");
                     diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED, transaction.getHash()));
-                    if (project.getPaymentURL() == null || mode == Mode.SERVER) {
-                        // We have pledge data in this case, so we can consult the claim tx to see which were used.
-                        movePledgesFromOpenToClaimed(transaction, project);
-                    } else {
-                        // We (probably) don't have pledge data in this case, so put us on the regular server update
-                        // code path, where the pledges will all be marked as as claimed.
-                        jitteredServerRequery(project);   // Allow the server time to notice the claim tx as well.
-                    }
                 }
                 break;
             case DEAD:
@@ -270,19 +257,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 break;
         }
         return false;  // Don't remove listener.
-    }
-
-    private void movePledgesFromOpenToClaimed(Transaction claim, Project project) {
-        // This only works if we have the actual pledge data.
-        executor.checkOnThread();
-        List<LHProtos.Pledge> taken = new ArrayList<>();
-        for (LHProtos.Pledge pledge : getOpenPledgesFor(project)) {
-            if (LHUtils.pledgeAppearsInClaim(project, pledge, claim)) {
-                taken.add(pledge);
-            }
-        }
-        getClaimedPledgesFor(project).addAll(taken);
-        getOpenPledgesFor(project).removeAll(taken);
     }
 
     public void waitForInit() {
@@ -347,12 +321,11 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 // Bye bye .... even if the pledge was claimed, we're about to lose our knowlege of it because the
                 // user removed it from disk, so we can't keep track of it reliably afterwards anyway.
                 log.info("Pledge on disk disappeared.");
-                openPledges.get(project).remove(removedPledge);
-                getClaimedPledgesFor(project).remove(removedPledge);
+                pledges.get(project).remove(removedPledge);
                 // If the project was in error because of this pledge (e.g. it was a duplicate), kick off a recheck.
                 CheckStatus status = checkStatuses.get(project);
                 if (status != null && status.error != null)
-                    checkPledgesAgainstP2PNetwork(project, openPledges.get(project));
+                    checkPledgesAgainstP2PNetwork(project, pledges.get(project));
             }
         }
         if (change.wasAdded()) {
@@ -373,13 +346,12 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         executor.checkOnThread();
         if (mode == Mode.CLIENT) {
             // We have to double check against wallet.getPledges here, because during startup the disk manager queues
-            // up "new pledge found" events BEFORE we add pledges from the wallet into openPledges/claimedPledges, etc.
+            // up "new pledge found" events BEFORE we add pledges from the wallet into pledges, etc.
             if (wallet.getPledges().contains(pledge) || wallet.wasPledgeRevoked(pledge)) {
                 return true;
             }
         }
-        for (ObservableSet<LHProtos.Pledge> set : openPledges.values()) if (set.contains(pledge)) return true;
-        for (ObservableSet<LHProtos.Pledge> set : claimedPledges.values()) if (set.contains(pledge)) return true;
+        for (ObservableSet<LHProtos.Pledge> set : pledges.values()) if (set.contains(pledge)) return true;
         return false;
     }
 
@@ -416,6 +388,26 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             }
         }
         executor.executeASAP(() -> {
+            ProjectStateInfo state = diskManager.getProjectState(project);
+            if (state != null && state.getState() == ProjectState.CLAIMED && (project.getPaymentURL() == null || mode == Mode.SERVER)) {
+                // Serverless project.
+                Transaction contract = wallet.getTransaction(state.claimedBy);
+                if (contract == null) {
+                    log.error("Serverless project marked as claimed but contract not found in wallet! Assuming all pledges were taken.");
+                    syncPledges(project, pledges, new ArrayList<>(pledges));
+                    result.complete(pledges);
+                } else {
+                    log.info("Project '{}' is claimed by {}, skipping network check as all pledges would be taken", project.getTitle(), contract.getHash());
+                    ArrayList<LHProtos.Pledge> appearedInClaim = new ArrayList<>();
+                    for (LHProtos.Pledge pledge : pledges) {
+                        if (LHUtils.pledgeAppearsInClaim(project, pledge, contract))
+                            appearedInClaim.add(pledge);
+                    }
+                    syncPledges(project, pledges, appearedInClaim);
+                    result.complete(new HashSet<>(appearedInClaim));
+                }
+                return;
+            }
             log.info("Checking {} pledge(s) against P2P network for '{}'", pledges.size(), project);
             markAsInProgress(project);
             ListenableFuture<List<Peer>> peerFuture = xtP2P.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION);
@@ -576,18 +568,12 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                                 diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED,
                                         new Sha256Hash(status.getClaimedBy().toByteArray())));
                             }
-                            ObservableSet<LHProtos.Pledge> curOpenPledges = getOpenPledgesFor(project);
-                            ObservableSet<LHProtos.Pledge> curClaimedPledges = getClaimedPledgesFor(project);
-                            log.info("Project is claimed ({}/{})", curOpenPledges.size(), curClaimedPledges.size());
-                            curClaimedPledges.clear();
-                            curClaimedPledges.addAll(status.getPledgesList());
-                            curOpenPledges.clear();
-                        } else {
-                            // Status contains a new list of pledges. We should update our own observable list by touching it
-                            // as little as possible. This ensures that as updates flow through to the UI any animations look
-                            // good (as opposed to total replacement which would animate poorly).
-                            syncPledges(project, new HashSet<>(status.getPledgesList()), status.getPledgesList());
+                            log.info("Project is claimed ({} pledges)", getPledgesFor(project).size());
                         }
+                        // Status contains a new list of pledges. We should update our own observable list by touching it
+                        // as little as possible. This ensures that as updates flow through to the UI any animations look
+                        // good (as opposed to total replacement which would animate poorly).
+                        syncPledges(project, new HashSet<>(status.getPledgesList()), status.getPledgesList());
                         markAsCheckDone(project);
                         future.complete(status);
                         log.info("Processing of project status from server complete");
@@ -606,14 +592,14 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         // vs client vs serverless codepaths.
 
         executor.checkOnThread();
-        final ObservableSet<LHProtos.Pledge> curOpenPledges = getOpenPledgesFor(forProject);
+        final ObservableSet<LHProtos.Pledge> curOpenPledges = getPledgesFor(forProject);
 
         // Build a map of pledgehash->pledge so we can dedupe server-scrubbed pledges.
         Map<Sha256Hash, LHProtos.Pledge> hashes = curOpenPledges.stream().collect(
                 toMap(LHUtils::hashFromPledge, p -> p)
         );
 
-        // Try and update openPledges/claimedPledges with minimal touching, so animations work right.
+        // Try and update pledges with minimal touching, so animations work right.
 
         Set<LHProtos.Pledge> newlyOpen = new HashSet<>(verifiedPledges);
         newlyOpen.removeAll(curOpenPledges);
@@ -653,35 +639,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 curOpenPledges.removeAll(removedItems);
             }
         }
-        // A pledge that's missing might be claimed.
-        if (forProject.getPaymentURL() == null || mode == Mode.SERVER) {
-            Transaction claim = getClaimForProject(forProject);
-            if (claim != null) {
-                Set<LHProtos.Pledge> newlyClaimed = new HashSet<>(newlyInvalid);
-                newlyClaimed.removeIf(pledge -> !LHUtils.pledgeAppearsInClaim(forProject, pledge, claim));
-                ObservableSet<LHProtos.Pledge> cpf = getClaimedPledgesFor(forProject);
-                cpf.addAll(newlyClaimed);
-            }
-        }
-    }
-
-    private ObservableSet<LHProtos.Pledge> getClaimedPledgesFor(Project forProject) {
-        executor.checkOnThread();
-        ObservableSet<LHProtos.Pledge> result = claimedPledges.get(forProject);
-        if (result == null) {
-            result = FXCollections.observableSet();
-            claimedPledges.put(forProject, result);
-        }
-        return result;
-    }
-
-    @Nullable
-    private Transaction getClaimForProject(Project forProject) {
-        ProjectStateInfo state = diskManager.getProjectState(forProject);
-        if (state.state == ProjectState.CLAIMED)
-            return wallet.getTransaction(state.claimedBy);
-        else
-            return null;
     }
 
     /** Returns a new read-only set that has changes applied using the given executor. */
@@ -735,29 +692,15 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     public ObservableSet<LHProtos.Pledge> mirrorOpenPledges(Project forProject, AffinityExecutor executor) {
         // Must build the mirror on the backend thread because otherwise it might change whilst we're doing the
         // initial copy to fill it up.
-        return this.executor.fetchFrom(() -> ObservableMirrors.mirrorSet(getOpenPledgesFor(forProject), executor));
+        return this.executor.fetchFrom(() -> ObservableMirrors.mirrorSet(getPledgesFor(forProject), executor));
     }
 
-    /**
-     * Returns a read only observable list of claimed pledges. May block waiting for the backend.
-     */
-    public ObservableSet<LHProtos.Pledge> mirrorClaimedPledges(Project forProject, AffinityExecutor executor) {
-        // Must build the mirror on the backend thread because otherwise it might change whilst we're doing the
-        // initial copy to fill it up.
-        return this.executor.fetchFrom(() -> ObservableMirrors.mirrorSet(getClaimedPledgesFor(forProject), executor));
-    }
-
-    @Nullable
-    public Project getProjectById(String id) {
-        return diskManager.getProjectById(id);
-    }
-
-    private ObservableSet<LHProtos.Pledge> getOpenPledgesFor(Project forProject) {
+    private ObservableSet<LHProtos.Pledge> getPledgesFor(Project forProject) {
         executor.checkOnThread();
-        ObservableSet<LHProtos.Pledge> result = openPledges.get(forProject);
+        ObservableSet<LHProtos.Pledge> result = pledges.get(forProject);
         if (result == null) {
             result = FXCollections.observableSet();
-            openPledges.put(forProject, result);
+            pledges.put(forProject, result);
         }
         return result;
     }
@@ -765,9 +708,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     /** Returns a reactive property that sums up the total value of all open pledges. */
     @SuppressWarnings("unchecked")
     public LongProperty makeTotalPledgedProperty(Project project, AffinityExecutor executor) {
-        ObservableSet<LHProtos.Pledge> one = mirrorOpenPledges(project, executor);
-        ObservableSet<LHProtos.Pledge> two = mirrorClaimedPledges(project, executor);
-        return bindTotalPledgedProperty(mergeSets(one, two));
+        return bindTotalPledgedProperty(mirrorOpenPledges(project, executor));
     }
 
     public ObservableMap<Project, CheckStatus> mirrorCheckStatuses(AffinityExecutor executor) {
@@ -777,9 +718,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     public Coin fetchTotalPledged(Project project) {
         return executor.fetchFrom(() -> {
             Coin amount = Coin.ZERO;
-            for (LHProtos.Pledge pledge : getOpenPledgesFor(project))
-                amount = amount.add(Coin.valueOf(pledge.getPledgeDetails().getTotalInputValue()));
-            for (LHProtos.Pledge pledge : getClaimedPledgesFor(project))
+            for (LHProtos.Pledge pledge : getPledgesFor(project))
                 amount = amount.add(Coin.valueOf(pledge.getPledgeDetails().getTotalInputValue()));
             return amount;
         });
@@ -831,10 +770,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     private static final int BLOCK_PROPAGATION_TIME_SECS = 30;    // 90th percentile block propagation times ~15 secs
     private static final int TX_PROPAGATION_TIME_SECS = 5;  // 90th percentile tx propagation times ~3 secs
     private int maxJitterSeconds = BLOCK_PROPAGATION_TIME_SECS;
-
-    public int getMaxJitterSeconds() {
-        return maxJitterSeconds;
-    }
 
     public void setMaxJitterSeconds(int maxJitterSeconds) {
         this.maxJitterSeconds = maxJitterSeconds;
@@ -899,7 +834,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                             log.error("Too much money submitted! {} already vs {} in new pledge", total, value);
                             throw new Ex.GoalExceeded();
                         }
-                        // Once dependencies (if any) are handled, start the check process. This will update openPledges once
+                        // Once dependencies (if any) are handled, start the check process. This will update pledges once
                         // done successfully.
                         checkPledgeAgainstP2PNetwork(project, pledge);
                         // Finally, save to disk. This will cause a notification of a new pledge to happen but we'll end
@@ -969,10 +904,6 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         return result;
     }
 
-    public int getMinPeersForUTXOQuery() {
-        return minPeersForUTXOQuery;
-    }
-
     public void setMinPeersForUTXOQuery(int minPeersForUTXOQuery) {
         this.minPeersForUTXOQuery = minPeersForUTXOQuery;
     }
@@ -991,6 +922,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         }
     }
 
+    /** Map of project ID to project state info */
     public ObservableMap<String, ProjectStateInfo> mirrorProjectStates(AffinityExecutor runChangesIn) {
         return diskManager.mirrorProjectStates(runChangesIn);
     }
@@ -1052,7 +984,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         log.debug("Checking {} to see if it's a revocation", t.getHash());
         List<LHProtos.Pledge> revoked = whichPledgesAreRevokedBy(t);
         if (revoked.isEmpty()) return;
-        for (ObservableSet<LHProtos.Pledge> pledges : openPledges.values()) {
+        for (ObservableSet<LHProtos.Pledge> pledges : this.pledges.values()) {
             pledges.removeAll(revoked);
         }
     }
@@ -1125,7 +1057,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     private Map<TransactionOutPoint, LHProtos.Pledge> getAllOpenPledgedOutpoints() {
         executor.checkOnThread();
         Map<TransactionOutPoint, LHProtos.Pledge> result = new HashMap<>();
-        for (ObservableSet<LHProtos.Pledge> pledges : openPledges.values()) {
+        for (ObservableSet<LHProtos.Pledge> pledges : this.pledges.values()) {
             for (LHProtos.Pledge pledge : pledges) {
                 if (pledge.getPledgeDetails().hasOrigHash()) continue;   // Can't watch for revocations of scrubbed pledges.
                 Transaction tx = LHUtils.pledgeToTx(wallet.getParams(), pledge);

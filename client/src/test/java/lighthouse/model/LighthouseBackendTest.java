@@ -588,10 +588,8 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         backend.importProjectFrom(downloadedFile);
 
-        ObservableSet<LHProtos.Pledge> openPledges = backend.mirrorOpenPledges(project, gate);
-        ObservableSet<LHProtos.Pledge> claimedPledges = backend.mirrorClaimedPledges(project, gate);
-        assertEquals(0, claimedPledges.size());
-        assertEquals(0, openPledges.size());
+        ObservableSet<LHProtos.Pledge> pledges = backend.mirrorOpenPledges(project, gate);
+        assertEquals(0, pledges.size());
 
         Triplet<Transaction, Transaction, LHProtos.Pledge> data = TestUtils.makePledge(project, to, project.getGoalAmount());
         LHProtos.Pledge pledge1 = data.getValue2();
@@ -623,7 +621,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         gate.waitAndRun();
         gate.waitAndRun();
-        assertEquals(2, openPledges.size());
+        assertEquals(2, pledges.size());
 
         ObservableMap<String, LighthouseBackend.ProjectStateInfo> states = backend.mirrorProjectStates(gate);
         assertEquals(LighthouseBackend.ProjectState.OPEN, states.get(project.getID()).state);
@@ -638,17 +636,23 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
             assertTrue(m instanceof MemoryPoolMessage || m instanceof BloomFilter);
         }
 
-        for (int i = 0; i < 5; i++) {
-            gate.waitAndRun();   // updates to lists and things.
-        }
+        gate.waitAndRun();
 
         assertEquals(LighthouseBackend.ProjectState.CLAIMED, states.get(project.getID()).state);
         assertEquals(contract.getHash(), states.get(project.getID()).claimedBy);
         assertTrue(Files.exists(AppDirectory.dir().resolve(DiskManager.PROJECT_STATUS_FILENAME)));
 
-        assertEquals(2, claimedPledges.size());
-        assertTrue(claimedPledges.contains(pledge1));
-        assertTrue(claimedPledges.contains(pledge2));
+        assertEquals(2, pledges.size());
+        assertTrue(pledges.contains(pledge1));
+        assertTrue(pledges.contains(pledge2));
+
+        // Now simulate a backend restart, and check that the pledges are still available despite being claimed.
+        backend.shutdown();
+        initCoreState();
+
+        pledges = backend.mirrorOpenPledges(project, gate);
+        assertEquals(2, pledges.size());
+        assertEquals(LighthouseBackend.ProjectState.CLAIMED, backend.mirrorProjectStates(gate).get(project.getID()).state);
 
         // TODO: Craft a test that verifies double spending of the claim is handled properly.
     }
@@ -740,7 +744,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         projectModel.serverName.set("localhost");
         project = projectModel.getProject();
         ObservableSet<LHProtos.Pledge> openPledges = backend.mirrorOpenPledges(project, gate);
-        ObservableSet<LHProtos.Pledge> claimedPledges = backend.mirrorClaimedPledges(project, gate);
         final LHProtos.Pledge scrubbedPledge = makeScrubbedPledge(Coin.COIN);
         writeProjectToDisk();
         gate.waitAndRun();
@@ -750,7 +753,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         sendServerStatus(exchange, scrubbedPledge);
         gate.waitAndRun();
         assertEquals(1, openPledges.size());
-        assertEquals(0, claimedPledges.size());
 
         // Pledge gets revoked.
         backend.refreshProjectStatusFromServer(project);
@@ -758,7 +760,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         sendServerStatus(httpReqs.take());
         gate.waitAndRun();
         assertEquals(0, openPledges.size());
-        assertEquals(0, claimedPledges.size());
 
         // New pledges are made.
         Utils.rollMockClock(60);
@@ -771,7 +772,6 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         gate.waitAndRun();
         gate.waitAndRun();
         assertEquals(2, openPledges.size());
-        assertEquals(0, claimedPledges.size());
 
         // And now the project is claimed.
         backend.refreshProjectStatusFromServer(project);
@@ -788,10 +788,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         exchange.sendResponseHeaders(HTTP_OK, bits.length);
         exchange.getResponseBody().write(bits);
         exchange.close();
-        // Must do this four times because observable sets don't collapse notifications :(
-        for (int i = 0; i < 4; i++) gate.waitAndRun();
-        assertEquals(0, openPledges.size());
-        assertEquals(2, claimedPledges.size());
+        assertEquals(2, openPledges.size());
     }
 
     private LHProtos.Pledge.Builder makeSimpleHalfPledge(ECKey signingKey, TransactionOutput output) {

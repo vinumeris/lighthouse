@@ -113,9 +113,7 @@ public class ProjectView extends HBox {
             });
 
 //            pledges = fakePledges();
-            ObservableSet<LHProtos.Pledge> openPledges = Main.backend.mirrorOpenPledges(project.get(), AffinityExecutor.UI_THREAD);
-            ObservableSet<LHProtos.Pledge> claimedPledges = Main.backend.mirrorClaimedPledges(project.get(), AffinityExecutor.UI_THREAD);
-            pledges = mergeSets(openPledges, claimedPledges);
+            pledges = Main.backend.mirrorOpenPledges(project.get(), AffinityExecutor.UI_THREAD);
             pledges.addListener((SetChangeListener<? super LHProtos.Pledge>) change -> {
                 if (change.wasAdded())
                     checkForMyPledge(project.get());

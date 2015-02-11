@@ -18,7 +18,6 @@ import java.security.*;
 import java.time.*;
 import java.util.*;
 
-import static com.google.common.base.Preconditions.*;
 import static java.net.HttpURLConnection.*;
 
 /**
@@ -35,17 +34,7 @@ public class ProjectHandler implements HttpHandler {
     private final ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;
     private final ObservableMap<Project, LighthouseBackend.CheckStatus> checkStates;
 
-    // This ends up being mostly the same as LighthouseBackend.pledges and exists in case we want to run the web
-    // server in a different thread to the backend in future.
-    public static class PledgeGroup {
-        public final ObservableSet<LHProtos.Pledge> open, claimed;
-
-        public PledgeGroup(ObservableSet<LHProtos.Pledge> open, ObservableSet<LHProtos.Pledge> claimed) {
-            this.open = open;
-            this.claimed = claimed;
-        }
-    }
-    private final Map<Project, PledgeGroup> pledges = new HashMap<>();
+    private final Map<Project, ObservableSet<LHProtos.Pledge>> pledges = new HashMap<>();
 
     enum DownloadFormat {
         PBUF,
@@ -134,12 +123,10 @@ public class ProjectHandler implements HttpHandler {
         return (path.endsWith(".json") || path.endsWith(".xml") || path.endsWith(".html") || path.endsWith(".lighthouse-project"));
     }
 
-    private PledgeGroup getPledgesFor(Project project) {
-        PledgeGroup result = pledges.get(project);
+    private ObservableSet<LHProtos.Pledge> getPledgesFor(Project project) {
+        ObservableSet<LHProtos.Pledge> result = pledges.get(project);
         if (result == null) {
-            ObservableSet<LHProtos.Pledge> open = backend.mirrorOpenPledges(project, executor);
-            ObservableSet<LHProtos.Pledge> claimed = backend.mirrorClaimedPledges(project, executor);
-            result = new PledgeGroup(open, claimed);
+            result = backend.mirrorOpenPledges(project, executor);
             pledges.put(project, result);
         }
         return result;
@@ -194,12 +181,7 @@ public class ProjectHandler implements HttpHandler {
             authenticated = true;
         }
 
-        // TODO: This pledge group stuff is no longer relevant as the protocol has evolved, and just opens up potential for bugs: remove it.
-        PledgeGroup pledgeGroup = getPledgesFor(project);
-        long totalPledged = addPledgesToStatus(status, authenticated, pledgeGroup.open);
-        if (!pledgeGroup.claimed.isEmpty())
-            checkState(pledgeGroup.open.isEmpty());
-        addPledgesToStatus(status, authenticated, pledgeGroup.claimed);
+        long totalPledged = addPledgesToStatus(status, authenticated, getPledgesFor(project));
 
         LighthouseBackend.ProjectStateInfo info = projectStates.get(project.getID());
         if (info.claimedBy != null) {
