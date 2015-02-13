@@ -51,3 +51,29 @@ the original.
 
 Thus to avoid confusion if you'd like to distribute a version of the project that doesn't match the upstream sources, 
 please invent a new name and logo for it first. Thanks.
+
+# building from source
+
+Building Lighthouse from source requires the [Maven](http://maven.apache.org/) build tool and the [bitcoinj](http://bitcoinj.github.io/) library.
+
+The latest version of bitcoinj should be [installed from source](https://github.com/bitcoinj/bitcoinj):
+
+```
+$ git clone https://github.com/bitcoinj/bitcoinj
+$ cd bitcoinj
+$ mvn clean install
+```
+
+Compile Lighthouse with:
+
+```
+$ git clone https://github.com/vinumeris/lighthouse
+$ cd lighthouse
+$ mvn clean package
+```
+
+Run Lighthouse with:
+
+```
+$ java -jar client/target/shaded.jar
+```
