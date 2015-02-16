@@ -35,7 +35,12 @@ import static lighthouse.protocol.LHUtils.*;
  * pledges. It is not a builder or holder for UI state, look at ProjectModel for that.
  */
 public class Project {
-    private final Logger log = LoggerFactory.getLogger(Project.class);
+    // These sizes are taken from the Facebook cover image default sizes, although in the app they are typically
+    // displayed smaller.
+    public static final int COVER_IMAGE_WIDTH = 851;
+    public static final int COVER_IMAGE_HEIGHT = 315;
+
+    private static final Logger log = LoggerFactory.getLogger(Project.class);
     private final NetworkParameters params;
     private final LHProtos.ProjectDetails projectReq;
     // These fields should be immutable pure functions of projectReq, as we may hand back projectReq later and

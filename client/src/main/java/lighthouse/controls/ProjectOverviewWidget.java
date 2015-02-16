@@ -63,7 +63,7 @@ public class ProjectOverviewWidget extends HBox {
         }
 
         // Make the cover image go grey when claimed and blurred when loading. Make a loading indicator fade in/out.
-        final Image image = new Image(project.getCoverImage().newInput());
+        final Image image = new Image(project.getCoverImage().newInput(), Project.COVER_IMAGE_WIDTH, Project.COVER_IMAGE_HEIGHT, false, true);
         ColorAdjust colorAdjust = new ColorAdjust();
         colorAdjust.saturationProperty().bind(
                 when(

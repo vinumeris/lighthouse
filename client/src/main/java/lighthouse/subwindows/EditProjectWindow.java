@@ -274,13 +274,23 @@ public class EditProjectWindow {
 
     private void setImageTo(ByteString bytes) {
         coverImageView.setEffect(null);
-        final Image image = new Image(bytes.newInput());
-        if (image.getException() == null) {
-            model.image.set(bytes);
-            coverImageView.setImage(image);
-        } else {
-            log.error("Could not load image", image.getException());
+        // Force the size here at load time so we get a smaller version of the image pixels we can store in the project
+        // file. This prevents massive image files from bloating things up.
+        final Image image = new Image(bytes.newInput(), Project.COVER_IMAGE_WIDTH, Project.COVER_IMAGE_HEIGHT, true, true);
+        Exception exception = image.getException();
+        if (exception == null) {
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                // Force to JPEG as normally this results in smaller outputs.
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "jpg", baos);
+                model.image.set(ByteString.copyFrom(baos.toByteArray()));
+                coverImageView.setImage(image);
+            } catch (IOException e) {
+                exception = e;
+            }
         }
+        if (exception != null)
+            log.error("Could not load image", exception);
     }
 
     public void imageSelectorDragOver(DragEvent event) {
