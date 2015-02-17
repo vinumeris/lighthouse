@@ -494,10 +494,6 @@ public class ProjectView extends HBox {
             vbox.setPrefHeight(0);
             vbox.setMaxHeight(USE_PREF_SIZE);
             setGraphic(vbox);
-            setOnMouseClicked(ev -> {
-                if (ev.getClickCount() == 2)
-                    ShowPledgeWindow.open(project.get(), getItem());
-            });
         }
 
         @Override
@@ -505,8 +501,13 @@ public class ProjectView extends HBox {
             super.updateItem(pledge, empty);
             if (empty) {
                 getGraphic().setVisible(false);
+                setOnMouseClicked(null);
                 return;
             }
+            setOnMouseClicked(ev -> {
+                if (ev.getClickCount() == 2)
+                    ShowPledgeWindow.open(project.get(), getItem());
+            });
             getGraphic().setVisible(true);
             LHProtos.PledgeDetails details = pledge.getPledgeDetails();
             String msg = Coin.valueOf(details.getTotalInputValue()).toFriendlyString();
