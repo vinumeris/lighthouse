@@ -285,6 +285,7 @@ public class MainWindow {
     public void handleOpenedFile(File file) {
         // Can be called either due to a drop, or user double clicking a file in a file explorer.
         checkGuiThread();
+        log.info("Opening {}", file);
         if (file.toString().endsWith(DiskManager.PROJECT_FILE_EXTENSION)) {
             importProject(file);
         } else if (file.toString().endsWith(DiskManager.PLEDGE_FILE_EXTENSION)) {

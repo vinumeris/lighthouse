@@ -653,7 +653,8 @@ public class LighthouseBackend extends AbstractBlockChainListener {
     public void importProjectFrom(Path file) throws IOException {
         // TODO: Simplify this right down. Just rip out the directory watching for projects entirely.
         // Can be on any thread here. Do file IO on calling thread so IO error handling is easier.
-        checkState(Files.isRegularFile(file));
+        if (!Files.isRegularFile(file))
+            throw new IOException("Irregular file: " + file);
         Path destPath = AppDirectory.dir().resolve(file.getFileName());
 
         if (Files.exists(destPath)) {
