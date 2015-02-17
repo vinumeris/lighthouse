@@ -132,7 +132,12 @@ public class MainWindow {
         });
     }
 
+    private Views currentView = null;
+
     private void switchView(Views view) {
+        // Double calls can occur if someone double clicks the back button whilst it's animating in/out.
+        if (currentView == view)
+            return;
         switch (view) {
             case OVERVIEW:
                 contentStack.getChildren().remove(projectViewContainer);
@@ -148,6 +153,7 @@ public class MainWindow {
                 break;
             default: throw new IllegalStateException();
         }
+        currentView = view;
     }
 
     private void switchToProject(Project next) {
