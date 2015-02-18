@@ -34,6 +34,12 @@ public class WalletSettingsController {
 
     private KeyParameter aesKey;
 
+    public static void open(@Nullable KeyParameter key) {
+        checkGuiThread();
+        Main.OverlayUI<WalletSettingsController> screen = Main.instance.overlayUI("subwindows/wallet_settings.fxml", "Wallet settings");
+        screen.controller.initialize(key);
+    }
+
     // Note: NOT called by FXMLLoader!
     public void initialize(@Nullable KeyParameter aesKey) {
         DeterministicSeed seed = Main.bitcoin.wallet().getKeyChainSeed();
@@ -107,11 +113,7 @@ public class WalletSettingsController {
     }
 
     private void askForPasswordAndRetry() {
-        WalletPasswordController.requestPasswordWithNextWindow(key -> {
-            checkGuiThread();
-            Main.OverlayUI<WalletSettingsController> screen = Main.instance.overlayUI("subwindows/wallet_settings.fxml", "Wallet settings");
-            screen.controller.initialize(key);
-        });
+        WalletPasswordController.requestPasswordWithNextWindow(WalletSettingsController::open);
     }
 
     @FXML

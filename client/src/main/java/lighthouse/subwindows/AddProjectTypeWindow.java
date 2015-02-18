@@ -155,9 +155,12 @@ public class AddProjectTypeWindow {
 
     @FXML
     public void cancelClicked(ActionEvent event) {
-        if (editing)
-            EditProjectWindow.openForEdit(model);
-        else
-            EditProjectWindow.openForCreate(model);
+        // Work around ConcurrentModificationException error in framework.
+        Platform.runLater(() -> {
+            if (editing)
+                EditProjectWindow.openForEdit(model);
+            else
+                EditProjectWindow.openForCreate(model);
+        });
     }
 }

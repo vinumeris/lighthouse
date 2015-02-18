@@ -495,8 +495,7 @@ public class MainWindow {
 
     @FXML
     public void setupWalletClicked(ActionEvent event) {
-        Main.OverlayUI<WalletSettingsController> screen = Main.instance.overlayUI("subwindows/wallet_settings.fxml", "Wallet settings");
-        screen.controller.initialize(null);
+        WalletSettingsController.open(null);
     }
     //endregion
 }

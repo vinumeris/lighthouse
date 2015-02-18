@@ -2,6 +2,7 @@ package lighthouse.subwindows;
 
 import com.google.common.io.*;
 import com.google.protobuf.*;
+import javafx.application.*;
 import javafx.embed.swing.*;
 import javafx.event.*;
 import javafx.fxml.*;
@@ -200,16 +201,19 @@ public class EditProjectWindow {
 
     @FXML
     public void nextClicked(ActionEvent event) {
-        // Quick check that they haven't duplicated the title as otherwise that results in file name clashes
-        // We could add (2) after the file name or whatever to avoid this, but multiple different projects with
-        // the same title would be confusing anyway so just forbid it.
-        if (!editing && Files.exists(AppDirectory.dir().resolve(Project.getSuggestedFileName(model.title.get())))) {
-            informationalAlert("Title conflict",
-                    "You already have a project with that title. Please choose another. If you are trying to create a " +
-                            "different version, consider putting the date or a number in the title so people can distinguish them.");
-            return;
-        }
-        AddProjectTypeWindow.open(model, editing);
+        // Hack for accelerator crash.
+        Platform.runLater(() -> {
+            // Quick check that they haven't duplicated the title as otherwise that results in file name clashes
+            // We could add (2) after the file name or whatever to avoid this, but multiple different projects with
+            // the same title would be confusing anyway so just forbid it.
+            if (!editing && Files.exists(AppDirectory.dir().resolve(Project.getSuggestedFileName(model.title.get())))) {
+                informationalAlert("Title conflict",
+                        "You already have a project with that title. Please choose another. If you are trying to create a " +
+                                "different version, consider putting the date or a number in the title so people can distinguish them.");
+                return;
+            }
+            AddProjectTypeWindow.open(model, editing);
+        });
     }
 
     @FXML
