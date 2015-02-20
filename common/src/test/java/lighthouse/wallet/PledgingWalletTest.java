@@ -157,7 +157,7 @@ public class PledgingWalletTest {
         LHProtos.Pledge[] revokedPledge = new LHProtos.Pledge[1];
         wallet.addOnRevokeHandler(p -> revokedPledge[0] = p, Threading.SAME_THREAD);
 
-        ListenableFuture<Transaction> revocation = wallet.revokePledge(proto, null).broadcastFuture;
+        ListenableFuture<Transaction> revocation = wallet.revokePledge(proto, null).broadcast.future();
         assertFalse(revocation.isDone());
         MockTransactionBroadcaster.TxFuturePair pair = objects.broadcaster.waitForTxFuture();
         pair.succeed();

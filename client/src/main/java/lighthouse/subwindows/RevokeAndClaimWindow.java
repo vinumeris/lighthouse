@@ -1,7 +1,6 @@
 package lighthouse.subwindows;
 
 import com.google.common.util.concurrent.*;
-import com.vinumeris.crashfx.*;
 import javafx.application.*;
 import javafx.event.*;
 import javafx.fxml.*;
@@ -143,25 +142,20 @@ public class RevokeAndClaimWindow {
 
     private void broadcastClaim(Set<LHProtos.Pledge> pledges, @Nullable KeyParameter key) {
         try {
-            PledgingWallet.CompletionProgress progress = Main.wallet.completeContractWithFee(projectToClaim, pledges, key);
-            double total = Main.bitcoin.peerGroup().getMinBroadcastConnections();
-            progress.peersSeen = seen -> {
-                if (seen == -1) {
-                    Platform.runLater(onSuccess::run);
-                } else {
-                    progressBar.setProgress(seen / total);
-                }
-            };
-            progress.txFuture.handleAsync((t, ex) -> {
-                if (ex != null) {
-                    informationalAlert("Transaction acceptance issue",
-                            "At least one peer reported a problem with the transaction: %s", ex);
-                } else {
-                    onSuccess.run();
-                }
-                overlayUI.done();
-                return null;
-            }, Platform::runLater);
+            Main.wallet.completeContractWithFee(projectToClaim, pledges, key,
+                    // Progress
+                    (val) -> {
+                        progressBar.setProgress(val);
+                        if (val >= 1.0)
+                            overlayUI.done();
+                    },
+
+                    // Error
+                    (ex) -> {
+                        overlayUI.done();
+                        informationalAlert("Transaction acceptance issue",
+                                "The Bitcoin network has rejected the claim: %s", ex);
+                    }, Platform::runLater);
         }  catch (Ex.ValueMismatch e) {
             // TODO: Solve value mismatch errors. We have a few options.
             // 1) Try taking away pledges to see if we can get precisely to the target value, e.g. this can
@@ -194,10 +188,8 @@ public class RevokeAndClaimWindow {
         try {
             PledgingWallet.Revocation revocation = Main.wallet.revokePledge(pledgeToRevoke, aesKey);
             progressBar.setProgress(-1);
-            revocation.tx.getConfidence().addEventListener((conf, reason) -> {
-                progressBar.setProgress(conf.numBroadcastPeers() / (double) Main.bitcoin.peerGroup().getMinBroadcastConnections());
-            }, Platform::runLater);
-            Futures.addCallback(revocation.broadcastFuture, new FutureCallback<Transaction>() {
+            revocation.broadcast.setProgressCallback(progressBar::setProgress, Platform::runLater);
+            Futures.addCallback(revocation.broadcast.future(), new FutureCallback<Transaction>() {
                 @Override
                 public void onSuccess(@Nullable Transaction result) {
                     onSuccess.run();
@@ -206,7 +198,9 @@ public class RevokeAndClaimWindow {
 
                 @Override
                 public void onFailure(Throwable t) {
-                    CrashWindow.open(t);
+                    informationalAlert("Transaction acceptance issue",
+                            "The Bitcoin network has rejected the revocation transaction: %s", t);
+                    log.error("Revocation failed", t);
                     overlayUI.done();
                 }
             }, Platform::runLater);

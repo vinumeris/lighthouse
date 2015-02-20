@@ -356,11 +356,11 @@ public class PledgingWallet extends Wallet {
     @GuardedBy("this") private Set<Transaction> revokeInProgress = new HashSet<>();
 
     public class Revocation {
-        public final ListenableFuture<Transaction> broadcastFuture;
+        public final TransactionBroadcast broadcast;
         public final Transaction tx;
 
-        public Revocation(ListenableFuture<Transaction> broadcastFuture, Transaction tx) {
-            this.broadcastFuture = broadcastFuture;
+        public Revocation(TransactionBroadcast broadcast, Transaction tx) {
+            this.broadcast = broadcast;
             this.tx = tx;
         }
     }
@@ -391,8 +391,8 @@ public class PledgingWallet extends Wallet {
         log.info("Broadcasting revocation of pledge for {} satoshis", stub.getValue());
         log.info("Stub: {}", stub);
         log.info("Revocation tx: {}", revocation);
-        final ListenableFuture<Transaction> future = vTransactionBroadcaster.broadcastTransaction(revocation);
-        Futures.addCallback(future, new FutureCallback<Transaction>() {
+        TransactionBroadcast broadcast = vTransactionBroadcaster.broadcastTransaction(revocation);
+        Futures.addCallback(broadcast.future(), new FutureCallback<Transaction>() {
             @Override
             public void onSuccess(@Nullable Transaction result) {
                 log.info("Broadcast of revocation was successful, marking pledge {} as revoked in wallet", hashFromPledge(proto));
@@ -415,7 +415,7 @@ public class PledgingWallet extends Wallet {
                 log.error("Failed to broadcast pledge revocation: {}", t);
             }
         });
-        return new Revocation(future, revocation);
+        return new Revocation(broadcast, revocation);
     }
 
     private synchronized void updateForRevoke(Transaction tx, LHProtos.Pledge proto, TransactionOutput stub) {
@@ -425,70 +425,77 @@ public class PledgingWallet extends Wallet {
         projects.inverse().remove(proto);
     }
 
-    public static class CompletionProgress {
-        public volatile Consumer<Integer> peersSeen;   // or -1 for mined/dead.
-        public CompletableFuture<Transaction> txFuture;
-        private int lastPeersSeen;
-
-        private CompletionProgress() {
-        }
-
-        private void setPeersSeen(int value) {
-            if (value != lastPeersSeen) {
-                lastPeersSeen = value;
-                peersSeen.accept(value);
-            }
-        }
-    }
-
     /**
      * Runs completeContract to get a feeless contract, then attaches an extra input of size MIN_FEE, potentially
      * creating and broadcasting a tx to create an output of the right size first (as we cannot add change outputs
      * to an assurance contract). The returned future completes once both dependency and contract are broadcast OK.
      */
-    public CompletionProgress completeContractWithFee(Project project, Set<LHProtos.Pledge> pledges, @Nullable KeyParameter aesKey) throws InsufficientMoneyException {
+    public void completeContractWithFee(Project project, Set<LHProtos.Pledge> pledges, @Nullable KeyParameter aesKey,
+                                        TransactionBroadcast.ProgressCallback progress, Consumer<Throwable> error,
+                                        Executor callbackExecutor) throws InsufficientMoneyException {
         // The chances of having a fee shaped output are minimal, so we always create a dependency tx here.
         // We x2 it to avoid problems with sitting right on the dust threshold for older peers.
         final Coin feeSize = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.multiply(2);
         log.info("Completing contract with fee: sending dependency tx");
-        CompletionProgress progress = new CompletionProgress();
-        TransactionConfidence.Listener broadcastListener = new TransactionConfidence.Listener() {
-            private Set<PeerAddress> addrs = new HashSet<>();
-
-            @Override
-            public void onConfidenceChanged(TransactionConfidence conf, ChangeReason reason) {
-                // tx can be different.
-                if (reason == TransactionConfidence.Listener.ChangeReason.SEEN_PEERS) {
-                    addrs.addAll(Sets.newHashSet(conf.getBroadcastBy()));
-                    progress.setPeersSeen(addrs.size());
-                } else if (reason == ChangeReason.TYPE) {
-                    progress.setPeersSeen(-1);
-                }
-            }
-        };
         Transaction contract = project.completeContract(pledges);
         Wallet.SendRequest request = Wallet.SendRequest.to(freshReceiveKey().toAddress(params), feeSize);
         request.aesKey = aesKey;
         Wallet.SendResult result = sendCoins(vTransactionBroadcaster, request);
+
+        TransactionBroadcast.ProgressCallback mergingCallback = new TransactionBroadcast.ProgressCallback() {
+            double total, last;
+
+            @Override
+            public void onBroadcastProgress(double val) {
+                // Progress will increment from 0.0 to 1.0 for the dep tx, and then reset to 0.0 and do it again.
+                // But we want to present the user with a smooth 0.0 to 1.0 progress bar. So we aggregate them here.
+                if (val < last)
+                    last = 0.0;
+                total += val - last;
+                last = val;
+                progress.onBroadcastProgress(total / 2.0);
+            }
+        };
+
+        result.broadcast.setProgressCallback(mergingCallback, callbackExecutor);
+
         // The guava API is better for this than what the Java 8 guys produced, sigh.
-        ListenableFuture<Transaction> future = Futures.transform(result.broadcastComplete, (AsyncFunction<Transaction, Transaction>) tx -> {
-            // Runs on a bitcoinj thread when the dependency was broadcast.
-            // Find the right output size and add it as a regular input (that covers the rest).
-            log.info("Dependency broadcast complete");
-            TransactionOutput feeOut = tx.getOutputs().stream()
-                    .filter(output -> output.getValue().equals(feeSize)).findAny().get();
-            contract.addInput(feeOut);
-            // Sign the final output we added.
-            SendRequest req = SendRequest.forTx(contract);
-            req.aesKey = aesKey;
-            signTransaction(req);
-            log.info("Prepared final contract: {}", contract);
-            contract.getConfidence().addEventListener(broadcastListener);
-            return vTransactionBroadcaster.broadcastTransaction(contract);
+        Futures.addCallback(result.broadcastComplete, new FutureCallback<Transaction>() {
+                @Override
+                public void onSuccess(@Nullable Transaction tx) {
+                    // Runs on a bitcoinj thread when the dependency was broadcast.
+                    // Find the right output size and add it as a regular input (that covers the rest).
+                    log.info("Dependency broadcast complete");
+                    TransactionOutput feeOut = tx.getOutputs().stream()
+                            .filter(output -> output.getValue().equals(feeSize)).findAny().get();
+                    contract.addInput(feeOut);
+                    // Sign the final output we added.
+                    SendRequest req = SendRequest.forTx(contract);
+                    req.aesKey = aesKey;
+                    signTransaction(req);
+                    log.info("Prepared final contract: {}", contract);
+                    TransactionBroadcast broadcast = vTransactionBroadcaster.broadcastTransaction(contract);
+                    broadcast.setProgressCallback(mergingCallback, callbackExecutor);
+                    Futures.addCallback(broadcast.future(), new FutureCallback<Transaction>() {
+                        @Override
+                        public void onSuccess(@Nullable Transaction result) {
+                            log.info("Successfully broadcast claim");
+                        }
+
+                        @Override
+                        public void onFailure(Throwable t) {
+                            log.error("Error broadcasting claim!", t);
+                            error.accept(t);
+                        }
+                    }, callbackExecutor);
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    log.error("Dependency broadcast failed!", t);
+                    callbackExecutor.execute(() -> error.accept(t));
+                }
         });
-        result.tx.getConfidence().addEventListener(broadcastListener);
-        progress.txFuture = convertFuture(future);
-        return progress;
     }
 
     public boolean isProjectMine(Project project) {

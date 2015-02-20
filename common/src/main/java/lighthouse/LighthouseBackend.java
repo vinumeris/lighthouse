@@ -236,9 +236,13 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         switch (conf.getConfidenceType()) {
             case PENDING:
                 int seenBy = conf.numBroadcastPeers();
-                int minBroadcastConnections = regularP2P.getMinBroadcastConnections();
-                log.info("Claim seen by {}/{} peers", seenBy, minBroadcastConnections);
-                if (seenBy < minBroadcastConnections)
+                // This logic taken from bitcoinj's TransactionBroadcast class.
+                int numConnected = regularP2P.getConnectedPeers().size();
+                int numToBroadcastTo = (int) Math.max(1, Math.round(Math.ceil(numConnected / 2.0)));
+                int numWaitingFor = (int) Math.ceil((numConnected - numToBroadcastTo) / 2.0);
+
+                log.info("Claim seen by {}/{} peers", seenBy, numWaitingFor);
+                if (seenBy < numWaitingFor)
                     break;
                 // Fall through ...
             case BUILDING:
@@ -894,7 +898,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                         // case of remote nodes (maybe we should forbid this later), it may block for a few seconds whilst
                         // the transactions propagate.
                         log.info("Broadcasting dependency {} with thirty second timeout", tx.getHash());
-                        regularP2P.broadcastTransaction(tx).get(30, TimeUnit.SECONDS);
+                        regularP2P.broadcastTransaction(tx).future().get(30, TimeUnit.SECONDS);
                     }
                     result.complete(pledge);
                 }
