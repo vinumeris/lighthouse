@@ -436,7 +436,7 @@ public class Main extends Application {
     }
 
     public PeerGroup connectXTPeers() {
-        boolean isOffline = new InetSocketAddress("google.com", 80).getAddress() == null;
+        boolean isOffline = false;//new InetSocketAddress("google.com", 80).getAddress() == null;
         if (isOffline) {
             log.warn("User appears to be offline");
             offline = true;
