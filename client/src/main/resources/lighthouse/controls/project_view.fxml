@@ -8,6 +8,7 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
+<?import lighthouse.controls.*?>
 <?import java.lang.*?>
 <fx:root prefHeight="495.0" prefWidth="846.0" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
@@ -72,11 +73,11 @@
                     <children>
                         <VBox fx:id="rightVBox" spacing="10.0" HBox.hgrow="ALWAYS">
                             <children>
-                                <TextFlow fx:id="description" lineSpacing="5" style="-fx-text-fill: black; -fx-padding: 5 0 0 0">
+                                <DescriptionFlow fx:id="description" lineSpacing="5" style="-fx-text-fill: black; -fx-padding: 5 0 0 0">
                                     <children>
                                         <Text text="Sample description" textAlignment="JUSTIFY" />
                                     </children>
-                                </TextFlow>
+                                </DescriptionFlow>
                                 <!--<Line endX="${rightVBox.width}" startX="0.0" styleClass="dotted-line" />-->
                                 <PieChart fx:id="pieChart" labelLineLength="10.0" labelsVisible="false" legendVisible="false" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="300.0" startAngle="90" styleClass="pledges-piechart">
                                     <effect>

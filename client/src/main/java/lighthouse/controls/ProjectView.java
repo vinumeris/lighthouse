@@ -18,7 +18,6 @@ import javafx.scene.effect.*;
 import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
-import javafx.scene.text.*;
 import javafx.stage.*;
 import lighthouse.*;
 import lighthouse.protocol.*;
@@ -55,7 +54,7 @@ public class ProjectView extends HBox {
     @FXML Label projectTitle;
     @FXML Label goalAmountLabel;
     @FXML Label raisedAmountLabel;
-    @FXML TextFlow description;
+    @FXML DescriptionFlow description;
     @FXML Label noPledgesLabel;
     @FXML ListView<LHProtos.Pledge> pledgesList;
     @FXML PieChart pieChart;
@@ -201,7 +200,7 @@ public class ProjectView extends HBox {
         projectTitle.setText(p.getTitle());
         goalAmountLabel.setText(String.format(goalAmountFormatStr, p.getGoalAmount().toPlainString()));
 
-        description.getChildren().setAll(new Text(project.get().getMemo()));
+        description.setText(project.get().getMemo());
 
         pledgesListVBox.visibleProperty().bind(not(isEmpty(pledgesList.getItems())));
         noPledgesLabel.visibleProperty().bind(isEmpty(pledgesList.getItems()));

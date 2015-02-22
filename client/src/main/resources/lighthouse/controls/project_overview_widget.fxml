@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.Circle?>
-<?import javafx.scene.shape.Line?>
-<?import javafx.scene.text.Text?>
-<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<?import lighthouse.controls.*?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1" fx:id="rootPane" onDragDetected="#dragDetected" onDragDone="#dragDone" maxWidth="650.0" styleClass="project-overview-widget" type="javafx.scene.layout.HBox" xmlns="http://javafx.com/javafx/8">
     <children>
         <VBox fx:id="vbox" HBox.hgrow="ALWAYS">
@@ -48,11 +47,11 @@
                 <Circle fx:id="progressCircle" centerY="${coverArea.height}" centerX="${rootPane.width - 58}" radius="8" styleClass="progress-line" fill="transparent" managed="false"/>
                 <HBox prefWidth="200.0">
                     <children>
-                        <TextFlow fx:id="blurbFlow" maxWidth="Infinity" lineSpacing="5">
+                        <DescriptionFlow fx:id="blurbFlow" maxWidth="Infinity" lineSpacing="5">
                             <children>
                                 <Label text="Some blah description"/>
                             </children>
-                        </TextFlow>
+                        </DescriptionFlow>
                     </children>
                     <padding>
                         <Insets bottom="10" left="10" right="10" top="15"/>

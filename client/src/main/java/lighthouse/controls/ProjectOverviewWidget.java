@@ -12,7 +12,6 @@ import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.*;
-import javafx.scene.text.*;
 import lighthouse.*;
 import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
@@ -31,7 +30,7 @@ public class ProjectOverviewWidget extends HBox {
     private static final Logger log = LoggerFactory.getLogger(ProjectOverviewWidget.class);
 
     @FXML Label titleLabel;
-    @FXML TextFlow blurbFlow;
+    @FXML DescriptionFlow blurbFlow;
     @FXML Label ownershipIcon;
     @FXML HBox titleHBox;
     @FXML Circle progressCircle;
@@ -53,8 +52,7 @@ public class ProjectOverviewWidget extends HBox {
         uncheck(loader::load);
 
         titleLabel.setText(project.getTitle());
-        Text text = new Text(project.getMemo());
-        blurbFlow.getChildren().setAll(text);
+        blurbFlow.setText(project.getMemo());
 
         if (Main.wallet.isProjectMine(project)) {
             AwesomeDude.setIcon(ownershipIcon, AwesomeIcon.HOME, "25");
