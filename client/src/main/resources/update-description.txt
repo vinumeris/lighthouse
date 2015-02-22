@@ -1,4 +1,0 @@
-Bug fixes and performance tweaks
-This update resolves various crashes and UI sync bugs. It also tweaks how Lighthouse syncs with the peer to peer network which should result in faster and more reliable chain syncs.
-
-Window sizes/positions are now remembered across restarts.
