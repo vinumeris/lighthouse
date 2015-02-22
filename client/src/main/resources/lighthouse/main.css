@@ -139,9 +139,6 @@
 }
 
 .add-project-pane {
-    /*-fx-background-color: black, white;
-    -fx-background-insets: -1, 0;
-    -fx-background-radius: 6, 5;*/
     -fx-border-radius: 6;
     -fx-border-color: lightgray;
     -fx-border-style: dashed;
@@ -155,11 +152,6 @@
 .add-project-pane > Button:cancel {
     -fx-text-fill: darkslategrey;
 }
-
-/*.project-view-right-pane {*/
-    /*-fx-border-color: lightgray;*/
-    /*-fx-border-width: 0 0 0 1;*/
-/*}*/
 
 .project-info-area {
     -fx-background-color: #3c777b;
