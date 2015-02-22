@@ -398,7 +398,8 @@ public class Main extends Application {
             informationalAlert("Already running",
                     "This application is already running and cannot be started twice.");
             bitcoin = null;
-            xtPeers.stopAsync();
+            if (!Main.offline)
+                xtPeers.stopAsync();
             walletLoadedLatch.countDown();
             Platform.exit();
             return;
