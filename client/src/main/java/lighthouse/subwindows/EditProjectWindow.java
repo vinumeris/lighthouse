@@ -2,7 +2,10 @@ package lighthouse.subwindows;
 
 import com.google.common.io.*;
 import com.google.protobuf.*;
+import de.jensd.fx.fontawesome.*;
 import javafx.application.*;
+import javafx.beans.binding.*;
+import javafx.beans.value.*;
 import javafx.embed.swing.*;
 import javafx.event.*;
 import javafx.fxml.*;
@@ -15,12 +18,15 @@ import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.*;
 import lighthouse.*;
+import lighthouse.controls.*;
 import lighthouse.files.*;
 import lighthouse.model.*;
 import lighthouse.protocol.*;
 import lighthouse.utils.*;
 import org.bitcoinj.core.*;
 import org.controlsfx.control.*;
+import org.pegdown.*;
+import org.pegdown.ast.*;
 import org.slf4j.*;
 
 import javax.imageio.*;
@@ -50,6 +56,8 @@ public class EditProjectWindow {
     @FXML TextArea descriptionEdit;
     @FXML Button nextButton;
     @FXML Pane createPane;
+    @FXML Label descriptionHelpButton;
+    @FXML Label previewTextLabel;
 
     private PopOver maxPledgesPopOver;
 
@@ -85,6 +93,8 @@ public class EditProjectWindow {
     private void setupFor(ProjectModel model, boolean editing) {
         this.model = model;
         this.editing = editing;
+
+        setupMarkdownPreviewLink();
 
         // Copy data from model.
         addressEdit.setText(model.address.get());
@@ -170,6 +180,9 @@ public class EditProjectWindow {
         // TODO: This fixed value won't work properly with internationalization.
         rootPane.setPrefWidth(618);
         rootPane.prefHeightProperty().bind(Main.instance.scene.heightProperty().multiply(0.8));
+
+        descriptionHelpButton.setText("");
+        AwesomeDude.setIcon(descriptionHelpButton, AwesomeIcon.QUESTION_CIRCLE);
     }
 
     private void setupDefaultCoverImage() {
@@ -332,5 +345,37 @@ public class EditProjectWindow {
     @FXML
     public void cancelClicked(ActionEvent event) {
         overlayUI.done();
+    }
+
+    @FXML
+    public void showMarkdownHelp(MouseEvent event) {
+        Main.instance.getHostServices().showDocument("https://help.github.com/articles/markdown-basics/");
+    }
+
+    private static final PegDownProcessor parser = new PegDownProcessor(100L /* max parse time msec */);
+
+    private void setupMarkdownPreviewLink() {
+        // Monitor the text and if it appears to use Markdown, show the preview link. Otherwise hide it.
+        previewTextLabel.setMinHeight(0.0);
+        ObservableBooleanValue linkHidden = Bindings.createBooleanBinding(
+                () -> !isMarkdown(descriptionEdit.getText()),
+                descriptionEdit.textProperty()
+        );
+        NumberBinding height = Bindings.when(linkHidden).then(0.0).otherwise(25.0);
+        animatedBind(previewTextLabel, previewTextLabel.minHeightProperty(), height);
+    }
+
+    private boolean isMarkdown(String text) {
+        return isMarkdown(parser.parseMarkdown(text.toCharArray()));
+    }
+
+    private boolean isMarkdown(RootNode tree) {
+        return MarkDownNode.countFormattingNodes(tree) > 0;
+    }
+
+    @FXML
+    public void onPreviewTextClicked(MouseEvent event) {
+        log.info("Preview text clicked");
+        MarkDownNode.openPopup(descriptionEdit.textProperty(), (url) -> Main.instance.getHostServices().showDocument(url));
     }
 }

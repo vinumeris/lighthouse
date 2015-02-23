@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.text.*?>
-<?import javafx.scene.image.*?>
-<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-
 <BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="610.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.EditProjectWindow">
     <center>
         <VBox>
             <children>
-                <GridPane fx:id="createPane" hgap="45.0" maxWidth="1.7976931348623157E308" styleClass="window-pane" vgap="15.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
+                <GridPane fx:id="createPane" hgap="45.0" maxWidth="1.7976931348623157E308" styleClass="edit-project-grid" vgap="15.0" BorderPane.alignment="CENTER" VBox.vgrow="ALWAYS">
                     <columnConstraints>
                         <ColumnConstraints hgrow="NEVER" minWidth="10.0" prefWidth="100.0" />
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -28,9 +26,7 @@
                     </BorderPane.margin>
                     <children>
                         <Label text="Project name" GridPane.rowIndex="1" />
-                        <Label alignment="TOP_CENTER" text="Description" GridPane.rowIndex="2" />
                         <TextField fx:id="titleEdit" promptText="Example: Building a lighthouse" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <TextArea fx:id="descriptionEdit" prefWidth="200.0" styleClass="create-project-textarea" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <Label text="Goal amount" GridPane.rowIndex="3" />
                         <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                             <children>
@@ -62,6 +58,25 @@
                             </children>
                         </StackPane>
                         <Label text="Cover image" />
+                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
+                     <children>
+                        <Label maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="Description" />
+                        <Label fx:id="descriptionHelpButton" onMouseClicked="#showMarkdownHelp" text="?">
+                           <padding>
+                              <Insets left="10.0" />
+                           </padding>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <children>
+                        <TextArea fx:id="descriptionEdit" prefWidth="200.0" promptText="You can format text using Markdown syntax." styleClass="create-project-textarea" wrapText="true" />
+                        <Label fx:id="previewTextLabel" onMouseClicked="#onPreviewTextClicked" style="-fx-font-weight: normal;" styleClass="link-label" text="Preview formatted text" />
+                     </children>
+                  </VBox>
                     </children>
                     <VBox.margin>
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

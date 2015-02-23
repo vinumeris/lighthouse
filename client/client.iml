@@ -36,6 +36,15 @@
     <orderEntry type="library" name="Maven: net.sf.proguard:proguard-base:5.0" level="project" />
     <orderEntry type="library" name="Maven: org.bitcoinj:orchid:1.1" level="project" />
     <orderEntry type="library" name="Maven: com.lambdaworks:scrypt:1.4.0" level="project" />
+    <orderEntry type="library" name="Maven: org.pegdown:pegdown:1.4.2" level="project" />
+    <orderEntry type="library" name="Maven: org.parboiled:parboiled-java:1.1.6" level="project" />
+    <orderEntry type="library" name="Maven: org.parboiled:parboiled-core:1.1.6" level="project" />
+    <orderEntry type="library" name="Maven: org.ow2.asm:asm:4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.ow2.asm:asm-tree:4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.ow2.asm:asm-analysis:4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.ow2.asm:asm-util:4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:0.10.770" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-runtime:0.10.770" level="project" />
     <orderEntry type="library" name="Maven: org.bitcoinj:bitcoinj-core:0.13-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-jdk14:1.7.6" level="project" />

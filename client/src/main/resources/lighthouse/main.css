@@ -261,3 +261,7 @@
 .hover-link:hover {
     -fx-underline: true;
 }
+
+.edit-project-grid .link-label {
+    -fx-font-weight: normal;
+}

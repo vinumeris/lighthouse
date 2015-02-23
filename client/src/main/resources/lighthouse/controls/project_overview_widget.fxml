@@ -47,11 +47,11 @@
                 <Circle fx:id="progressCircle" centerY="${coverArea.height}" centerX="${rootPane.width - 58}" radius="8" styleClass="progress-line" fill="transparent" managed="false"/>
                 <HBox prefWidth="200.0">
                     <children>
-                        <DescriptionFlow fx:id="blurbFlow" maxWidth="Infinity" lineSpacing="5">
+                        <ReadMorePane maxHeight="205" prefWidth="${vbox.width}">
                             <children>
-                                <Label text="Some blah description"/>
+                                <MarkDownNode fx:id="blurbFlow" maxWidth="Infinity"/>
                             </children>
-                        </DescriptionFlow>
+                        </ReadMorePane>
                     </children>
                     <padding>
                         <Insets bottom="10" left="10" right="10" top="15"/>

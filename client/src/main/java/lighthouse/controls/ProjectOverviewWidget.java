@@ -30,7 +30,7 @@ public class ProjectOverviewWidget extends HBox {
     private static final Logger log = LoggerFactory.getLogger(ProjectOverviewWidget.class);
 
     @FXML Label titleLabel;
-    @FXML DescriptionFlow blurbFlow;
+    @FXML MarkDownNode blurbFlow;
     @FXML Label ownershipIcon;
     @FXML HBox titleHBox;
     @FXML Circle progressCircle;
@@ -53,6 +53,7 @@ public class ProjectOverviewWidget extends HBox {
 
         titleLabel.setText(project.getTitle());
         blurbFlow.setText(project.getMemo());
+        blurbFlow.setUrlOpener(url -> Main.instance.getHostServices().showDocument(url));
 
         if (Main.wallet.isProjectMine(project)) {
             AwesomeDude.setIcon(ownershipIcon, AwesomeIcon.HOME, "25");

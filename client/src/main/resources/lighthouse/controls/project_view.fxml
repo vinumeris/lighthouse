@@ -73,12 +73,9 @@
                     <children>
                         <VBox fx:id="rightVBox" spacing="10.0" HBox.hgrow="ALWAYS">
                             <children>
-                                <DescriptionFlow fx:id="description" lineSpacing="5" style="-fx-text-fill: black; -fx-padding: 5 0 0 0">
-                                    <children>
-                                        <Text text="Sample description" textAlignment="JUSTIFY" />
-                                    </children>
-                                </DescriptionFlow>
-                                <!--<Line endX="${rightVBox.width}" startX="0.0" styleClass="dotted-line" />-->
+                                <ReadMorePane minHeight="250">
+                                    <MarkDownNode fx:id="description" style="-fx-text-fill: black; -fx-padding: 5 0 0 0"/>
+                                </ReadMorePane>
                                 <PieChart fx:id="pieChart" labelLineLength="10.0" labelsVisible="false" legendVisible="false" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="300.0" startAngle="90" styleClass="pledges-piechart">
                                     <effect>
                                         <DropShadow color="#000000bb" />
@@ -86,7 +83,7 @@
                                 </PieChart>
                                 <HBox alignment="CENTER_RIGHT" spacing="15.0">
                                     <children>
-                              <Label fx:id="copyDescriptionLink" onMouseClicked="#onCopyDescriptionClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="Copy description" />
+                                        <Label fx:id="copyDescriptionLink" onMouseClicked="#onCopyDescriptionClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="Copy description" />
                                         <Label alignment="CENTER_RIGHT" onMouseClicked="#onViewTechDetailsClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="View technical details" textFill="BLUE" />
                                     </children>
                                 </HBox>

@@ -54,7 +54,7 @@ public class ProjectView extends HBox {
     @FXML Label projectTitle;
     @FXML Label goalAmountLabel;
     @FXML Label raisedAmountLabel;
-    @FXML DescriptionFlow description;
+    @FXML MarkDownNode description;
     @FXML Label noPledgesLabel;
     @FXML ListView<LHProtos.Pledge> pledgesList;
     @FXML PieChart pieChart;
@@ -239,6 +239,8 @@ public class ProjectView extends HBox {
                 Main.instance.scene.getAccelerators().put(KeyCombination.keyCombination("Shortcut+R"), () -> Main.backend.refreshProjectStatusFromServer(p));
             });
         }
+
+        description.setUrlOpener(url -> Main.instance.getHostServices().showDocument(url));
     }
 
     private void checkForMyPledge(Project p) {

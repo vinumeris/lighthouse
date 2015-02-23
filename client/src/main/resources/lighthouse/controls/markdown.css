@@ -1,0 +1,64 @@
+MarkDownNode {
+    -fx-font-size: 11pt;
+    -fx-font-family: "Helvetica Neue";
+}
+
+.md-emph {
+    -fx-font-style: italic;
+    -fx-font-weight: normal;
+}
+
+.md-header {
+    -fx-font-size: 200%;
+    -fx-underline: true;
+    -fx-border-color: black;
+    -fx-border-style: solid;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 1em 0 0 0;
+}
+
+.md-header-1 {
+    -fx-font-size: 300%;
+}
+.md-header-2 {
+    -fx-font-size: 250%;
+}
+.md-header-3 {
+    -fx-font-size: 200%;
+}
+.md-header-4 {
+    -fx-font-size: 150%;
+}
+.md-header-5 {
+    -fx-font-size: 100%;
+}
+
+.md-p {
+    -fx-padding: 0 0 15px 0;
+}
+
+.md-link {
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.md-verbatim {
+    -fx-padding: 1em;
+}
+.md-code {
+    -fx-padding: 0 5px 0 5px;
+}
+.md-code, .md-verbatim {
+    -fx-font-family: Monospace;
+    -fx-border-color: #eaeaea;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-background-color: #f8f8f8;
+    -fx-background-radius: 3px;
+}
+
+.md-blockquote {
+    -fx-border-color: grey, transparent;
+    -fx-border-width: 0px 0px 0px 3px, 0px 0px 0px 10px;
+    -fx-border-style: solid;
+}
