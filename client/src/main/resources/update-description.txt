@@ -1,2 +1,0 @@
-Support formatted text in project descriptions.
-Markdown syntax can now be used in projects. There is a preview window in the create/edit project screen to help you with writing Markdown.

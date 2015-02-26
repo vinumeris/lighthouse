@@ -55,7 +55,7 @@ public class Main extends Application {
     public static final String APP_NAME = "Crowdfunding App";
 
     // UpdateFX stuff. Version is incremented monotonically after a new version is released.
-    public static final int VERSION = 26;
+    public static final int VERSION = 27;
 
     // No online updates URL for "Crowdfunding App".
     @Nullable public static final String UPDATES_BASE_URL = null;
