@@ -67,6 +67,7 @@ public class MarkDownNode : VBox() {
     }
     
     public trait DefaultVisitor : org.pegdown.ast.Visitor {
+        override fun visit(node: AnchorLinkNode) {}
         override fun visit(node: AbbreviationNode) {}
         override fun visit(node: AutoLinkNode) {}
         override fun visit(node: BlockQuoteNode) {}
@@ -226,6 +227,8 @@ public class MarkDownNode : VBox() {
         }
         override fun visit(node: MailLinkNode) = link("mailto:" + node.getText(), node.getText())
         override fun visit(node: RefLinkNode) = log.error("Unimplemented: reference links: $node")
+        override fun visit(node: AnchorLinkNode) = log.error("Unimplemented: anchor links: $node")
+
         override fun visit(node: WikiLinkNode) {
             text(node.getText())
         }
