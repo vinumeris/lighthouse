@@ -3,7 +3,7 @@
 [Setup]
 AppId={{lighthouse}}
 AppName=Lighthouse
-AppVersion=19
+AppVersion=__VERSION__
 AppVerName=Lighthouse
 AppPublisher=Vinumeris
 AppComments=Lighthouse

@@ -25,8 +25,9 @@ cp client/target/lighthouse.jar $dest
 echo "Copied build as version $ver to $dest"
 
 echo "Generating Windows build script"
-echo "& 'C:\Program Files\Java\stripped8u31-64\bin\javapackager.exe' -deploy -BappVersion=$ver -native exe -name Lighthouse -title Lighthouse -vendor Vinumeris -outdir deploy -appclass lighthouse.Main -srcfiles .\\updates\\builds\\processed\\$ver.jar -outfile Lighthouse -Bruntime='c:\Program Files\Java\s\stripped8u31-64\jre'" >win-build.ps1
-echo "& 'C:\Program Files (x86)\Java\jdk1.8.0_31\bin\javapackager.exe' -deploy -BappVersion=$ver -native exe -name Lighthouse -title Lighthouse -vendor Vinumeris -outdir deploy -appclass lighthouse.Main -srcfiles .\updates\builds\processed\25.jar -outfile Lighthouse -Bruntime='c:\Program Files (x86)\Java\jdk1.8.0_31\jre'" >>win-build.ps1
+sed "s/__VERSION__/$ver/g" package/windows/Lighthouse.iss.template >package/windows/Lighthouse.iss
+echo "& 'C:\Program Files\Java\stripped8u31-64\bin\javapackager.exe' -deploy -BappVersion=$ver -native exe -name Lighthouse -title Lighthouse -vendor Vinumeris -outdir deploy -appclass lighthouse.Main -srcfiles .\\updates\\builds\\processed\\$ver.jar -outfile Lighthouse -Bruntime='c:\Program Files\Java\stripped8u31-64\jre'" >win-build.ps1
+echo "& 'C:\Program Files (x86)\Java\jdk1.8.0_31\bin\javapackager.exe' -deploy -BappVersion=$ver -native exe -name Lighthouse -title Lighthouse -vendor Vinumeris -outdir deploy -appclass lighthouse.Main -srcfiles .\\updates\\builds\\processed\\$ver.jar -outfile Lighthouse -Bruntime='c:\Program Files (x86)\Java\jdk1.8.0_31\jre'" >>win-build.ps1
 
 if [[ "$1" != "--nosign" ]]; then
     echo "Generating online update site"
