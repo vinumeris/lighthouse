@@ -24,7 +24,7 @@ import javafx.scene.layout.StackPane
 [suppress("UNCHECKED_CAST")]    // Hack around Kotlin compiler bug
 public class ReadMorePane() : StackPane() {
     {
-        setMinHeight(50.0)
+        setMinHeight(65.0)
         getChildren().addListener(object : InvalidationListener {
             override fun invalidated(observable: Observable?) {
                 getChildren().removeListener(this)
