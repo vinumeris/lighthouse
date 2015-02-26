@@ -59,3 +59,7 @@
 -keepclassmembers,allowshrinking,allowobfuscation class * {
     synthetic <methods>;
 }
+
+# Pegdown and Parboiled do lots of funny tricks with run time code synthesis.
+-keep class org.pegdown.** { *; }
+-keep class org.parboiled.** { *; }
