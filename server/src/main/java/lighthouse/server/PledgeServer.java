@@ -21,6 +21,8 @@ import java.nio.file.*;
 import java.security.*;
 import java.util.logging.*;
 
+import java.lang.management.ManagementFactory;
+
 import static lighthouse.LighthouseBackend.Mode.*;
 
 /**
@@ -34,6 +36,7 @@ public class PledgeServer {
     public static void main(String[] args) throws Exception {
         OptionParser parser = new OptionParser();
         OptionSpec<String> dirFlag = parser.accepts("dir").withRequiredArg();
+	OptionSpec<String> pidFlag = parser.accepts("pid").withRequiredArg();
         OptionSpec<String> netFlag = parser.accepts("net").withRequiredArg().defaultsTo("main");
         OptionSpec<Short> portFlag = parser.accepts("port").withRequiredArg().ofType(Short.class).defaultsTo(DEFAULT_LOCALHOST_PORT);
         OptionSpec<String> keystoreFlag = parser.accepts("keystore").withRequiredArg();
@@ -82,6 +85,22 @@ public class PledgeServer {
            .startAsync()
            .awaitRunning();
         log.info("bitcoinj initialised");
+
+	// PID file support
+	String PID = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+	String PIDFileName = appDir + "/lighthouse-server.pid";
+	if (options.has(pidFlag)) {
+		PIDFileName = options.valueOf(pidFlag);
+	}
+
+	File PIDFile = new File(PIDFileName);
+	try {
+		Files.write(Paths.get(PIDFile.toURI()), PID.getBytes("utf-8"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+		log.info("PID " + PID + " writing to " + PIDFileName);
+		PIDFile.deleteOnExit();
+	} catch (Exception e) {
+		log.warn("PID " + PID + " could not write to " + PIDFileName);
+	}
 
         // Don't start up fully until we're properly set up. Eventually this can go away.
         log.info("Waiting to find {} peer(s) that supports getutxo", minPeersSupportingGetUTXO);
