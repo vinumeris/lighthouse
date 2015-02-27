@@ -1,5 +1,6 @@
 package lighthouse.server;
 
+import com.google.common.collect.*;
 import com.sun.net.httpserver.*;
 import joptsimple.*;
 import lighthouse.*;
@@ -16,6 +17,7 @@ import org.slf4j.*;
 
 import javax.net.ssl.*;
 import java.io.*;
+import java.lang.management.*;
 import java.net.*;
 import java.nio.file.*;
 import java.security.*;
@@ -31,12 +33,15 @@ public class PledgeServer {
     private static final Logger log = LoggerFactory.getLogger(PledgeServer.class);
     public static final short DEFAULT_LOCALHOST_PORT = (short) LHUtils.HTTP_LOCAL_TEST_PORT;
 
+    public static final String DEFAULT_PID_FILENAME = "lighthouse-server.pid";
+
     public static void main(String[] args) throws Exception {
         OptionParser parser = new OptionParser();
         OptionSpec<String> dirFlag = parser.accepts("dir").withRequiredArg();
         OptionSpec<String> netFlag = parser.accepts("net").withRequiredArg().defaultsTo("main");
-        OptionSpec<Short> portFlag = parser.accepts("port").withRequiredArg().ofType(Short.class).defaultsTo(DEFAULT_LOCALHOST_PORT);
+        OptionSpec<Short>  portFlag = parser.accepts("port").withRequiredArg().ofType(Short.class).defaultsTo(DEFAULT_LOCALHOST_PORT);
         OptionSpec<String> keystoreFlag = parser.accepts("keystore").withRequiredArg();
+        OptionSpec<String> pidFileFlag = parser.accepts("pidfile").withRequiredArg().defaultsTo(DEFAULT_PID_FILENAME);
         parser.accepts("local-node");
         OptionSpec<Void> logToConsole = parser.accepts("log-to-console");
         OptionSet options = parser.parse(args);
@@ -59,6 +64,7 @@ public class PledgeServer {
         Path appDir = AppDirectory.initAppDir("lighthouse-server");   // Create dir if necessary.
 
         setupLogging(appDir, options.has(logToConsole));
+        writePidFile(appDir, pidFileFlag.value(options));
 
         WalletAppKit kit = new WalletAppKit(params, appDir.toFile(), "lighthouse-server") {
             {
@@ -105,6 +111,21 @@ public class PledgeServer {
         });
         log.info("****** STARTING WEB SERVER ON PORT {} ******", portFlag.value(options));
         server.start();
+    }
+
+    private static void writePidFile(Path appDir, String fileNameOrPath) {
+        Path path = appDir.resolve(fileNameOrPath);   // If fileNameOrPath starts with / then it will override the default.
+        Path filePath;
+        if (Files.isDirectory(path))
+            filePath = path.resolve(DEFAULT_PID_FILENAME);
+        else
+            filePath = path;
+        String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+        log.info("Our process ID is {}", pid);
+        LHUtils.ignoreAndLog(() -> {
+            Files.write(filePath, ImmutableList.of(pid), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            filePath.toFile().deleteOnExit();
+        });
     }
 
     private static HttpServer createServer(OptionSpec<Short> portFlag, OptionSpec<String> keystoreFlag, OptionSet options) throws Exception {
