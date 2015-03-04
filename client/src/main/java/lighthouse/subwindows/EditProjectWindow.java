@@ -30,6 +30,7 @@ import org.pegdown.ast.*;
 import org.slf4j.*;
 
 import javax.imageio.*;
+import java.awt.image.*;
 import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
@@ -298,9 +299,16 @@ public class EditProjectWindow {
         if (exception == null) {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                // Force to JPEG as normally this results in smaller outputs.
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "jpg", baos);
-                model.image.set(ByteString.copyFrom(baos.toByteArray()));
+                BufferedImage im = SwingFXUtils.fromFXImage(image, null);
+                // Force to JPEG as normally this results in smaller outputs, unless we are running on 8u20 which has
+                // a bug that results in corrupted JPEGs. In this case we write out PNGs, but that's very bloated for
+                // photos and makes bigger project files.
+                if (System.getProperty("java.version").equals("1.8.0_20"))
+                    ImageIO.write(im, "png", baos);
+                else
+                    ImageIO.write(im, "jpeg", baos);
+                byte[] bits = baos.toByteArray();
+                model.image.set(ByteString.copyFrom(bits));
                 coverImageView.setImage(image);
             } catch (IOException e) {
                 exception = e;
