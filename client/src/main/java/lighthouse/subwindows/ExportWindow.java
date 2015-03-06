@@ -129,7 +129,22 @@ public class ExportWindow {
         dragData.done();
         if (pledge != null)
             pledge.commit(true);
-        overlayUI.done();
+        else if (!maybeShowServerGuidance())
+            overlayUI.done();
+    }
+
+    public boolean maybeShowServerGuidance() {
+        if (project.getPaymentURL() != null) {
+            String host = project.getPaymentURL().getHost();
+            ServerList.Entry entry = ServerList.hostnameToServer.get(host);
+            if (entry != null) {
+                // If we know about this server, i.e. because the user accepted our default, then show the
+                // submit email address to them as guidance.
+                ProjectSubmitInstructionsWindow.open(entry.submitAddress, entry.submitType);
+                return true;
+            }
+        }
+        return false;
     }
 
     @FXML
@@ -155,17 +170,8 @@ public class ExportWindow {
                 data.writeTo(outputStream);
                 if (savingPledge) {
                     pledge.commit(true);
-                } else if (project.getPaymentURL() != null) {
-                    String host = project.getPaymentURL().getHost();
-                    ServerList.Entry entry = ServerList.hostnameToServer.get(host);
-                    if (entry != null) {
-                        // If we know about this server, i.e. because the user accepted our default, then show the
-                        // submit email address to them as guidance.
-                        ProjectSubmitInstructionsWindow.open(entry.submitAddress, entry.submitType);
-                        return;
-                    }
-                }
-                overlayUI.done();
+                } else if (!maybeShowServerGuidance())
+                    overlayUI.done();
             } catch (IOException e) {
                 GuiUtils.informationalAlert("Failed to save file", e.getLocalizedMessage());
             }
