@@ -215,7 +215,12 @@ public class MarkDownNode : VBox() {
         override fun visit(node: ExpLinkNode) {
             val child = node.getChildren()[0].getChildren()[0]
             if (child is TextNode) {
-                link(node.url, child.getText())
+                val sbLabel = StringBuilder()
+                for (child2 in node.getChildren()[0].getChildren()) {
+                    val textNode: TextNode? = child2 as? TextNode
+                    if(textNode != null) sbLabel.append(textNode.getText())
+                }
+                link(node.url, sbLabel.toString())
             } else if (child is ExpImageNode) {
                 val imageView = ImageView(Image(child.url, true))
                 imageView.setOnMouseClicked { this@MarkDownNode.urlOpener.accept(child.url) }
