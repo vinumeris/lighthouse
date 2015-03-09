@@ -34,6 +34,7 @@
 
 .gradient-pane {
     -fx-background-color: #3c777b;
+    -fx-background-image: url("low-point-lighthouse-darkgreen.jpg");
     -fx-background-position: bottom right;
     -fx-background-repeat: no-repeat;
 }
@@ -264,4 +265,17 @@
 
 .edit-project-grid .link-label {
     -fx-font-weight: normal;
+}
+
+.reddit-ad {
+    -fx-border-color: #ffffff;
+    -fx-border-radius: 6;
+    -fx-border-style: dashed;
+    -fx-background-radius: 6;
+    -fx-background-color: #ffffff33;
+    -fx-padding: 30px;
+    -fx-cursor: hand;
+}
+.reddit-ad:hover {
+    -fx-background-color: #ffffffcc;
 }
