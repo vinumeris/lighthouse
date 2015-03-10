@@ -16,6 +16,7 @@ import static lighthouse.protocol.LHUtils.*;
  */
 public class ProjectModel {
     public final StringProperty title = new SimpleStringProperty();
+    public final StringProperty email = new SimpleStringProperty();
     public final StringProperty memo = new SimpleStringProperty();
     public final StringProperty serverName = new SimpleStringProperty();
     public final StringProperty address = new SimpleStringProperty();
@@ -68,6 +69,8 @@ public class ProjectModel {
             proto.getExtraDetailsBuilder().setTitle(title.get());
             pathSetter.invalidated(null);
         });
+        email.set(project.getEmail());
+        email.addListener(o -> proto.getExtraDetailsBuilder().setEmail(email.get()));
         memo.addListener(o -> proto.setMemo(memo.get()));
         // Just adjust the first output. GUI doesn't handle multioutput contracts right now (they're useless anyway).
         goalAmount.addListener(o -> {

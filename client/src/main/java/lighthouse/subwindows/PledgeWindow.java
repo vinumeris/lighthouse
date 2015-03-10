@@ -47,7 +47,7 @@ public class PledgeWindow extends InnerWindow {
             minersFeeLabel.setVisible(valid && !coin.equals(Main.wallet.getBalance()));
             return valid;
         });
-        ValidationLink emailLink = new ValidationLink(emailEdit, str -> str.contains("@"));
+        ValidationLink emailLink = new ValidationLink(emailEdit, str -> str.matches("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$"));
         ValidationLink.autoDisableButton(confirmButton, amountLink, emailLink);
 
         String savedContact = Main.instance.prefs.getContactAddress();
