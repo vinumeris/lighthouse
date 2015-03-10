@@ -645,6 +645,21 @@ public final class LHProtos {
      * </pre>
      */
     long getMinPledgeSize();
+
+    // optional string email = 5;
+    /**
+     * <code>optional string email = 5;</code>
+     */
+    boolean hasEmail();
+    /**
+     * <code>optional string email = 5;</code>
+     */
+    java.lang.String getEmail();
+    /**
+     * <code>optional string email = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getEmailBytes();
   }
   /**
    * Protobuf type {@code lighthouse.ProjectExtraDetails}
@@ -719,6 +734,11 @@ public final class LHProtos {
             case 32: {
               bitField0_ |= 0x00000008;
               minPledgeSize_ = input.readInt64();
+              break;
+            }
+            case 42: {
+              bitField0_ |= 0x00000010;
+              email_ = input.readBytes();
               break;
             }
           }
@@ -890,11 +910,55 @@ public final class LHProtos {
       return minPledgeSize_;
     }
 
+    // optional string email = 5;
+    public static final int EMAIL_FIELD_NUMBER = 5;
+    private java.lang.Object email_;
+    /**
+     * <code>optional string email = 5;</code>
+     */
+    public boolean hasEmail() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional string email = 5;</code>
+     */
+    public java.lang.String getEmail() {
+      java.lang.Object ref = email_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          email_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string email = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getEmailBytes() {
+      java.lang.Object ref = email_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        email_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private void initFields() {
       title_ = "";
       coverImage_ = com.google.protobuf.ByteString.EMPTY;
       authKey_ = com.google.protobuf.ByteString.EMPTY;
       minPledgeSize_ = 0L;
+      email_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -924,6 +988,9 @@ public final class LHProtos {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeInt64(4, minPledgeSize_);
       }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeBytes(5, getEmailBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -948,6 +1015,10 @@ public final class LHProtos {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(4, minPledgeSize_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(5, getEmailBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1077,6 +1148,8 @@ public final class LHProtos {
         bitField0_ = (bitField0_ & ~0x00000004);
         minPledgeSize_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000008);
+        email_ = "";
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -1121,6 +1194,10 @@ public final class LHProtos {
           to_bitField0_ |= 0x00000008;
         }
         result.minPledgeSize_ = minPledgeSize_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.email_ = email_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1150,6 +1227,11 @@ public final class LHProtos {
         }
         if (other.hasMinPledgeSize()) {
           setMinPledgeSize(other.getMinPledgeSize());
+        }
+        if (other.hasEmail()) {
+          bitField0_ |= 0x00000010;
+          email_ = other.email_;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1433,6 +1515,80 @@ public final class LHProtos {
       public Builder clearMinPledgeSize() {
         bitField0_ = (bitField0_ & ~0x00000008);
         minPledgeSize_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // optional string email = 5;
+      private java.lang.Object email_ = "";
+      /**
+       * <code>optional string email = 5;</code>
+       */
+      public boolean hasEmail() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional string email = 5;</code>
+       */
+      public java.lang.String getEmail() {
+        java.lang.Object ref = email_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          email_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string email = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getEmailBytes() {
+        java.lang.Object ref = email_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          email_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string email = 5;</code>
+       */
+      public Builder setEmail(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+        email_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string email = 5;</code>
+       */
+      public Builder clearEmail() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        email_ = getDefaultInstance().getEmail();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string email = 5;</code>
+       */
+      public Builder setEmailBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+        email_ = value;
         onChanged();
         return this;
       }
@@ -10421,34 +10577,34 @@ public final class LHProtos {
     java.lang.String[] descriptorData = {
       "\n\024extended-bip70.proto\022\nlighthouse\"+\n\006Ou" +
       "tput\022\021\n\006amount\030\001 \001(\004:\0010\022\016\n\006script\030\002 \002(\014\"" +
-      "d\n\023ProjectExtraDetails\022\r\n\005title\030\001 \002(\t\022\023\n" +
+      "s\n\023ProjectExtraDetails\022\r\n\005title\030\001 \002(\t\022\023\n" +
       "\013cover_image\030\002 \001(\014\022\020\n\010auth_key\030\003 \001(\014\022\027\n\017" +
-      "min_pledge_size\030\004 \001(\003\"#\n\tOwnerData\022\026\n\016au" +
-      "th_key_index\030\001 \001(\r\"\335\001\n\016ProjectDetails\022\025\n" +
-      "\007network\030\001 \001(\t:\004main\022#\n\007outputs\030\002 \003(\0132\022." +
-      "lighthouse.Output\022\014\n\004time\030\003 \002(\004\022\017\n\007expir" +
-      "es\030\004 \001(\004\022\014\n\004memo\030\005 \001(\t\022\023\n\013payment_url\030\006 " +
-      "\001(\t\022\025\n\rmerchant_data\030\007 \001(\014\0226\n\rextra_deta",
-      "ils\030e \002(\0132\037.lighthouse.ProjectExtraDetai" +
-      "ls\"\216\001\n\007Project\022\"\n\027payment_details_versio" +
-      "n\030\001 \001(\r:\0011\022\026\n\010pki_type\030\002 \001(\t:\004none\022\020\n\010pk" +
-      "i_data\030\003 \001(\014\022\"\n\032serialized_payment_detai" +
-      "ls\030\004 \002(\014\022\021\n\tsignature\030\005 \001(\014\"\'\n\020X509Certi" +
-      "ficates\022\023\n\013certificate\030\001 \003(\014\"\231\001\n\rPledgeD" +
-      "etails\022\014\n\004memo\030\001 \001(\t\022\027\n\017contact_address\030" +
-      "\002 \001(\t\022\031\n\021total_input_value\030\003 \002(\004\022\022\n\nproj" +
-      "ect_id\030\004 \002(\t\022\021\n\ttimestamp\030\005 \002(\004\022\021\n\torig_" +
-      "hash\030\006 \001(\014\022\014\n\004name\030\007 \001(\t\"\217\001\n\006Pledge\022\025\n\rm",
-      "erchant_data\030\001 \001(\014\022\024\n\014transactions\030\002 \003(\014" +
-      "\022%\n\trefund_to\030\003 \003(\0132\022.lighthouse.Output\022" +
-      "1\n\016pledge_details\030d \001(\0132\031.lighthouse.Ple" +
-      "dgeDetails\">\n\tPledgeACK\022#\n\007payment\030\001 \002(\013" +
-      "2\022.lighthouse.Pledge\022\014\n\004memo\030\002 \001(\t\"\205\001\n\rP" +
-      "rojectStatus\022\n\n\002id\030\001 \002(\t\022\021\n\ttimestamp\030\002 " +
-      "\002(\004\022\034\n\024value_pledged_so_far\030\003 \002(\004\022#\n\007ple" +
-      "dges\030\004 \003(\0132\022.lighthouse.Pledge\022\022\n\nclaime" +
-      "d_by\030\005 \001(\014B!\n\023lighthouse.protocolB\010LHPro" +
-      "tosH\001"
+      "min_pledge_size\030\004 \001(\003\022\r\n\005email\030\005 \001(\t\"#\n\t" +
+      "OwnerData\022\026\n\016auth_key_index\030\001 \001(\r\"\335\001\n\016Pr" +
+      "ojectDetails\022\025\n\007network\030\001 \001(\t:\004main\022#\n\007o" +
+      "utputs\030\002 \003(\0132\022.lighthouse.Output\022\014\n\004time" +
+      "\030\003 \002(\004\022\017\n\007expires\030\004 \001(\004\022\014\n\004memo\030\005 \001(\t\022\023\n" +
+      "\013payment_url\030\006 \001(\t\022\025\n\rmerchant_data\030\007 \001(",
+      "\014\0226\n\rextra_details\030e \002(\0132\037.lighthouse.Pr" +
+      "ojectExtraDetails\"\216\001\n\007Project\022\"\n\027payment" +
+      "_details_version\030\001 \001(\r:\0011\022\026\n\010pki_type\030\002 " +
+      "\001(\t:\004none\022\020\n\010pki_data\030\003 \001(\014\022\"\n\032serialize" +
+      "d_payment_details\030\004 \002(\014\022\021\n\tsignature\030\005 \001" +
+      "(\014\"\'\n\020X509Certificates\022\023\n\013certificate\030\001 " +
+      "\003(\014\"\231\001\n\rPledgeDetails\022\014\n\004memo\030\001 \001(\t\022\027\n\017c" +
+      "ontact_address\030\002 \001(\t\022\031\n\021total_input_valu" +
+      "e\030\003 \002(\004\022\022\n\nproject_id\030\004 \002(\t\022\021\n\ttimestamp" +
+      "\030\005 \002(\004\022\021\n\torig_hash\030\006 \001(\014\022\014\n\004name\030\007 \001(\t\"",
+      "\217\001\n\006Pledge\022\025\n\rmerchant_data\030\001 \001(\014\022\024\n\014tra" +
+      "nsactions\030\002 \003(\014\022%\n\trefund_to\030\003 \003(\0132\022.lig" +
+      "hthouse.Output\0221\n\016pledge_details\030d \001(\0132\031" +
+      ".lighthouse.PledgeDetails\">\n\tPledgeACK\022#" +
+      "\n\007payment\030\001 \002(\0132\022.lighthouse.Pledge\022\014\n\004m" +
+      "emo\030\002 \001(\t\"\205\001\n\rProjectStatus\022\n\n\002id\030\001 \002(\t\022" +
+      "\021\n\ttimestamp\030\002 \002(\004\022\034\n\024value_pledged_so_f" +
+      "ar\030\003 \002(\004\022#\n\007pledges\030\004 \003(\0132\022.lighthouse.P" +
+      "ledge\022\022\n\nclaimed_by\030\005 \001(\014B!\n\023lighthouse." +
+      "protocolB\010LHProtosH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -10466,7 +10622,7 @@ public final class LHProtos {
           internal_static_lighthouse_ProjectExtraDetails_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_lighthouse_ProjectExtraDetails_descriptor,
-              new java.lang.String[] { "Title", "CoverImage", "AuthKey", "MinPledgeSize", });
+              new java.lang.String[] { "Title", "CoverImage", "AuthKey", "MinPledgeSize", "Email", });
           internal_static_lighthouse_OwnerData_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_lighthouse_OwnerData_fieldAccessorTable = new

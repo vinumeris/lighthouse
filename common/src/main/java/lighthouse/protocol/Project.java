@@ -48,6 +48,7 @@ public class Project {
     private final ImmutableList<TransactionOutput> outputs;
     private final long goalAmount, minPledgeAmount;
     private final String title;
+    private final String email;
     @Nullable private final URI  url;
     // Projects are identified by the hash of their serialized contents. There is no canonical encoding
     // and this ID is mostly used just as a key in various maps.
@@ -82,6 +83,7 @@ public class Project {
         if (this.goalAmount <= 0)
             throw new Ex.ValueMismatch(this.goalAmount);
         this.title = this.projectReq.getExtraDetails().getTitle();
+        this.email = this.projectReq.getExtraDetails().getEmail();
         if (this.projectReq.hasPaymentUrl()) {
             try {
                 url = new URI(this.projectReq.getPaymentUrl());
@@ -143,6 +145,11 @@ public class Project {
     /** Returns a human-readable title for the project. */
     public String getTitle() {
         return title;
+    }
+    
+    /** Returns a human-readable email for the project. */
+    public String getEmail() {
+        return projectReq.getExtraDetails().getEmail();
     }
 
     /** Returns a human-readable description for the project. */

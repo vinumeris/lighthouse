@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+
 <BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="610.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.EditProjectWindow">
     <center>
         <VBox>
@@ -17,6 +19,7 @@
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="NEVER" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="NEVER" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
@@ -27,8 +30,8 @@
                     <children>
                         <Label text="Project name" GridPane.rowIndex="1" />
                         <TextField fx:id="titleEdit" promptText="Example: Building a lighthouse" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label text="Goal amount" GridPane.rowIndex="3" />
-                        <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                        <Label text="Goal amount" GridPane.rowIndex="4" />
+                        <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                             <children>
                                 <TextField fx:id="goalAmountEdit" alignment="CENTER_RIGHT" style="-fx-graphic: url('icon.png')" text="0.0" HBox.hgrow="ALWAYS" />
                                 <Label minWidth="-Infinity" styleClass="btc-label-block" text="BTC" />
@@ -44,8 +47,8 @@
                         <Label minWidth="-Infinity" styleClass="btc-label-block" text="BTC" />
                             </children>
                         </HBox>
-                        <Label text="Address" GridPane.rowIndex="4" />
-                        <TextField fx:id="addressEdit" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label text="Address" GridPane.rowIndex="5" />
+                        <TextField fx:id="addressEdit" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                         <StackPane onDragDropped="#imageSelectorDropped" onDragOver="#imageSelectorDragOver" onMouseClicked="#imageSelectorClicked" GridPane.columnIndex="1">
                             <children>
                                 <ImageView fx:id="coverImageView" fitHeight="160.0" fitWidth="432.0" pickOnBounds="true" styleClass="cover-image">
@@ -58,7 +61,7 @@
                             </children>
                         </StackPane>
                         <Label text="Cover image" />
-                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
+                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="3">
                      <children>
                         <Label maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="Description" />
                         <Label fx:id="descriptionHelpButton" onMouseClicked="#showMarkdownHelp" text="?">
@@ -71,12 +74,14 @@
                         </Label>
                      </children>
                   </HBox>
-                  <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                  <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                      <children>
                         <TextArea fx:id="descriptionEdit" prefWidth="200.0" promptText="You can format text using Markdown syntax." styleClass="create-project-textarea" wrapText="true" />
                         <Label fx:id="previewTextLabel" onMouseClicked="#onPreviewTextClicked" style="-fx-font-weight: normal;" styleClass="link-label" text="Preview formatted text" />
                      </children>
                   </VBox>
+                  <Label text="Email address" GridPane.rowIndex="2" />
+                  <TextField fx:id="emailEdit" promptText="How can supporters get in touch with you?" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     </children>
                     <VBox.margin>
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
