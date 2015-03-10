@@ -53,6 +53,7 @@ public class EditProjectWindow {
     @FXML TextField addressEdit;
     @FXML TextField goalAmountEdit;
     @FXML TextField titleEdit;
+    @FXML TextField emailEdit;
     @FXML TextField minPledgeEdit;
     @FXML TextArea descriptionEdit;
     @FXML Button nextButton;
@@ -100,6 +101,11 @@ public class EditProjectWindow {
         // Copy data from model.
         addressEdit.setText(model.address.get());
         titleEdit.setText(model.title.get());
+                
+        String savedContact = Main.instance.prefs.getContactAddress();
+        if (savedContact != null)
+            emailEdit.setText(savedContact);
+        
         descriptionEdit.setText(model.memo.get());
         Coin goalCoin = Coin.valueOf(model.goalAmount.get());
         if (goalCoin.value != 1) {  // 1 satoshi is sentinel value meaning new project.
@@ -119,6 +125,7 @@ public class EditProjectWindow {
 
         // Bind UI back to model.
         this.model.title.bind(titleEdit.textProperty());
+        this.model.email.bind(emailEdit.textProperty());
         this.model.memo.bind(descriptionEdit.textProperty());
 
         coverPhotoSiteLink.setText(COVERPHOTO_SITE);
@@ -154,12 +161,14 @@ public class EditProjectWindow {
             if (addressValid.isValid.get())
                 this.model.address.set(cur);
         });
-
+        
+        ValidationLink emailLink = new ValidationLink(emailEdit, str -> str.matches("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$"));
         ValidationLink.autoDisableButton(nextButton,
                 goalValid,
                 new ValidationLink(titleEdit, str -> !str.isEmpty()),
                 minPledgeValue,
-                addressValid);
+                addressValid,
+                emailLink);
 
         roundCorners(coverImageView, 10);
 

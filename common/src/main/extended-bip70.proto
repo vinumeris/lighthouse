@@ -45,7 +45,7 @@ message ProjectExtraDetails {
     // TODO: Make required after alpha users have upgraded and no more alpha projects are hanging around.
     optional int64 min_pledge_size = 4;
 
-    // TODO: Contact details.
+    optional string email = 5;
 }
 
 // Data used only by the owner. This format may change arbitrarily between Lighthouse versions or be totally different
