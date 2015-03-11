@@ -147,7 +147,7 @@ public class Project {
         return title;
     }
     
-    /** Returns a human-readable email for the project. */
+    /** Returns a human-readable email for the project or the empty string if missing. */
     public String getEmail() {
         return projectReq.getExtraDetails().getEmail();
     }

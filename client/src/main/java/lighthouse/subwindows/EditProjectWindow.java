@@ -101,10 +101,12 @@ public class EditProjectWindow {
         // Copy data from model.
         addressEdit.setText(model.address.get());
         titleEdit.setText(model.title.get());
-                
-        String savedContact = Main.instance.prefs.getContactAddress();
-        if (savedContact != null)
-            emailEdit.setText(savedContact);
+        emailEdit.setText(model.email.get());
+        if (emailEdit.getText().isEmpty()) {
+            String savedContact = Main.instance.prefs.getContactAddress();
+            if (savedContact != null)
+                emailEdit.setText(savedContact);
+        }
         
         descriptionEdit.setText(model.memo.get());
         Coin goalCoin = Coin.valueOf(model.goalAmount.get());
@@ -235,6 +237,7 @@ public class EditProjectWindow {
                                 "different version, consider putting the date or a number in the title so people can distinguish them.");
                 return;
             }
+            Main.instance.prefs.setContactAddress(model.email.get());
             AddProjectTypeWindow.open(model, editing);
         });
     }
