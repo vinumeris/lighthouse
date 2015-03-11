@@ -1,2 +1,0 @@
-Bug fixes
-Fix for corrupted cover images and failing to show project submission guidance when dragging and dropping.

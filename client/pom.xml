@@ -3,7 +3,7 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>com.vinumeris.lighthouse</groupId>
-        <version>0.27-SNAPSHOT</version>
+        <version>0.28-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -115,7 +115,7 @@
         <dependency>
             <groupId>com.vinumeris.lighthouse</groupId>
             <artifactId>common</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>de.jensd</groupId>
