@@ -16,15 +16,17 @@ javapackager -deploy \
     -BappVersion=$ver \
     -Bcategory=Office,Finance \
     -BlicenseType=Apache \
+    -BlicenseFile=LICENSE \
     -Bemail=contact@vinumeris.com \
     -Bicon=client/icons/icon.png \
     -native deb \
     -name lighthouse \
-    -title Lighthouse \
+    -title "Lighthouse: a peer to peer crowdfunding app that uses Bitcoin" \
     -vendor Vinumeris \
     -outdir deploy \
     -appclass lighthouse.Main \
     -srcfiles $build \
+    -srcfiles package/linux/LICENSE \
+    -srcfiles package/linux/postinst \
+    -srcfiles package/linux/prerm \
     -outfile lighthouse
-
-# TODO: Figure out where LICENSE file goes so distros don't complain about "low quality" packages.

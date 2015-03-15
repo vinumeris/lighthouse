@@ -1,0 +1,2 @@
+#!/bin/sh
+ln -s /opt/lighthouse/lighthouse /usr/bin/lighthouse
