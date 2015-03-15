@@ -11,6 +11,7 @@ ver=$( sed -n 's/^.*final int VERSION = //p' client/src/main/java/lighthouse/Mai
 ver="${ver:0:${#ver}-1}"
 
 echo "Building version $ver..."
+rm -f updates/builds/processed/*
 mvn -q -U clean package -DskipTests
 [ ! -e updates ] && mkdir -p updates/builds
 
