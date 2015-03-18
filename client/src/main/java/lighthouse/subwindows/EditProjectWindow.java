@@ -315,7 +315,8 @@ public class EditProjectWindow {
                 // Force to JPEG as normally this results in smaller outputs, unless we are running on 8u20 which has
                 // a bug that results in corrupted JPEGs. In this case we write out PNGs, but that's very bloated for
                 // photos and makes bigger project files.
-                if (System.getProperty("java.version").equals("1.8.0_20"))
+                String ver = System.getProperty("java.version");
+                if (ver.equals("1.8.0_20") || ver.equals("1.8.0_31"))
                     ImageIO.write(im, "png", baos);
                 else
                     ImageIO.write(im, "jpeg", baos);
