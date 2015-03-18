@@ -1,0 +1,2 @@
+Faster sync, bug fixes, email addresses in projects.
+Attempt to sync the block chain from faster peers. Another fix for image corruption.
