@@ -862,7 +862,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         try {
             // Can be on any thread.
             final byte[] bits = pledge.toByteArray();
-            Sha256Hash hash = Sha256Hash.create(bits);
+            Sha256Hash hash = Sha256Hash.hash(bits);
             // This file name is not very helpful for sysadmins. Perhaps if we scrub the metadata enough we can make a
             // better one, e.g. with the users contact details in.
             String filename = hash + DiskManager.PLEDGE_FILE_EXTENSION;

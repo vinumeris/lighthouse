@@ -162,7 +162,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
                             .setTimestamp(Utils.currentTimeSeconds())
                         .build())
                 .build();
-        final Sha256Hash origHash = Sha256Hash.create(pledge.toByteArray());
+        final Sha256Hash origHash = Sha256Hash.hash(pledge.toByteArray());
         LHProtos.Pledge.Builder builder = pledge.toBuilder().clearTransactions();
         builder.getPledgeDetailsBuilder().setOrigHash(ByteString.copyFrom(origHash.getBytes()));
         return builder.build();
@@ -283,7 +283,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
                         .setTimestamp(Utils.currentTimeSeconds())
                         .build())
                 .build();
-        final Sha256Hash origHash = Sha256Hash.create(pledge.toByteArray());
+        final Sha256Hash origHash = Sha256Hash.hash(pledge.toByteArray());
         final LHProtos.Pledge.Builder scrubbedPledgeBuilder = pledge.toBuilder().clearTransactions();
         scrubbedPledgeBuilder.getPledgeDetailsBuilder().setOrigHash(ByteString.copyFrom(origHash.getBytes()));
         final LHProtos.Pledge scrubbedPledge = scrubbedPledgeBuilder.build();
@@ -571,7 +571,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         future.get();
 
         // And the pledge was saved to disk named after the hash of the pledge contents.
-        final Sha256Hash pledgeHash = Sha256Hash.create(pledge.toByteArray());
+        final Sha256Hash pledgeHash = Sha256Hash.hash(pledge.toByteArray());
         final List<Path> dirFiles = mapList(listDir(AppDirectory.dir()), Path::getFileName);
         assertTrue(dirFiles.contains(Paths.get(pledgeHash.toString() + DiskManager.PLEDGE_FILE_EXTENSION)));
     }

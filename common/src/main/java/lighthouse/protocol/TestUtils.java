@@ -35,6 +35,6 @@ public class TestUtils {
         byte[] script = ScriptBuilder.createInputScript(dummy).getProgram();
         // Nonsense outpoint, it doesn't matter.
         counter[0]++;
-        return new TransactionInput(UnitTestParams.get(), null, script, new TransactionOutPoint(UnitTestParams.get(), 0, Sha256Hash.create(counter)));
+        return new TransactionInput(UnitTestParams.get(), null, script, new TransactionOutPoint(UnitTestParams.get(), 0, Sha256Hash.hash(counter)));
     }
 }

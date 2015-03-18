@@ -277,6 +277,6 @@ public class LHUtils {
         if (pledge.getPledgeDetails().hasOrigHash())
             return new Sha256Hash(pledge.getPledgeDetails().getOrigHash().toByteArray());
         else
-            return Sha256Hash.create(pledge.toByteArray());
+            return Sha256Hash.hash(pledge.toByteArray());
     }
 }
