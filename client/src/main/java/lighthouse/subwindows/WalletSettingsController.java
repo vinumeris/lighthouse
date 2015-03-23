@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.*;
 import static javafx.beans.binding.Bindings.*;
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.I18nUtil._;
 
 public class WalletSettingsController {
     private static final Logger log = LoggerFactory.getLogger(WalletSettingsController.class);
@@ -29,6 +30,9 @@ public class WalletSettingsController {
     @FXML DatePicker datePicker;
     @FXML TextArea wordsArea;
     @FXML Button restoreButton;
+    @FXML Label walletWordsLabel;
+    @FXML Label createdOnLabel;
+    @FXML Button closeButton;
 
     public Main.OverlayUI overlayUI;
 
@@ -36,7 +40,7 @@ public class WalletSettingsController {
 
     public static void open(@Nullable KeyParameter key) {
         checkGuiThread();
-        Main.OverlayUI<WalletSettingsController> screen = Main.instance.overlayUI("subwindows/wallet_settings.fxml", "Wallet settings");
+        Main.OverlayUI<WalletSettingsController> screen = Main.instance.overlayUI("subwindows/wallet_settings.fxml", _("Wallet settings"));
         screen.controller.initialize(key);
     }
 
@@ -54,7 +58,7 @@ public class WalletSettingsController {
             this.aesKey = aesKey;
             seed = seed.decrypt(checkNotNull(Main.bitcoin.wallet().getKeyCrypter()), "", aesKey);
             // Now we can display the wallet seed as appropriate.
-            passwordButton.setText("Remove password");
+            passwordButton.setText(_("Remove password"));
         }
 
         // Set the date picker to show the birthday of this wallet.
@@ -110,6 +114,14 @@ public class WalletSettingsController {
                 datePicker.getStyleClass().remove("validation_error");
             }
         });
+        
+        // Load localized strings
+        walletWordsLabel.setText(_("These are your wallet words. Write them down along with the creation date, and you can get your money back " +
+        "even if you lose all your wallet backup files. Just type the details back in below to restore!"));
+        createdOnLabel.setText(_("Created on:"));
+        passwordButton.setText(_("Set password"));
+        restoreButton.setText(_("Restore from words"));
+        closeButton.setText(_("Close"));
     }
 
     private void askForPasswordAndRetry() {
@@ -126,21 +138,21 @@ public class WalletSettingsController {
         // Don't allow a restore unless this wallet is presently empty. We don't want to end up with two wallets, too
         // much complexity, even though WalletAppKit will keep the current one as a backup file in case of disaster.
         if (Main.bitcoin.wallet().getBalance().value > 0) {
-            informationalAlert("Wallet is not empty",
-                    "You must empty this wallet out before attempting to restore an older one, as mixing wallets " +
-                            "together can lead to invalidated backups.");
+            informationalAlert(_("Wallet is not empty"),
+                    _("You must empty this wallet out before attempting to restore an older one, as mixing wallets " +
+                            "together can lead to invalidated backups."));
             return;
         }
 
         if (aesKey != null) {
             // This is weak. We should encrypt the new seed here.
-            informationalAlert("Wallet is encrypted",
-                    "After restore, the wallet will no longer be encrypted and you must set a new password.");
+            informationalAlert(_("Wallet is encrypted"),
+                    _("After restore, the wallet will no longer be encrypted and you must set a new password."));
         }
 
         log.info("Attempting wallet restore using seed '{}' from date {}", wordsArea.getText(), datePicker.getValue());
-        informationalAlert("Wallet restore in progress",
-                "Your wallet will now be resynced from the Bitcoin network. This can take a long time for old wallets.");
+        informationalAlert(_("Wallet restore in progress"),
+                _("Your wallet will now be resynced from the Bitcoin network. This can take a long time for old wallets."));
         overlayUI.done();
 
         long birthday = datePicker.getValue().atStartOfDay().toEpochSecond(ZoneOffset.UTC);
@@ -152,11 +164,11 @@ public class WalletSettingsController {
     @FXML
     public void passwordButtonClicked(ActionEvent event) {
         if (aesKey == null) {
-            Main.instance.overlayUI("subwindows/wallet_set_password.fxml", "Set password");
+            Main.instance.overlayUI("subwindows/wallet_set_password.fxml", _("Set password"));
         } else {
             Main.bitcoin.wallet().decrypt(aesKey);
-            informationalAlert("Wallet decrypted", "A password will no longer be required to send money or edit settings.");
-            passwordButton.setText("Set password");
+            informationalAlert(_("Wallet decrypted"), _("A password will no longer be required to send money or edit settings."));
+            passwordButton.setText(_("Set password"));
             aesKey = null;
         }
     }

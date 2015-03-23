@@ -12,6 +12,8 @@ import org.bitcoinj.core.*;
 import java.time.*;
 import java.time.format.*;
 
+import static lighthouse.utils.I18nUtil._;
+
 /**
  * Allows the user to view the details of the pledge and copy/paste the
  */
@@ -21,6 +23,9 @@ public class ShowPledgeWindow {
     @FXML Label dateLabel;
     @FXML TextArea messageField;
     @FXML Button saveToFileButton;
+    @FXML Button closeButton;
+    @FXML Label pledgedByLabel;
+    @FXML Label onLabel;
 
     public Main.OverlayUI<ShowPledgeWindow> overlayUI;
 
@@ -28,7 +33,7 @@ public class ShowPledgeWindow {
     private LHProtos.Pledge pledge;
 
     public static Main.OverlayUI<ShowPledgeWindow> open(Project project, LHProtos.Pledge pledge) {
-        Main.OverlayUI<ShowPledgeWindow> ui = Main.instance.overlayUI("subwindows/show_pledge.fxml", "View pledge");
+        Main.OverlayUI<ShowPledgeWindow> ui = Main.instance.overlayUI("subwindows/show_pledge.fxml", _("View pledge"));
         ui.controller.init(project, pledge);
         return ui;
     }
@@ -36,7 +41,7 @@ public class ShowPledgeWindow {
     private void init(Project project, LHProtos.Pledge pledge) {
         LHProtos.PledgeDetails details = pledge.getPledgeDetails();
         amountLabel.setText(Coin.valueOf(details.getTotalInputValue()).toFriendlyString());
-        String label = details.hasName() ? details.getName() : "Anonymous";
+        String label = details.hasName() ? details.getName() : _("Anonymous");
         if (details.hasContactAddress())
             label += " <" + details.getContactAddress() + ">";
         contactLabel.setText(label);
@@ -54,6 +59,13 @@ public class ShowPledgeWindow {
         // Let the user save their pledge again if it's a serverless project and this pledge is ours.
         LHProtos.Pledge pledgeFor = Main.wallet.getPledgeFor(project);
         saveToFileButton.setVisible(project.getPaymentURL() == null && pledgeFor != null && LHUtils.hashFromPledge(pledge).equals(LHUtils.hashFromPledge(pledgeFor)));
+        
+        // Load localized strings
+        saveToFileButton.setText(_("Save to file"));
+        closeButton.setText(_("Close"));
+        pledgedByLabel.setText(_("pledged by"));
+        onLabel.setText(_("on"));
+        messageField.setPromptText(_("No attached message"));
     }
 
     @FXML

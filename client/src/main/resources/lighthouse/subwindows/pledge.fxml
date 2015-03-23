@@ -8,7 +8,7 @@
     <bottom>
         <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
             <children>
-                <Button cancelButton="true" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
+                <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
                 <Button fx:id="confirmButton" defaultButton="true" mnemonicParsing="false" onAction="#confirmClicked" text="Confirm" />
             </children>
             <padding>
@@ -20,7 +20,7 @@
         <VBox alignment="CENTER" prefHeight="374.0" prefWidth="400.0" spacing="5.0" BorderPane.alignment="CENTER">
             <children>
                 <Pane VBox.vgrow="ALWAYS" />
-                <Label style="-fx-font-size: 40;" text="Amount">
+                <Label fx:id="amountLabel" style="-fx-font-size: 40;" text="Amount">
                     <font>
                         <Font size="31.0" />
                     </font>
@@ -48,8 +48,8 @@
               </rowConstraints>
                <children>
                   <TextField fx:id="emailEdit" GridPane.columnIndex="1" />
-                  <Label minWidth="-Infinity" text="Email address" />
-                  <Label text="Name" GridPane.rowIndex="1" />
+                  <Label fx:id="emailAddressLabel" minWidth="-Infinity" text="Email address" />
+                  <Label fx:id="nameLabel" text="Name" GridPane.rowIndex="1" />
                   <TextField fx:id="nameEdit" promptText="Anonymous" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                </children>
                <VBox.margin>

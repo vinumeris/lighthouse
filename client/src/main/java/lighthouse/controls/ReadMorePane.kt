@@ -16,6 +16,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
 import javafx.util.Duration
 import lighthouse.utils.easing.ElasticInterpolator
+import lighthouse.utils.I18nUtil._
 
 /**
  * Control that wraps another control and hides most of it until the Read more ... link is clicked, when it animates
@@ -38,7 +39,7 @@ public class ReadMorePane() : StackPane() {
                         setPrefHeight(wrappedNode.getHeight())
                     } else {
                         wrappedNode.setMinHeight(0.0)
-                        val label = Label("Read more ...")
+                        val label = Label(_("Read more ..."))
                         label.setStyle("-fx-text-fill: blue; -fx-cursor: hand")
                         val box = HBox(label)
                         box.setAlignment(Pos.BOTTOM_RIGHT)

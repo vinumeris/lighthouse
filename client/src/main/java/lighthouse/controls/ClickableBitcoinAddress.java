@@ -22,6 +22,7 @@ import org.bitcoinj.uri.*;
 import java.io.*;
 
 import static javafx.beans.binding.Bindings.*;
+import static lighthouse.utils.I18nUtil._;
 
 /**
  * A custom control that implements a clickable, copyable Bitcoin address. Clicking it opens a local wallet app. The
@@ -48,11 +49,11 @@ public class ClickableBitcoinAddress extends AnchorPane {
 
             copyWidget.setCursor(Cursor.HAND);
             AwesomeDude.setIcon(copyWidget, AwesomeIcon.COPY);
-            Tooltip.install(copyWidget, new Tooltip("Copy address to clipboard"));
+            Tooltip.install(copyWidget, new Tooltip(_("Copy address to clipboard")));
 
             qrCode.setCursor(Cursor.HAND);
             AwesomeDude.setIcon(qrCode, AwesomeIcon.QRCODE);
-            Tooltip.install(qrCode, new Tooltip("Show a barcode scannable with a mobile phone for this address"));
+            Tooltip.install(qrCode, new Tooltip(_("Show a barcode scannable with a mobile phone for this address")));
 
             addressStr = convert(address);
             addressLabel.textProperty().bind(addressStr);
@@ -101,7 +102,7 @@ public class ClickableBitcoinAddress extends AnchorPane {
     @FXML
     protected void copyWidgetClicked(MouseEvent event) {
         copyAddress(null);
-        GuiUtils.arrowBubbleToNode(copyWidget, "Address copied to clipboard");
+        GuiUtils.arrowBubbleToNode(copyWidget, _("Address copied to clipboard"));
     }
 
     @FXML
@@ -124,7 +125,7 @@ public class ClickableBitcoinAddress extends AnchorPane {
         vbox.setPrefWidth(qrImage.getWidth());
         vbox.setStyle("-fx-background-color: white");
         vbox.setPrefHeight(qrImage.getHeight() + label.getHeight() + vbox.getSpacing());
-        EmbeddedWindow window = new EmbeddedWindow("QR code", vbox);
+        EmbeddedWindow window = new EmbeddedWindow(_("QR code"), vbox);
         final Main.OverlayUI<ClickableBitcoinAddress> overlay = Main.instance.overlayUI(window, this);
         window.setOnCloseClicked(overlay::done);
         //overlay.outsideClickDismisses();

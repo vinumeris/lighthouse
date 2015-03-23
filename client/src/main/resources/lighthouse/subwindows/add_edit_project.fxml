@@ -28,14 +28,14 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                     </BorderPane.margin>
                     <children>
-                        <Label text="Project name" GridPane.rowIndex="1" />
+                        <Label fx:id="projectNameLabel" text="Project name" GridPane.rowIndex="1" />
                         <TextField fx:id="titleEdit" promptText="Example: Building a lighthouse" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label text="Goal amount" GridPane.rowIndex="4" />
+                        <Label fx:id="goalAmountLabel" text="Goal amount" GridPane.rowIndex="4" />
                         <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                             <children>
                                 <TextField fx:id="goalAmountEdit" alignment="CENTER_RIGHT" style="-fx-graphic: url('icon.png')" text="0.0" HBox.hgrow="ALWAYS" />
                                 <Label minWidth="-Infinity" styleClass="btc-label-block" text="BTC" />
-                        <Label minWidth="-Infinity" text="Min pledge">
+                        <Label fx:id="minPledgeLabel" minWidth="-Infinity" text="Min pledge">
                            <padding>
                               <Insets left="15.0" />
                            </padding>
@@ -47,7 +47,7 @@
                         <Label minWidth="-Infinity" styleClass="btc-label-block" text="BTC" />
                             </children>
                         </HBox>
-                        <Label text="Address" GridPane.rowIndex="5" />
+                        <Label fx:id="addressLabel" text="Address" GridPane.rowIndex="5" />
                         <TextField fx:id="addressEdit" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                         <StackPane onDragDropped="#imageSelectorDropped" onDragOver="#imageSelectorDragOver" onMouseClicked="#imageSelectorClicked" GridPane.columnIndex="1">
                             <children>
@@ -60,10 +60,10 @@
                                 <Label fx:id="coverPhotoSiteLink" onMouseClicked="#openCoverPhotoFinder" style="-fx-padding: 10; -fx-background-color: #ffffffdd" styleClass="link-label" text="coverphotoz.com" StackPane.alignment="BOTTOM_RIGHT" />
                             </children>
                         </StackPane>
-                        <Label text="Cover image" />
+                        <Label fx:id="coverImageTextLabel" text="Cover image" />
                   <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="3">
                      <children>
-                        <Label maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="Description" />
+                        <Label fx:id="descriptionLabel" maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="Description" />
                         <Label fx:id="descriptionHelpButton" onMouseClicked="#showMarkdownHelp" text="?">
                            <padding>
                               <Insets left="10.0" />
@@ -80,7 +80,7 @@
                         <Label fx:id="previewTextLabel" onMouseClicked="#onPreviewTextClicked" style="-fx-font-weight: normal;" styleClass="link-label" text="Preview formatted text" />
                      </children>
                   </VBox>
-                  <Label text="Email address" GridPane.rowIndex="2" />
+                  <Label fx:id="emailAddressLabel" text="Email address" GridPane.rowIndex="2" />
                   <TextField fx:id="emailEdit" promptText="How can supporters get in touch with you?" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     </children>
                     <VBox.margin>
@@ -97,7 +97,7 @@
         <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="10.0" styleClass="fat-buttons" BorderPane.alignment="CENTER">
             <children>
                 <Pane HBox.hgrow="ALWAYS" />
-                <Button cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
+                <Button fx:id="cancelButton" cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
                 <Button fx:id="nextButton" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#nextClicked" text="Next" />
             </children>
             <padding>

@@ -38,6 +38,7 @@ import java.nio.file.*;
 
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.I18nUtil._;
 
 /**
  * A window that lets you create a new project or edit an existing one.
@@ -60,6 +61,16 @@ public class EditProjectWindow {
     @FXML Pane createPane;
     @FXML Label descriptionHelpButton;
     @FXML Label previewTextLabel;
+    @FXML Label projectNameLabel;
+    @FXML Label goalAmountLabel;
+    @FXML Label minPledgeLabel;
+    @FXML Label addressLabel;
+    @FXML Label coverImageTextLabel;
+    @FXML Label descriptionLabel;
+    @FXML Label emailAddressLabel;
+    @FXML Button cancelButton;
+        
+        
 
     private PopOver maxPledgesPopOver;
 
@@ -72,19 +83,19 @@ public class EditProjectWindow {
         ProjectModel projectModel = new ProjectModel(Main.wallet);
         // Pick a random server as the default suggestion, to load balance across them more effectively.
         projectModel.serverName.set(ServerList.pickRandom().hostName);  // By default.
-        open(projectModel, "Create new project", false);
+        open(projectModel, _("Create new project"), false);
     }
 
     public static void openForCreate(ProjectModel project) {
-        open(project, "Create new project", false);
+        open(project, _("Create new project"), false);
     }
 
     public static void openForEdit(Project project) {
-        open(new ProjectModel(project.getProtoDetails().toBuilder()), "Edit project", true);
+        open(new ProjectModel(project.getProtoDetails().toBuilder()), _("Edit project"), true);
     }
 
     public static void openForEdit(ProjectModel project) {
-        open(project, "Edit project", true);
+        open(project, _("Edit project"), true);
     }
 
     private static void open(ProjectModel project, String title, boolean editing) {
@@ -174,7 +185,8 @@ public class EditProjectWindow {
 
         roundCorners(coverImageView, 10);
 
-        Label maxPledgesWarning = new Label(String.format("You can collect a maximum of %d pledges, due to limits in the Bitcoin protocol.", ProjectModel.MAX_NUM_INPUTS));
+        // TRANS: %d = maximum number of pledges
+        Label maxPledgesWarning = new Label(String.format(_("You can collect a maximum of %d pledges, due to limits in the Bitcoin protocol."), ProjectModel.MAX_NUM_INPUTS));
         maxPledgesWarning.setStyle("-fx-font-size: 12; -fx-padding: 10");
         maxPledgesPopOver = new PopOver(maxPledgesWarning);
         maxPledgesPopOver.setDetachable(false);
@@ -195,6 +207,22 @@ public class EditProjectWindow {
 
         descriptionHelpButton.setText("");
         AwesomeDude.setIcon(descriptionHelpButton, AwesomeIcon.QUESTION_CIRCLE);
+
+        // Load localized strings
+        projectNameLabel.setText(_("Project name"));
+        goalAmountLabel.setText(_("Goal amount"));
+        minPledgeLabel.setText(_("Min pledge"));
+        addressLabel.setText(_("Address"));
+        coverImageLabel.setText(_("Drop a custom image or click here to open"));
+        coverImageTextLabel.setText(_("Cover image"));
+        descriptionLabel.setText(_("Description"));
+        previewTextLabel.setText(_("Preview formatted text"));
+        emailAddressLabel.setText(_("Email address"));
+        cancelButton.setText(_("Cancel"));
+        nextButton.setText(_("Next"));
+        titleEdit.setPromptText(_("Example: Building a lighthouse"));
+        descriptionEdit.setPromptText(_("You can format text using Markdown syntax."));
+        emailEdit.setPromptText(_("How can supporters get in touch with you?"));        
     }
 
     private void setupDefaultCoverImage() {
@@ -232,9 +260,9 @@ public class EditProjectWindow {
             // We could add (2) after the file name or whatever to avoid this, but multiple different projects with
             // the same title would be confusing anyway so just forbid it.
             if (!editing && Files.exists(AppDirectory.dir().resolve(Project.getSuggestedFileName(model.title.get())))) {
-                informationalAlert("Title conflict",
-                        "You already have a project with that title. Please choose another. If you are trying to create a " +
-                                "different version, consider putting the date or a number in the title so people can distinguish them.");
+                informationalAlert(_("Title conflict"),
+                        _("You already have a project with that title. Please choose another. If you are trying to create a " +
+                                "different version, consider putting the date or a number in the title so people can distinguish them."));
                 return;
             }
             Main.instance.prefs.setContactAddress(model.email.get());
@@ -246,8 +274,8 @@ public class EditProjectWindow {
     public void imageSelectorClicked(MouseEvent event) {
         log.info("Image selector clicked");
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select an image file");
-        chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Images (JPG/PNG/GIF)", "*.jpg", "*.jpeg", "*.png", "*.gif"));
+        chooser.setTitle(_("Select an image file"));
+        chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter(_("Images (JPG/PNG/GIF)"), "*.jpg", "*.jpeg", "*.png", "*.gif"));
         platformFiddleChooser(chooser);
         Path prevPath = Main.instance.prefs.getCoverPhotoFolder();
         if (prevPath != null)
@@ -272,7 +300,9 @@ public class EditProjectWindow {
                     setImageTo(bytes);
                 });
                 task.setOnFailed(ev -> {
-                    informationalAlert("Image load failed", "Could not download the image from the remote server: %s", task.getException().getLocalizedMessage());
+                    informationalAlert(_("Image load failed"),
+                        // TRANS: %s = error message
+                        _("Could not download the image from the remote server: %s"), task.getException().getLocalizedMessage());
                     coverImageLabel.setGraphic(null);
                     coverImageLabel.setText(oldLabel);
                 });
@@ -283,14 +313,15 @@ public class EditProjectWindow {
                 coverImageLabel.setGraphic(indicator);
                 coverImageLabel.setText("");
                 Thread download = new Thread(task);
-                download.setName("Download of " + result);
+                // TRANS: %s = image URL
+                download.setName(String.format(_("Download of %s"), result));
                 download.setDaemon(true);
                 download.start();
             } else {
                 // Load in a blocking fashion.
                 byte[] bits = ByteStreams.toByteArray(result.openStream());
                 if (bits.length > 1024 * 1024 * 5) {
-                    informationalAlert("Image too large", "Please make sure your image is smaller than 5mb, any larger is excessive.");
+                    informationalAlert(_("Image too large"), _("Please make sure your image is smaller than 5mb, any larger is excessive."));
                     return;
                 }
                 final ByteString bytes = ByteString.copyFrom(bits);
@@ -298,7 +329,7 @@ public class EditProjectWindow {
             }
         } catch (Exception e) {
             log.error("Failed to load image", e);
-            informationalAlert("Failed to load image", "%s", e.getLocalizedMessage());
+            informationalAlert(_("Failed to load image"), "%s", e.getLocalizedMessage());
         }
     }
 
@@ -370,7 +401,7 @@ public class EditProjectWindow {
 
     @FXML
     public void showMarkdownHelp(MouseEvent event) {
-        Main.instance.getHostServices().showDocument("https://help.github.com/articles/markdown-basics/");
+        Main.instance.getHostServices().showDocument(_("https://help.github.com/articles/markdown-basics/"));
     }
 
     private static final PegDownProcessor parser = new PegDownProcessor(100L /* max parse time msec */);

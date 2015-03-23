@@ -7,7 +7,7 @@
    <bottom>
       <HBox alignment="CENTER_RIGHT" prefHeight="21.0" prefWidth="540.0" spacing="15.0" BorderPane.alignment="CENTER">
          <children>
-            <Button defaultButton="true" mnemonicParsing="false" onAction="#closeClicked" text="Close" />
+            <Button fx:id="closeButton" defaultButton="true" mnemonicParsing="false" onAction="#closeClicked" text="Close" />
          </children>
       </HBox>
    </bottom>
@@ -31,17 +31,17 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Label text="Target address" />
+                  <Label fx:id="targetAddressLabel" text="Target address" />
                   <VBox fx:id="targetAddressVBox" maxHeight="-Infinity" GridPane.columnIndex="1" />
-                  <Label text="Server URL" GridPane.rowIndex="1" />
+                  <Label fx:id="serverUrlLabel" text="Server URL" GridPane.rowIndex="1" />
                   <TextField fx:id="serverURL" editable="false" promptText="Serverless project" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Label text="Min pledge size" GridPane.rowIndex="2" />
+                  <Label fx:id="minPledgeLabel" text="Min pledge size" GridPane.rowIndex="2" />
                   <TextField fx:id="minPledgeSize" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label text="Auth key" GridPane.rowIndex="3" />
+                  <Label fx:id="authKeyLabel" text="Auth key" GridPane.rowIndex="3" />
                   <TextField fx:id="authKey" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <Label text="Network parameters" GridPane.rowIndex="4" />
+                  <Label fx:id="networkParamsLabel" text="Network parameters" GridPane.rowIndex="4" />
                   <TextField fx:id="netParams" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <Label text="Creation time" GridPane.rowIndex="5" />
+                  <Label fx:id="creationTimeLabel" text="Creation time" GridPane.rowIndex="5" />
                   <TextField fx:id="creationTime" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                </children>
             </GridPane>
