@@ -4,6 +4,8 @@ import org.bitcoinj.core.NetworkParameters;
 
 import java.math.BigDecimal;
 
+import static lighthouse.utils.I18nUtil._;
+
 // TODO: Move this into bitcoinj
 
 public class BitcoinValue {
@@ -11,13 +13,13 @@ public class BitcoinValue {
     public static long userInputToSatoshis(String userInput) throws NumberFormatException {
         BigDecimal bd = new BigDecimal(userInput.trim());
         if (bd.signum() < 0)
-            throw new NumberFormatException("Negative numbers not allowed");
+            throw new NumberFormatException(_("Negative numbers not allowed"));
         final BigDecimal satoshis = bd.movePointRight(8);
         if (satoshis.scale() > 0)
-            throw new NumberFormatException("Fractional value units not allowed");
+            throw new NumberFormatException(_("Fractional value units not allowed"));
         final long l = satoshis.longValue();
         if (l > NetworkParameters.MAX_MONEY.longValue())
-            throw new NumberFormatException("Larger than MAX_MONEY");
+            throw new NumberFormatException(_("Larger than MAX_MONEY"));
         return l;
     }
 }

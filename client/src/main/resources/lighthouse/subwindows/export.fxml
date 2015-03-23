@@ -17,7 +17,7 @@
                         <Label fx:id="moneyIcon" text="" />
                     </children>
                 </StackPane>
-                <Label text="Drag to a folder, email or chat window. Or ..." />
+                <Label fx:id="dragToAFolderLabel" text="Drag to a folder, email or chat window. Or ..." />
                 <Button fx:id="saveButton" defaultButton="true" mnemonicParsing="false" onAction="#saveClicked" text="Save to file" />
             </children>
         </VBox>
@@ -30,7 +30,7 @@
                   <Image url="@../light-bulb-icon.png" />
                </image>
             </ImageView>
-            <Label text="The folder you save the project to will be watched, and any pledges found there will be automatically loaded." wrapText="true" />
+            <Label fx:id="folderWillBeWatchedLabel" text="The folder you save the project to will be watched, and any pledges found there will be automatically loaded." wrapText="true" />
          </children>
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

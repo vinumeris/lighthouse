@@ -4,6 +4,8 @@ import com.google.common.collect.*;
 
 import java.util.*;
 
+import static lighthouse.utils.I18nUtil._;
+
 /**
  * Hard-coded list of project servers so the app can randomly pick between them and load balance the work.
  */
@@ -30,10 +32,10 @@ public class ServerList {
     }
 
     public static final List<Entry> servers = ImmutableList.of(
-            new Entry("vinumeris.com", "project-hosting@vinumeris.com", "Submission via email. Project must be legal under Swiss and UK law.", SubmitType.EMAIL),
-            new Entry("lighthouse.onetapsw.com", "lighthouse-projects@onetapsw.com", "Submission via email. Project must be legal under US law.", SubmitType.EMAIL),
-            new Entry("lighthouseprojects.io", "projects@lighthouseprojects.io", "Submission via email. Project must be legal under New Zealand law.", SubmitType.EMAIL),
-            new Entry("lighthouse.bitseattle.com", "https://lighthouse.bitseattle.com/lighthouse-projects/upload/", "Submission via the web. Project must be legal under US law.", SubmitType.WEB)
+            new Entry("vinumeris.com", "project-hosting@vinumeris.com", _("Submission via email. Project must be legal under Swiss and UK law."), SubmitType.EMAIL),
+            new Entry("lighthouse.onetapsw.com", "lighthouse-projects@onetapsw.com", _("Submission via email. Project must be legal under US law."), SubmitType.EMAIL),
+            new Entry("lighthouseprojects.io", "projects@lighthouseprojects.io", _("Submission via email. Project must be legal under New Zealand law."), SubmitType.EMAIL),
+            new Entry("lighthouse.bitseattle.com", "https://lighthouse.bitseattle.com/lighthouse-projects/upload/", _("Submission via the web. Project must be legal under US law."), SubmitType.WEB)
     );
     public static final Map<String, Entry> hostnameToServer;
 

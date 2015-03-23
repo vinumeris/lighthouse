@@ -36,6 +36,7 @@ import static javafx.beans.binding.Bindings.*;
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.threading.AffinityExecutor.*;
 import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.I18nUtil._;
 
 /**
  * Gets created auto-magically by FXMLLoader via reflection. The widget fields are set to the GUI controls they're named
@@ -61,6 +62,11 @@ public class MainWindow {
     @FXML Label addProjectIcon;
     @FXML Label networkIndicatorLabel;
     @FXML Button backButton;
+    @FXML Label addressLabel;
+    @FXML Label yourBalanceLabel;
+    @FXML Button createProjectBtn;
+    @FXML Button importProjectBtn;
+    @FXML Label dropFileHereLabel;
 
     // These are read-only mirrors of sets maintained by the backend. Changes made by LighthouseBackend are propagated
     // into the UI thread and applied there asynchronously, thus it is safe to connect them directly to UI widgets.
@@ -89,9 +95,9 @@ public class MainWindow {
         numInitialBoxes = projectsVBox.getChildren().size();
 
         AwesomeDude.setIcon(emptyWalletBtn, AwesomeIcon.SIGN_OUT, "12pt", ContentDisplay.LEFT);
-        Tooltip.install(emptyWalletBtn, new Tooltip("Send money out of the wallet"));
+        Tooltip.install(emptyWalletBtn, new Tooltip(_("Send money out of the wallet")));
         AwesomeDude.setIcon(setupWalletBtn, AwesomeIcon.LOCK, "12pt", ContentDisplay.LEFT);
-        Tooltip.install(setupWalletBtn, new Tooltip("Make paper backup and encrypt your wallet"));
+        Tooltip.install(setupWalletBtn, new Tooltip(_("Make paper backup and encrypt your wallet")));
         AwesomeDude.setIcon(addProjectIcon, AwesomeIcon.FILE_ALT, "50pt; -fx-text-fill: white" /* lame hack */);
 
         // Slide back button in/out.
@@ -99,6 +105,15 @@ public class MainWindow {
         animatedBind(topBoxLeftArea, topBoxLeftArea.translateXProperty(), when(inProjectView).then(0).otherwise(-45), Interpolator.EASE_OUT);
 
         AwesomeDude.setIcon(menuBtn, AwesomeIcon.BARS);
+        
+        // Load localized strings
+        addressLabel.setText(_("YOUR ADDRESS"));
+        setupWalletBtn.setText(_("Set up wallet"));
+        emptyWalletBtn.setText(_("Empty wallet"));
+        yourBalanceLabel.setText(_("YOUR BALANCE"));
+        createProjectBtn.setText(_("Create project"));
+        importProjectBtn.setText(_("Import project"));
+        dropFileHereLabel.setText(_("You can also drop an existing project file here."));
 
         // Avoid duplicate add errors.
         contentStack.getChildren().remove(projectViewContainer);
@@ -245,8 +260,8 @@ public class MainWindow {
     @FXML
     public void importClicked(ActionEvent event) {
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select a bitcoin project file to import");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Project/contract files", "*" + DiskManager.PROJECT_FILE_EXTENSION));
+        chooser.setTitle(_("Select a bitcoin project file to import"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(_("Project/contract files"), "*" + DiskManager.PROJECT_FILE_EXTENSION));
                 platformFiddleChooser(chooser);
         File file = chooser.showOpenDialog(Main.instance.mainStage);
         if (file == null)
@@ -299,8 +314,9 @@ public class MainWindow {
             Sha256Hash hash = Sha256Hash.hashFileContents(file);
             Files.copy(file.toPath(), AppDirectory.dir().resolve(hash + DiskManager.PLEDGE_FILE_EXTENSION));
         } catch (IOException e) {
-            GuiUtils.informationalAlert("Import failed",
-                    "Could not copy the dropped pledge into the %s application directory: " + e, Main.APP_NAME);
+            GuiUtils.informationalAlert(_("Import failed"),
+                    // TRANS: %1$s = app name, %2$s = error message
+                    _("Could not copy the dropped pledge into the %1$s application directory: %2$s"), Main.APP_NAME, e);
         }
     }
 
@@ -313,8 +329,9 @@ public class MainWindow {
         try {
             Main.backend.importProjectFrom(file);
         } catch (IOException e) {
-            GuiUtils.informationalAlert("Failed to import project",
-                    "Could not read project file: " + e.getLocalizedMessage());
+            GuiUtils.informationalAlert(_("Failed to import project"),
+                    // TRANS: %s = error message
+                    _("Could not read project file: %s"), e.getLocalizedMessage());
         }
     }
 
@@ -363,7 +380,7 @@ public class MainWindow {
 
     private void setupBitcoinSyncNotification() {
         if (Main.offline) {
-            Main.instance.notificationBar.displayNewItem("You are offline. You will not be able to use the app until you go online and restart.");
+            Main.instance.notificationBar.displayNewItem(_("You are offline. You will not be able to use the app until you go online and restart."));
             emptyWalletBtn.disableProperty().unbind();
             emptyWalletBtn.setDisable(true);
             return;
@@ -371,7 +388,7 @@ public class MainWindow {
         TorClient torClient = Main.bitcoin.peerGroup().getTorClient();
         if (torClient != null) {
             SimpleDoubleProperty torProgress = new SimpleDoubleProperty(-1);
-            String torMsg = "Initialising Tor";
+            String torMsg = _("Initialising Tor");
             syncItem = Main.instance.notificationBar.displayNewItem(torMsg, torProgress);
             torClient.addInitializationListener(new TorInitializationListener() {
                 @Override
@@ -430,13 +447,13 @@ public class MainWindow {
             public void invalidated(Observable x) {
                 if (shown) return;
                 NotificationBarPane.Item downloadingItem = Main.instance.notificationBar.displayNewItem(
-                        "Downloading software update", updater.progressProperty());
+                        _("Downloading software update"), updater.progressProperty());
                 updater.setOnSucceeded(ev -> {
                     UpdateFXWindow.saveCachedIndex(unchecked(updater::get).updates);
-                    Button restartButton = new Button("Restart");
+                    Button restartButton = new Button(_("Restart"));
                     restartButton.setOnAction(ev2 -> Main.restart());
                     NotificationBarPane.Item newItem = Main.instance.notificationBar.createItem(
-                            "Please restart the app to upgrade to the new version.", restartButton);
+                            _("Please restart the app to upgrade to the new version."), restartButton);
                     Main.instance.notificationBar.items.replaceAll(item -> item == downloadingItem ? newItem : item);
                 });
                 updater.setOnFailed(ev -> {
@@ -445,8 +462,9 @@ public class MainWindow {
                     // At this point the user has seen that we're trying to download something so tell them if it went
                     // wrong.
                     if (Main.params != RegTestParams.get())
-                        GuiUtils.informationalAlert("Online update failed",
-                                "An error was encountered whilst attempting to download or apply an online update: %s",
+                        GuiUtils.informationalAlert(_("Online update failed"),
+                                // TRANS: %s = error message
+                                _("An error was encountered whilst attempting to download or apply an online update: %s"),
                                 updater.getException());
                 });
                 shown = true;
@@ -462,7 +480,7 @@ public class MainWindow {
     }
 
     public void showBitcoinSyncMessage() {
-        syncItem = Main.instance.notificationBar.displayNewItem("Synchronising with the Bitcoin network", bitcoinUIModel.syncProgressProperty());
+        syncItem = Main.instance.notificationBar.displayNewItem(_("Synchronising with the Bitcoin network"), bitcoinUIModel.syncProgressProperty());
     }
 
     private Animation scrollToTop() {
@@ -482,8 +500,8 @@ public class MainWindow {
     }
 
     public void tellUserToSendSomeMoney() {
-        GuiUtils.arrowBubbleToNode(balanceArea, "You don't have any bitcoins in this wallet").thenRun(() -> {
-            GuiUtils.arrowBubbleToNode(addressControl, "Send some money to this address first");
+        GuiUtils.arrowBubbleToNode(balanceArea, _("You don't have any bitcoins in this wallet")).thenRun(() -> {
+            GuiUtils.arrowBubbleToNode(addressControl, _("Send some money to this address first"));
         });
     }
 

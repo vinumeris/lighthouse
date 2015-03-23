@@ -9,6 +9,7 @@ import org.bitcoinj.core.*;
 import org.bitcoinj.script.*;
 
 import static lighthouse.protocol.LHUtils.*;
+import static lighthouse.utils.I18nUtil._;
 
 /**
  * This class wraps a LHProtos.Project and exposes JFX properties for things that users are interested in. It performs
@@ -52,7 +53,8 @@ public class ProjectModel {
         if (liveProto.hasPaymentUrl()) {
             String host = LHUtils.validateServerPath(liveProto.getPaymentUrl());
             if (host == null)
-                throw new IllegalArgumentException("Server path not valid for Lighthouse protocol: " + liveProto.getPaymentUrl());
+                // TRANS: %s = payment URL
+                throw new IllegalArgumentException(String.format(_("Server path not valid for Lighthouse protocol: %s"), liveProto.getPaymentUrl()));
             serverName.set(host);
         }
 
@@ -86,7 +88,8 @@ public class ProjectModel {
         if (addr == null)
             addr = output.getAddressFromP2SH(project.getParams());
         if (addr == null)
-            throw new IllegalArgumentException("Output type is not pay to address/p2sh: " + output);
+            // TRANS: %s = transaction output
+            throw new IllegalArgumentException(String.format(_("Output type is not pay to address/p2sh: %s"), output));
         address.set(addr.toString());
         address.addListener(o -> {
             try {
