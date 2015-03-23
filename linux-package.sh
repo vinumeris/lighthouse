@@ -25,5 +25,8 @@ javapackager -deploy \
     -vendor Vinumeris \
     -outdir deploy \
     -appclass lighthouse.Main \
-    -srcdir updates/builds/processed \
+    -srcfiles $build \
+    -srcfiles package/linux/LICENSE \
+    -srcfiles package/linux/postinst \
+    -srcfiles package/linux/prerm \
     -outfile lighthouse
