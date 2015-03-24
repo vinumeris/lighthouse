@@ -41,6 +41,7 @@ import static javafx.beans.binding.Bindings.*;
 import static javafx.collections.FXCollections.*;
 import static lighthouse.utils.GuiUtils.*;
 import static lighthouse.utils.MoreBindings.*;
+import static lighthouse.utils.I18nUtil._;
 
 /**
  * The main content area that shows project details, pledges, a pie chart, buttons etc.
@@ -65,6 +66,11 @@ public class ProjectView extends HBox {
     @FXML Button editButton;
     @FXML VBox pledgesListVBox;
     @FXML Label copyDescriptionLink;
+    @FXML Label viewTechDetailsLabel;
+    @FXML Label pledgersLabel;
+    @FXML Label fundedLabel;
+    @FXML Label exportPledgesBtn;
+    
 
     public final ObjectProperty<Project> project = new SimpleObjectProperty<>();
     public final ObjectProperty<EventHandler<ActionEvent>> onBackClickedProperty = new SimpleObjectProperty<>();
@@ -97,6 +103,17 @@ public class ProjectView extends HBox {
         setupFXML();
         pledgesList.setCellFactory(pledgeListView -> new PledgeListCell());
         project.addListener(x -> updateForProject());
+        
+        // Load localized strings        
+        // TRANS: %s = goal amount in BTC
+        goalAmountFormatStr = _("PLEDGED OF %s BTC GOAL");
+        editButton.setText(_("Edit"));
+        copyDescriptionLink.setText(_("Copy description"));
+        viewTechDetailsLabel.setText(_("View technical details"));
+        pledgersLabel.setText(_("PLEDGERS"));
+        fundedLabel.setText(_("FUNDED"));
+        exportPledgesBtn.setText(_("Export as CSV ..."));
+        noPledgesLabel.setText(_("No pledges yet!"));
     }
 
     // Holds together various bindings so we can disconnect them when we switch projects.
@@ -256,16 +273,17 @@ public class ProjectView extends HBox {
         if (status != null && status.error != null) {
             String msg = status.error.getLocalizedMessage();
             if (status.error instanceof FileNotFoundException)
-                msg = "Project is not on the server yet: email the project file to the operator";
+                msg = _("Project is not on the server yet: email the project file to the operator");
             else if (status.error instanceof Ex.InconsistentUTXOAnswers)
-                msg = "Bitcoin P2P network returned inconsistent answers, please contact support";
+                msg = _("Bitcoin P2P network returned inconsistent answers, please contact support");
             else if (status.error instanceof TimeoutException)
-                msg = "Server error: Timed out";
+                msg = _("Server error: Timed out");
             else //noinspection ConstantConditions
                 if (msg == null)
-                    msg = "Internal error: " + status.error.getClass().getName();
+                    msg = _("Internal error: ") + status.error.getClass().getName();
             else
-                msg = "Error: " + msg;
+                // TRANS: %s = error message
+                msg = String.format(_("Error: %s"), msg);
             notifyBarItem = Main.instance.notificationBar.displayNewItem(msg);
         }
     }
@@ -282,20 +300,20 @@ public class ProjectView extends HBox {
         switch (mode.get()) {
             case OPEN_FOR_PLEDGES:
                 if (isFullyFundedAndNotParticipating.get()) {
-                    actionButton.setText("Fully funded");
+                    actionButton.setText(_("Fully funded"));
                     // Disable state is handled by binding.
                 } else {
-                    actionButton.setText("Pledge");
+                    actionButton.setText(_("Pledge"));
                 }
                 break;
             case PLEDGED:
-                actionButton.setText("Revoke");
+                actionButton.setText(_("Revoke"));
                 break;
             case CAN_CLAIM:
-                actionButton.setText("Claim");
+                actionButton.setText(_("Claim"));
                 break;
             case CLAIMED:
-                actionButton.setText("View claim transaction");
+                actionButton.setText(_("View claim transaction"));
                 ColorAdjust effect = new ColorAdjust();
                 coverImage.setEffect(effect);
                 if (priorMode == Mode.CLAIMED) {
@@ -374,7 +392,6 @@ public class ProjectView extends HBox {
             loader.setClassLoader(getClass().getClassLoader());
             loader.load();
 
-            goalAmountFormatStr = goalAmountLabel.getText();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -420,7 +437,7 @@ public class ProjectView extends HBox {
 
     private void makePledge(Project p) {
         log.info("Invoking pledge screen");
-        PledgeWindow window = Main.instance.<PledgeWindow>overlayUI("subwindows/pledge.fxml", "Pledge").controller;
+        PledgeWindow window = Main.instance.<PledgeWindow>overlayUI("subwindows/pledge.fxml", _("Pledge")).controller;
         window.setProject(p);
         window.setLimits(p.getGoalAmount().subtract(Coin.valueOf(pledgedValue.get())), p.getMinPledgeAmount());
         window.onSuccess = () -> {
@@ -474,7 +491,7 @@ public class ProjectView extends HBox {
                             (date = new Label())
                     )),
                     (memoSnippet = new Label()),
-                    (viewMore = new Label("View more"))
+                    (viewMore = new Label(_("View more")))
             );
             vbox.getStyleClass().add("pledge-cell");
             status.getStyleClass().add("pledge-cell-status");
@@ -515,7 +532,7 @@ public class ProjectView extends HBox {
             if (LHUtils.hashFromPledge(pledge).equals(myPledgeHash))
                 msg += " (yours)";
             status.setText(msg);
-            name.setText(details.hasName() ? details.getName() : "Anonymous");
+            name.setText(details.hasName() ? details.getName() : _("Anonymous"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             LocalDateTime time = LocalDateTime.ofEpochSecond(details.getTimestamp(), 0, ZoneOffset.UTC);
             date.setText(time.format(formatter));
@@ -527,10 +544,10 @@ public class ProjectView extends HBox {
     public void edit(ActionEvent event) {
         log.info("Edit button clicked");
         if (pledgedValue.get() > 0) {
-            informationalAlert("Unable to edit",
-                    "You cannot edit a project that has already started gathering pledges, as otherwise existing " +
+            informationalAlert(_("Unable to edit"),
+                    _("You cannot edit a project that has already started gathering pledges, as otherwise existing " +
                             "pledges could be invalidated and participants could get confused. If you would like to " +
-                            "change this project either create a new one, or request revocation of existing pledges."
+                            "change this project either create a new one, or request revocation of existing pledges.")
             );
             return;
         }
@@ -550,7 +567,7 @@ public class ProjectView extends HBox {
         ClipboardContent content = new ClipboardContent();
         content.putString(project.get().getMemo());
         clipboard.setContent(content);
-        GuiUtils.arrowBubbleToNode(copyDescriptionLink, "Description copied to clipboard");
+        GuiUtils.arrowBubbleToNode(copyDescriptionLink, _("Description copied to clipboard"));
     }
 
     @FXML
@@ -566,7 +583,9 @@ public class ProjectView extends HBox {
                     Main.instance.scene.setCursor(Cursor.DEFAULT);
                     if (ex != null) {
                         log.error("Unable to fetch project status", ex);
-                        informationalAlert("Unable to fetch email addresses", "Could not fetch project status from server: %s", ex);
+                        informationalAlert(_("Unable to fetch email addresses"),
+                            // TRANS: %s = error message
+                            _("Could not fetch project status from server: %s"), ex);
                     } else {
                         exportPledges(status.getPledgesList());
                     }
@@ -580,7 +599,7 @@ public class ProjectView extends HBox {
 
     private void exportPledges(List<LHProtos.Pledge> pledges) {
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Export pledges to CSV file");
+        chooser.setTitle(_("Export pledges to CSV file"));
         chooser.setInitialFileName("pledges.csv");
         GuiUtils.platformFiddleChooser(chooser);
         File file = chooser.showSaveDialog(Main.instance.mainStage);
@@ -597,10 +616,12 @@ public class ProjectView extends HBox {
                 writer.append(String.format("%d,%s,%s,%s,%s%n", pledge.getPledgeDetails().getTotalInputValue(),
                         time, pledge.getPledgeDetails().getName(), pledge.getPledgeDetails().getContactAddress(), memo));
             }
-            GuiUtils.informationalAlert("Export succeeded", "Pledges are stored in a CSV file, which can be loaded with any spreadsheet application. Amounts are specified in satoshis.");
+            GuiUtils.informationalAlert(_("Export succeeded"), _("Pledges are stored in a CSV file, which can be loaded with any spreadsheet application. Amounts are specified in satoshis."));
         } catch (IOException e) {
             log.error("Failed to write to csv file", e);
-            GuiUtils.informationalAlert("Export failed", "Lighthouse was unable to save pledge data to the selected file: %s", e.getLocalizedMessage());
+            GuiUtils.informationalAlert(_("Export failed"),
+                // TRANS: %s = error message
+                _("Lighthouse was unable to save pledge data to the selected file: %s"), e.getLocalizedMessage());
         }
     }
 }

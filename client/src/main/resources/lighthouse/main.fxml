@@ -22,7 +22,7 @@
                     <VBox alignment="CENTER_LEFT" prefHeight="80.0">
                         <children>
                             <HBox spacing="15">
-                                <Label text="YOUR ADDRESS" style="-fx-font-weight: bold"/>
+                                <Label fx:id="addressLabel" text="YOUR ADDRESS" style="-fx-font-weight: bold"/>
                                 <Label fx:id="networkIndicatorLabel" text="testnet" styleClass="network-indicator" visible="false"/>
                             </HBox>
                             <ClickableBitcoinAddress fx:id="addressControl"/>
@@ -43,7 +43,7 @@
 
                 <Pane HBox.hgrow="ALWAYS"/>
                 <VBox alignment="CENTER_RIGHT">
-                    <Label text="YOUR BALANCE" style="-fx-font-weight: bold"/>
+                    <Label fx:id="yourBalanceLabel" text="YOUR BALANCE" style="-fx-font-weight: bold"/>
                     <HBox fx:id="balanceArea" alignment="CENTER" styleClass="balance-label">
                         <children>
                             <ImageView fitHeight="32" preserveRatio="true">
@@ -87,10 +87,10 @@
                                                     <children>
                                                         <Label fx:id="addProjectIcon"/>
                                                         <HBox spacing="10" alignment="CENTER">
-                                                            <Button onAction="#addProjectClicked" text="Create project" cancelButton="true"/>
-                                                            <Button onAction="#importClicked" text="Import project" cancelButton="true"/>
+                                                            <Button fx:id="createProjectBtn" onAction="#addProjectClicked" text="Create project" cancelButton="true"/>
+                                                            <Button fx:id="importProjectBtn" onAction="#importClicked" text="Import project" cancelButton="true"/>
                                                         </HBox>
-                                                        <Label text="You can also drop an existing project file here."/>
+                                                        <Label fx:id="dropFileHereLabel" text="You can also drop an existing project file here."/>
                                                     </children>
                                                 </VBox>
                                             </children>

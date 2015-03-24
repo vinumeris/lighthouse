@@ -20,6 +20,7 @@ import java.io.*;
 import java.nio.file.*;
 
 import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.I18nUtil._;
 
 /**
  * Screen where user chooses between server assisted and serverless mode.
@@ -32,6 +33,10 @@ public class AddProjectTypeWindow {
     @FXML ComboBox<String> serverNameCombo;
     @FXML Button saveButton;
     @FXML Text serverInstructionsLabel;
+    @FXML Button backButton;
+    @FXML Text serverCollectsPledgesText;
+    @FXML Label serverNameLabel;
+    @FXML Text fullyDecentralisedDescText;
 
     private ProjectModel model;
     private boolean editing;
@@ -40,7 +45,7 @@ public class AddProjectTypeWindow {
 
     public static Main.OverlayUI<AddProjectTypeWindow> open(ProjectModel projectModel, boolean editing) {
         Main.OverlayUI<AddProjectTypeWindow> result = Main.instance.overlayUI("subwindows/add_project_type.fxml",
-                editing ? "Change type" : "Select type");
+                editing ? _("Change type") : _("Select type"));
         result.controller.setModel(projectModel);
         result.controller.editing = editing;
         return result;
@@ -69,6 +74,20 @@ public class AddProjectTypeWindow {
                 serverInstructionsLabel.setText("");
             }
         });
+        
+        // Load localized strings
+        saveButton.setText(_("Save"));
+        backButton.setText(_("Back"));
+        serverCollectsPledgesText.setText(_("A server collects and monitors pledges on your behalf. You can use a community run server or run your own."));
+        serverNameLabel.setText(_("Server name"));
+        serverInstructionsLabel.setText(_("Server instructions"));
+        serverAssisted.setText(_("Server assisted"));
+        fullyDecentralised.setText(_("Fully decentralised"));
+        fullyDecentralisedDescText.setText(_("This style of project does not require any server. " + 
+            "Backers will be given a pledge file that they must get back to you via email, shared folder, instant messaging etc. " +
+            "People will not be able to see how much money was raised so far unless they download the pledge files themselves.\n\n" +
+            "Fully decentralised can be an appropriate choice when you are fund raising from a group of friends or will be managing the pledges " +
+            "in some other way. It's less convenient but doesn't require any infrastructure."));
     }
 
     private boolean isServerNameValid(String str) {
@@ -86,10 +105,10 @@ public class AddProjectTypeWindow {
     private boolean validateAndSync() {
         if (serverAssisted.isSelected()) {
             if (serverNameCombo.getValue() == null || serverNameCombo.getValue().equals("")) {
-                GuiUtils.arrowBubbleToNode(serverNameCombo, "You must pick a server.");
+                GuiUtils.arrowBubbleToNode(serverNameCombo, _("You must pick a server."));
                 return false;
             } else if (!isServerNameValid(serverNameCombo.getValue())) {
-                GuiUtils.arrowBubbleToNode(serverNameCombo, "The server name is not considered valid.");
+                GuiUtils.arrowBubbleToNode(serverNameCombo, _("The server name is not considered valid."));
                 return false;
             }
         }
@@ -114,11 +133,11 @@ public class AddProjectTypeWindow {
                     project = Main.backend.saveProject(model.getProject());
                     ExportWindow.openForProject(project);
                 } else {
-                    GuiUtils.informationalAlert("Folder watching",
-                            "The folder to which you save your project file will be watched for pledge files. When you receive them from backers, just put them in the same directory and they will appear.");
+                    GuiUtils.informationalAlert(_("Folder watching"),
+                            _("The folder to which you save your project file will be watched for pledge files. When you receive them from backers, just put them in the same directory and they will appear."));
                     // Request directory first then save, so the animations are right.
                     DirectoryChooser chooser = new DirectoryChooser();
-                    chooser.setTitle("Select a directory to store the project and pledges");
+                    chooser.setTitle(_("Select a directory to store the project and pledges"));
                     platformFiddleChooser(chooser);
                     File dir = chooser.showDialog(Main.instance.mainStage);
                     if (dir == null)
@@ -134,8 +153,9 @@ public class AddProjectTypeWindow {
                 }
             } catch (IOException e) {
                 log.error("Could not save project", e);
-                informationalAlert("Could not save project",
-                        "An error was encountered whilst trying to save the project: %s",
+                informationalAlert(_("Could not save project"),
+                        // TRANS: %s = error message
+                        _("An error was encountered whilst trying to save the project: %s"),
                         Throwables.getRootCause(e));
             }
         });

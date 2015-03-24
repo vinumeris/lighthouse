@@ -17,6 +17,7 @@ import java.util.*;
 
 import static com.google.common.base.Preconditions.*;
 import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.I18nUtil._;
 
 /**
  * Tells the user there's a fee to pay and shows a progress bar that tracks network propagation. Possibly request the
@@ -40,15 +41,22 @@ public class RevokeAndClaimWindow {
     public Label explanationLabel;
 
     @FXML ProgressBar progressBar;
+    
+    public void initialize() {
+        // Load localized strings
+        explanationLabel.setText(_("This operation incurs a small miners fee because it requires making a Bitcoin transaction."));
+        cancelBtn.setText(_("Cancel"));
+        confirmBtn.setText(_("Confirm"));
+    }
 
     public static Main.OverlayUI<RevokeAndClaimWindow> openForRevoke(LHProtos.Pledge pledgeToRevoke) {
-        Main.OverlayUI<RevokeAndClaimWindow> overlay = Main.instance.overlayUI("subwindows/revoke_and_claim.fxml", "Revoke pledge");
+        Main.OverlayUI<RevokeAndClaimWindow> overlay = Main.instance.overlayUI("subwindows/revoke_and_claim.fxml", _("Revoke pledge"));
         overlay.controller.setForRevoke(pledgeToRevoke);
         return overlay;
     }
 
     public static Main.OverlayUI<RevokeAndClaimWindow> openForClaim(Project project, Set<LHProtos.Pledge> pledgesToClaim) {
-        Main.OverlayUI<RevokeAndClaimWindow> overlay = Main.instance.overlayUI("subwindows/revoke_and_claim.fxml", "Claim pledges");
+        Main.OverlayUI<RevokeAndClaimWindow> overlay = Main.instance.overlayUI("subwindows/revoke_and_claim.fxml", _("Claim pledges"));
         overlay.controller.setForClaim(project, pledgesToClaim);
         return overlay;
     }
@@ -56,12 +64,12 @@ public class RevokeAndClaimWindow {
     private void setForClaim(Project project, Set<LHProtos.Pledge> claim) {
         projectToClaim = project;
         pledgesToClaim = claim;
-        explanationLabel.setText("Claiming a project sends all the pledged money to the project's goal address. " + explanationLabel.getText());
+        explanationLabel.setText(_("Claiming a project sends all the pledged money to the project's goal address. ") + explanationLabel.getText());
     }
 
     private void setForRevoke(LHProtos.Pledge revoke) {
         pledgeToRevoke = revoke;
-        explanationLabel.setText("Revoking a pledge returns the money to your wallet. " + explanationLabel.getText());
+        explanationLabel.setText(_("Revoking a pledge returns the money to your wallet. ") + explanationLabel.getText());
     }
 
     @FXML
@@ -122,13 +130,15 @@ public class RevokeAndClaimWindow {
             // On backend thread.
             if (ex != null) {
                 log.error("Unable to fetch project status", ex);
-                informationalAlert("Unable to claim", "Could not fetch project status from server: %s", ex);
+                informationalAlert(_("Unable to claim"),
+                    // TRANS: %s = error message
+                    _("Could not fetch project status from server: %s"), ex);
                 overlayUI.done();
             } else {
                 HashSet<LHProtos.Pledge> newPledges = new HashSet<>(status.getPledgesList());
                 if (status.getValuePledgedSoFar() < projectToClaim.getGoalAmount().value) {
                     log.error("Refreshed project status indicates value has changed, is now {}", status.getValuePledgedSoFar());
-                    informationalAlert("Unable to claim", "One or more pledges have been revoked whilst you were waiting.");
+                    informationalAlert(_("Unable to claim"), _("One or more pledges have been revoked whilst you were waiting."));
                     overlayUI.done();
                 } else {
                     // Must use newPledges here because a pledge might have been revoked and replaced in the
@@ -153,8 +163,9 @@ public class RevokeAndClaimWindow {
                     // Error
                     (ex) -> {
                         overlayUI.done();
-                        informationalAlert("Transaction acceptance issue",
-                                "The Bitcoin network has rejected the claim: %s", ex);
+                        informationalAlert(_("Transaction acceptance issue"),
+                                // TRANS: %s = error message
+                                _("The Bitcoin network has rejected the claim: %s"), ex);
                     }, Platform::runLater);
         }  catch (Ex.ValueMismatch e) {
             // TODO: Solve value mismatch errors. We have a few options.
@@ -168,17 +179,18 @@ public class RevokeAndClaimWindow {
             //
             // This should never happen in server assisted mode.
             log.error("Value mismatch: " + e);
-            informationalAlert("Too much money",
-                    "You have gathered pledges that add up to more than the goal. The excess cannot be " +
+            informationalAlert(_("Too much money"),
+                    // TRANS: %s = difference in BTC
+                    _("You have gathered pledges that add up to more than the goal. The excess cannot be " +
                             "redeemed in the current version of the software and would end up being paid completely " +
                             "to miners fees. Please remove some pledges and try to hit the goal amount exactly. " +
-                            "There is %s too much.", Coin.valueOf(e.byAmount).toFriendlyString());
+                            "There is %s too much."), Coin.valueOf(e.byAmount).toFriendlyString());
             overlayUI.done();
         } catch (InsufficientMoneyException e) {
             log.error("Insufficient money to claim", e);
-            informationalAlert("Cannot claim pledges",
-                    "Closing the contract requires paying Bitcoin network fees, but you don't have enough " +
-                            "money in the wallet. Add more money and try again."
+            informationalAlert(_("Cannot claim pledges"),
+                    _("Closing the contract requires paying Bitcoin network fees, but you don't have enough " +
+                            "money in the wallet. Add more money and try again.")
             );
             overlayUI.done();
         }
@@ -198,8 +210,9 @@ public class RevokeAndClaimWindow {
 
                 @Override
                 public void onFailure(Throwable t) {
-                    informationalAlert("Transaction acceptance issue",
-                            "The Bitcoin network has rejected the revocation transaction: %s", t);
+                    informationalAlert(_("Transaction acceptance issue"),
+                            // TRANS: %s = error message
+                            _("The Bitcoin network has rejected the revocation transaction: %s"), t);
                     log.error("Revocation failed", t);
                     overlayUI.done();
                 }
@@ -208,9 +221,9 @@ public class RevokeAndClaimWindow {
             // This really sucks. In future we should make it a free tx, when we know if we have sufficient
             // priority to meet the relay rules.
             log.error("Could not revoke due to insufficient money to pay the fee", e);
-            informationalAlert("Cannot revoke pledge",
-                    "Revoking a pledge requires making another Bitcoin transaction on the block chain, but " +
-                            "you don't have sufficient funds to pay the required fee. Add more money and try again."
+            informationalAlert(_("Cannot revoke pledge"),
+                    _("Revoking a pledge requires making another Bitcoin transaction on the block chain, but " +
+                            "you don't have sufficient funds to pay the required fee. Add more money and try again.")
             );
         }
     }

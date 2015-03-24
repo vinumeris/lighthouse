@@ -63,6 +63,11 @@
             <artifactId>guava</artifactId>
             <version>16.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.gnu.gettext</groupId>
+            <artifactId>libintl</artifactId>
+            <version>0.18.2</version>
+        </dependency>
     </dependencies>
 
     <modules>

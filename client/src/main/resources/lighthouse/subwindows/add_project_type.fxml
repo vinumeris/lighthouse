@@ -9,7 +9,7 @@
       <HBox alignment="CENTER_RIGHT" prefHeight="81.0" prefWidth="750.0" spacing="10.0" styleClass="fat-buttons" BorderPane.alignment="CENTER">
          <children>
             <Pane HBox.hgrow="ALWAYS" />
-            <Button cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Back" />
+            <Button fx:id="backButton" cancelButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#cancelClicked" text="Back" />
             <Button fx:id="saveButton" defaultButton="true" maxWidth="Infinity" mnemonicParsing="false" onAction="#saveClicked" text="Save" />
          </children>
          <padding>
@@ -36,7 +36,7 @@
                   <Insets />
                </VBox.margin>
                <children>
-                  <Text lineSpacing="15.0" strokeType="OUTSIDE" strokeWidth="0.0" text="A server collects and monitors pledges on your behalf. You can use a community run server or run your own." />
+                  <Text fx:id="serverCollectsPledgesText" lineSpacing="15.0" strokeType="OUTSIDE" strokeWidth="0.0" text="A server collects and monitors pledges on your behalf. You can use a community run server or run your own." />
                </children>
             </TextFlow>
             <GridPane vgap="10.0">
@@ -49,7 +49,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Label text="Server name" />
+                  <Label fx:id="serverNameLabel" text="Server name" />
                   <ComboBox fx:id="serverNameCombo" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
                   <TextFlow prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <children>
@@ -68,7 +68,7 @@
                   <Insets />
                </VBox.margin>
                <children>
-                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="This style of project does not require any server. Backers will be given a pledge file that they must get back to you via email, shared folder, instant messaging etc. People will not be able to see how much money was raised so far unless they download the pledge files themselves.&#10;&#10;Fully decentralised can be an appropriate choice when you are fund raising from a group of friends or will be managing the pledges in some other way. It's less convenient but doesn't require any infrastructure." />
+                  <Text fx:id="fullyDecentralisedDescText" strokeType="OUTSIDE" strokeWidth="0.0" text="This style of project does not require any server. Backers will be given a pledge file that they must get back to you via email, shared folder, instant messaging etc. People will not be able to see how much money was raised so far unless they download the pledge files themselves.&#10;&#10;Fully decentralised can be an appropriate choice when you are fund raising from a group of friends or will be managing the pledges in some other way. It's less convenient but doesn't require any infrastructure." />
                </children>
             </TextFlow>
          </children>

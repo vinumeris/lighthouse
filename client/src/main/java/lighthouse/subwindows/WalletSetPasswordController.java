@@ -16,6 +16,7 @@ import org.spongycastle.crypto.params.*;
 import java.time.*;
 
 import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.I18nUtil._;
 
 public class WalletSetPasswordController {
     private static final Logger log = LoggerFactory.getLogger(WalletSetPasswordController.class);
@@ -25,6 +26,10 @@ public class WalletSetPasswordController {
     public GridPane widgetGrid;
     public HBox buttonHBox;
     public Label explanationLabel;
+    @FXML Button closeButton;
+    @FXML Button setButton;
+    @FXML Label enterPasswordLabel;
+    @FXML Label repeatPasswordLabel;
 
     public Main.OverlayUI overlayUI;
     // These params were determined empirically on a top-range (as of 2014) MacBook Pro with native scrypt support,
@@ -38,6 +43,14 @@ public class WalletSetPasswordController {
 
     public void initialize() {
         progressMeter.setOpacity(0);
+        
+        // Load localized strings
+        explanationLabel.setText(_("Setting a password on your wallet makes it safer against viruses and theft. " +
+            "You will need to enter your password whenever money is sent."));
+        closeButton.setText(_("Close"));
+        setButton.setText(_("Set password"));
+        enterPasswordLabel.setText(_("Enter password"));
+        repeatPasswordLabel.setText(_("Repeat password"));
     }
 
     public static Duration estimatedKeyDerivationTime = null;
@@ -67,13 +80,13 @@ public class WalletSetPasswordController {
     @FXML
     public void setPasswordClicked(ActionEvent event) {
         if (!pass1.getText().equals(pass2.getText())) {
-            informationalAlert("Passwords do not match", "Try re-typing your chosen passwords.");
+            informationalAlert(_("Passwords do not match"), _("Try re-typing your chosen passwords."));
             return;
         }
         String password = pass1.getText();
         // This is kind of arbitrary and we could do much more to help people pick strong passwords.
         if (password.length() < 4) {
-            informationalAlert("Password too short", "You need to pick a password at least five characters or longer.");
+            informationalAlert(_("Password too short"), _("You need to pick a password at least five characters or longer."));
             return;
         }
 
@@ -94,8 +107,8 @@ public class WalletSetPasswordController {
                 log.info("Key derived, now encrypting");
                 Main.bitcoin.wallet().encrypt(scrypt, aesKey);
                 log.info("Encryption done");
-                informationalAlert("Wallet encrypted",
-                        "You can remove the password at any time from the settings screen.");
+                informationalAlert(_("Wallet encrypted"),
+                        _("You can remove the password at any time from the settings screen."));
                 overlayUI.done();
             }
         };

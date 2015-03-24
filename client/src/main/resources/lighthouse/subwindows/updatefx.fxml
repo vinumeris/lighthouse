@@ -20,7 +20,7 @@
       </ScrollPane>
       <HBox alignment="CENTER_RIGHT" prefHeight="59.0" prefWidth="600.0" spacing="10.0" styleClass="fat-buttons">
          <children>
-            <Button cancelButton="true" mnemonicParsing="false" onAction="#closeClicked" text="Close" />
+            <Button fx:id="closeButton" cancelButton="true" mnemonicParsing="false" onAction="#closeClicked" text="Close" />
             <Button fx:id="pinBtn" defaultButton="true" mnemonicParsing="false" onAction="#pinClicked" text="Always use this version" />
          </children>
       </HBox>

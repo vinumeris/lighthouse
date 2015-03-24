@@ -16,6 +16,7 @@ import java.io.*;
 import java.net.*;
 
 import static com.google.common.base.Preconditions.*;
+import static lighthouse.utils.I18nUtil._;
 
 public class PledgeUploadWindow {
     private static final Logger log = LoggerFactory.getLogger(PledgeUploadWindow.class);
@@ -27,16 +28,21 @@ public class PledgeUploadWindow {
     @FXML public Label uploadLabel;
     @FXML public Label uploadIcon;
     @FXML public ProgressIndicator uploadProgress;
+    @FXML public Button cancelButton;
     private Task<Void> uploadTask;
 
     private Runnable onSuccess;
 
     public void initialize() {
         AwesomeDude.setIcon(uploadIcon, AwesomeIcon.CLOUD_UPLOAD, "60");
+        
+        // Load localized strings
+        uploadLabel.setText(_("Connecting to server ..."));
+        cancelButton.setText(_("Cancel"));
     }
 
     public static void open(Project project, PledgingWallet.PendingPledge pledge, Runnable onSuccess) {
-        Main.OverlayUI<PledgeUploadWindow> window = Main.instance.overlayUI("subwindows/pledge_upload.fxml", "Upload");
+        Main.OverlayUI<PledgeUploadWindow> window = Main.instance.overlayUI("subwindows/pledge_upload.fxml", _("Upload"));
         window.controller.startUpload(project, pledge);
         window.controller.onSuccess = onSuccess;
     }
@@ -61,18 +67,20 @@ public class PledgeUploadWindow {
                         connection.connect();
                     } catch (IOException e) {
                         log.error("Connect failed: {}", e.getLocalizedMessage());
-                        updateMessage("Connection failed: " + e.getLocalizedMessage());
+                        // TRANS: %s = error message
+                        updateMessage(String.format(_("Connection failed: %s"), e.getLocalizedMessage()));
                         throw e;
                     }
                     log.info("Connected");
-                    updateMessage("Connected, uploading ...");
+                    updateMessage(_("Connected, uploading ..."));
                     try (OutputStream stream = connection.getOutputStream()) {
                         final LHProtos.Pledge data = pledge.getData();
                         data.writeTo(stream);
                         log.info("Data uploaded");
                         int response = connection.getResponseCode();
                         if (response != HttpURLConnection.HTTP_OK) {
-                            throw new Exception(String.format("Server said %d %s", connection.getResponseCode(), connection.getResponseMessage()));
+                            // TRANS: %d = error code number, %s = error message
+                            throw new Exception(String.format(_("Server said %d %s"), connection.getResponseCode(), connection.getResponseMessage()));
                         } else {
                             log.info("Server accepted, committing");
                             pledge.commit(false);
@@ -80,8 +88,10 @@ public class PledgeUploadWindow {
                     }
                     return null;
                 } catch (Exception e) {
-                    GuiUtils.informationalAlert("Upload failed", "%s. This probably indicates either a problem with " +
-                                    "your internet connection or a configuration issue with the server. You could try again later.",
+                    GuiUtils.informationalAlert(_("Upload failed"),
+                            // TRANS: %s = error message
+                            _("%s. This probably indicates either a problem with " +
+                                    "your internet connection or a configuration issue with the server. You could try again later."),
                             Throwables.getRootCause(e).getLocalizedMessage());
                     log.error("Upload error", e);
                     throw e;

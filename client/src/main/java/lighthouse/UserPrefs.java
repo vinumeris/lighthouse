@@ -11,6 +11,8 @@ import java.nio.file.*;
 import java.time.*;
 import java.util.*;
 
+import static lighthouse.utils.I18nUtil._;
+
 /**
  * Stores user preferences (not many currently). Access from UI thread.
  */
@@ -32,7 +34,7 @@ public class UserPrefs {
 
     private void store() {
         try (OutputStream stream = Files.newOutputStream(path)) {
-            prefs.store(stream, " Lighthouse settings file");
+            prefs.store(stream, _(" Lighthouse settings file"));
         } catch (IOException e) {
             log.error("Could not save preferences!", e);
         }

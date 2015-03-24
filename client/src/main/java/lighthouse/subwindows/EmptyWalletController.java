@@ -14,6 +14,7 @@ import javax.annotation.*;
 
 import static com.google.common.base.Preconditions.*;
 import static lighthouse.utils.GuiUtils.*;
+import static lighthouse.utils.I18nUtil._;
 
 public class EmptyWalletController {
     public Button sendBtn;
@@ -30,6 +31,11 @@ public class EmptyWalletController {
     public void initialize() {
         checkState(!Main.bitcoin.wallet().getBalance().isZero());
         new BitcoinAddressValidator(Main.params, address, sendBtn);
+        
+        // Load localized strings
+        titleLabel.setText(_("Send to address:"));
+        sendBtn.setText(_("Send"));
+        cancelBtn.setText(_("Cancel"));
     }
 
     @FXML
@@ -38,7 +44,7 @@ public class EmptyWalletController {
     }
 
     public static Main.OverlayUI<EmptyWalletController> open() {
-        return Main.instance.overlayUI("subwindows/send_money.fxml", "Empty wallet");
+        return Main.instance.overlayUI("subwindows/send_money.fxml", _("Empty wallet"));
     }
 
     @FXML
@@ -70,8 +76,8 @@ public class EmptyWalletController {
             address.setDisable(true);
             updateTitleForBroadcast();
         } catch (InsufficientMoneyException e) {
-            informationalAlert("Could not empty the wallet",
-                    "You may have too little money left in the wallet to make a transaction.");
+            informationalAlert(_("Could not empty the wallet"),
+                    _("You may have too little money left in the wallet to make a transaction."));
             overlayUI.done();
         } catch (ECKey.KeyIsEncryptedException e) {
             askForPasswordAndRetry();
@@ -93,6 +99,7 @@ public class EmptyWalletController {
 
     private void updateTitleForBroadcast() {
         final int peers = sendResult.tx.getConfidence().numBroadcastPeers();
-        titleLabel.setText(String.format("Broadcasting ... seen by %d peers", peers));
+        // TRANS: %d = number of peers
+        titleLabel.setText(String.format(_("Broadcasting ... seen by %d peers"), peers));
     }
 }

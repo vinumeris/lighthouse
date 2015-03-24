@@ -11,7 +11,7 @@
           <contextMenu>
             <ContextMenu fx:id="addressMenu">
               <items>
-                <MenuItem mnemonicParsing="false" onAction="#copyAddress" text="Copy to clipboard">
+                <MenuItem fx:id="clipboardMenuItem" mnemonicParsing="false" onAction="#copyAddress" text="Copy to clipboard">
                   <accelerator>
                     <KeyCodeCombination alt="UP" code="C" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                   </accelerator>
