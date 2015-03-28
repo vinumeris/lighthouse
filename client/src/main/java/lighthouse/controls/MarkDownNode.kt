@@ -1,27 +1,32 @@
 package lighthouse.controls
 
-import com.google.common.base.*
-import javafx.scene.layout.*
-import javafx.scene.text.*
-import org.pegdown.*
-import org.pegdown.ast.*
-import org.slf4j.*
-
-import java.util.*
-import javafx.scene.paint.Color
+import com.google.common.base.CharMatcher
+import com.google.common.base.Strings
+import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
+import javafx.beans.value.ObservableStringValue
 import javafx.geometry.Insets
-import javafx.scene.control.Separator
-import javafx.scene.image.ImageView
-import javafx.scene.image.Image
-import java.util.function.Consumer
-import kotlin.platform.platformStatic
-import javafx.stage.Stage
+import javafx.scene.Cursor
 import javafx.scene.Scene
 import javafx.scene.control.ScrollPane
-import javafx.beans.value.ObservableStringValue
-import javafx.beans.property.StringProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.scene.Cursor
+import javafx.scene.control.Separator
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Pane
+import javafx.scene.layout.StackPane
+import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
+import javafx.scene.text.Text
+import javafx.scene.text.TextFlow
+import javafx.stage.Stage
+import org.pegdown.Extensions
+import org.pegdown.PegDownProcessor
+import org.pegdown.ast.*
+import org.slf4j.LoggerFactory
+import java.util.LinkedList
+import java.util.function.Consumer
+import kotlin.platform.platformStatic as static
 
 public class MarkDownNode : VBox() {
     public var urlOpener: Consumer<String> = Consumer<String> {}
@@ -31,9 +36,9 @@ public class MarkDownNode : VBox() {
         text.set(new)
     }
 
-    {
+    init {
         setupCSS()
-        text.addListener { (obj, old: String?, new: String?) ->
+        text.addListener { obj, old: String?, new: String? ->
             renderMarkDown(preTransform(new ?: ""))
             layout()
         }
@@ -344,10 +349,10 @@ public class MarkDownNode : VBox() {
         }
     }
 
-    class object {
+    companion object {
         val log = LoggerFactory.getLogger(javaClass<MarkDownNode>())
 
-        [platformStatic] public fun printAST(node: Node, offset: Int) {
+        static public fun printAST(node: Node, offset: Int) {
             System.out.print(Strings.repeat(" ", offset))
             System.out.println(node)
             for (n in node.getChildren()) {
@@ -355,11 +360,11 @@ public class MarkDownNode : VBox() {
             }
         }
 
-        [platformStatic] public fun countFormattingNodes(ast: Node): Int = (if (isTextNode(ast)) 0 else 1) + ast.getChildren().map { countFormattingNodes(it) }.sum()
+        static public fun countFormattingNodes(ast: Node): Int = (if (isTextNode(ast)) 0 else 1) + ast.getChildren().map { countFormattingNodes(it) }.sum()
 
         private fun isTextNode(ast: Node) = ast is ParaNode || ast is TextNode || ast is RootNode || ast.javaClass == javaClass<SuperNode>()
 
-        [platformStatic] public fun openPopup(text: ObservableStringValue, urlOpener: Consumer<String>) {
+        static public fun openPopup(text: ObservableStringValue, urlOpener: Consumer<String>) {
             val node = MarkDownNode()
             node.text.bind(text)
             node.urlOpener = urlOpener

@@ -1,21 +1,21 @@
 package lighthouse.controls
 
-import javafx.scene.control.Label
-import javafx.scene.layout.HBox
-import javafx.geometry.Pos
-import javafx.scene.shape.Rectangle
-import javafx.animation.Timeline
-import javafx.animation.KeyFrame
-import javafx.util.Duration
-import javafx.animation.KeyValue
-import javafx.beans.value.WritableValue
-import lighthouse.utils.easing.ElasticInterpolator
 import javafx.animation.Interpolator
-import javafx.scene.layout.Region
+import javafx.animation.KeyFrame
+import javafx.animation.KeyValue
+import javafx.animation.Timeline
 import javafx.application.Platform
 import javafx.beans.InvalidationListener
 import javafx.beans.Observable
+import javafx.beans.value.WritableValue
+import javafx.geometry.Pos
+import javafx.scene.control.Label
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
+import javafx.scene.shape.Rectangle
+import javafx.util.Duration
+import lighthouse.utils.easing.ElasticInterpolator
 
 /**
  * Control that wraps another control and hides most of it until the Read more ... link is clicked, when it animates
@@ -23,7 +23,7 @@ import javafx.scene.layout.StackPane
  */
 [suppress("UNCHECKED_CAST")]    // Hack around Kotlin compiler bug
 public class ReadMorePane() : StackPane() {
-    {
+    init {
         setMinHeight(65.0)
         getChildren().addListener(object : InvalidationListener {
             override fun invalidated(observable: Observable?) {
