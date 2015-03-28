@@ -1,22 +1,20 @@
 package lighthouse.subwindows;
 
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
+import javafx.application.*;
+import javafx.event.*;
+import javafx.fxml.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
-import lighthouse.Main;
-import lighthouse.protocol.Project;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.script.Script;
+import javafx.scene.layout.*;
+import lighthouse.*;
+import lighthouse.protocol.*;
+import org.bitcoinj.core.*;
+import org.bitcoinj.script.*;
 
-import java.net.URI;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.net.*;
+import java.time.*;
+import java.time.format.*;
 
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 /**
  * Window that shows protobuf fields like auth key, target addresses etc. Useful when the crowdfund is going to a well
@@ -46,9 +44,9 @@ public class ProjectTechDetailsWindow {
             if (script.isSentToAddress() || script.isPayToScriptHash())
                 text = script.getToAddress(project.getParams()).toString();
             else if (script.isSentToMultiSig())
-                text = _("Raw multi-sig");
+                text = tr("Raw multi-sig");
             else
-                text = _("Unrecognised project output type");
+                text = tr("Unrecognised project output type");
             TextField tf = new TextField(text);
             tf.setEditable(false);
             targetAddressVBox.getChildren().add(tf);
@@ -61,18 +59,18 @@ public class ProjectTechDetailsWindow {
         creationTime.setText(Instant.ofEpochSecond(project.getProtoDetails().getTime()).atZone(ZoneId.of("UTC")).format(DateTimeFormatter.RFC_1123_DATE_TIME));
         
         // Load localized strings
-        closeButton.setText(_("Close"));
-        targetAddressLabel.setText(_("Target address"));
-        serverUrlLabel.setText(_("Server URL"));
-        minPledgeLabel.setText(_("Min pledge size"));
-        authKeyLabel.setText(_("Auth key"));
-        networkParamsLabel.setText(_("Network parameters"));
-        creationTimeLabel.setText(_("Creation time"));
-        if (url == null) serverURL.setPromptText(_("Serverless project"));
+        closeButton.setText(tr("Close"));
+        targetAddressLabel.setText(tr("Target address"));
+        serverUrlLabel.setText(tr("Server URL"));
+        minPledgeLabel.setText(tr("Min pledge size"));
+        authKeyLabel.setText(tr("Auth key"));
+        networkParamsLabel.setText(tr("Network parameters"));
+        creationTimeLabel.setText(tr("Creation time"));
+        if (url == null) serverURL.setPromptText(tr("Serverless project"));
     }
 
     public static void open(Project project) {
-        Main.OverlayUI<ProjectTechDetailsWindow> ui = Main.instance.overlayUI("subwindows/project_tech_details.fxml", _("Project details"));
+        Main.OverlayUI<ProjectTechDetailsWindow> ui = Main.instance.overlayUI("subwindows/project_tech_details.fxml", tr("Project details"));
         ui.controller.initFromProject(project);
     }
 

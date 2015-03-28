@@ -25,7 +25,7 @@ import javax.annotation.*;
 import static javafx.beans.binding.Bindings.*;
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 /** An entry in the project list that is shown on the overview page */
 public class ProjectOverviewWidget extends HBox {
@@ -112,12 +112,12 @@ public class ProjectOverviewWidget extends HBox {
         Tooltip tooltip = new Tooltip();
         // TODO: Maybe use Adam's BtcFormat class here instead.
         // TRANS: %s = amount in BTC
-        tooltip.textProperty().bind(new ReactiveCoinFormatter(_("%s BTC raised so far"), MonetaryFormat.BTC, pledgedAmount));
+        tooltip.textProperty().bind(new ReactiveCoinFormatter(tr("%s BTC raised so far"), MonetaryFormat.BTC, pledgedAmount));
         Tooltip.install(progressCircle, tooltip);
         
         // Load localized strings
-        loadingText.setText(_("Loading ..."));
-        youCreatedThisTooltip.setText(_("You created this project"));
+        loadingText.setText(tr("Loading ..."));
+        youCreatedThisTooltip.setText(tr("You created this project"));
     }
 
     public void onCheckStatusChanged(@Nullable LighthouseBackend.CheckStatus checkStatus) {

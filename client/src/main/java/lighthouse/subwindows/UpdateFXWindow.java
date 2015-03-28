@@ -21,7 +21,8 @@ import static com.google.common.base.Preconditions.*;
 import static java.lang.String.format;
 import static java.nio.file.Files.*;
 import static lighthouse.utils.GuiUtils.*;
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.GuiUtils.log;
+import static lighthouse.utils.I18nUtil.*;
 
 /**
  * Lets the user select a version to pin themselves to.
@@ -77,12 +78,12 @@ public class UpdateFXWindow {
         });
         
         // Load localized strings
-        closeButton.setText(_("Close"));
-        pinBtn.setText(_("Always use this version"));
+        closeButton.setText(tr("Close"));
+        pinBtn.setText(tr("Always use this version"));
     }
 
     public static Main.OverlayUI<UpdateFXWindow> open(Updater updater) {
-        Main.OverlayUI<UpdateFXWindow> result = Main.instance.<UpdateFXWindow>overlayUI("subwindows/updatefx.fxml", _("Application updates"));
+        Main.OverlayUI<UpdateFXWindow> result = Main.instance.<UpdateFXWindow>overlayUI("subwindows/updatefx.fxml", tr("Application updates"));
         result.controller.setUpdater(checkNotNull(updater));
         return result;
     }
@@ -93,16 +94,16 @@ public class UpdateFXWindow {
         if (selected == null) {
             UpdateFX.unpin(Main.unadjustedAppDir);
             currentPin.set(0);
-            informationalAlert(_("Version change"),
-                    _("You will be switched to always track the latest version. The app will now restart."));
+            informationalAlert(tr("Version change"),
+                    tr("You will be switched to always track the latest version. The app will now restart."));
             Main.restart();
         } else {
             int ver = selected.getVersion();
             UpdateFX.pinToVersion(Main.unadjustedAppDir, ver);
             currentPin.set(ver);
-            informationalAlert(_("Version change"),
+            informationalAlert(tr("Version change"),
                     // TRANS: %d = version number
-                    _("You will be switched to always use version %d. The app will now restart."), ver);
+                    tr("You will be switched to always use version %d. The app will now restart."), ver);
             Main.restart();
         }
     }

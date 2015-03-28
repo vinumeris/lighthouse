@@ -20,7 +20,7 @@ public class I18nUtil {
         }
     }
 
-    public static String _(String s) {
+    public static String tr(String s) {
         if (locale != null)
             return gettext(locale, s);
         else

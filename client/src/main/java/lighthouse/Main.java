@@ -53,7 +53,7 @@ import static lighthouse.utils.I18nUtil.*;
 public class Main extends Application {
     public static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    public static final String APP_NAME = _("Crowdfunding App");
+    public static final String APP_NAME = tr("Crowdfunding App");
 
     // UpdateFX stuff. Version is incremented monotonically after a new version is released.
     public static final int VERSION = 29;
@@ -179,7 +179,7 @@ public class Main extends Application {
         if (getParameters().getUnnamed().contains("--help") || getParameters().getUnnamed().contains("-h")) {
             System.out.println(String.format(
                     // TRANS: %s = App name, %s = App version
-                    _("%s version %d (C) 2014 Vinumeris GmbH\n\n" +
+                    tr("%s version %d (C) 2014 Vinumeris GmbH\n\n" +
                             "Usage: lighthouse [args] [filename.lighthouse-project...] \n" +
                             "  --use-tor:                      Enable experimental Tor mode (may freeze up)\n" +
                             "  --slow-gfx:                     Enable more eyecandy that may stutter on slow GFX cards\n" +
@@ -217,9 +217,9 @@ public class Main extends Application {
         String updatesURL = getParameters().getNamed().get("updates-url");
         if (updatesURL != null) {
             if (LHUtils.didThrow(() -> new URI(updatesURL))) {
-                informationalAlert(_("Bad updates URL"),
+                informationalAlert(tr("Bad updates URL"),
                     // TRANS: %s = updates URL
-                    _("The --updates-url parameter is invalid: %s"), updatesURL);
+                    tr("The --updates-url parameter is invalid: %s"), updatesURL);
                 return false;
             }
             this.updatesURL = updatesURL;
@@ -230,7 +230,7 @@ public class Main extends Application {
             GuiUtils.resourceOverrideDirectory = Paths.get(resdir);
             if (!Files.isDirectory(GuiUtils.resourceOverrideDirectory) ||
                 !Files.exists(GuiUtils.resourceOverrideDirectory.resolve("main.fxml"))) {
-                informationalAlert(_("Not a directory"), _("The --resdir value must point to a directory containing UI resource files (fxml, css, etc)."));
+                informationalAlert(tr("Not a directory"), tr("The --resdir value must point to a directory containing UI resource files (fxml, css, etc)."));
                 return false;
             }
         }
@@ -260,7 +260,7 @@ public class Main extends Application {
             netname = "production";
         params = NetworkParameters.fromID("org.bitcoin." + netname);
         if (params == null) {
-            informationalAlert(_("Unknown network ID"), _("The --net parameter must be main, regtest or test"));
+            informationalAlert(tr("Unknown network ID"), tr("The --net parameter must be main, regtest or test"));
             return false;
         }
         // When not using testnet, use a subdirectory of the app directory to keep everything in, named after the
@@ -313,7 +313,7 @@ public class Main extends Application {
     }
 
     private Node createLoadingUI() {
-        StackPane pane = new StackPane(new Label(_("Crowdfunding app")));
+        StackPane pane = new StackPane(new Label(tr("Crowdfunding app")));
         pane.setPadding(new Insets(20));
         pane.setStyle("-fx-background-color: white");
         return pane;
@@ -327,7 +327,7 @@ public class Main extends Application {
             // Load the main window.
             URL location = getResource("main.fxml");
             FXMLLoader loader = new FXMLLoader(location);
-            Pane ui = LHUtils.stopwatched(_("Loading main.fxml"), loader::load);
+            Pane ui = LHUtils.stopwatched(tr("Loading main.fxml"), loader::load);
             ui.setMaxWidth(Double.MAX_VALUE);
             ui.setMaxHeight(Double.MAX_VALUE);
             MainWindow controller = loader.getController();
@@ -356,9 +356,9 @@ public class Main extends Application {
         } catch (Throwable e) {
             log.error("Failed to load UI: ", e);
             if (GuiUtils.resourceOverrideDirectory != null)
-                informationalAlert(_("Failed to load UI"),
+                informationalAlert(tr("Failed to load UI"),
                     // TRANS: %s = error message
-                    _("Error: %s"), e.getMessage());
+                    tr("Error: %s"), e.getMessage());
             else
                 CrashWindow.open(e);
         }
@@ -403,8 +403,8 @@ public class Main extends Application {
             }
         };
         if (bitcoin.isChainFileLocked()) {
-            informationalAlert(_("Already running"),
-                    _("This application is already running and cannot be started twice."));
+            informationalAlert(tr("Already running"),
+                    tr("This application is already running and cannot be started twice."));
             bitcoin = null;
             if (!Main.offline)
                 xtPeers.stopAsync();
@@ -451,9 +451,9 @@ public class Main extends Application {
             offline = true;
         }
         return LHUtils.connectXTPeers(params, isOffline, () -> {
-            informationalAlert(_("Local Bitcoin node not usable"),
+            informationalAlert(tr("Local Bitcoin node not usable"),
                     // TRANS: %s = app name
-                    _("You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support %s needs. %s will still " +
+                    tr("You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support %s needs. %s will still " +
                             "work but will use the peer to peer network instead, so you won't get upgraded security. " +
                             "Try installing Bitcoin XT, which is a modified version of Bitcoin Core that has the upgraded protocol support."),
                     APP_NAME, APP_NAME);

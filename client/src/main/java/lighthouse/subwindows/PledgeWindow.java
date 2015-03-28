@@ -17,7 +17,7 @@ import javax.annotation.*;
 
 import static com.google.common.base.Preconditions.*;
 import static lighthouse.utils.GuiUtils.*;
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 /**
  * Window which asks user to specify the amount they want to pledge.
@@ -64,24 +64,24 @@ public class PledgeWindow extends InnerWindow {
         minersFeeLabel.setText(String.format(minersFeeLabel.getText(), Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.toFriendlyString()));
         
         // Load localized strings
-        confirmButton.setText(_("Confirm"));
-        cancelButton.setText(_("Cancel"));
-        amountLabel.setText(_("Amount"));
-        allMoney.setText(_("Maximum amount possible"));
-        minMoney.setText(_("Minimum amount possible"));
-        emailAddressLabel.setText(_("Email address"));
-        nameLabel.setText(_("Name"));
-        nameEdit.setPromptText(_("Anonymous"));
-        messageEdit.setPromptText(_("Message to project owner (optional)"));
+        confirmButton.setText(tr("Confirm"));
+        cancelButton.setText(tr("Cancel"));
+        amountLabel.setText(tr("Amount"));
+        allMoney.setText(tr("Maximum amount possible"));
+        minMoney.setText(tr("Minimum amount possible"));
+        emailAddressLabel.setText(tr("Email address"));
+        nameLabel.setText(tr("Name"));
+        nameEdit.setPromptText(tr("Anonymous"));
+        messageEdit.setPromptText(tr("Message to project owner (optional)"));
     }
 
     public void setProject(Project project) {
         this.project = project;
         // Until we do encryption of data in pledges, serverless projects are different to server assisted.
         if (project.getPaymentURL() != null) {
-            pubPrivLabel.setText(_("Name and message will be public."));
+            pubPrivLabel.setText(tr("Name and message will be public."));
         } else {
-            pubPrivLabel.setText(_("Name, email and message will be public."));
+            pubPrivLabel.setText(tr("Name, email and message will be public."));
         }
     }
 
@@ -94,7 +94,7 @@ public class PledgeWindow extends InnerWindow {
         this.min = min;
         log.info("Max {}    Min {}", max, min);
         // TRANS: %s = example BTC amount limit
-        amountEdit.setPromptText(String.format(_("e.g. %s"), max.toPlainString()));
+        amountEdit.setPromptText(String.format(tr("e.g. %s"), max.toPlainString()));
     }
 
     @FXML

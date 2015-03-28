@@ -19,7 +19,7 @@ import java.util.function.*;
 
 import static com.google.common.base.Preconditions.*;
 import static lighthouse.utils.GuiUtils.*;
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 /**
  * User interface for entering a password on demand, e.g. to send money. Also used when encrypting a wallet. Shows a
@@ -45,13 +45,13 @@ public class WalletPasswordController {
         Platform.runLater(pass1::requestFocus);
         
         // Load localized strings
-        confirmButton.setText(_("Confirm"));
-        cancelButton.setText(_("Cancel"));
-        passwordLabel.setText(_("Password"));
+        confirmButton.setText(tr("Confirm"));
+        cancelButton.setText(tr("Cancel"));
+        passwordLabel.setText(tr("Password"));
     }
 
     public static void requestPasswordWithNextWindow(Consumer<KeyParameter> keyConsumer) {
-        Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", _("Password"));
+        Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", tr("Password"));
         pwd.controller.aesKeyProperty().addListener((observable, old, cur) -> {
             // We only get here if the user found the right password. If they don't or they cancel, we end up back on
             // the main UI screen.
@@ -61,7 +61,7 @@ public class WalletPasswordController {
     }
 
     public static void requestPassword(Consumer<KeyParameter> keyConsumer) {
-        Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", _("Password"));
+        Main.OverlayUI<WalletPasswordController> pwd = Main.instance.overlayUI("subwindows/wallet_password.fxml", tr("Password"));
         pwd.controller.aesKeyProperty().addListener((observable, old, cur) -> {
             // We only get here if the user found the right password. If they don't or they cancel, we end up back on
             // the main UI screen.
@@ -74,7 +74,7 @@ public class WalletPasswordController {
     @FXML void confirmClicked(ActionEvent event) {
         String password = pass1.getText();
         if (password.isEmpty() || password.length() < 4) {
-            informationalAlert(_("Bad password"), _("The password you entered is empty or too short."));
+            informationalAlert(tr("Bad password"), tr("The password you entered is empty or too short."));
             return;
         }
 
@@ -91,8 +91,8 @@ public class WalletPasswordController {
                     fadeOut(progressMeter);
                     fadeIn(widgetBox);
                     fadeIn(buttonsBox);
-                    informationalAlert(_("Wrong password"),
-                            _("Please try entering your password again, carefully checking for typos or spelling errors."));
+                    informationalAlert(tr("Wrong password"),
+                            tr("Please try entering your password again, carefully checking for typos or spelling errors."));
                 }
             }
         };

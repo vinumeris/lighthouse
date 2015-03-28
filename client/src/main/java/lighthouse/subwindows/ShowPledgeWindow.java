@@ -12,7 +12,7 @@ import org.bitcoinj.core.*;
 import java.time.*;
 import java.time.format.*;
 
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 /**
  * Allows the user to view the details of the pledge and copy/paste the
@@ -33,7 +33,7 @@ public class ShowPledgeWindow {
     private LHProtos.Pledge pledge;
 
     public static Main.OverlayUI<ShowPledgeWindow> open(Project project, LHProtos.Pledge pledge) {
-        Main.OverlayUI<ShowPledgeWindow> ui = Main.instance.overlayUI("subwindows/show_pledge.fxml", _("View pledge"));
+        Main.OverlayUI<ShowPledgeWindow> ui = Main.instance.overlayUI("subwindows/show_pledge.fxml", tr("View pledge"));
         ui.controller.init(project, pledge);
         return ui;
     }
@@ -41,7 +41,7 @@ public class ShowPledgeWindow {
     private void init(Project project, LHProtos.Pledge pledge) {
         LHProtos.PledgeDetails details = pledge.getPledgeDetails();
         amountLabel.setText(Coin.valueOf(details.getTotalInputValue()).toFriendlyString());
-        String label = details.hasName() ? details.getName() : _("Anonymous");
+        String label = details.hasName() ? details.getName() : tr("Anonymous");
         if (details.hasContactAddress())
             label += " <" + details.getContactAddress() + ">";
         contactLabel.setText(label);
@@ -61,11 +61,11 @@ public class ShowPledgeWindow {
         saveToFileButton.setVisible(project.getPaymentURL() == null && pledgeFor != null && LHUtils.hashFromPledge(pledge).equals(LHUtils.hashFromPledge(pledgeFor)));
         
         // Load localized strings
-        saveToFileButton.setText(_("Save to file"));
-        closeButton.setText(_("Close"));
-        pledgedByLabel.setText(_("pledged by"));
-        onLabel.setText(_("on"));
-        messageField.setPromptText(_("No attached message"));
+        saveToFileButton.setText(tr("Save to file"));
+        closeButton.setText(tr("Close"));
+        pledgedByLabel.setText(tr("pledged by"));
+        onLabel.setText(tr("on"));
+        messageField.setPromptText(tr("No attached message"));
     }
 
     @FXML

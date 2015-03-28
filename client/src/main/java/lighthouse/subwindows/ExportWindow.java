@@ -22,7 +22,7 @@ import javax.annotation.*;
 import java.io.*;
 import java.nio.file.*;
 
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 // TODO: The folder explainer here is actually dead code.
 
@@ -47,14 +47,14 @@ public class ExportWindow {
         moneyIcon.setTextFill(Color.valueOf("#cccccc"));
         
         // Load localized strings
-        dragToAFolderLabel.setText(_("Drag to a folder, email or chat window. Or ..."));
-        folderWillBeWatchedLabel.setText(_("The folder you save the project to will be watched, and any pledges found there will be automatically loaded."));
-        saveButton.setText(_("Save to file"));
+        dragToAFolderLabel.setText(tr("Drag to a folder, email or chat window. Or ..."));
+        folderWillBeWatchedLabel.setText(tr("The folder you save the project to will be watched, and any pledges found there will be automatically loaded."));
+        saveButton.setText(tr("Save to file"));
     }
 
     public static void openForPledge(Project project, PledgingWallet.PledgeSupplier pledge) {
         log.info("Open ExportWindow for a pledge for {}", project.getTitle());
-        ExportWindow window = Main.instance.<ExportWindow>overlayUI("subwindows/export.fxml", _("Export pledge")).controller;
+        ExportWindow window = Main.instance.<ExportWindow>overlayUI("subwindows/export.fxml", tr("Export pledge")).controller;
         window.project = project;
         window.pledge = pledge;
         ((BorderPane)window.folderWatchExplainer.getParent()).setBottom(null);
@@ -62,7 +62,7 @@ public class ExportWindow {
 
     public static void openForProject(Project project) {
         log.info("Open ExportWindow for saving project '{}'", project.getTitle());
-        ExportWindow window = Main.instance.<ExportWindow>overlayUI("subwindows/export.fxml", _("Export project")).controller;
+        ExportWindow window = Main.instance.<ExportWindow>overlayUI("subwindows/export.fxml", tr("Export project")).controller;
         window.project = project;
         // Don't show "will watch directory" explainer for server assisted projects.
         if (project.getPaymentURL() != null) {
@@ -128,7 +128,7 @@ public class ExportWindow {
     private String getFileName() {
         if (pledge != null) {
             // TRANS: %1$s = pledger's name, %2$s = project name, %3$s = file extension
-            final String FILE_NAME = _("Pledge by %1$s for %2$s%3$s");
+            final String FILE_NAME = tr("Pledge by %1$s for %2$s%3$s");
             return String.format(FILE_NAME, Main.demoName == null ? System.getProperty("user.name") : Main.demoName, project.getTitle(), DiskManager.PLEDGE_FILE_EXTENSION);
         } else {
             return project.getSuggestedFileName();
@@ -167,7 +167,7 @@ public class ExportWindow {
             log.info("Save clicked for {}", savingPledge ? "pledge" : "project");
 
             FileChooser chooser = new FileChooser();
-            chooser.setTitle(savingPledge ? _("Save pledge to a file") : _("Save project to a file"));
+            chooser.setTitle(savingPledge ? tr("Save pledge to a file") : tr("Save project to a file"));
             chooser.setInitialFileName(getFileName());
             GuiUtils.platformFiddleChooser(chooser);
             File file = chooser.showSaveDialog(Main.instance.mainStage);
@@ -184,7 +184,7 @@ public class ExportWindow {
                 } else if (!maybeShowServerGuidance())
                     overlayUI.done();
             } catch (IOException e) {
-                GuiUtils.informationalAlert(_("Failed to save file"), e.getLocalizedMessage());
+                GuiUtils.informationalAlert(tr("Failed to save file"), e.getLocalizedMessage());
             }
         });
     }

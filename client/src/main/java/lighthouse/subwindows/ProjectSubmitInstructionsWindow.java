@@ -8,7 +8,7 @@ import org.slf4j.*;
 
 import java.net.*;
 
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 /**
  * Quick usability hint for people who don't RTFM and get confused what they do after creating a project :-)
@@ -24,14 +24,14 @@ public class ProjectSubmitInstructionsWindow {
     
     public void initialize() {
         // Load localized strings
-        closeButton.setText(_("Close"));
-        submitProjectLabel.setText(_("Now submit your project for hosting:"));
+        closeButton.setText(tr("Close"));
+        submitProjectLabel.setText(tr("Now submit your project for hosting:"));
     }
 
     public static void open(String submitAddress, ServerList.SubmitType submitType) {
         log.info("Showing project submit instructions: {}", submitAddress);
         ProjectSubmitInstructionsWindow window = Main.instance.<ProjectSubmitInstructionsWindow>overlayUI(
-                        "subwindows/project_submit_instructions.fxml", _("Information")).controller;
+                        "subwindows/project_submit_instructions.fxml", tr("Information")).controller;
         if (submitType == ServerList.SubmitType.EMAIL) {
             window.submitAddressLabel.setText(submitAddress);
             window.submitAddressLabel.setOnMouseClicked(ev -> {

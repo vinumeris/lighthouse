@@ -1,10 +1,9 @@
 package lighthouse.utils;
 
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.stage.Stage;
+import javafx.scene.control.*;
+import javafx.stage.*;
 
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 public class AlertWindowController {
     public Label messageLabel;
@@ -16,10 +15,10 @@ public class AlertWindowController {
     /** Initialize this alert dialog for information about a crash. */
     public void crashAlert(Stage stage, String crashMessage) {
         // Load localized strings
-        okButton.setText(_("OK"));
-        cancelButton.setText(_("Cancel"));
-        actionButton.setText(_("Action"));
-        messageLabel.setText(_("Unfortunately, we screwed up and the app crashed. Sorry about that!"));
+        okButton.setText(tr("OK"));
+        cancelButton.setText(tr("Cancel"));
+        actionButton.setText(tr("Action"));
+        messageLabel.setText(tr("Unfortunately, we screwed up and the app crashed. Sorry about that!"));
         detailsLabel.setText(crashMessage);
 
         cancelButton.setVisible(false);

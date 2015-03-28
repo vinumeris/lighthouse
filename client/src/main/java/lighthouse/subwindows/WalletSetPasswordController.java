@@ -45,12 +45,12 @@ public class WalletSetPasswordController {
         progressMeter.setOpacity(0);
         
         // Load localized strings
-        explanationLabel.setText(_("Setting a password on your wallet makes it safer against viruses and theft. " +
+        explanationLabel.setText(tr("Setting a password on your wallet makes it safer against viruses and theft. " +
                 "You will need to enter your password whenever money is sent."));
-        closeButton.setText(_("Close"));
-        setButton.setText(_("Set password"));
-        enterPasswordLabel.setText(_("Enter password"));
-        repeatPasswordLabel.setText(_("Repeat password"));
+        closeButton.setText(tr("Close"));
+        setButton.setText(tr("Set password"));
+        enterPasswordLabel.setText(tr("Enter password"));
+        repeatPasswordLabel.setText(tr("Repeat password"));
     }
 
     public static Duration estimatedKeyDerivationTime = null;
@@ -80,13 +80,13 @@ public class WalletSetPasswordController {
     @FXML
     public void setPasswordClicked(ActionEvent event) {
         if (!pass1.getText().equals(pass2.getText())) {
-            informationalAlert(_("Passwords do not match"), _("Try re-typing your chosen passwords."));
+            informationalAlert(tr("Passwords do not match"), tr("Try re-typing your chosen passwords."));
             return;
         }
         String password = pass1.getText();
         // This is kind of arbitrary and we could do much more to help people pick strong passwords.
         if (password.length() < 4) {
-            informationalAlert(_("Password too short"), _("You need to pick a password at least five characters or longer."));
+            informationalAlert(tr("Password too short"), tr("You need to pick a password at least five characters or longer."));
             return;
         }
 
@@ -107,8 +107,8 @@ public class WalletSetPasswordController {
                 log.info("Key derived, now encrypting");
                 Main.bitcoin.wallet().encrypt(scrypt, aesKey);
                 log.info("Encryption done");
-                informationalAlert(_("Wallet encrypted"),
-                        _("You can remove the password at any time from the settings screen."));
+                informationalAlert(tr("Wallet encrypted"),
+                        tr("You can remove the password at any time from the settings screen."));
                 overlayUI.done();
             }
         };
