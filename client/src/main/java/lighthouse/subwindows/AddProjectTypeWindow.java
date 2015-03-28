@@ -20,7 +20,7 @@ import java.io.*;
 import java.nio.file.*;
 
 import static lighthouse.utils.GuiUtils.*;
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 /**
  * Screen where user chooses between server assisted and serverless mode.
@@ -83,11 +83,11 @@ public class AddProjectTypeWindow {
         serverInstructionsLabel.setText(_("Server instructions"));
         serverAssisted.setText(_("Server assisted"));
         fullyDecentralised.setText(_("Fully decentralised"));
-        fullyDecentralisedDescText.setText(_("This style of project does not require any server. " + 
-            "Backers will be given a pledge file that they must get back to you via email, shared folder, instant messaging etc. " +
-            "People will not be able to see how much money was raised so far unless they download the pledge files themselves.\n\n" +
-            "Fully decentralised can be an appropriate choice when you are fund raising from a group of friends or will be managing the pledges " +
-            "in some other way. It's less convenient but doesn't require any infrastructure."));
+        fullyDecentralisedDescText.setText(_("This style of project does not require any server. " +
+                "Backers will be given a pledge file that they must get back to you via email, shared folder, instant messaging etc. " +
+                "People will not be able to see how much money was raised so far unless they download the pledge files themselves.\n\n" +
+                "Fully decentralised can be an appropriate choice when you are fund raising from a group of friends or will be managing the pledges " +
+                "in some other way. It's less convenient but doesn't require any infrastructure."));
     }
 
     private boolean isServerNameValid(String str) {

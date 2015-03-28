@@ -16,7 +16,7 @@ import org.spongycastle.crypto.params.*;
 import java.time.*;
 
 import static lighthouse.utils.GuiUtils.*;
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 public class WalletSetPasswordController {
     private static final Logger log = LoggerFactory.getLogger(WalletSetPasswordController.class);
@@ -46,7 +46,7 @@ public class WalletSetPasswordController {
         
         // Load localized strings
         explanationLabel.setText(_("Setting a password on your wallet makes it safer against viruses and theft. " +
-            "You will need to enter your password whenever money is sent."));
+                "You will need to enter your password whenever money is sent."));
         closeButton.setText(_("Close"));
         setButton.setText(_("Set password"));
         enterPasswordLabel.setText(_("Enter password"));

@@ -48,7 +48,7 @@ import java.util.logging.*;
 import static lighthouse.LighthouseBackend.Mode.*;
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 public class Main extends Application {
     public static final Logger log = LoggerFactory.getLogger(Main.class);
@@ -180,19 +180,19 @@ public class Main extends Application {
             System.out.println(String.format(
                     // TRANS: %s = App name, %s = App version
                     _("%s version %d (C) 2014 Vinumeris GmbH\n\n" +
-                    "Usage: lighthouse [args] [filename.lighthouse-project...] \n" +
-                    "  --use-tor:                      Enable experimental Tor mode (may freeze up)\n" +
-                    "  --slow-gfx:                     Enable more eyecandy that may stutter on slow GFX cards\n" +
-                    "  --net={regtest,main,test}:      Select Bitcoin network to operate on.\n" +
-                    "  --connect=ipaddr,ipaddr         Uses the given IP addresses for REGULAR (non-XT) Bitcoin usage.\n" +
-                    "  --name=alice                    Name is put in titlebar and pledge filenames, useful for testing\n" +
-                    "                                  multiple instances on the same machine.\n" +
-                    "  --appdir=/path/to/dir           Overrides the usual directory used, useful for testing multiple\n" +
-                    "                                  instances on the same machine.\n" +
-                    "  --debuglog                      Print logging data to the console.\n" +
-                    "  --updates-url=http://xxx/       Override the default URL used for updates checking.\n" +
-                    "  --resfiles=/path/to/dir         Load GUI resource files from the given directory instead of using\n" +
-                    "                                  the included versions.\n"),
+                            "Usage: lighthouse [args] [filename.lighthouse-project...] \n" +
+                            "  --use-tor:                      Enable experimental Tor mode (may freeze up)\n" +
+                            "  --slow-gfx:                     Enable more eyecandy that may stutter on slow GFX cards\n" +
+                            "  --net={regtest,main,test}:      Select Bitcoin network to operate on.\n" +
+                            "  --connect=ipaddr,ipaddr         Uses the given IP addresses for REGULAR (non-XT) Bitcoin usage.\n" +
+                            "  --name=alice                    Name is put in titlebar and pledge filenames, useful for testing\n" +
+                            "                                  multiple instances on the same machine.\n" +
+                            "  --appdir=/path/to/dir           Overrides the usual directory used, useful for testing multiple\n" +
+                            "                                  instances on the same machine.\n" +
+                            "  --debuglog                      Print logging data to the console.\n" +
+                            "  --updates-url=http://xxx/       Override the default URL used for updates checking.\n" +
+                            "  --resfiles=/path/to/dir         Load GUI resource files from the given directory instead of using\n" +
+                            "                                  the included versions.\n"),
                     APP_NAME, VERSION
             ));
             return false;

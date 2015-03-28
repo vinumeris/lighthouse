@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.*;
 import static javafx.beans.binding.Bindings.*;
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 public class WalletSettingsController {
     private static final Logger log = LoggerFactory.getLogger(WalletSettingsController.class);
@@ -117,7 +117,7 @@ public class WalletSettingsController {
         
         // Load localized strings
         walletWordsLabel.setText(_("These are your wallet words. Write them down along with the creation date, and you can get your money back " +
-        "even if you lose all your wallet backup files. Just type the details back in below to restore!"));
+                "even if you lose all your wallet backup files. Just type the details back in below to restore!"));
         createdOnLabel.setText(_("Created on:"));
         passwordButton.setText(_("Set password"));
         restoreButton.setText(_("Restore from words"));

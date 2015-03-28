@@ -38,7 +38,7 @@ import java.nio.file.*;
 
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
-import static lighthouse.utils.I18nUtil._;
+import static lighthouse.utils.I18nUtil.*;
 
 /**
  * A window that lets you create a new project or edit an existing one.
@@ -222,7 +222,7 @@ public class EditProjectWindow {
         nextButton.setText(_("Next"));
         titleEdit.setPromptText(_("Example: Building a lighthouse"));
         descriptionEdit.setPromptText(_("You can format text using Markdown syntax."));
-        emailEdit.setPromptText(_("How can supporters get in touch with you?"));        
+        emailEdit.setPromptText(_("How can supporters get in touch with you?"));
     }
 
     private void setupDefaultCoverImage() {
