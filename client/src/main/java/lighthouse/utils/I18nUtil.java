@@ -1,27 +1,29 @@
 package lighthouse.utils;
 
-import java.util.ResourceBundle;
-import java.util.MissingResourceException;
-import gnu.gettext.*;
+import org.slf4j.*;
+
+import javax.annotation.*;
+import java.util.*;
+
+import static gnu.gettext.GettextResource.*;
 
 public class I18nUtil {
-    private static Boolean translationAvailable;
-    private static GettextResource resource;
-    private static ResourceBundle locale = loadCurrentLocale();
-    
-    private static ResourceBundle loadCurrentLocale() {
+    private static final Logger log = LoggerFactory.getLogger(I18nUtil.class);
+    @Nullable public static ResourceBundle locale;
+
+    static {
         try {
-            ResourceBundle ret = ResourceBundle.getBundle("lighthouse.locale.lighthouse");
-            translationAvailable = true;
-            return ret;
+            locale = ResourceBundle.getBundle("lighthouse.locale.lighthouse");
+            log.info("Using language translations for {}", locale.getLocale());
         } catch (MissingResourceException e) {
-            translationAvailable = false; // If user's locale is not supported yet, we will use the original English strings
+            // Ignore.
         }
-        return null;
     }
-    
+
     public static String _(String s) {
-        if (translationAvailable) return resource.gettext(locale, s);
-        else return s;
+        if (locale != null)
+            return gettext(locale, s);
+        else
+            return s;
     }
 }
