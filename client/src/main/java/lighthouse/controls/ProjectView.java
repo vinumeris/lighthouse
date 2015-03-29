@@ -385,7 +385,7 @@ public class ProjectView extends HBox {
 
     private void setupFXML() {
         try {
-            FXMLLoader loader = new FXMLLoader(getResource("controls/project_view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getResource("controls/project_view.fxml"), I18nUtil.locale);
             loader.setRoot(this);
             loader.setController(this);
             // The following line is supposed to help Scene Builder, although it doesn't seem to be needed for me.

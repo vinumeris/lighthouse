@@ -1,12 +1,14 @@
-# Lighthouse: a peer to peer crowdfunding app that uses Bitcoin
-# Copyright (C) 2015 Vinumeris GmbH
-# This file is distributed under Apache 2 license.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Lighthouse\n"
-"Report-Msgid-Bugs-To: lighthouse-dev@googlegroups.com\n"
-"POT-Creation-Date: 2015-03-28 20:37+0100\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-03-29 16:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,116 +18,86 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. TRANS: %s = payment URL
-#: client/src/main/java/lighthouse/model/ProjectModel.java:57
 msgid "Server path not valid for Lighthouse protocol: %s"
 msgstr ""
 
 #. TRANS: %s = transaction output
-#: client/src/main/java/lighthouse/model/ProjectModel.java:92
 msgid "Output type is not pay to address/p2sh: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/BitcoinAddressValidator.java:37
 msgid "<address goes here>"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/BitcoinAddressValidator.java:38
 msgid "Copy to clipboard"
 msgstr ""
 
 #. TRANS: %s = goal amount in BTC
-#: client/src/main/java/lighthouse/controls/ProjectView.java:109
 msgid "PLEDGED OF %s BTC GOAL"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:110
 msgid "Edit"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:111
 msgid "Copy description"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:112
 msgid "View technical details"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:113
 msgid "PLEDGERS"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:114
 msgid "FUNDED"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:115
 msgid "Export as CSV ..."
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:116
 msgid "No pledges yet!"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:276
 msgid ""
 "Project is not on the server yet: email the project file to the operator"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:278
 msgid ""
 "Bitcoin P2P network returned inconsistent answers, please contact support"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:280
 msgid "Server error: Timed out"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:283
 msgid "Internal error: "
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/controls/ProjectView.java:286
-#: client/src/main/java/lighthouse/Main.java:361
 msgid "Error: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:303
 msgid "Fully funded"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:306
-#: client/src/main/java/lighthouse/controls/ProjectView.java:440
 msgid "Pledge"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:310
 msgid "Revoke"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:313
 msgid "Claim"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:316
 msgid "View claim transaction"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:494
 msgid "View more"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:535
-#: client/src/main/java/lighthouse/subwindows/ShowPledgeWindow.java:44
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:74
 msgid "Anonymous"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:547
 msgid "Unable to edit"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:548
 msgid ""
 "You cannot edit a project that has already started gathering pledges, as "
 "otherwise existing pledges could be invalidated and participants could get "
@@ -133,82 +105,63 @@ msgid ""
 "or request revocation of existing pledges."
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:570
 msgid "Description copied to clipboard"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:586
 msgid "Unable to fetch email addresses"
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/controls/ProjectView.java:588
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:135
 msgid "Could not fetch project status from server: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:602
 msgid "Export pledges to CSV file"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:619
 msgid "Export succeeded"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:619
 msgid ""
 "Pledges are stored in a CSV file, which can be loaded with any spreadsheet "
 "application. Amounts are specified in satoshis."
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectView.java:622
 msgid "Export failed"
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/controls/ProjectView.java:624
 msgid "Lighthouse was unable to save pledge data to the selected file: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ReadMorePane.kt:42
 msgid "Read more ..."
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ClickableBitcoinAddress.java:52
 msgid "Copy address to clipboard"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ClickableBitcoinAddress.java:56
 msgid "Show a barcode scannable with a mobile phone for this address"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ClickableBitcoinAddress.java:105
 msgid "Address copied to clipboard"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ClickableBitcoinAddress.java:128
 msgid "QR code"
 msgstr ""
 
 #. TRANS: %s = amount in BTC
-#: client/src/main/java/lighthouse/controls/ProjectOverviewWidget.java:115
 msgid "%s BTC raised so far"
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectOverviewWidget.java:119
 msgid "Loading ..."
 msgstr ""
 
-#: client/src/main/java/lighthouse/controls/ProjectOverviewWidget.java:120
 msgid "You created this project"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:56
 msgid "Crowdfunding App"
 msgstr ""
 
 #. TRANS: %s = App name, %s = App version
-#: client/src/main/java/lighthouse/Main.java:182
 msgid ""
 "%s version %d (C) 2014 Vinumeris GmbH\n"
 "\n"
@@ -234,59 +187,46 @@ msgid ""
 "                                  the included versions.\n"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:220
 msgid "Bad updates URL"
 msgstr ""
 
 #. TRANS: %s = updates URL
-#: client/src/main/java/lighthouse/Main.java:222
 msgid "The --updates-url parameter is invalid: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:233
 msgid "Not a directory"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:233
 msgid ""
 "The --resdir value must point to a directory containing UI resource files "
 "(fxml, css, etc)."
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:263
 msgid "Unknown network ID"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:263
 msgid "The --net parameter must be main, regtest or test"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:316
 msgid "Crowdfunding app"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:330
 msgid "Loading main.fxml"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:359
 msgid "Failed to load UI"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:406
 msgid "Already running"
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:407
 msgid "This application is already running and cannot be started twice."
 msgstr ""
 
-#: client/src/main/java/lighthouse/Main.java:454
 msgid "Local Bitcoin node not usable"
 msgstr ""
 
 #. TRANS: %s = app name
-#: client/src/main/java/lighthouse/Main.java:456
 msgid ""
 "You have a Bitcoin (Core) node running on your computer, but it doesn't have "
 "the protocol support %s needs. %s will still work but will use the peer to "
@@ -295,490 +235,359 @@ msgid ""
 "upgraded protocol support."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ShowPledgeWindow.java:36
 msgid "View pledge"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ShowPledgeWindow.java:64
-#: client/src/main/java/lighthouse/subwindows/ExportWindow.java:52
 msgid "Save to file"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ShowPledgeWindow.java:65
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:64
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:124
-#: client/src/main/java/lighthouse/subwindows/UpdateFXWindow.java:80
-#: client/src/main/java/lighthouse/subwindows/ProjectSubmitInstructionsWindow.java:27
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:50
 msgid "Close"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ShowPledgeWindow.java:66
 msgid "pledged by"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ShowPledgeWindow.java:67
 msgid "on"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ShowPledgeWindow.java:68
 msgid "No attached message"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletPasswordController.java:48
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:67
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:49
 msgid "Confirm"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletPasswordController.java:49
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:221
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:68
-#: client/src/main/java/lighthouse/subwindows/PledgeUploadWindow.java:41
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:48
-#: client/src/main/java/lighthouse/subwindows/EmptyWalletController.java:38
-#: client/src/main/java/lighthouse/utils/AlertWindowController.java:20
 msgid "Cancel"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletPasswordController.java:50
-#: client/src/main/java/lighthouse/subwindows/WalletPasswordController.java:54
-#: client/src/main/java/lighthouse/subwindows/WalletPasswordController.java:64
 msgid "Password"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletPasswordController.java:77
 msgid "Bad password"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletPasswordController.java:77
 msgid "The password you entered is empty or too short."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletPasswordController.java:94
 msgid "Wrong password"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletPasswordController.java:95
 msgid ""
 "Please try entering your password again, carefully checking for typos or "
 "spelling errors."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:86
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:90
 msgid "Create new project"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:94
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:98
 msgid "Edit project"
 msgstr ""
 
 #. TRANS: %d = maximum number of pledges
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:189
 msgid ""
 "You can collect a maximum of %d pledges, due to limits in the Bitcoin "
 "protocol."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:212
 msgid "Project name"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:213
 msgid "Goal amount"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:214
 msgid "Min pledge"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:215
 msgid "Address"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:216
 msgid "Drop a custom image or click here to open"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:217
 msgid "Cover image"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:218
 msgid "Description"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:219
 msgid "Preview formatted text"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:220
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:72
 msgid "Email address"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:222
 msgid "Next"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:223
 msgid "Example: Building a lighthouse"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:224
 msgid "You can format text using Markdown syntax."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:225
 msgid "How can supporters get in touch with you?"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:263
 msgid "Title conflict"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:264
 msgid ""
 "You already have a project with that title. Please choose another. If you "
 "are trying to create a different version, consider putting the date or a "
 "number in the title so people can distinguish them."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:277
 msgid "Select an image file"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:278
 msgid "Images (JPG/PNG/GIF)"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:303
 msgid "Image load failed"
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:305
 msgid "Could not download the image from the remote server: %s"
 msgstr ""
 
 #. TRANS: %s = image URL
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:317
 msgid "Download of %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:324
 msgid "Image too large"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:324
 msgid ""
 "Please make sure your image is smaller than 5mb, any larger is excessive."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:332
 msgid "Failed to load image"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EditProjectWindow.java:404
 msgid "https://help.github.com/articles/markdown-basics/"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:69
 msgid "Amount"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:70
 msgid "Maximum amount possible"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:71
 msgid "Minimum amount possible"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:73
 msgid "Name"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:75
 msgid "Message to project owner (optional)"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:82
 msgid "Name and message will be public."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:84
 msgid "Name, email and message will be public."
 msgstr ""
 
 #. TRANS: %s = example BTC amount limit
-#: client/src/main/java/lighthouse/subwindows/PledgeWindow.java:97
 msgid "e.g. %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:49
 msgid "Raw multi-sig"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:51
 msgid "Unrecognised project output type"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:65
 msgid "Target address"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:66
 msgid "Server URL"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:67
 msgid "Min pledge size"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:68
 msgid "Auth key"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:69
 msgid "Network parameters"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:70
 msgid "Creation time"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:71
 msgid "Serverless project"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectTechDetailsWindow.java:75
 msgid "Project details"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:43
 msgid "Wallet settings"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:61
 msgid "Remove password"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:119
 msgid ""
 "These are your wallet words. Write them down along with the creation date, "
 "and you can get your money back even if you lose all your wallet backup "
 "files. Just type the details back in below to restore!"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:121
 msgid "Created on:"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:122
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:167
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:171
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:51
 msgid "Set password"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:123
 msgid "Restore from words"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:141
 msgid "Wallet is not empty"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:142
 msgid ""
 "You must empty this wallet out before attempting to restore an older one, as "
 "mixing wallets together can lead to invalidated backups."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:149
 msgid "Wallet is encrypted"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:150
 msgid ""
 "After restore, the wallet will no longer be encrypted and you must set a new "
 "password."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:154
 msgid "Wallet restore in progress"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:155
 msgid ""
 "Your wallet will now be resynced from the Bitcoin network. This can take a "
 "long time for old wallets."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:170
 msgid "Wallet decrypted"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSettingsController.java:170
 msgid "A password will no longer be required to send money or edit settings."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/UpdateFXWindow.java:81
 msgid "Always use this version"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/UpdateFXWindow.java:85
 msgid "Application updates"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/UpdateFXWindow.java:96
-#: client/src/main/java/lighthouse/subwindows/UpdateFXWindow.java:103
 msgid "Version change"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/UpdateFXWindow.java:97
 msgid ""
 "You will be switched to always track the latest version. The app will now "
 "restart."
 msgstr ""
 
 #. TRANS: %d = version number
-#: client/src/main/java/lighthouse/subwindows/UpdateFXWindow.java:105
 msgid ""
 "You will be switched to always use version %d. The app will now restart."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectSubmitInstructionsWindow.java:28
 msgid "Now submit your project for hosting:"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ProjectSubmitInstructionsWindow.java:34
 msgid "Information"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeUploadWindow.java:40
 msgid "Connecting to server ..."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeUploadWindow.java:45
 msgid "Upload"
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/subwindows/PledgeUploadWindow.java:71
 msgid "Connection failed: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeUploadWindow.java:75
 msgid "Connected, uploading ..."
 msgstr ""
 
 #. TRANS: %d = error code number, %s = error message
-#: client/src/main/java/lighthouse/subwindows/PledgeUploadWindow.java:83
 msgid "Server said %d %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/PledgeUploadWindow.java:91
 msgid "Upload failed"
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/subwindows/PledgeUploadWindow.java:93
 msgid ""
 "%s. This probably indicates either a problem with your internet connection "
 "or a configuration issue with the server. You could try again later."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:48
 msgid ""
 "Setting a password on your wallet makes it safer against viruses and theft. "
 "You will need to enter your password whenever money is sent."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:52
 msgid "Enter password"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:53
 msgid "Repeat password"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:83
 msgid "Passwords do not match"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:83
 msgid "Try re-typing your chosen passwords."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:89
 msgid "Password too short"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:89
 msgid "You need to pick a password at least five characters or longer."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:110
 msgid "Wallet encrypted"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/WalletSetPasswordController.java:111
 msgid "You can remove the password at any time from the settings screen."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:47
 msgid ""
 "This operation incurs a small miners fee because it requires making a "
 "Bitcoin transaction."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:53
 msgid "Revoke pledge"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:59
 msgid "Claim pledges"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:67
 msgid ""
 "Claiming a project sends all the pledged money to the project's goal "
 "address. "
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:72
 msgid "Revoking a pledge returns the money to your wallet. "
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:133
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:141
 msgid "Unable to claim"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:141
 msgid "One or more pledges have been revoked whilst you were waiting."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:166
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:213
 msgid "Transaction acceptance issue"
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:168
 msgid "The Bitcoin network has rejected the claim: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:182
 msgid "Too much money"
 msgstr ""
 
 #. TRANS: %s = difference in BTC
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:184
 msgid ""
 "You have gathered pledges that add up to more than the goal. The excess "
 "cannot be redeemed in the current version of the software and would end up "
@@ -786,132 +595,102 @@ msgid ""
 "hit the goal amount exactly. There is %s too much."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:191
 msgid "Cannot claim pledges"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:192
 msgid ""
 "Closing the contract requires paying Bitcoin network fees, but you don't "
 "have enough money in the wallet. Add more money and try again."
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:215
 msgid "The Bitcoin network has rejected the revocation transaction: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:224
 msgid "Cannot revoke pledge"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/RevokeAndClaimWindow.java:225
 msgid ""
 "Revoking a pledge requires making another Bitcoin transaction on the block "
 "chain, but you don't have sufficient funds to pay the required fee. Add more "
 "money and try again."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ExportWindow.java:50
 msgid "Drag to a folder, email or chat window. Or ..."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ExportWindow.java:51
 msgid ""
 "The folder you save the project to will be watched, and any pledges found "
 "there will be automatically loaded."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ExportWindow.java:57
 msgid "Export pledge"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ExportWindow.java:65
 msgid "Export project"
 msgstr ""
 
 #. TRANS: %1$s = pledger's name, %2$s = project name, %3$s = file extension
-#: client/src/main/java/lighthouse/subwindows/ExportWindow.java:131
 msgid "Pledge by %1$s for %2$s%3$s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ExportWindow.java:170
 msgid "Save pledge to a file"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ExportWindow.java:170
 msgid "Save project to a file"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/ExportWindow.java:187
 msgid "Failed to save file"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EmptyWalletController.java:36
 msgid "Send to address:"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EmptyWalletController.java:37
 msgid "Send"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EmptyWalletController.java:47
-#: client/src/main/java/lighthouse/MainWindow.java:112
 msgid "Empty wallet"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EmptyWalletController.java:79
 msgid "Could not empty the wallet"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/EmptyWalletController.java:80
 msgid "You may have too little money left in the wallet to make a transaction."
 msgstr ""
 
 #. TRANS: %d = number of peers
-#: client/src/main/java/lighthouse/subwindows/EmptyWalletController.java:103
 msgid "Broadcasting ... seen by %d peers"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:48
 msgid "Change type"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:48
 msgid "Select type"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:79
 msgid "Save"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:80
 msgid "Back"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:81
 msgid ""
 "A server collects and monitors pledges on your behalf. You can use a "
 "community run server or run your own."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:82
 msgid "Server name"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:83
 msgid "Server instructions"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:84
 msgid "Server assisted"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:85
 msgid "Fully decentralised"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:86
 msgid ""
 "This style of project does not require any server. Backers will be given a "
 "pledge file that they must get back to you via email, shared folder, instant "
@@ -923,182 +702,140 @@ msgid ""
 "It's less convenient but doesn't require any infrastructure."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:108
 msgid "You must pick a server."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:111
 msgid "The server name is not considered valid."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:136
 msgid "Folder watching"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:137
 msgid ""
 "The folder to which you save your project file will be watched for pledge "
 "files. When you receive them from backers, just put them in the same "
 "directory and they will appear."
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:140
 msgid "Select a directory to store the project and pledges"
 msgstr ""
 
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:156
 msgid "Could not save project"
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/subwindows/AddProjectTypeWindow.java:158
 msgid "An error was encountered whilst trying to save the project: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/utils/BitcoinValue.java:16
 msgid "Negative numbers not allowed"
 msgstr ""
 
-#: client/src/main/java/lighthouse/utils/BitcoinValue.java:19
 msgid "Fractional value units not allowed"
 msgstr ""
 
-#: client/src/main/java/lighthouse/utils/BitcoinValue.java:22
 msgid "Larger than MAX_MONEY"
 msgstr ""
 
-#: client/src/main/java/lighthouse/utils/AlertWindowController.java:19
 msgid "OK"
 msgstr ""
 
-#: client/src/main/java/lighthouse/utils/AlertWindowController.java:21
 msgid "Action"
 msgstr ""
 
-#: client/src/main/java/lighthouse/utils/AlertWindowController.java:22
 msgid "Unfortunately, we screwed up and the app crashed. Sorry about that!"
 msgstr ""
 
-#: client/src/main/java/lighthouse/UserPrefs.java:37
 msgid " Lighthouse settings file"
 msgstr ""
 
-#: client/src/main/java/lighthouse/ServerList.java:35
 msgid "Submission via email. Project must be legal under Swiss and UK law."
 msgstr ""
 
-#: client/src/main/java/lighthouse/ServerList.java:36
 msgid "Submission via email. Project must be legal under US law."
 msgstr ""
 
-#: client/src/main/java/lighthouse/ServerList.java:37
 msgid "Submission via email. Project must be legal under New Zealand law."
 msgstr ""
 
-#: client/src/main/java/lighthouse/ServerList.java:38
 msgid "Submission via the web. Project must be legal under US law."
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:98
 msgid "Send money out of the wallet"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:100
 msgid "Make paper backup and encrypt your wallet"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:110
 msgid "YOUR ADDRESS"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:111
 msgid "Set up wallet"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:113
 msgid "YOUR BALANCE"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:114
 msgid "Create project"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:115
 msgid "Import project"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:116
 msgid "You can also drop an existing project file here."
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:263
 msgid "Select a bitcoin project file to import"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:264
 msgid "Project/contract files"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:317
 msgid "Import failed"
 msgstr ""
 
 #. TRANS: %1$s = app name, %2$s = error message
-#: client/src/main/java/lighthouse/MainWindow.java:319
 msgid ""
 "Could not copy the dropped pledge into the %1$s application directory: %2$s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:332
 msgid "Failed to import project"
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/MainWindow.java:334
 msgid "Could not read project file: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:383
 msgid ""
 "You are offline. You will not be able to use the app until you go online and "
 "restart."
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:391
 msgid "Initialising Tor"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:450
 msgid "Downloading software update"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:453
 msgid "Restart"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:456
 msgid "Please restart the app to upgrade to the new version."
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:465
 msgid "Online update failed"
 msgstr ""
 
 #. TRANS: %s = error message
-#: client/src/main/java/lighthouse/MainWindow.java:467
 msgid ""
 "An error was encountered whilst attempting to download or apply an online "
 "update: %s"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:483
 msgid "Synchronising with the Bitcoin network"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:503
 msgid "You don't have any bitcoins in this wallet"
 msgstr ""
 
-#: client/src/main/java/lighthouse/MainWindow.java:504
 msgid "Send some money to this address first"
 msgstr ""

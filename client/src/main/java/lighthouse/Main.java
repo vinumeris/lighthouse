@@ -325,8 +325,7 @@ public class Main extends Application {
             refreshStylesheets(scene);
 
             // Load the main window.
-            URL location = getResource("main.fxml");
-            FXMLLoader loader = new FXMLLoader(location);
+            FXMLLoader loader = new FXMLLoader(getResource("main.fxml"), I18nUtil.locale);
             Pane ui = LHUtils.stopwatched(tr("Loading main.fxml"), loader::load);
             ui.setMaxWidth(Double.MAX_VALUE);
             ui.setMaxHeight(Double.MAX_VALUE);
@@ -413,7 +412,7 @@ public class Main extends Application {
             return;
         }
         if (params == RegTestParams.get()) {
-            InetAddress local = unchecked(InetAddress::getLocalHost);
+            InetAddress local = unchecked((UncheckedRun<InetAddress>) /* cast is ij bug workaround */ InetAddress::getLocalHost);
             bitcoin.setPeerNodes(
                     new PeerAddress(local, RegTestParams.get().getPort()),
                     new PeerAddress(local, RegTestParams.get().getPort() + 1)
@@ -602,7 +601,7 @@ public class Main extends Application {
             checkGuiThread();
             // Load the UI from disk.
             URL location = getResource(name);
-            FXMLLoader loader = new FXMLLoader(location);
+            FXMLLoader loader = new FXMLLoader(location, I18nUtil.locale);
             Pane ui = loader.load();
             T controller = loader.getController();
 

@@ -45,7 +45,7 @@ public class GuiUtils {
             // files for an alert window for you, and then you customise it as you see fit.
             Stage dialogStage = new Stage();
             dialogStage.initModality(Modality.APPLICATION_MODAL);
-            FXMLLoader loader = new FXMLLoader(GuiUtils.class.getResource("alert.fxml"));
+            FXMLLoader loader = new FXMLLoader(GuiUtils.class.getResource("alert.fxml"), I18nUtil.locale);
             Pane pane = loader.load();
             AlertWindowController controller = loader.getController();
             setup.accept(dialogStage, controller);

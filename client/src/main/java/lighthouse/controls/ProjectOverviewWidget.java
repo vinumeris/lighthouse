@@ -50,7 +50,7 @@ public class ProjectOverviewWidget extends HBox {
                                  ObservableObjectValue<LighthouseBackend.ProjectState> state) {
         this.project = project;
 
-        FXMLLoader loader = new FXMLLoader(GuiUtils.getResource("controls/project_overview_widget.fxml"));
+        FXMLLoader loader = new FXMLLoader(GuiUtils.getResource("controls/project_overview_widget.fxml"), I18nUtil.locale);
         loader.setRoot(this);
         loader.setController(this);
         uncheck(loader::load);

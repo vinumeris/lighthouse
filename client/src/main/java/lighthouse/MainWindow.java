@@ -62,10 +62,6 @@ public class MainWindow {
     @FXML Label addProjectIcon;
     @FXML Label networkIndicatorLabel;
     @FXML Button backButton;
-    @FXML Label addressLabel;
-    @FXML Label yourBalanceLabel;
-    @FXML Button createProjectBtn;
-    @FXML Button importProjectBtn;
     @FXML Label dropFileHereLabel;
 
     // These are read-only mirrors of sets maintained by the backend. Changes made by LighthouseBackend are propagated
@@ -105,15 +101,6 @@ public class MainWindow {
         animatedBind(topBoxLeftArea, topBoxLeftArea.translateXProperty(), when(inProjectView).then(0).otherwise(-45), Interpolator.EASE_OUT);
 
         AwesomeDude.setIcon(menuBtn, AwesomeIcon.BARS);
-        
-        // Load localized strings
-        addressLabel.setText(tr("YOUR ADDRESS"));
-        setupWalletBtn.setText(tr("Set up wallet"));
-        emptyWalletBtn.setText(tr("Empty wallet"));
-        yourBalanceLabel.setText(tr("YOUR BALANCE"));
-        createProjectBtn.setText(tr("Create project"));
-        importProjectBtn.setText(tr("Import project"));
-        dropFileHereLabel.setText(tr("You can also drop an existing project file here."));
 
         // Avoid duplicate add errors.
         contentStack.getChildren().remove(projectViewContainer);
