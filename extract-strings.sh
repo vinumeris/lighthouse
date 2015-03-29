@@ -6,7 +6,7 @@ find client -name '*.java' -or -name '*.kt' | xargs xgettext --no-location -ktr 
 
 # Extract translatable strings from FXML
 find client/src/main/resources/lighthouse -name '*.fxml' \
-   | xargs xml select -t -v '//@*' \
+   | xargs xml select -t -v '//@*' -n \
    | egrep '^%' \
    | sed 's/^%//g' \
    | while read; do echo "_(\"$REPLY\")"; done \
