@@ -330,12 +330,6 @@ msgstr ""
 msgid "e.g. %s"
 msgstr ""
 
-msgid "Raw multi-sig"
-msgstr ""
-
-msgid "Unrecognised project output type"
-msgstr ""
-
 msgid "Target address"
 msgstr ""
 

@@ -37,9 +37,9 @@ public class ProjectTechDetailsWindow {
             if (script.isSentToAddress() || script.isPayToScriptHash())
                 text = script.getToAddress(project.getParams()).toString();
             else if (script.isSentToMultiSig())
-                text = tr("Raw multi-sig");
+                text = "Raw multi-sig";
             else
-                text = tr("Unrecognised project output type");
+                text = "Unrecognised project output type";
             TextField tf = new TextField(text);
             tf.setEditable(false);
             targetAddressVBox.getChildren().add(tf);
