@@ -53,7 +53,8 @@ import static lighthouse.utils.I18nUtil.*;
 public class Main extends Application {
     public static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    public static final String APP_NAME = tr("Crowdfunding App");
+    // This is not translated as it's used for directory paths and other system strings.
+    public static final String APP_NAME = "Crowdfunding App";
 
     // UpdateFX stuff. Version is incremented monotonically after a new version is released.
     public static final int VERSION = 29;
