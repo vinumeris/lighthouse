@@ -179,8 +179,7 @@ public class Main extends Application {
     private boolean parseCommandLineArgs() {
         if (getParameters().getUnnamed().contains("--help") || getParameters().getUnnamed().contains("-h")) {
             System.out.println(String.format(
-                    // TRANS: %s = App name, %s = App version
-                    tr("%s version %d (C) 2014 Vinumeris GmbH\n\n" +
+                    "%s version %d (C) 2014 Vinumeris GmbH\n\n" +
                             "Usage: lighthouse [args] [filename.lighthouse-project...] \n" +
                             "  --use-tor:                      Enable experimental Tor mode (may freeze up)\n" +
                             "  --slow-gfx:                     Enable more eyecandy that may stutter on slow GFX cards\n" +
@@ -193,7 +192,7 @@ public class Main extends Application {
                             "  --debuglog                      Print logging data to the console.\n" +
                             "  --updates-url=http://xxx/       Override the default URL used for updates checking.\n" +
                             "  --resfiles=/path/to/dir         Load GUI resource files from the given directory instead of using\n" +
-                            "                                  the included versions.\n"),
+                            "                                  the included versions.\n",
                     APP_NAME, VERSION
             ));
             return false;
@@ -218,9 +217,8 @@ public class Main extends Application {
         String updatesURL = getParameters().getNamed().get("updates-url");
         if (updatesURL != null) {
             if (LHUtils.didThrow(() -> new URI(updatesURL))) {
-                informationalAlert(tr("Bad updates URL"),
-                    // TRANS: %s = updates URL
-                    tr("The --updates-url parameter is invalid: %s"), updatesURL);
+                informationalAlert("Bad updates URL",
+                        "The --updates-url parameter is invalid: %s", updatesURL);
                 return false;
             }
             this.updatesURL = updatesURL;
@@ -231,7 +229,7 @@ public class Main extends Application {
             GuiUtils.resourceOverrideDirectory = Paths.get(resdir);
             if (!Files.isDirectory(GuiUtils.resourceOverrideDirectory) ||
                 !Files.exists(GuiUtils.resourceOverrideDirectory.resolve("main.fxml"))) {
-                informationalAlert(tr("Not a directory"), tr("The --resdir value must point to a directory containing UI resource files (fxml, css, etc)."));
+                informationalAlert("Not a directory", "The --resdir value must point to a directory containing UI resource files (fxml, css, etc).");
                 return false;
             }
         }
@@ -261,7 +259,7 @@ public class Main extends Application {
             netname = "production";
         params = NetworkParameters.fromID("org.bitcoin." + netname);
         if (params == null) {
-            informationalAlert(tr("Unknown network ID"), tr("The --net parameter must be main, regtest or test"));
+            informationalAlert("Unknown network ID", "The --net parameter must be main, regtest or test");
             return false;
         }
         // When not using testnet, use a subdirectory of the app directory to keep everything in, named after the
@@ -314,7 +312,7 @@ public class Main extends Application {
     }
 
     private Node createLoadingUI() {
-        StackPane pane = new StackPane(new Label(tr("Crowdfunding app")));
+        StackPane pane = new StackPane(new Label("Crowdfunding app"));
         pane.setPadding(new Insets(20));
         pane.setStyle("-fx-background-color: white");
         return pane;
@@ -327,7 +325,7 @@ public class Main extends Application {
 
             // Load the main window.
             FXMLLoader loader = new FXMLLoader(getResource("main.fxml"), I18nUtil.translations);
-            Pane ui = LHUtils.stopwatched(tr("Loading main.fxml"), loader::load);
+            Pane ui = LHUtils.stopwatched("Loading main.fxml", loader::load);
             ui.setMaxWidth(Double.MAX_VALUE);
             ui.setMaxHeight(Double.MAX_VALUE);
             MainWindow controller = loader.getController();
@@ -356,9 +354,7 @@ public class Main extends Application {
         } catch (Throwable e) {
             log.error("Failed to load UI: ", e);
             if (GuiUtils.resourceOverrideDirectory != null)
-                informationalAlert(tr("Failed to load UI"),
-                    // TRANS: %s = error message
-                    tr("Error: %s"), e.getMessage());
+                informationalAlert("Failed to load UI", "Error: %s", e.getMessage());
             else
                 CrashWindow.open(e);
         }

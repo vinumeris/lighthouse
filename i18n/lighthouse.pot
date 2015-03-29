@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-29 21:23+0200\n"
+"POT-Creation-Date: 2015-03-29 23:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -157,65 +157,6 @@ msgid "Loading ..."
 msgstr ""
 
 msgid "You created this project"
-msgstr ""
-
-msgid "Crowdfunding App"
-msgstr ""
-
-#. TRANS: %s = App name, %s = App version
-msgid ""
-"%s version %d (C) 2014 Vinumeris GmbH\n"
-"\n"
-"Usage: lighthouse [args] [filename.lighthouse-project...] \n"
-"  --use-tor:                      Enable experimental Tor mode (may freeze "
-"up)\n"
-"  --slow-gfx:                     Enable more eyecandy that may stutter on "
-"slow GFX cards\n"
-"  --net={regtest,main,test}:      Select Bitcoin network to operate on.\n"
-"  --connect=ipaddr,ipaddr         Uses the given IP addresses for REGULAR "
-"(non-XT) Bitcoin usage.\n"
-"  --name=alice                    Name is put in titlebar and pledge "
-"filenames, useful for testing\n"
-"                                  multiple instances on the same machine.\n"
-"  --appdir=/path/to/dir           Overrides the usual directory used, useful "
-"for testing multiple\n"
-"                                  instances on the same machine.\n"
-"  --debuglog                      Print logging data to the console.\n"
-"  --updates-url=http://xxx/       Override the default URL used for updates "
-"checking.\n"
-"  --resfiles=/path/to/dir         Load GUI resource files from the given "
-"directory instead of using\n"
-"                                  the included versions.\n"
-msgstr ""
-
-msgid "Bad updates URL"
-msgstr ""
-
-#. TRANS: %s = updates URL
-msgid "The --updates-url parameter is invalid: %s"
-msgstr ""
-
-msgid "Not a directory"
-msgstr ""
-
-msgid ""
-"The --resdir value must point to a directory containing UI resource files "
-"(fxml, css, etc)."
-msgstr ""
-
-msgid "Unknown network ID"
-msgstr ""
-
-msgid "The --net parameter must be main, regtest or test"
-msgstr ""
-
-msgid "Crowdfunding app"
-msgstr ""
-
-msgid "Loading main.fxml"
-msgstr ""
-
-msgid "Failed to load UI"
 msgstr ""
 
 msgid "Already running"
@@ -728,15 +669,6 @@ msgstr ""
 msgid "An error was encountered whilst trying to save the project: %s"
 msgstr ""
 
-msgid "Negative numbers not allowed"
-msgstr ""
-
-msgid "Fractional value units not allowed"
-msgstr ""
-
-msgid "Larger than MAX_MONEY"
-msgstr ""
-
 msgid "OK"
 msgstr ""
 
@@ -744,9 +676,6 @@ msgid "Action"
 msgstr ""
 
 msgid "Unfortunately, we screwed up and the app crashed. Sorry about that!"
-msgstr ""
-
-msgid " Lighthouse settings file"
 msgstr ""
 
 msgid "Submission via email. Project must be legal under Swiss and UK law."
