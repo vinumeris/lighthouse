@@ -182,18 +182,22 @@ public class MarkDownNode : VBox() {
         }
 
         override fun visit(node: VerbatimNode) {
-            val box = VBox()
-            VBox.setMargin(borderedLabel(node, "md-verbatim", parent = box), Insets(0.0, 0.0, 15.0, 0.0))
+            val textFlow = nodeWithStyles<TextFlow>("md-verbatim")
+            textFlow.getChildren() add mdTextToFXText(node)
+            val box = VBox(textFlow)
+            VBox.setMargin(textFlow, Insets(0.0, 0.0, 15.0, 0.0))
             cursor.getChildren() add box
         }
 
         private fun borderedLabel(node: TextNode, style: String, parent: Pane = cursor): javafx.scene.Node {
-            val label = Text(NEWLINE_MATCHER.trimTrailingFrom(node.getText()))
+            val label = mdTextToFXText(node)
             val wrapper = VBox(label)
             wrapper.getStyleClass() add style
             parent.getChildren() add wrapper
             return wrapper
         }
+
+        private fun mdTextToFXText(node: TextNode) = Text(NEWLINE_MATCHER.trimTrailingFrom(node.getText()))
 
         override fun visit(node: DefinitionNode) = descend(node)
         override fun visit(node: DefinitionTermNode) = descend(node)
