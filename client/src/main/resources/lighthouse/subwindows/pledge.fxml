@@ -8,8 +8,8 @@
     <bottom>
         <HBox alignment="CENTER_RIGHT" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER">
             <children>
-                <Button fx:id="cancelButton" cancelButton="true" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
-                <Button fx:id="confirmButton" defaultButton="true" mnemonicParsing="false" onAction="#confirmClicked" text="Confirm" />
+                <Button cancelButton="true" mnemonicParsing="false" onAction="#cancelClicked" text="%Cancel" />
+                <Button fx:id="confirmButton" defaultButton="true" mnemonicParsing="false" onAction="#confirmClicked" text="%Confirm" />
             </children>
             <padding>
                 <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
@@ -20,7 +20,7 @@
         <VBox alignment="CENTER" prefHeight="374.0" prefWidth="400.0" spacing="5.0" BorderPane.alignment="CENTER">
             <children>
                 <Pane VBox.vgrow="ALWAYS" />
-                <Label fx:id="amountLabel" style="-fx-font-size: 40;" text="Amount">
+                <Label style="-fx-font-size: 40;" text="%Amount">
                     <font>
                         <Font size="31.0" />
                     </font>
@@ -35,8 +35,8 @@
                   <Insets bottom="10.0" />
                </VBox.margin>
             </Label>
-                <Label fx:id="allMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#allMoneyClicked" styleClass="link-label" text="Maximum amount possible" />
-            <Label fx:id="minMoney" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#minMoneyClicked" styleClass="link-label" text="Minimum amount possible" />
+                <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#allMoneyClicked" styleClass="link-label" text="%Maximum amount possible" />
+            <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#minMoneyClicked" styleClass="link-label" text="%Minimum amount possible" />
             <GridPane hgap="15.0" minHeight="-Infinity" vgap="10.0">
               <columnConstraints>
                 <ColumnConstraints fillWidth="false" hgrow="NEVER" minWidth="10.0" />
@@ -48,15 +48,15 @@
               </rowConstraints>
                <children>
                   <TextField fx:id="emailEdit" GridPane.columnIndex="1" />
-                  <Label fx:id="emailAddressLabel" minWidth="-Infinity" text="Email address" />
-                  <Label fx:id="nameLabel" text="Name" GridPane.rowIndex="1" />
-                  <TextField fx:id="nameEdit" promptText="Anonymous" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label minWidth="-Infinity" text="%Email address" />
+                  <Label text="%Name" GridPane.rowIndex="1" />
+                  <TextField fx:id="nameEdit" promptText="%Anonymous" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                </children>
                <VBox.margin>
                   <Insets bottom="10.0" top="10.0" />
                </VBox.margin>
             </GridPane>
-            <TextArea fx:id="messageEdit" prefHeight="200.0" prefWidth="200.0" promptText="Message to project owner (optional)" wrapText="true" />
+            <TextArea fx:id="messageEdit" prefHeight="200.0" prefWidth="200.0" promptText="%Message to project owner (optional)" wrapText="true" />
             <Label fx:id="pubPrivLabel" maxWidth="1.7976931348623157E308" minWidth="-Infinity" style="-fx-text-fill: silver;" text="(public/private explainer label)" />
                 <Pane prefHeight="0.0" prefWidth="340.0" VBox.vgrow="ALWAYS" />
             </children>

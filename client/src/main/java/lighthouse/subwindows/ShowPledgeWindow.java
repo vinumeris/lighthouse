@@ -59,13 +59,6 @@ public class ShowPledgeWindow {
         // Let the user save their pledge again if it's a serverless project and this pledge is ours.
         LHProtos.Pledge pledgeFor = Main.wallet.getPledgeFor(project);
         saveToFileButton.setVisible(project.getPaymentURL() == null && pledgeFor != null && LHUtils.hashFromPledge(pledge).equals(LHUtils.hashFromPledge(pledgeFor)));
-        
-        // Load localized strings
-        saveToFileButton.setText(tr("Save to file"));
-        closeButton.setText(tr("Close"));
-        pledgedByLabel.setText(tr("pledged by"));
-        onLabel.setText(tr("on"));
-        messageField.setPromptText(tr("No attached message"));
     }
 
     @FXML

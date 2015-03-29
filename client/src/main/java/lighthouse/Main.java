@@ -325,7 +325,7 @@ public class Main extends Application {
             refreshStylesheets(scene);
 
             // Load the main window.
-            FXMLLoader loader = new FXMLLoader(getResource("main.fxml"), I18nUtil.locale);
+            FXMLLoader loader = new FXMLLoader(getResource("main.fxml"), I18nUtil.translations);
             Pane ui = LHUtils.stopwatched(tr("Loading main.fxml"), loader::load);
             ui.setMaxWidth(Double.MAX_VALUE);
             ui.setMaxHeight(Double.MAX_VALUE);
@@ -601,7 +601,7 @@ public class Main extends Application {
             checkGuiThread();
             // Load the UI from disk.
             URL location = getResource(name);
-            FXMLLoader loader = new FXMLLoader(location, I18nUtil.locale);
+            FXMLLoader loader = new FXMLLoader(location, I18nUtil.translations);
             Pane ui = loader.load();
             T controller = loader.getController();
 

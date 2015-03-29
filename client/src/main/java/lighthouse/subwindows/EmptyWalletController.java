@@ -31,11 +31,6 @@ public class EmptyWalletController {
     public void initialize() {
         checkState(!Main.bitcoin.wallet().getBalance().isZero());
         new BitcoinAddressValidator(Main.params, address, sendBtn);
-        
-        // Load localized strings
-        titleLabel.setText(tr("Send to address:"));
-        sendBtn.setText(tr("Send"));
-        cancelBtn.setText(tr("Cancel"));
     }
 
     @FXML

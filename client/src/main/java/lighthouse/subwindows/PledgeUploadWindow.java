@@ -28,17 +28,12 @@ public class PledgeUploadWindow {
     @FXML public Label uploadLabel;
     @FXML public Label uploadIcon;
     @FXML public ProgressIndicator uploadProgress;
-    @FXML public Button cancelButton;
     private Task<Void> uploadTask;
 
     private Runnable onSuccess;
 
     public void initialize() {
         AwesomeDude.setIcon(uploadIcon, AwesomeIcon.CLOUD_UPLOAD, "60");
-        
-        // Load localized strings
-        uploadLabel.setText(tr("Connecting to server ..."));
-        cancelButton.setText(tr("Cancel"));
     }
 
     public static void open(Project project, PledgingWallet.PendingPledge pledge, Runnable onSuccess) {

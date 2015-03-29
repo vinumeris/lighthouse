@@ -30,9 +30,6 @@ public class WalletSettingsController {
     @FXML DatePicker datePicker;
     @FXML TextArea wordsArea;
     @FXML Button restoreButton;
-    @FXML Label walletWordsLabel;
-    @FXML Label createdOnLabel;
-    @FXML Button closeButton;
 
     public Main.OverlayUI overlayUI;
 
@@ -114,14 +111,6 @@ public class WalletSettingsController {
                 datePicker.getStyleClass().remove("validation_error");
             }
         });
-        
-        // Load localized strings
-        walletWordsLabel.setText(tr("These are your wallet words. Write them down along with the creation date, and you can get your money back " +
-                "even if you lose all your wallet backup files. Just type the details back in below to restore!"));
-        createdOnLabel.setText(tr("Created on:"));
-        passwordButton.setText(tr("Set password"));
-        restoreButton.setText(tr("Restore from words"));
-        closeButton.setText(tr("Close"));
     }
 
     private void askForPasswordAndRetry() {

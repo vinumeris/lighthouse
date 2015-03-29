@@ -18,15 +18,7 @@ public class ProjectSubmitInstructionsWindow {
     private static final Logger log = LoggerFactory.getLogger(ProjectSubmitInstructionsWindow.class);
 
     @FXML Label submitAddressLabel;
-    @FXML Label submitProjectLabel;
-    @FXML Button closeButton;
     public Main.OverlayUI<InnerWindow> overlayUI;
-    
-    public void initialize() {
-        // Load localized strings
-        closeButton.setText(tr("Close"));
-        submitProjectLabel.setText(tr("Now submit your project for hosting:"));
-    }
 
     public static void open(String submitAddress, ServerList.SubmitType submitType) {
         log.info("Showing project submit instructions: {}", submitAddress);

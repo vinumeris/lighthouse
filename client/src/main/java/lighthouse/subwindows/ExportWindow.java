@@ -32,8 +32,6 @@ public class ExportWindow {
     @FXML HBox folderWatchExplainer;
     @FXML StackPane dragArea;
     @FXML Label moneyIcon;
-    @FXML Label dragToAFolderLabel;
-    @FXML Label folderWillBeWatchedLabel;
     @FXML Button saveButton;
 
     public Main.OverlayUI<InnerWindow> overlayUI;
@@ -45,11 +43,6 @@ public class ExportWindow {
         // TODO: Make a composite icon that looks more pledgey.
         AwesomeDude.setIcon(moneyIcon, AwesomeIcon.MONEY, "70.0");
         moneyIcon.setTextFill(Color.valueOf("#cccccc"));
-        
-        // Load localized strings
-        dragToAFolderLabel.setText(tr("Drag to a folder, email or chat window. Or ..."));
-        folderWillBeWatchedLabel.setText(tr("The folder you save the project to will be watched, and any pledges found there will be automatically loaded."));
-        saveButton.setText(tr("Save to file"));
     }
 
     public static void openForPledge(Project project, PledgingWallet.PledgeSupplier pledge) {

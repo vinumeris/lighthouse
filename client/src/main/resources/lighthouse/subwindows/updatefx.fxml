@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-
+<?import javafx.scene.text.*?>
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="481.0" prefWidth="718.0" spacing="10.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.UpdateFXWindow">
    <children>
       <ListView fx:id="updatesList" prefHeight="200.0" prefWidth="200.0" style="-fx-font-size: 13;" VBox.vgrow="ALWAYS" />
@@ -20,8 +18,8 @@
       </ScrollPane>
       <HBox alignment="CENTER_RIGHT" prefHeight="59.0" prefWidth="600.0" spacing="10.0" styleClass="fat-buttons">
          <children>
-            <Button fx:id="closeButton" cancelButton="true" mnemonicParsing="false" onAction="#closeClicked" text="Close" />
-            <Button fx:id="pinBtn" defaultButton="true" mnemonicParsing="false" onAction="#pinClicked" text="Always use this version" />
+            <Button cancelButton="true" mnemonicParsing="false" onAction="#closeClicked" text="%Close" />
+            <Button fx:id="pinBtn" defaultButton="true" mnemonicParsing="false" onAction="#pinClicked" text="%Always use this version" />
          </children>
       </HBox>
    </children>

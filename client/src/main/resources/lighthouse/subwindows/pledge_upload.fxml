@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
-
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="318.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.PledgeUploadWindow">
     <center>
         <VBox alignment="CENTER" prefHeight="200.0" spacing="20.0" BorderPane.alignment="CENTER">
             <children>
                 <Label fx:id="uploadIcon" text="" />
-                <Label fx:id="uploadLabel" text="Connecting to server ..." wrapText="true" />
+                <Label fx:id="uploadLabel" text="%Connecting to server ..." wrapText="true" />
                 <ProgressIndicator fx:id="uploadProgress" />
-                <Button fx:id="cancelButton" cancelButton="true" onAction="#cancelClicked" text="Cancel" />
+                <Button cancelButton="true" onAction="#cancelClicked" text="%Cancel" />
             </children>
             <padding>
                 <Insets left="20" right="20" />

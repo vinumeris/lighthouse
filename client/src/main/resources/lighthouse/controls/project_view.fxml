@@ -42,7 +42,7 @@
                                         <Insets bottom="15" left="15" right="20" />
                                     </padding>
                                 </VBox>
-                                <Button fx:id="editButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#edit" styleClass="edit-button" text="Edit" StackPane.alignment="TOP_RIGHT">
+                                <Button fx:id="editButton" minWidth="-Infinity" mnemonicParsing="false" onAction="#edit" styleClass="edit-button" text="%Edit" StackPane.alignment="TOP_RIGHT">
                                     <StackPane.margin>
                                         <Insets right="15" top="15" />
                                     </StackPane.margin>
@@ -83,8 +83,8 @@
                                 </PieChart>
                                 <HBox alignment="CENTER_RIGHT" spacing="15.0">
                                     <children>
-                                        <Label fx:id="copyDescriptionLink" onMouseClicked="#onCopyDescriptionClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="Copy description" />
-                                        <Label fx:id="viewTechDetailsLabel" alignment="CENTER_RIGHT" onMouseClicked="#onViewTechDetailsClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="View technical details" textFill="BLUE" />
+                                        <Label fx:id="copyDescriptionLink" onMouseClicked="#onCopyDescriptionClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="%Copy description" />
+                                        <Label alignment="CENTER_RIGHT" onMouseClicked="#onViewTechDetailsClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="%View technical details" textFill="BLUE" />
                                     </children>
                                 </HBox>
                             </children>
@@ -106,7 +106,7 @@
                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                             </padding>
                         </HBox>
-                        <Label fx:id="goalAmountLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" styleClass="of-goal-label" text="PLEDGED OF %S BTC GOAL" />
+                        <Label fx:id="goalAmountLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" styleClass="of-goal-label" text="%PLEDGED OF %s BTC GOAL" />
                     </children>
                     <padding>
                         <Insets bottom="15.0" />
@@ -121,7 +121,7 @@
                         <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" styleClass="project-pledgers-area" HBox.hgrow="ALWAYS">
                             <children>
                                 <Label fx:id="numPledgersLabel" styleClass="extra-info-label" text="2" />
-                                <Label fx:id="pledgersLabel" text="PLEDGERS" />
+                                <Label fx:id="pledgersLabel" text="%PLEDGERS" />
                             </children>
                             <padding>
                                 <Insets bottom="20.0" top="20.0" />
@@ -130,7 +130,7 @@
                         <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" styleClass="project-funded-area" HBox.hgrow="ALWAYS">
                             <children>
                                 <Label fx:id="percentFundedLabel" styleClass="extra-info-label" text="74%" />
-                                <Label fx:id="fundedLabel" text="FUNDED" />
+                                <Label fx:id="fundedLabel" text="%FUNDED" />
                             </children>
                             <padding>
                                 <Insets bottom="20.0" top="20.0" />
@@ -171,7 +171,7 @@
                                         <ListView fx:id="pledgesList" layoutX="14.0" layoutY="113.0" prefHeight="450.0" prefWidth="300.0" styleClass="pledges-list" VBox.vgrow="ALWAYS" />
                                         <HBox alignment="CENTER_RIGHT">
                                             <children>
-                                                <Label fx:id="exportPledgesBtn" onMouseClicked="#exportPledgesClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="Export as CSV ...">
+                                                <Label fx:id="exportPledgesBtn" onMouseClicked="#exportPledgesClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="%Export as CSV ...">
                                                     <HBox.margin>
                                                         <Insets bottom="15.0" top="10.0" />
                                                     </HBox.margin>
@@ -180,7 +180,7 @@
                                         </HBox>
                                     </children>
                                 </VBox>
-                                <Label fx:id="noPledgesLabel" text="No pledges yet!" />
+                                <Label fx:id="noPledgesLabel" text="%No pledges yet!" />
                             </children>
                         </StackPane>
                     </children>

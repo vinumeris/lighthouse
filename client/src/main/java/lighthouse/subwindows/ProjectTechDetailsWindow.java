@@ -27,13 +27,6 @@ public class ProjectTechDetailsWindow {
     @FXML TextField authKey;
     @FXML TextField netParams;
     @FXML TextField creationTime;
-    @FXML Button closeButton;
-    @FXML Label targetAddressLabel;
-    @FXML Label serverUrlLabel;
-    @FXML Label minPledgeLabel;
-    @FXML Label authKeyLabel;
-    @FXML Label networkParamsLabel;
-    @FXML Label creationTimeLabel;
 
     public Main.OverlayUI<ProjectTechDetailsWindow> overlayUI;
 
@@ -57,16 +50,6 @@ public class ProjectTechDetailsWindow {
         authKey.setText(ECKey.fromPublicOnly(project.getAuthKey()).toAddress(project.getParams()).toString());
         netParams.setText(project.getProtoDetails().getNetwork());
         creationTime.setText(Instant.ofEpochSecond(project.getProtoDetails().getTime()).atZone(ZoneId.of("UTC")).format(DateTimeFormatter.RFC_1123_DATE_TIME));
-        
-        // Load localized strings
-        closeButton.setText(tr("Close"));
-        targetAddressLabel.setText(tr("Target address"));
-        serverUrlLabel.setText(tr("Server URL"));
-        minPledgeLabel.setText(tr("Min pledge size"));
-        authKeyLabel.setText(tr("Auth key"));
-        networkParamsLabel.setText(tr("Network parameters"));
-        creationTimeLabel.setText(tr("Creation time"));
-        if (url == null) serverURL.setPromptText(tr("Serverless project"));
     }
 
     public static void open(Project project) {

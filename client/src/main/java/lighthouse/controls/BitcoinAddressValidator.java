@@ -1,12 +1,9 @@
 package lighthouse.controls;
 
-import javafx.fxml.*;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import lighthouse.utils.*;
 import org.bitcoinj.core.*;
-
-import static lighthouse.utils.I18nUtil.*;
 
 /**
  * Given a text field, some network params and optionally some nodes, will make the text field an angry red colour
@@ -15,8 +12,6 @@ import static lighthouse.utils.I18nUtil.*;
 public class BitcoinAddressValidator {
     private NetworkParameters params;
     private Node[] nodes;
-    @FXML Label addressLabel;
-    @FXML MenuItem clipboardMenuItem;
 
     public BitcoinAddressValidator(NetworkParameters params, TextField field, Node... nodes) {
         this.params = params;
@@ -30,10 +25,6 @@ public class BitcoinAddressValidator {
             toggleButtons(current);
         });
         toggleButtons(field.getText());
-        
-        // Load localized strings
-        addressLabel.setText(tr("<address goes here>"));
-        clipboardMenuItem.setText(tr("Copy to clipboard"));
     }
 
     private void toggleButtons(String current) {

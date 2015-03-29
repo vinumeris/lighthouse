@@ -61,16 +61,7 @@ public class EditProjectWindow {
     @FXML Pane createPane;
     @FXML Label descriptionHelpButton;
     @FXML Label previewTextLabel;
-    @FXML Label projectNameLabel;
-    @FXML Label goalAmountLabel;
-    @FXML Label minPledgeLabel;
-    @FXML Label addressLabel;
-    @FXML Label coverImageTextLabel;
-    @FXML Label descriptionLabel;
     @FXML Label emailAddressLabel;
-    @FXML Button cancelButton;
-        
-        
 
     private PopOver maxPledgesPopOver;
 
@@ -207,22 +198,6 @@ public class EditProjectWindow {
 
         descriptionHelpButton.setText("");
         AwesomeDude.setIcon(descriptionHelpButton, AwesomeIcon.QUESTION_CIRCLE);
-
-        // Load localized strings
-        projectNameLabel.setText(tr("Project name"));
-        goalAmountLabel.setText(tr("Goal amount"));
-        minPledgeLabel.setText(tr("Min pledge"));
-        addressLabel.setText(tr("Address"));
-        coverImageLabel.setText(tr("Drop a custom image or click here to open"));
-        coverImageTextLabel.setText(tr("Cover image"));
-        descriptionLabel.setText(tr("Description"));
-        previewTextLabel.setText(tr("Preview formatted text"));
-        emailAddressLabel.setText(tr("Email address"));
-        cancelButton.setText(tr("Cancel"));
-        nextButton.setText(tr("Next"));
-        titleEdit.setPromptText(tr("Example: Building a lighthouse"));
-        descriptionEdit.setPromptText(tr("You can format text using Markdown syntax."));
-        emailEdit.setPromptText(tr("How can supporters get in touch with you?"));
     }
 
     private void setupDefaultCoverImage() {

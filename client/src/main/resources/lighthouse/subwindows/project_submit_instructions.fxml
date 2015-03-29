@@ -9,7 +9,7 @@
    <bottom>
       <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="closeButton" defaultButton="true" mnemonicParsing="false" onAction="#closeClicked" text="Close" />
+            <Button defaultButton="true" mnemonicParsing="false" onAction="#closeClicked" text="%Close" />
          </children>
          <padding>
             <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
@@ -19,7 +19,7 @@
    <center>
       <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="submitProjectLabel" style="-fx-font-size: 20;" text="Now submit your project for hosting:" />
+            <Label style="-fx-font-size: 20;" text="%Now submit your project for hosting:" />
             <Label fx:id="submitAddressLabel" style="-fx-font-size: 30; -fx-text-fill: blue; -fx-underline: true;" text="project-hosting@vinumeris.com">
                <cursor>
                   <Cursor fx:constant="HAND" />

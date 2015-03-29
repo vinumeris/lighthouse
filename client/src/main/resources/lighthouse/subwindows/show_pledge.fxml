@@ -10,21 +10,21 @@
             <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
          </padding>
          <children>
-            <Button fx:id="saveToFileButton" mnemonicParsing="false" onAction="#saveToFile" text="Save to file" />
-            <Button fx:id="closeButton" defaultButton="true" mnemonicParsing="false" onAction="#closeClicked" text="Close" />
+            <Button fx:id="saveToFileButton" mnemonicParsing="false" onAction="#saveToFile" text="%Save to file" />
+            <Button fx:id="closeButton" defaultButton="true" mnemonicParsing="false" onAction="#closeClicked" text="%Close" />
          </children>
       </HBox>
    </bottom>
    <center>
       <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0" styleClass="show-pledge-window" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="amountLabel" style="-fx-font-size: 50;" text="Amount" />
-            <Label fx:id="pledgedByLabel" styleClass="show-pledge-inner-label" text="pledged by" />
+            <Label fx:id="amountLabel" style="-fx-font-size: 50;" text="%Amount" />
+            <Label fx:id="pledgedByLabel" styleClass="show-pledge-inner-label" text="%pledged by" />
             <Label fx:id="contactLabel" style="-fx-font-size: 20;" text="foo@bar.org" />
-            <Label fx:id="onLabel" styleClass="show-pledge-inner-label" text="on" />
+            <Label fx:id="onLabel" styleClass="show-pledge-inner-label" text="%on" />
             <Label fx:id="dateLabel" style="-fx-font-size: 30;" text="Wednesday 7th July" />
             <Separator prefWidth="200.0" />
-            <TextArea fx:id="messageField" prefHeight="197.0" prefWidth="421.0" promptText="No attached message" wrapText="true" />
+            <TextArea fx:id="messageField" prefHeight="197.0" prefWidth="421.0" promptText="%No attached message" wrapText="true" />
          </children>
          <padding>
             <Insets left="30.0" right="30.0" top="30.0" />

@@ -33,10 +33,7 @@ public class AddProjectTypeWindow {
     @FXML ComboBox<String> serverNameCombo;
     @FXML Button saveButton;
     @FXML Text serverInstructionsLabel;
-    @FXML Button backButton;
-    @FXML Text serverCollectsPledgesText;
     @FXML Label serverNameLabel;
-    @FXML Text fullyDecentralisedDescText;
 
     private ProjectModel model;
     private boolean editing;
@@ -74,20 +71,6 @@ public class AddProjectTypeWindow {
                 serverInstructionsLabel.setText("");
             }
         });
-        
-        // Load localized strings
-        saveButton.setText(tr("Save"));
-        backButton.setText(tr("Back"));
-        serverCollectsPledgesText.setText(tr("A server collects and monitors pledges on your behalf. You can use a community run server or run your own."));
-        serverNameLabel.setText(tr("Server name"));
-        serverInstructionsLabel.setText(tr("Server instructions"));
-        serverAssisted.setText(tr("Server assisted"));
-        fullyDecentralised.setText(tr("Fully decentralised"));
-        fullyDecentralisedDescText.setText(tr("This style of project does not require any server. " +
-                "Backers will be given a pledge file that they must get back to you via email, shared folder, instant messaging etc. " +
-                "People will not be able to see how much money was raised so far unless they download the pledge files themselves.\n\n" +
-                "Fully decentralised can be an appropriate choice when you are fund raising from a group of friends or will be managing the pledges " +
-                "in some other way. It's less convenient but doesn't require any infrastructure."));
     }
 
     private boolean isServerNameValid(String str) {

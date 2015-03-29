@@ -66,11 +66,6 @@ public class ProjectView extends HBox {
     @FXML Button editButton;
     @FXML VBox pledgesListVBox;
     @FXML Label copyDescriptionLink;
-    @FXML Label viewTechDetailsLabel;
-    @FXML Label pledgersLabel;
-    @FXML Label fundedLabel;
-    @FXML Label exportPledgesBtn;
-    
 
     public final ObjectProperty<Project> project = new SimpleObjectProperty<>();
     public final ObjectProperty<EventHandler<ActionEvent>> onBackClickedProperty = new SimpleObjectProperty<>();
@@ -103,17 +98,6 @@ public class ProjectView extends HBox {
         setupFXML();
         pledgesList.setCellFactory(pledgeListView -> new PledgeListCell());
         project.addListener(x -> updateForProject());
-        
-        // Load localized strings        
-        // TRANS: %s = goal amount in BTC
-        goalAmountFormatStr = tr("PLEDGED OF %s BTC GOAL");
-        editButton.setText(tr("Edit"));
-        copyDescriptionLink.setText(tr("Copy description"));
-        viewTechDetailsLabel.setText(tr("View technical details"));
-        pledgersLabel.setText(tr("PLEDGERS"));
-        fundedLabel.setText(tr("FUNDED"));
-        exportPledgesBtn.setText(tr("Export as CSV ..."));
-        noPledgesLabel.setText(tr("No pledges yet!"));
     }
 
     // Holds together various bindings so we can disconnect them when we switch projects.
@@ -385,7 +369,7 @@ public class ProjectView extends HBox {
 
     private void setupFXML() {
         try {
-            FXMLLoader loader = new FXMLLoader(getResource("controls/project_view.fxml"), I18nUtil.locale);
+            FXMLLoader loader = new FXMLLoader(getResource("controls/project_view.fxml"), I18nUtil.translations);
             loader.setRoot(this);
             loader.setController(this);
             // The following line is supposed to help Scene Builder, although it doesn't seem to be needed for me.

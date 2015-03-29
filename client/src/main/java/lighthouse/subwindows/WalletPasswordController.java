@@ -32,9 +32,6 @@ public class WalletPasswordController {
     @FXML PasswordField pass1;
     @FXML ProgressIndicator progressMeter;
     @FXML HBox widgetBox;
-    @FXML Button confirmButton;
-    @FXML Button cancelButton;    
-    @FXML Label passwordLabel;
 
     public Main.OverlayUI overlayUI;
 
@@ -43,11 +40,6 @@ public class WalletPasswordController {
     public void initialize() {
         progressMeter.setOpacity(0);
         Platform.runLater(pass1::requestFocus);
-        
-        // Load localized strings
-        confirmButton.setText(tr("Confirm"));
-        cancelButton.setText(tr("Cancel"));
-        passwordLabel.setText(tr("Password"));
     }
 
     public static void requestPasswordWithNextWindow(Consumer<KeyParameter> keyConsumer) {

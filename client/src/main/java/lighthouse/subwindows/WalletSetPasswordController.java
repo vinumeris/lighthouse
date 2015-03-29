@@ -26,10 +26,6 @@ public class WalletSetPasswordController {
     public GridPane widgetGrid;
     public HBox buttonHBox;
     public Label explanationLabel;
-    @FXML Button closeButton;
-    @FXML Button setButton;
-    @FXML Label enterPasswordLabel;
-    @FXML Label repeatPasswordLabel;
 
     public Main.OverlayUI overlayUI;
     // These params were determined empirically on a top-range (as of 2014) MacBook Pro with native scrypt support,
@@ -43,14 +39,6 @@ public class WalletSetPasswordController {
 
     public void initialize() {
         progressMeter.setOpacity(0);
-        
-        // Load localized strings
-        explanationLabel.setText(tr("Setting a password on your wallet makes it safer against viruses and theft. " +
-                "You will need to enter your password whenever money is sent."));
-        closeButton.setText(tr("Close"));
-        setButton.setText(tr("Set password"));
-        enterPasswordLabel.setText(tr("Enter password"));
-        repeatPasswordLabel.setText(tr("Repeat password"));
     }
 
     public static Duration estimatedKeyDerivationTime = null;

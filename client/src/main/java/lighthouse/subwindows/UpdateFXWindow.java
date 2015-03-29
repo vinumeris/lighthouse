@@ -34,7 +34,6 @@ public class UpdateFXWindow {
     @FXML Text descriptionLabel;
     @FXML ListView<UFXProtocol.Update> updatesList;
     @FXML Button pinBtn;
-    @FXML Button closeButton;
 
     private ObservableList<UFXProtocol.Update> updates = FXCollections.observableArrayList();
     private SimpleIntegerProperty currentPin = new SimpleIntegerProperty();
@@ -76,10 +75,6 @@ public class UpdateFXWindow {
             else
                 descriptionLabel.setText("");
         });
-        
-        // Load localized strings
-        closeButton.setText(tr("Close"));
-        pinBtn.setText(tr("Always use this version"));
     }
 
     public static Main.OverlayUI<UpdateFXWindow> open(Updater updater) {

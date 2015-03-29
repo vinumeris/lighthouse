@@ -12,7 +12,6 @@ import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.*;
-import javafx.scene.text.*;
 import lighthouse.*;
 import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
@@ -40,8 +39,6 @@ public class ProjectOverviewWidget extends HBox {
     @FXML ImageView coverImage;
     @FXML Node loadingIndicatorArea;
     @FXML ProgressIndicator loadingIndicator;
-    @FXML Text loadingText;
-    @FXML Tooltip youCreatedThisTooltip;
 
     private Project project;
     private final SimpleBooleanProperty isLoading = new SimpleBooleanProperty();
@@ -50,7 +47,7 @@ public class ProjectOverviewWidget extends HBox {
                                  ObservableObjectValue<LighthouseBackend.ProjectState> state) {
         this.project = project;
 
-        FXMLLoader loader = new FXMLLoader(GuiUtils.getResource("controls/project_overview_widget.fxml"), I18nUtil.locale);
+        FXMLLoader loader = new FXMLLoader(GuiUtils.getResource("controls/project_overview_widget.fxml"), I18nUtil.translations);
         loader.setRoot(this);
         loader.setController(this);
         uncheck(loader::load);
@@ -114,10 +111,6 @@ public class ProjectOverviewWidget extends HBox {
         // TRANS: %s = amount in BTC
         tooltip.textProperty().bind(new ReactiveCoinFormatter(tr("%s BTC raised so far"), MonetaryFormat.BTC, pledgedAmount));
         Tooltip.install(progressCircle, tooltip);
-        
-        // Load localized strings
-        loadingText.setText(tr("Loading ..."));
-        youCreatedThisTooltip.setText(tr("You created this project"));
     }
 
     public void onCheckStatusChanged(@Nullable LighthouseBackend.CheckStatus checkStatus) {

@@ -32,12 +32,6 @@ public class PledgeWindow extends InnerWindow {
     @FXML TextArea messageEdit;
     @FXML TextField emailEdit;
     @FXML TextField nameEdit;
-    @FXML Button cancelButton;
-    @FXML Label amountLabel;
-    @FXML Label allMoney;
-    @FXML Label minMoney;
-    @FXML Label emailAddressLabel;
-    @FXML Label nameLabel;
 
     // Will be initialised by the ProjectView.
     public Project project;
@@ -62,17 +56,6 @@ public class PledgeWindow extends InnerWindow {
             emailEdit.setText(savedContact);
 
         minersFeeLabel.setText(String.format(minersFeeLabel.getText(), Transaction.REFERENCE_DEFAULT_MIN_TX_FEE.toFriendlyString()));
-        
-        // Load localized strings
-        confirmButton.setText(tr("Confirm"));
-        cancelButton.setText(tr("Cancel"));
-        amountLabel.setText(tr("Amount"));
-        allMoney.setText(tr("Maximum amount possible"));
-        minMoney.setText(tr("Minimum amount possible"));
-        emailAddressLabel.setText(tr("Email address"));
-        nameLabel.setText(tr("Name"));
-        nameEdit.setPromptText(tr("Anonymous"));
-        messageEdit.setPromptText(tr("Message to project owner (optional)"));
     }
 
     public void setProject(Project project) {

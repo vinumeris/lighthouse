@@ -15,9 +15,6 @@ public class AlertWindowController {
     /** Initialize this alert dialog for information about a crash. */
     public void crashAlert(Stage stage, String crashMessage) {
         // Load localized strings
-        okButton.setText(tr("OK"));
-        cancelButton.setText(tr("Cancel"));
-        actionButton.setText(tr("Action"));
         messageLabel.setText(tr("Unfortunately, we screwed up and the app crashed. Sorry about that!"));
         detailsLabel.setText(crashMessage);
 

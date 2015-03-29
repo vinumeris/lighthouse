@@ -41,13 +41,6 @@ public class RevokeAndClaimWindow {
     public Label explanationLabel;
 
     @FXML ProgressBar progressBar;
-    
-    public void initialize() {
-        // Load localized strings
-        explanationLabel.setText(tr("This operation incurs a small miners fee because it requires making a Bitcoin transaction."));
-        cancelBtn.setText(tr("Cancel"));
-        confirmBtn.setText(tr("Confirm"));
-    }
 
     public static Main.OverlayUI<RevokeAndClaimWindow> openForRevoke(LHProtos.Pledge pledgeToRevoke) {
         Main.OverlayUI<RevokeAndClaimWindow> overlay = Main.instance.overlayUI("subwindows/revoke_and_claim.fxml", tr("Revoke pledge"));
