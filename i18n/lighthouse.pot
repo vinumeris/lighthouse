@@ -25,9 +25,6 @@ msgstr ""
 msgid "Output type is not pay to address/p2sh: %s"
 msgstr ""
 
-msgid "<address goes here>"
-msgstr ""
-
 msgid "Copy to clipboard"
 msgstr ""
 
