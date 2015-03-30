@@ -194,7 +194,7 @@ public class EditProjectWindow {
     public void initialize() {
         // TODO: This fixed value won't work properly with internationalization.
         rootPane.setPrefWidth(618);
-        rootPane.prefHeightProperty().bind(Main.instance.scene.heightProperty().multiply(0.8));
+        rootPane.prefHeightProperty().bind(Main.instance.scene.heightProperty().multiply(0.87));
 
         descriptionHelpButton.setText("");
         AwesomeDude.setIcon(descriptionHelpButton, AwesomeIcon.QUESTION_CIRCLE);
