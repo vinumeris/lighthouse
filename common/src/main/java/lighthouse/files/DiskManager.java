@@ -9,7 +9,6 @@ import lighthouse.protocol.*;
 import lighthouse.threading.*;
 import net.jcip.annotations.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.protocols.payments.*;
 import org.slf4j.*;
 
 import javax.annotation.*;
@@ -370,12 +369,8 @@ public class DiskManager {
                 return null;
             }
             return project;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("File appeared in directory but could not be read, ignoring: {}", e.getMessage());
-            return null;
-        } catch (PaymentProtocolException e) {
-            // Don't know how to load this file!
-            log.error("Failed reading file", e);
             return null;
         }
     }
