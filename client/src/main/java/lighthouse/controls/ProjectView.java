@@ -141,6 +141,7 @@ public class ProjectView extends HBox {
             bindSetToList(pledges, list1);
             sortedByTime = new SortedList<>(list1, (o1, o2) -> -Long.compareUnsigned(o1.getPledgeDetails().getTimestamp(), o2.getPledgeDetails().getTimestamp()));
             bindContent(pledgesList.getItems(), sortedByTime);
+            pledgesList.prefHeightProperty().bind(Bindings.size(sortedByTime).multiply(75).add(2));
 
             //    - Convert pledges into pie slices.
             MappedList<PieChart.Data, LHProtos.Pledge> pledgeSlices = new MappedList<>(sortedByTime,

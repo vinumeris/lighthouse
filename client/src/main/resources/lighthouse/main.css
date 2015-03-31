@@ -192,6 +192,7 @@
 .pledges-list, .pledged-list:focused {
     -fx-background-color: white;
     -fx-background-insets: 0;
+    -fx-fixed-cell-size: 75px;
 }
 
 .network-indicator {
