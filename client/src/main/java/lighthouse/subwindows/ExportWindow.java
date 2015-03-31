@@ -174,8 +174,10 @@ public class ExportWindow {
                 data.writeTo(outputStream);
                 if (savingPledge) {
                     pledge.commit(true);
-                } else if (!maybeShowServerGuidance())
-                    overlayUI.done();
+                } else if (maybeShowServerGuidance()) {
+                    return;
+                }
+                overlayUI.done();
             } catch (IOException e) {
                 GuiUtils.informationalAlert(tr("Failed to save file"), e.getLocalizedMessage());
             }
