@@ -135,6 +135,7 @@ public class MainWindow {
     }
 
     private Views currentView = null;
+    private double contentScroll = 0.0;
 
     private void switchView(Views view) {
         // Double calls can occur if someone double clicks the back button whilst it's animating in/out.
@@ -144,10 +145,14 @@ public class MainWindow {
             case OVERVIEW:
                 contentStack.getChildren().remove(projectViewContainer);
                 contentStack.getChildren().add(overviewVbox);
+                contentScrollPane.layout();
+                contentScrollPane.setVvalue(contentScroll);
                 projectView.updateForVisibility(false, null);
                 inProjectView.set(false);
                 break;
             case PROJECT:
+                contentScroll = contentScrollPane.getVvalue();
+                contentScrollPane.setVvalue(0);
                 contentStack.getChildren().remove(overviewVbox);
                 contentStack.getChildren().add(projectViewContainer);
                 projectView.updateForVisibility(true, checkStates);
@@ -258,7 +263,7 @@ public class MainWindow {
     }
 
     @FXML
-    public void backToOverview(ActionEvent event) {
+    public void backButtonClicked(ActionEvent event) {
         switchView(Views.OVERVIEW);
     }
 

@@ -11,7 +11,7 @@
         <HBox fx:id="topBox" minHeight="100" alignment="CENTER" styleClass="topbox">
             <children>
                 <HBox alignment="CENTER" fx:id="topBoxLeftArea">
-                    <Button fx:id="backButton" mnemonicParsing="false" onAction="#backToOverview" styleClass="back-button" text="">
+                    <Button fx:id="backButton" mnemonicParsing="false" onAction="#backButtonClicked" styleClass="back-button" text="">
                         <padding><Insets right="15"/></padding>
                     </Button>
                     <!--<ImageView fitWidth="80.0" pickOnBounds="true" preserveRatio="true">
