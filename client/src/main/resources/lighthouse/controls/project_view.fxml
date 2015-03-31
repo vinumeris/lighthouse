@@ -158,32 +158,19 @@
                     </children>
                 </Pane>
                 <VBox maxHeight="1.7976931348623157E308" style="-fx-background-color: white; -fx-border-color: lightgray; -fx-border-width: 0 0 0 1;" styleClass="fat-buttons" VBox.vgrow="ALWAYS">
-                    <children>
-                        <Button fx:id="actionButton" defaultButton="true" maxWidth="Infinity" minHeight="50" mnemonicParsing="false" onAction="#actionClicked" prefHeight="46.0">
-                            <VBox.margin>
-                                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                            </VBox.margin>
-                        </Button>
-                        <StackPane minWidth="250.0" VBox.vgrow="ALWAYS">
-                            <children>
-                                <VBox fx:id="pledgesListVBox">
-                                    <children>
-                                        <ListView fx:id="pledgesList" layoutX="14.0" layoutY="113.0" prefHeight="450.0" prefWidth="300.0" styleClass="pledges-list" VBox.vgrow="ALWAYS" />
-                                        <HBox alignment="CENTER_RIGHT">
-                                            <children>
-                                                <Label fx:id="exportPledgesBtn" onMouseClicked="#exportPledgesClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="%Export as CSV ...">
-                                                    <HBox.margin>
-                                                        <Insets bottom="15.0" top="10.0" />
-                                                    </HBox.margin>
-                                                </Label>
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-                                <Label fx:id="noPledgesLabel" text="%No pledges yet!" />
-                            </children>
-                        </StackPane>
-                    </children>
+                    <Button fx:id="actionButton" defaultButton="true" maxWidth="Infinity" minHeight="50" mnemonicParsing="false" onAction="#actionClicked" prefHeight="46.0">
+                        <VBox.margin>
+                            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                        </VBox.margin>
+                    </Button>
+                    <ListView fx:id="pledgesList" prefWidth="300.0" styleClass="pledges-list" VBox.vgrow="ALWAYS">
+                        <placeholder><Label fx:id="noPledgesLabel" text="%No pledges yet!" /></placeholder>
+                    </ListView>
+                    <HBox alignment="CENTER_RIGHT">
+                        <Label fx:id="exportPledgesBtn" onMouseClicked="#exportPledgesClicked" style="-fx-font-size: 12;" styleClass="hover-link" text="%Export as CSV ...">
+                            <HBox.margin><Insets bottom="15.0" top="10.0" /></HBox.margin>
+                        </Label>
+                    </HBox>
                 </VBox>
             </children>
         </VBox>

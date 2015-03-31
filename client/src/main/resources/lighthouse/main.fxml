@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import lighthouse.controls.*?>
@@ -68,12 +67,8 @@
             <ScrollPane fx:id="contentScrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" onDragOver="#dragOver" onDragDropped="#dragDropped">
                 <content>
                     <VBox fx:id="contentStack" minHeight="${root.height - topBox.height - 5}">
-                        <StackPane fx:id="projectViewContainer" style="-fx-padding: 40" VBox.vgrow="ALWAYS">
-                            <ProjectView fx:id="projectView" styleClass="project-view">
-                                <effect>
-                                    <DropShadow/>
-                                </effect>
-                            </ProjectView>
+                        <StackPane fx:id="projectViewContainer" VBox.vgrow="ALWAYS">
+                            <ProjectView fx:id="projectView"/>
                         </StackPane>
                         <VBox fx:id="overviewVbox" styleClass="content-vbox">
                             <children>

@@ -56,7 +56,6 @@ public class ProjectView extends HBox {
     @FXML Label goalAmountLabel;
     @FXML Label raisedAmountLabel;
     @FXML MarkDownNode description;
-    @FXML Label noPledgesLabel;
     @FXML ListView<LHProtos.Pledge> pledgesList;
     @FXML PieChart pieChart;
     @FXML Button actionButton;
@@ -64,7 +63,6 @@ public class ProjectView extends HBox {
     @FXML Label numPledgersLabel;
     @FXML Label percentFundedLabel;
     @FXML Button editButton;
-    @FXML VBox pledgesListVBox;
     @FXML Label copyDescriptionLink;
 
     public final ObjectProperty<Project> project = new SimpleObjectProperty<>();
@@ -202,9 +200,6 @@ public class ProjectView extends HBox {
         goalAmountLabel.setText(String.format(goalAmountFormatStr, p.getGoalAmount().toPlainString()));
 
         description.setText(project.get().getMemo());
-
-        pledgesListVBox.visibleProperty().bind(not(isEmpty(pledgesList.getItems())));
-        noPledgesLabel.visibleProperty().bind(isEmpty(pledgesList.getItems()));
 
         // Load and set up the cover image.
         Image img = new Image(p.getCoverImage().newInput());
