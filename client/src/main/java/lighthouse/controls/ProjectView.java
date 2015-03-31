@@ -376,6 +376,7 @@ public class ProjectView extends HBox {
             loader.setClassLoader(getClass().getClassLoader());
             loader.load();
 
+            goalAmountFormatStr = goalAmountLabel.getText();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
