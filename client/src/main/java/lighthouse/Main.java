@@ -524,7 +524,12 @@ public class Main extends Application {
 
                     stopClickPane.setImage(image);
                     stopClickPane.setOpacity(0.0);
-                    fadeIn(stopClickPane, 0, 1.0);
+                    fadeIn(stopClickPane, 0, 1.0).setOnFinished(ev -> {
+                        // Now switch to using the live blur effect, to avoid glitches when the window is resized.
+                        stopClickPane.setCache(false);
+                        stopClickPane.setImage(null);
+                        mainUI.setEffect(blur);
+                    });
                 }
                 ui.setOpacity(0.0);
                 fadeIn(ui);
@@ -559,6 +564,13 @@ public class Main extends Application {
             }
             if (GuiUtils.isSoftwarePipeline()) {
                 brightnessUnadjust(mainUI);
+            } else {
+                WritableImage image = new WritableImage((int) scene.getWidth(), (int) scene.getHeight());
+                mainUI.setClip(new Rectangle(scene.getWidth(), scene.getHeight()));
+                mainUI.snapshot(new SnapshotParameters(), image);
+                mainUI.setClip(null);
+                mainUI.setEffect(null);
+                stopClickPane.setImage(image);
             }
             this.ui = null;
             this.controller = null;
