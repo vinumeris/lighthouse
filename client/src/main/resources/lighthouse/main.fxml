@@ -64,7 +64,7 @@
 
         <!-- Main content area -->
         <StackPane VBox.vgrow="ALWAYS" styleClass="gradient-pane">
-            <ScrollPane fx:id="contentScrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" onDragOver="#dragOver" onDragDropped="#dragDropped">
+            <ScrollPane fx:id="contentScrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" onDragOver="#dragOver" onDragDropped="#dragDropped" styleClass="edge-to-edge">
                 <content>
                     <VBox fx:id="contentStack" minHeight="${root.height - topBox.height - 5}">
                         <StackPane fx:id="projectViewContainer" VBox.vgrow="ALWAYS">
