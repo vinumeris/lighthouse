@@ -195,6 +195,10 @@
     -fx-fixed-cell-size: 75px;
 }
 
+.pledges-list .list-cell:empty {
+    -fx-background-color: transparent;
+}
+
 .network-indicator {
     -fx-background-color: grey;
     -fx-font-size: 12;
