@@ -35,7 +35,8 @@ public class ServerList {
             new Entry("vinumeris.com", "project-hosting@vinumeris.com", tr("Submission via email. Project must be legal under Swiss and UK law."), SubmitType.EMAIL),
             new Entry("lighthouse.onetapsw.com", "lighthouse-projects@onetapsw.com", tr("Submission via email. Project must be legal under US law."), SubmitType.EMAIL),
             new Entry("lighthouseprojects.io", "projects@lighthouseprojects.io", tr("Submission via email. Project must be legal under New Zealand law."), SubmitType.EMAIL),
-            new Entry("lighthouse.bitseattle.com", "https://lighthouse.bitseattle.com/lighthouse-projects/upload/", tr("Submission via the web. Project must be legal under US law."), SubmitType.WEB)
+            new Entry("lighthouse.bitseattle.com", "https://lighthouse.bitseattle.com/lighthouse-projects/upload/", tr("Submission via the web. Project must be legal under US law."), SubmitType.WEB),
+            new Entry("server.lightlist.io", "https://www.lightlist.io/projects/new", tr("Submission via the web. Project must be legal under US law."), SubmitType.WEB)
     );
     public static final Map<String, Entry> hostnameToServer;
 
