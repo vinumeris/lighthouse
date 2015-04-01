@@ -225,6 +225,26 @@ public class ProjectView extends HBox {
         // This must be done after the binding because otherwise it has no node in the scene graph yet.
         emptySlice.getNode().setOpacity(0.1);
         emptySlice.getNode().setVisible(true);
+        
+        for(int j = 0; j < pieChart.getData().size() - 1; j++)
+        {
+            final int sliceIndex = j;
+            pieChart.getData().get(j).getNode().setOnMouseClicked((ev) -> {
+                if (ev.getClickCount() == 2)
+                    ShowPledgeWindow.open(project.get(), pledgesList.getItems().get(sliceIndex));
+                pledgesList.getSelectionModel().select(sliceIndex);
+                pledgesList.scrollTo(sliceIndex);
+                pledgesList.requestFocus();
+                
+                for(int i = 0; i < pieChart.getData().size() - 1; i++)
+                {
+                    if(i == sliceIndex)
+                        pieChart.getData().get(i).getNode().getStyleClass().add("highlightedPieSlice");
+                    else
+                        pieChart.getData().get(i).getNode().getStyleClass().removeAll("highlightedPieSlice");
+                }
+            });
+        }
 
         checkForMyPledge(p);
 
@@ -475,8 +495,7 @@ public class ProjectView extends HBox {
                             (pane = new Pane()),
                             (date = new Label())
                     )),
-                    (memoSnippet = new Label()),
-                    (viewMore = new Label(tr("View more")))
+                    (memoSnippet = new Label())
             );
             vbox.getStyleClass().add("pledge-cell");
             status.getStyleClass().add("pledge-cell-status");
@@ -490,12 +509,7 @@ public class ProjectView extends HBox {
             memoSnippet.setWrapText(true);
             memoSnippet.maxWidthProperty().bind(vbox.widthProperty());
             memoSnippet.setMaxHeight(100);
-            viewMore.getStyleClass().add("hover-link");
-            viewMore.setOnMouseClicked(ev -> ShowPledgeWindow.open(project.get(), getItem()));
-            viewMore.setAlignment(Pos.CENTER_RIGHT);
-            viewMore.prefWidthProperty().bind(vbox.widthProperty());
-            vbox.setPrefHeight(0);
-            vbox.setMaxHeight(USE_PREF_SIZE);
+            vbox.setMaxHeight(100);
             setGraphic(vbox);
         }
 
@@ -510,12 +524,20 @@ public class ProjectView extends HBox {
             setOnMouseClicked(ev -> {
                 if (ev.getClickCount() == 2)
                     ShowPledgeWindow.open(project.get(), getItem());
+
+                for(int i = 0; i < pieChart.getData().size() - 1; i++)
+                {
+                    if(i == getIndex())
+                        pieChart.getData().get(i).getNode().getStyleClass().add("highlightedPieSlice");
+                    else
+                        pieChart.getData().get(i).getNode().getStyleClass().removeAll("highlightedPieSlice");
+                }
             });
             getGraphic().setVisible(true);
             LHProtos.PledgeDetails details = pledge.getPledgeDetails();
             String msg = Coin.valueOf(details.getTotalInputValue()).toFriendlyString();
             if (LHUtils.hashFromPledge(pledge).equals(myPledgeHash))
-                msg += " (yours)";
+                msg += tr(" (yours)");
             status.setText(msg);
             name.setText(details.hasName() ? details.getName() : tr("Anonymous"));
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
