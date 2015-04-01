@@ -1,5 +1,6 @@
 package lighthouse.model;
 
+import com.google.common.base.*;
 import com.google.common.collect.*;
 import com.google.common.util.concurrent.*;
 import com.google.protobuf.*;
@@ -93,7 +94,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
             e.printStackTrace();
             fail("Uncaught exception");
         });
-        initCoreState();
+        initCoreState(CLIENT);
 
         projectModel = new ProjectModel(pledgingWallet);
         to = new ECKey().toAddress(params);
@@ -120,11 +121,11 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         TransactionBroadcast.random = new Random(1);
     }
 
-    public void initCoreState() {
+    public void initCoreState(LighthouseBackend.Mode client) {
         gate = new AffinityExecutor.Gate();
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
         diskManager = new DiskManager(UnitTestParams.get(), executor);
-        backend = new LighthouseBackend(CLIENT, peerGroup, peerGroup, blockChain, pledgingWallet, diskManager, executor);
+        backend = new LighthouseBackend(client, peerGroup, peerGroup, blockChain, pledgingWallet, diskManager, executor);
         backend.setMinPeersForUTXOQuery(1);
         backend.setMaxJitterSeconds(0);
 
@@ -504,7 +505,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         writePledgeToDisk(AppDirectory.dir(), proto);
 
         // Now restart the backend so it doesn't see changes anymore but fresh state: we still don't recheck the pledge.
-        initCoreState();
+        initCoreState(CLIENT);
 
         ObservableMap<Project, LighthouseBackend.CheckStatus> statuses = backend.mirrorCheckStatuses(gate);
         assertEquals(0, statuses.size());
@@ -513,7 +514,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
     @Test
     public void submitPledgeViaHTTP() throws Exception {
         backend.shutdown();
-        initCoreState();
+        initCoreState(SERVER);
         // Test the process of broadcasting a pledge's dependencies, then checking the UTXO set to see if it was
         // revoked already. If all is OK then it should show up in the verified pledges set.
 
@@ -574,6 +575,64 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         final Sha256Hash pledgeHash = Sha256Hash.hash(pledge.toByteArray());
         final List<Path> dirFiles = mapList(listDir(AppDirectory.dir()), Path::getFileName);
         assertTrue(dirFiles.contains(Paths.get(pledgeHash.toString() + DiskManager.PLEDGE_FILE_EXTENSION)));
+    }
+
+    @Test
+    public void submitPledgeViaHTTPWithError() throws Exception {
+        // Same as above but this time, we make the pledge too small to be accepted and verify that it doesn't work.
+        backend.shutdown();
+        initCoreState(SERVER);
+
+        peerGroup.setMinBroadcastConnections(2);
+
+        Triplet<Transaction, Transaction, LHProtos.Pledge> data = TestUtils.makePledge(project, to, project.getGoalAmount(), project.getMinPledgeAmount().divide(2));
+        Transaction stubTx = data.getValue0();
+        Transaction pledgeTx = data.getValue1();
+        LHProtos.Pledge pledge = data.getValue2();
+
+        writeProjectToDisk();
+
+        // The dependency TX doesn't really have to be a dependency at the moment, it could be anything so we lazily
+        // just make an unrelated fake tx to check the ordering of things.
+        Transaction depTx = FakeTxBuilder.createFakeTx(params, Coin.COIN, address);
+        pledge = pledge.toBuilder().setTransactions(0, ByteString.copyFrom(depTx.bitcoinSerialize()))
+                .addTransactions(ByteString.copyFrom(pledgeTx.bitcoinSerialize()))
+                .build();
+
+        InboundMessageQueuer p1 = connectPeer(1);
+        InboundMessageQueuer p2 = connectPeer(2, supportingVer);
+
+        // Pledge is submitted to the server via HTTP.
+        CompletableFuture<LHProtos.Pledge> future = backend.submitPledge(project, pledge);
+        assertFalse(future.isDone());
+
+        // Broadcast happens.
+        Transaction broadcast = (Transaction) waitForOutbound(p1);
+        assertEquals(depTx, broadcast);
+        assertNull(outbound(p2));
+        InventoryMessage inv = new InventoryMessage(params);
+        inv.addTransaction(depTx);
+        inbound(p2, inv);
+        // Broadcast is now complete, so query.
+        GetUTXOsMessage getutxos = (GetUTXOsMessage) waitForOutbound(p2);
+        assertNotNull(getutxos);
+        assertEquals(pledgeTx.getInput(0).getOutpoint(), getutxos.getOutPoints().get(0));
+
+        // We reply with the data it expects.
+        doGetUTXOAnswer(p2, stubTx.getOutput(0));
+
+        // And now we expect it to notice that the pledge is bad.
+        try {
+            future.get();
+            fail();
+        } catch (ExecutionException e) {
+            assertTrue(e.toString(), Throwables.getRootCause(e) instanceof Ex.PledgeTooSmall);
+        }
+
+        // Pledge NOT saved to disk.
+        final Sha256Hash pledgeHash = Sha256Hash.hash(pledge.toByteArray());
+        final List<Path> dirFiles = mapList(listDir(AppDirectory.dir()), Path::getFileName);
+        assertFalse(dirFiles.contains(Paths.get(pledgeHash.toString() + DiskManager.PLEDGE_FILE_EXTENSION)));
     }
 
     @Test
@@ -648,7 +707,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         // Now simulate a backend restart, and check that the pledges are still available despite being claimed.
         backend.shutdown();
-        initCoreState();
+        initCoreState(CLIENT);
 
         pledges = backend.mirrorOpenPledges(project, gate);
         assertEquals(2, pledges.size());

@@ -363,12 +363,12 @@ public class LighthouseBackend extends AbstractBlockChainListener {
      * This method does a check of all current pledges + the given pledge. If it's found to be good, it'll be added
      * to our open pledges list ... or not. This is used when a pledge is found on disk or submitted to the server.
      */
-    private void checkPledgeAgainstP2PNetwork(Project project, LHProtos.Pledge pledge) {
+    private CompletableFuture<Set<LHProtos.Pledge>> checkPledgeAgainstP2PNetwork(Project project, LHProtos.Pledge pledge) {
         executor.checkOnThread();
         ObservableSet<LHProtos.Pledge> create = diskManager.getPledgesOrCreate(project);
         Set<LHProtos.Pledge> both = new HashSet<>(create);
         both.add(pledge);
-        checkPledgesAgainstP2PNetwork(project, both);
+        return checkPledgesAgainstP2PNetwork(project, both);
     }
 
     // Completes with the set of pledges that passed verification.
@@ -841,11 +841,16 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                         }
                         // Once dependencies (if any) are handled, start the check process. This will update pledges once
                         // done successfully.
-                        checkPledgeAgainstP2PNetwork(project, pledge);
-                        // Finally, save to disk. This will cause a notification of a new pledge to happen but we'll end
-                        // up ignoring it because we'll see we already loaded and verified it.
-                        savePledge(pledge);
-                        result.complete(pledge);
+                        checkPledgeAgainstP2PNetwork(project, pledge).whenComplete((item, ex2) -> {
+                            if (ex2 != null) {
+                                result.completeExceptionally(ex2);
+                            } else {
+                                // Finally, save to disk. This will cause a notification of a new pledge to happen but we'll end
+                                // up ignoring it because we'll see we already loaded and verified it.
+                                savePledge(pledge);
+                                result.complete(pledge);
+                            }
+                        });
                     } catch (Exception e) {
                         result.completeExceptionally(e);
                     }
@@ -888,7 +893,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 List<ByteString> txnBytes = pledge.getTransactionsList().subList(0, pledge.getTransactionsCount() - 1);
                 if (txnBytes.size() > 5) {
                     // We don't accept ridiculous number of dependency txns. Even this is probably too much.
-                    log.error("Too many dependencies");
+                    log.error("Too many dependencies: {}", txnBytes.size());
                     result.completeExceptionally(new Ex.TooManyDependencies(txnBytes.size()));
                 } else {
                     log.info("Broadcasting {} provided pledge dependencies", txnBytes.size());

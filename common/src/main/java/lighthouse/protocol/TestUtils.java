@@ -13,6 +13,10 @@ public class TestUtils {
     // Pledge for half the project value.
     public static Triplet<Transaction, Transaction, LHProtos.Pledge> makePledge(Project forProject, Address address, Coin projectValue) {
         final Coin pledgeVal = projectValue.divide(2);
+        return makePledge(forProject, address, projectValue, pledgeVal);
+    }
+
+    public static Triplet<Transaction, Transaction, LHProtos.Pledge> makePledge(Project forProject, Address address, Coin projectValue, Coin pledgeVal) {
         ECKey key1 = new ECKey();
         Transaction tx0 = new Transaction(UnitTestParams.get());
         tx0.addInput(makeRandomInput());
