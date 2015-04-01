@@ -42,6 +42,11 @@ public class Ex extends RuntimeException {
         public TooManyDependencies(int amount) {
             this.amount = amount;
         }
+
+        @Override
+        public String toString() {
+            return String.format("TooManyDependencies{amount=%d}", amount);
+        }
     }
 
     public static class NonStandardInput extends Ex {}
