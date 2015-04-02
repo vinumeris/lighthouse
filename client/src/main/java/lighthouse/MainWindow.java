@@ -53,10 +53,8 @@ public class MainWindow {
     @FXML VBox projectsVBox;
     @FXML HBox topBox;
     @FXML VBox root;
-    @FXML HBox contentHBox;
     @FXML ScrollPane contentScrollPane;
     @FXML ProjectView projectView;
-    @FXML VBox overviewVbox;
     @FXML VBox contentStack;
     @FXML Label addProjectIcon;
     @FXML Label networkIndicatorLabel;
@@ -103,7 +101,7 @@ public class MainWindow {
 
         // Avoid duplicate add errors.
         contentStack.getChildren().remove(projectView);
-        contentStack.getChildren().remove(overviewVbox);
+        contentStack.getChildren().remove(projectsVBox);
 
         // Some UI init is done in onBitcoinSetup
         switchView(Views.OVERVIEW);
@@ -143,7 +141,7 @@ public class MainWindow {
         switch (view) {
             case OVERVIEW:
                 contentStack.getChildren().remove(projectView);
-                contentStack.getChildren().add(overviewVbox);
+                contentStack.getChildren().add(projectsVBox);
                 contentScrollPane.layout();
                 contentScrollPane.setVvalue(contentScroll);
                 projectView.updateForVisibility(false, null);
@@ -152,7 +150,7 @@ public class MainWindow {
             case PROJECT:
                 contentScroll = contentScrollPane.getVvalue();
                 contentScrollPane.setVvalue(0);
-                contentStack.getChildren().remove(overviewVbox);
+                contentStack.getChildren().remove(projectsVBox);
                 contentStack.getChildren().add(projectView);
                 projectView.updateForVisibility(true, checkStates);
                 inProjectView.set(true);
@@ -201,8 +199,8 @@ public class MainWindow {
         Platform.runLater(() -> {
             double amount = projectWidget.getHeight();
             amount += projectsVBox.getSpacing();
-            contentHBox.setTranslateY(-amount);
-            TranslateTransition transition = new TranslateTransition(Duration.millis(1500), contentHBox);
+            projectsVBox.setTranslateY(-amount);
+            TranslateTransition transition = new TranslateTransition(Duration.millis(1500), projectsVBox);
             transition.setFromY(-amount);
             transition.setToY(0);
             transition.setInterpolator(new ElasticInterpolator(EasingMode.EASE_OUT));
