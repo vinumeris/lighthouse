@@ -16,6 +16,9 @@ import org.slf4j.*;
 import org.spongycastle.crypto.params.*;
 
 import javax.annotation.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
@@ -234,6 +237,23 @@ public class PledgingWallet extends Wallet {
         NetworkParameters params = NetworkParameters.fromID(proto.getNetworkIdentifier());
         return (PledgingWallet) serializer.readWallet(params, new WalletExtension[]{new PledgeStorage(null)}, proto);
     }
+
+    public static PledgingWallet loadFromFile(File walletFile) throws FileNotFoundException, UnreadableWalletException {
+
+        try {
+                FileInputStream fileStream = new FileInputStream(walletFile);
+                WalletProtobufSerializer serializer = new WalletProtobufSerializer(PledgingWallet::new);
+                return (PledgingWallet) serializer.readWallet(fileStream);
+        } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+        } catch (UnreadableWalletException e) {
+                throw new RuntimeException(e);
+        }
+
+
+    }
+
+
 
     private synchronized void populateExtensionProto(LHWalletProtos.Extension.Builder ext) {
         ext.addAllPledges(pledges.values());
