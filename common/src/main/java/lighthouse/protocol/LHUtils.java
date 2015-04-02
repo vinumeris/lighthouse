@@ -136,7 +136,7 @@ public class LHUtils {
             return run.run();
         } catch (Throwable throwable) {
             Throwables.propagate(throwable);
-            return null;  // unreachable
+            throw new AssertionError();    // Unreachable.
         }
     }
 
