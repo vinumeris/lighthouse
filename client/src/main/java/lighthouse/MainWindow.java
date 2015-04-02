@@ -16,7 +16,6 @@ import lighthouse.activities.*;
 import lighthouse.controls.*;
 import lighthouse.model.*;
 import lighthouse.nav.*;
-import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
 import lighthouse.utils.*;
 import org.bitcoinj.core.*;
@@ -48,10 +47,6 @@ public class MainWindow {
     @FXML StackPane contentStack;
     @FXML Label networkIndicatorLabel;
     @FXML Button backButton;
-
-    // These are read-only mirrors of sets maintained by the backend. Changes made by LighthouseBackend are propagated
-    // into the UI thread and applied there asynchronously, thus it is safe to connect them directly to UI widgets.
-    private ObservableList<Project> projects;
 
     public static BitcoinUIModel bitcoinUIModel = new BitcoinUIModel();
     private NotificationBarPane.Item syncItem;
