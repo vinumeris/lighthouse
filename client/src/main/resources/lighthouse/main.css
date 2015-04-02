@@ -270,3 +270,7 @@
 .edit-project-grid .link-label {
     -fx-font-weight: normal;
 }
+
+.highlightedPieSlice {
+    -fx-pie-color: black;
+}
