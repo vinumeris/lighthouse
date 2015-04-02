@@ -61,10 +61,11 @@ public class OverviewActivity : VBox(), Activity {
     private val numInitialBoxes: Int
 
     init {
-        val loader = FXMLLoader(getResource("activities/overview.fxml"), I18nUtil.translations)
-        loader.setRoot(this)
-        loader.setController(this)
-        loader.load<Any>()
+        with (FXMLLoader(getResource("activities/overview.fxml"), I18nUtil.translations)) {
+            setRoot(this)
+            setController(this)
+            load<Any>()
+        }
 
         numInitialBoxes = getChildren().size()
 
@@ -248,13 +249,9 @@ public class OverviewActivity : VBox(), Activity {
 
     private fun getProjectState(p: Project) = projectStates.get(p.getID())?.state ?: LighthouseBackend.ProjectState.OPEN
 
-    override fun onStart() {
-    }
+    override fun onStart() {}
 
-    override fun onStop() {
-    }
+    override fun onStop() {}
 
-    companion object {
-        private val log = LoggerFactory.getLogger(javaClass<OverviewActivity>())
-    }
+    private val log = LoggerFactory.getLogger(javaClass<OverviewActivity>())
 }

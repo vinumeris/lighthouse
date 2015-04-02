@@ -247,7 +247,6 @@ public class MainWindow {
         });
     }
 
-    //region Generic Bitcoin wallet related code
     @FXML
     public void emptyWallet(ActionEvent event) {
         EmptyWalletController.open();
@@ -257,5 +256,4 @@ public class MainWindow {
     public void setupWalletClicked(ActionEvent event) {
         WalletSettingsController.open(null);
     }
-    //endregion
 }
