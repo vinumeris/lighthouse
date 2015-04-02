@@ -67,9 +67,7 @@
             <ScrollPane fx:id="contentScrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" onDragOver="#dragOver" onDragDropped="#dragDropped" styleClass="edge-to-edge">
                 <content>
                     <VBox fx:id="contentStack" minHeight="${root.height - topBox.height - 5}">
-                        <StackPane fx:id="projectViewContainer" VBox.vgrow="ALWAYS">
-                            <ProjectView fx:id="projectView"/>
-                        </StackPane>
+                        <ProjectView fx:id="projectView" VBox.vgrow="ALWAYS"/>
                         <VBox fx:id="overviewVbox" styleClass="content-vbox">
                             <children>
                                 <HBox VBox.vgrow="ALWAYS" fx:id="contentHBox">

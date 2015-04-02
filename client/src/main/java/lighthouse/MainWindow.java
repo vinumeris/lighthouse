@@ -56,7 +56,6 @@ public class MainWindow {
     @FXML HBox contentHBox;
     @FXML ScrollPane contentScrollPane;
     @FXML ProjectView projectView;
-    @FXML StackPane projectViewContainer;
     @FXML VBox overviewVbox;
     @FXML VBox contentStack;
     @FXML Label addProjectIcon;
@@ -103,7 +102,7 @@ public class MainWindow {
         AwesomeDude.setIcon(menuBtn, AwesomeIcon.BARS);
 
         // Avoid duplicate add errors.
-        contentStack.getChildren().remove(projectViewContainer);
+        contentStack.getChildren().remove(projectView);
         contentStack.getChildren().remove(overviewVbox);
 
         // Some UI init is done in onBitcoinSetup
@@ -143,7 +142,7 @@ public class MainWindow {
             return;
         switch (view) {
             case OVERVIEW:
-                contentStack.getChildren().remove(projectViewContainer);
+                contentStack.getChildren().remove(projectView);
                 contentStack.getChildren().add(overviewVbox);
                 contentScrollPane.layout();
                 contentScrollPane.setVvalue(contentScroll);
@@ -154,7 +153,7 @@ public class MainWindow {
                 contentScroll = contentScrollPane.getVvalue();
                 contentScrollPane.setVvalue(0);
                 contentStack.getChildren().remove(overviewVbox);
-                contentStack.getChildren().add(projectViewContainer);
+                contentStack.getChildren().add(projectView);
                 projectView.updateForVisibility(true, checkStates);
                 inProjectView.set(true);
                 break;
