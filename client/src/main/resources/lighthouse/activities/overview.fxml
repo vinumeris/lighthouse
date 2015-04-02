@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<fx:root xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" type="VBox" spacing="20" VBox.vgrow="ALWAYS" alignment="CENTER" styleClass="content-vbox" onDragOver="#dragOver" onDragDropped="#dragDropped">
+    <children>
+        <VBox spacing="20" alignment="CENTER" maxWidth="650" styleClass="add-project-pane, fat-buttons" minHeight="126.0">
+            <children>
+                <Label fx:id="addProjectIcon"/>
+                <HBox spacing="10" alignment="CENTER">
+                    <Button onAction="#addProjectClicked" text="%Create project" cancelButton="true"/>
+                    <Button onAction="#importClicked" text="%Import project" cancelButton="true"/>
+                </HBox>
+                <Label text="%You can also drop an existing project file here."/>
+            </children>
+        </VBox>
+        <Pane minHeight="320.0"/>
+    </children>
+    <padding>
+        <Insets left="15.0" right="15.0"/>
+    </padding>
+</fx:root>

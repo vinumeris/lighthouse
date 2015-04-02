@@ -11,30 +11,22 @@ import javafx.collections.*;
 import javafx.event.*;
 import javafx.fxml.*;
 import javafx.scene.control.*;
-import javafx.scene.input.*;
 import javafx.scene.layout.*;
-import javafx.stage.*;
-import javafx.util.*;
+import lighthouse.activities.*;
 import lighthouse.controls.*;
-import lighthouse.files.AppDirectory;
-import lighthouse.files.*;
 import lighthouse.model.*;
+import lighthouse.nav.*;
 import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
 import lighthouse.utils.*;
-import lighthouse.utils.easing.*;
 import org.bitcoinj.core.*;
 import org.bitcoinj.params.*;
 import org.bitcoinj.utils.*;
 import org.fxmisc.easybind.*;
 import org.slf4j.*;
 
-import java.io.*;
-import java.nio.file.*;
-
 import static javafx.beans.binding.Bindings.*;
 import static lighthouse.protocol.LHUtils.*;
-import static lighthouse.threading.AffinityExecutor.*;
 import static lighthouse.utils.GuiUtils.*;
 import static lighthouse.utils.I18nUtil.*;
 
@@ -50,63 +42,34 @@ public class MainWindow {
     @FXML Button emptyWalletBtn, setupWalletBtn, menuBtn;
     @FXML ClickableBitcoinAddress addressControl;
     @FXML HBox balanceArea;
-    @FXML VBox projectsVBox;
     @FXML HBox topBox;
     @FXML VBox root;
     @FXML ScrollPane contentScrollPane;
-    @FXML ProjectView projectView;
-    @FXML VBox contentStack;
-    @FXML Label addProjectIcon;
+    @FXML StackPane contentStack;
     @FXML Label networkIndicatorLabel;
     @FXML Button backButton;
-    @FXML Label dropFileHereLabel;
 
     // These are read-only mirrors of sets maintained by the backend. Changes made by LighthouseBackend are propagated
     // into the UI thread and applied there asynchronously, thus it is safe to connect them directly to UI widgets.
     private ObservableList<Project> projects;
 
-    private final KeyCombination BACK_SHORTCUT = KeyCombination.valueOf("Shortcut+LEFT");
-
     public static BitcoinUIModel bitcoinUIModel = new BitcoinUIModel();
     private NotificationBarPane.Item syncItem;
     private ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;
-    // A map indicating the status of checking each project against the network (downloading, found an error, done, etc)
-    // This is mirrored into the UI thread from the backend.
-    private ObservableMap<Project, LighthouseBackend.CheckStatus> checkStates;
 
-    private SimpleBooleanProperty inProjectView = new SimpleBooleanProperty();
-
-    private int numInitialBoxes;
+    public static OverviewActivity overviewActivity;
+    public static NavManager navManager;
 
     private static Updater updater;
 
-    enum Views {
-        OVERVIEW,
-        PROJECT
-    }
-
     // Called by FXMLLoader.
     public void initialize() {
-        numInitialBoxes = projectsVBox.getChildren().size();
-
         AwesomeDude.setIcon(emptyWalletBtn, AwesomeIcon.SIGN_OUT, "12pt", ContentDisplay.LEFT);
         Tooltip.install(emptyWalletBtn, new Tooltip(tr("Send money out of the wallet")));
         AwesomeDude.setIcon(setupWalletBtn, AwesomeIcon.LOCK, "12pt", ContentDisplay.LEFT);
         Tooltip.install(setupWalletBtn, new Tooltip(tr("Make paper backup and encrypt your wallet")));
-        AwesomeDude.setIcon(addProjectIcon, AwesomeIcon.FILE_ALT, "50pt; -fx-text-fill: white" /* lame hack */);
-
-        // Slide back button in/out.
-        AwesomeDude.setIcon(backButton, AwesomeIcon.ARROW_CIRCLE_LEFT, "30");
-        animatedBind(topBoxLeftArea, topBoxLeftArea.translateXProperty(), when(inProjectView).then(0).otherwise(-45), Interpolator.EASE_OUT);
 
         AwesomeDude.setIcon(menuBtn, AwesomeIcon.BARS);
-
-        // Avoid duplicate add errors.
-        contentStack.getChildren().remove(projectView);
-        contentStack.getChildren().remove(projectsVBox);
-
-        // Some UI init is done in onBitcoinSetup
-        switchView(Views.OVERVIEW);
 
         // Wait for the backend to start up so we can populate the projects list without seeing laggards drop in
         // from the top, as otherwise the backend could still be loading projects by the time we're done loading
@@ -114,219 +77,19 @@ public class MainWindow {
         if (!Main.instance.waitForInit())
             return;  // Backend didn't start up e.g. app is already running.
 
-        projects = Main.backend.mirrorProjects(UI_THREAD);
-        projectStates = Main.backend.mirrorProjectStates(UI_THREAD);
-        checkStates = Main.backend.mirrorCheckStatuses(UI_THREAD);
-        projectView.statusMap = checkStates;
-        for (Project project : projects)
-            projectsVBox.getChildren().add(0, buildProjectWidget(project));
-        projects.addListener((ListChangeListener<Project>) change -> {
-            while (change.next()) {
-                if (change.wasReplaced()) {
-                    updateExistingProject(change.getFrom(), change.getAddedSubList().get(0), change.getRemoved().get(0));
-                } else if (change.wasAdded()) {
-                    slideInNewProject(change.getAddedSubList().get(0));
-                } else if (change.wasRemoved()) {
-                    log.warn("Cannot animate project remove yet: {}", change);
-                    projectsVBox.getChildren().remove(projectsVBox.getChildren().size() - 1 - numInitialBoxes - change.getFrom());
-                }
-            }
-        });
-    }
+        overviewActivity = new OverviewActivity();
+        navManager = new NavManager(contentScrollPane, overviewActivity);
 
-    private Views currentView = null;
-    private double contentScroll = 0.0;
-
-    private void switchView(Views view) {
-        // Double calls can occur if someone double clicks the back button whilst it's animating in/out.
-        if (currentView == view)
-            return;
-        switch (view) {
-            case OVERVIEW:
-                contentStack.getChildren().remove(projectView);
-                contentStack.getChildren().add(projectsVBox);
-                contentScrollPane.layout();
-                contentScrollPane.setVvalue(contentScroll);
-                projectView.onStop();
-                inProjectView.set(false);
-                Platform.runLater(() -> Main.instance.scene.getAccelerators().remove(BACK_SHORTCUT));
-                break;
-            case PROJECT:
-                contentScroll = contentScrollPane.getVvalue();
-                contentScrollPane.setVvalue(0);
-                contentStack.getChildren().remove(projectsVBox);
-                contentStack.getChildren().add(projectView);
-                projectView.onStart();
-                inProjectView.set(true);
-                Platform.runLater(() -> Main.instance.scene.getAccelerators().put(BACK_SHORTCUT, () -> switchView(Views.OVERVIEW)));
-                break;
-            default: throw new IllegalStateException();
-        }
-        currentView = view;
-    }
-
-    private void switchToProject(Project next) {
-        log.info("Switching to project: {}", next.getTitle());
-        projectView.project.set(next);
-        switchView(Views.PROJECT);
-    }
-
-    // Triggered by the project disk model being adjusted.
-    private void updateExistingProject(int index, Project newProject, Project prevProject) {
-        log.info("Update at index {}", index);
-        int uiIndex =
-                projectsVBox.getChildren().size()
-                        - 1   // from size to index
-                        - numInitialBoxes   // the vbox for buttons at the bottom
-                        - index;
-        if (uiIndex < 0)
-            return;  // This can happen if the project which is updated is not even on screen yet; Windows fucks up sometimes and tells us this so just ignore it.
-        projectsVBox.getChildren().set(uiIndex, buildProjectWidget(newProject));
-        if (inProjectView.get() && projectView.getProject().equals(prevProject)) {
-            projectView.setProject(newProject);
-        }
-    }
-
-    // Triggered by the project disk model being adjusted.
-    private void slideInNewProject(Project project) {
-        if (contentScrollPane.getVvalue() != contentScrollPane.getVmin()) {
-            // Need to scroll to the top before dropping the project widget in.
-            scrollToTop().setOnFinished(ev -> slideInNewProject(project));
-            return;
-        }
-        ProjectOverviewWidget projectWidget = buildProjectWidget(project);
-
-        // Hack: Add at the end for the size calculation, then we'll move it to the start after the next frame.
-        projectWidget.setVisible(false);
-        projectsVBox.getChildren().add(projectWidget);
-
-        // Slide in from above.
-        Platform.runLater(() -> {
-            double amount = projectWidget.getHeight();
-            amount += projectsVBox.getSpacing();
-            projectsVBox.setTranslateY(-amount);
-            TranslateTransition transition = new TranslateTransition(Duration.millis(1500), projectsVBox);
-            transition.setFromY(-amount);
-            transition.setToY(0);
-            transition.setInterpolator(new ElasticInterpolator(EasingMode.EASE_OUT));
-            transition.setDelay(Duration.millis(1000));
-            transition.play();
-            // Re-position at the start.
-            projectsVBox.getChildren().remove(projectWidget);
-            projectsVBox.getChildren().add(0, projectWidget);
-            projectWidget.setVisible(true);
-        });
-    }
-
-    private ProjectOverviewWidget buildProjectWidget(Project project) {
-        SimpleObjectProperty<LighthouseBackend.ProjectState> state = new SimpleObjectProperty<>(getProjectState(project));
-
-        ProjectOverviewWidget projectWidget;
-        if (Main.offline) {
-            state.set(LighthouseBackend.ProjectState.UNKNOWN);
-            projectWidget = new ProjectOverviewWidget(project, new SimpleLongProperty(0), state);
-        } else {
-            projectStates.addListener((javafx.beans.InvalidationListener) x -> state.set(getProjectState(project)));
-            projectWidget = new ProjectOverviewWidget(project,
-                    Main.backend.makeTotalPledgedProperty(project, UI_THREAD),
-                    state);
-            projectWidget.getStyleClass().add("project-overview-widget-clickable");
-            projectWidget.onCheckStatusChanged(checkStates.get(project));
-            checkStates.addListener((MapChangeListener<Project, LighthouseBackend.CheckStatus>) change -> {
-                if (change.getKey().equals(project))
-                    projectWidget.onCheckStatusChanged(change.wasAdded() ? change.getValueAdded() : null);
-            });
-            projectWidget.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> switchToProject(project));
-        }
-        return projectWidget;
-    }
-
-    private LighthouseBackend.ProjectState getProjectState(Project project) {
-        LighthouseBackend.ProjectStateInfo info = projectStates.get(project.getID());
-        return info == null ? LighthouseBackend.ProjectState.OPEN : info.state;
-    }
-
-    @FXML
-    public void addProjectClicked(ActionEvent event) {
-        EditProjectWindow.openForCreate();
-    }
-
-    @FXML
-    public void importClicked(ActionEvent event) {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle(tr("Select a bitcoin project file to import"));
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(tr("Project/contract files"), "*" + DiskManager.PROJECT_FILE_EXTENSION));
-                platformFiddleChooser(chooser);
-        File file = chooser.showOpenDialog(Main.instance.mainStage);
-        if (file == null)
-            return;
-        log.info("Import clicked: {}", file);
-        importProject(file);
+        // Slide back button in/out.
+        AwesomeDude.setIcon(backButton, AwesomeIcon.ARROW_CIRCLE_LEFT, "30");
+        animatedBind(topBoxLeftArea, topBoxLeftArea.translateXProperty(),
+                when(navManager.getIsOnInitialActivity()).then(-45).otherwise(0),
+                Interpolator.EASE_OUT);
     }
 
     @FXML
     public void backButtonClicked(ActionEvent event) {
-        switchView(Views.OVERVIEW);
-    }
-
-    @FXML
-    public void dragOver(DragEvent event) {
-        boolean accept = false;
-        if (event.getGestureSource() != null)
-            return;   // Coming from us.
-        for (File file : event.getDragboard().getFiles()) {
-            if (file.toString().endsWith(DiskManager.PROJECT_FILE_EXTENSION) || file.toString().endsWith(DiskManager.PLEDGE_FILE_EXTENSION)) {
-                accept = true;
-                break;
-            }
-        }
-        if (accept)
-            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-    }
-
-    @FXML
-    public void dragDropped(DragEvent event) {
-        log.info("Drop: {}", event);
-        for (File file : event.getDragboard().getFiles())
-            handleOpenedFile(file);
-    }
-
-    public void handleOpenedFile(File file) {
-        // Can be called either due to a drop, or user double clicking a file in a file explorer.
-        checkGuiThread();
-        log.info("Opening {}", file);
-        if (file.toString().endsWith(DiskManager.PROJECT_FILE_EXTENSION)) {
-            importProject(file);
-        } else if (file.toString().endsWith(DiskManager.PLEDGE_FILE_EXTENSION)) {
-            importPledge(file);
-        } else
-            log.error("Unknown file type open requested: should not happen: " + file);
-    }
-
-    public static void importPledge(File file) {
-        try {
-            Sha256Hash hash = Sha256Hash.hashFileContents(file);
-            Files.copy(file.toPath(), AppDirectory.dir().resolve(hash + DiskManager.PLEDGE_FILE_EXTENSION));
-        } catch (IOException e) {
-            GuiUtils.informationalAlert(tr("Import failed"),
-                    // TRANS: %1$s = app name, %2$s = error message
-                    tr("Could not copy the dropped pledge into the %1$s application directory: %2$s"), Main.APP_NAME, e);
-        }
-    }
-
-
-    public static void importProject(File file) {
-        importProject(file.toPath());
-    }
-
-    public static void importProject(Path file) {
-        try {
-            Main.backend.importProjectFrom(file);
-        } catch (IOException e) {
-            GuiUtils.informationalAlert(tr("Failed to import project"),
-                    // TRANS: %s = error message
-                    tr("Could not read project file: %s"), e.getLocalizedMessage());
-        }
+        navManager.back();
     }
 
     private static boolean firstTime = true;
@@ -475,16 +238,6 @@ public class MainWindow {
 
     public void showBitcoinSyncMessage() {
         syncItem = Main.instance.notificationBar.displayNewItem(tr("Synchronising with the Bitcoin network"), bitcoinUIModel.syncProgressProperty());
-    }
-
-    private Animation scrollToTop() {
-        Animation animation = new Timeline(
-                new KeyFrame(GuiUtils.UI_ANIMATION_TIME,
-                        new KeyValue(contentScrollPane.vvalueProperty(), contentScrollPane.getVmin(), Interpolator.EASE_BOTH)
-                )
-        );
-        animation.play();
-        return animation;
     }
 
     @FXML

@@ -166,7 +166,7 @@ public class Main extends Application {
             } else {
                 for (Path path : filesToOpen) {
                     Platform.runLater(() -> {
-                        Main.instance.mainWindow.handleOpenedFile(path.toFile());
+                        MainWindow.overviewActivity.handleOpenedFile(path.toFile());
                     });
                 }
             }

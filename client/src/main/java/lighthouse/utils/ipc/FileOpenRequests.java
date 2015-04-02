@@ -57,7 +57,7 @@ public class FileOpenRequests {
                                 String path = stream.readUTF();
                                 Platform.runLater(() -> {
                                     Main.instance.mainStage.toFront();
-                                    Main.instance.mainWindow.handleOpenedFile(new File(path));
+                                    MainWindow.overviewActivity.handleOpenedFile(new File(path));
                                 });
                             }
                         } catch (EOFException e) {
@@ -109,7 +109,7 @@ public class FileOpenRequests {
                         continue;   // Only happens in dev environment.
                     Main.log.info("OS is requesting that we open " + strPath);
                     Platform.runLater(() -> {
-                        Main.instance.mainWindow.handleOpenedFile(new File(strPath));
+                        MainWindow.overviewActivity.handleOpenedFile(new File(strPath));
                     });
                 }
             }

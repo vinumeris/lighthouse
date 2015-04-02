@@ -64,31 +64,8 @@
 
         <!-- Main content area -->
         <StackPane VBox.vgrow="ALWAYS" styleClass="gradient-pane">
-            <ScrollPane fx:id="contentScrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" onDragOver="#dragOver" onDragDropped="#dragDropped" styleClass="edge-to-edge">
-                <content>
-                    <VBox fx:id="contentStack" minHeight="${root.height - topBox.height - 5}">
-                        <ProjectView fx:id="projectView" VBox.vgrow="ALWAYS"/>
-
-                        <VBox fx:id="projectsVBox" spacing="20" VBox.vgrow="ALWAYS" alignment="CENTER" styleClass="content-vbox">
-                            <children>
-                                <VBox spacing="20" alignment="CENTER" maxWidth="650" styleClass="add-project-pane, fat-buttons" minHeight="126.0">
-                                    <children>
-                                        <Label fx:id="addProjectIcon"/>
-                                        <HBox spacing="10" alignment="CENTER">
-                                            <Button onAction="#addProjectClicked" text="%Create project" cancelButton="true"/>
-                                            <Button onAction="#importClicked" text="%Import project" cancelButton="true"/>
-                                        </HBox>
-                                        <Label fx:id="dropFileHereLabel" text="%You can also drop an existing project file here."/>
-                                    </children>
-                                </VBox>
-                                <Pane minHeight="320.0"/>
-                            </children>
-                            <padding>
-                                <Insets left="15.0" right="15.0"/>
-                            </padding>
-                        </VBox>
-                    </VBox>
-                </content>
+            <ScrollPane fx:id="contentScrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="edge-to-edge">
+                <StackPane fx:id="contentStack" minHeight="${root.height - topBox.height - 5}"/>
             </ScrollPane>
         </StackPane>
     </children>

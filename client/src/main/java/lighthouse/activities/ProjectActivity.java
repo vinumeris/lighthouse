@@ -1,4 +1,4 @@
-package lighthouse.controls;
+package lighthouse.activities;
 
 import com.google.common.base.*;
 import com.google.common.collect.*;
@@ -20,6 +20,8 @@ import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.*;
 import lighthouse.*;
+import lighthouse.controls.*;
+import lighthouse.nav.*;
 import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
 import lighthouse.threading.*;
@@ -46,8 +48,8 @@ import static lighthouse.utils.MoreBindings.*;
 /**
  * The main content area that shows project details, pledges, a pie chart, buttons etc.
  */
-public class ProjectView extends HBox {
-    private static final Logger log = LoggerFactory.getLogger(ProjectView.class);
+public class ProjectActivity extends HBox implements Activity {
+    private static final Logger log = LoggerFactory.getLogger(ProjectActivity.class);
 
     private static final String BLOCK_EXPLORER_SITE = "https://blockchain.info/tx/%s";
     private static final String BLOCK_EXPLORER_SITE_TESTNET = "https://www.biteasy.com/testnet/transactions/%s";
@@ -73,9 +75,8 @@ public class ProjectView extends HBox {
     private LongProperty pledgedValue;
     private ObjectBinding<LighthouseBackend.CheckStatus> checkStatus;
     private ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;  // project id -> status
-    public ObservableMap<Project, LighthouseBackend.CheckStatus> statusMap;
+    private ObservableMap<Project, LighthouseBackend.CheckStatus> statusMap;
     @Nullable private NotificationBarPane.Item notifyBarItem;
-
     @Nullable private Sha256Hash myPledgeHash;
 
     private String goalAmountFormatStr;
@@ -90,11 +91,34 @@ public class ProjectView extends HBox {
     private SimpleObjectProperty<Mode> mode = new SimpleObjectProperty<>(Mode.OPEN_FOR_PLEDGES);
     private Mode priorMode;
 
-    public ProjectView() {
+    public ProjectActivity(ObservableList<Project> projects, Project project, ObservableMap<Project, LighthouseBackend.CheckStatus> statusMap) {
         // Don't try and access Main.backend here in case you race with startup.
-        setupFXML();
-        pledgesList.setCellFactory(pledgeListView -> new PledgeListCell());
-        project.addListener(x -> updateForProject());
+        try {
+            this.statusMap = statusMap;
+
+            FXMLLoader loader = new FXMLLoader(getResource("activities/project.fxml"), I18nUtil.translations);
+            loader.setRoot(this);
+            loader.setController(this);
+            loader.load();
+
+            description.setUrlOpener(url -> Main.instance.getHostServices().showDocument(url));
+            goalAmountFormatStr = goalAmountLabel.getText();
+            pledgesList.setCellFactory(pledgeListView -> new PledgeListCell());
+            this.project.addListener(x -> updateForProject());
+
+            projects.addListener((ListChangeListener<Project>) change -> {
+                while (change.next()) {
+                    if (change.wasReplaced()) {
+                        if (getProject().equals(change.getRemoved().get(0)))
+                            setProject(change.getAddedSubList().get(0));
+                    }
+                }
+            });
+
+            this.project.set(project);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Holds together various bindings so we can disconnect them when we switch projects.
@@ -231,7 +255,8 @@ public class ProjectView extends HBox {
             });
         }
 
-        description.setUrlOpener(url -> Main.instance.getHostServices().showDocument(url));
+        applyCss();
+        layout();
     }
 
     private void checkForMyPledge(Project p) {
@@ -355,21 +380,6 @@ public class ProjectView extends HBox {
             set.add(pledge.build());
         });
         return set;
-    }
-
-    private void setupFXML() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getResource("controls/project_view.fxml"), I18nUtil.translations);
-            loader.setRoot(this);
-            loader.setController(this);
-            // The following line is supposed to help Scene Builder, although it doesn't seem to be needed for me.
-            loader.setClassLoader(getClass().getClassLoader());
-            loader.load();
-
-            goalAmountFormatStr = goalAmountLabel.getText();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @FXML
