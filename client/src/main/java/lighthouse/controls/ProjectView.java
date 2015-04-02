@@ -66,15 +66,14 @@ public class ProjectView extends HBox {
     @FXML Label copyDescriptionLink;
 
     public final ObjectProperty<Project> project = new SimpleObjectProperty<>();
-    public final ObjectProperty<EventHandler<ActionEvent>> onBackClickedProperty = new SimpleObjectProperty<>();
 
     private PieChart.Data emptySlice;
-    private final KeyCombination backKey = KeyCombination.valueOf("Shortcut+LEFT");
     private ObservableSet<LHProtos.Pledge> pledges;
     private UIBindings bindings;
     private LongProperty pledgedValue;
     private ObjectBinding<LighthouseBackend.CheckStatus> checkStatus;
     private ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;  // project id -> status
+    public ObservableMap<Project, LighthouseBackend.CheckStatus> statusMap;
     @Nullable private NotificationBarPane.Item notifyBarItem;
 
     @Nullable private Sha256Hash myPledgeHash;
@@ -162,32 +161,27 @@ public class ProjectView extends HBox {
         }
     }
 
-    public void updateForVisibility(boolean visible, @Nullable ObservableMap<Project, LighthouseBackend.CheckStatus> statusMap) {
+    public void onStart() {
         if (project.get() == null) return;
-        if (visible) {
-            // Put the back keyboard shortcut in later, because removing an accelerator whilst a callback is being
-            // processed causes a ConcurrentModificationException inside the framework before 8u20.
-            Platform.runLater(() -> Main.instance.scene.getAccelerators().put(backKey, () -> backClicked(null)));
-            // Make the info bar appear if there's an error
-            checkStatus = valueAt(statusMap, project);
-            checkStatus.addListener(o -> updateInfoBar());
-            // Don't let the user perform an action whilst loading or if there's an error, unless that action would
-            // be revoke: users must be able to revoke even if the server is dead.
-            actionButton.disableProperty().unbind();
-            actionButton.disableProperty().bind(
-                    isFullyFundedAndNotParticipating.or(
-                            checkStatus.isNotNull().and(mode.isNotEqualTo(Mode.PLEDGED))
-                    )
-            );
-            updateInfoBar();
-        } else {
-            // Take the back keyboard shortcut out later, because removing an accelerator whilst its callback is being
-            // processed causes a ConcurrentModificationException inside the framework before 8u20.
-            Platform.runLater(() -> Main.instance.scene.getAccelerators().remove(backKey));
-            if (notifyBarItem != null) {
-                notifyBarItem.cancel();
-                notifyBarItem = null;
-            }
+        // Make the info bar appear if there's an error
+        checkStatus = valueAt(statusMap, project);
+        checkStatus.addListener(o -> updateInfoBar());
+        // Don't let the user perform an action whilst loading or if there's an error, unless that action would
+        // be revoke: users must be able to revoke even if the server is dead.
+        actionButton.disableProperty().unbind();
+        actionButton.disableProperty().bind(
+                isFullyFundedAndNotParticipating.or(
+                        checkStatus.isNotNull().and(mode.isNotEqualTo(Mode.PLEDGED))
+                )
+        );
+        updateInfoBar();
+    }
+
+    public void onStop() {
+        if (project.get() == null) return;
+        if (notifyBarItem != null) {
+            notifyBarItem.cancel();
+            notifyBarItem = null;
         }
     }
 
@@ -376,12 +370,6 @@ public class ProjectView extends HBox {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @FXML
-    private void backClicked(@Nullable ActionEvent event) {
-        if (onBackClickedProperty.get() != null)
-            onBackClickedProperty.get().handle(event);
     }
 
     @FXML

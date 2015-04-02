@@ -65,6 +65,8 @@ public class MainWindow {
     // into the UI thread and applied there asynchronously, thus it is safe to connect them directly to UI widgets.
     private ObservableList<Project> projects;
 
+    private final KeyCombination BACK_SHORTCUT = KeyCombination.valueOf("Shortcut+LEFT");
+
     public static BitcoinUIModel bitcoinUIModel = new BitcoinUIModel();
     private NotificationBarPane.Item syncItem;
     private ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;
@@ -115,6 +117,7 @@ public class MainWindow {
         projects = Main.backend.mirrorProjects(UI_THREAD);
         projectStates = Main.backend.mirrorProjectStates(UI_THREAD);
         checkStates = Main.backend.mirrorCheckStatuses(UI_THREAD);
+        projectView.statusMap = checkStates;
         for (Project project : projects)
             projectsVBox.getChildren().add(0, buildProjectWidget(project));
         projects.addListener((ListChangeListener<Project>) change -> {
@@ -144,16 +147,18 @@ public class MainWindow {
                 contentStack.getChildren().add(projectsVBox);
                 contentScrollPane.layout();
                 contentScrollPane.setVvalue(contentScroll);
-                projectView.updateForVisibility(false, null);
+                projectView.onStop();
                 inProjectView.set(false);
+                Platform.runLater(() -> Main.instance.scene.getAccelerators().remove(BACK_SHORTCUT));
                 break;
             case PROJECT:
                 contentScroll = contentScrollPane.getVvalue();
                 contentScrollPane.setVvalue(0);
                 contentStack.getChildren().remove(projectsVBox);
                 contentStack.getChildren().add(projectView);
-                projectView.updateForVisibility(true, checkStates);
+                projectView.onStart();
                 inProjectView.set(true);
+                Platform.runLater(() -> Main.instance.scene.getAccelerators().put(BACK_SHORTCUT, () -> switchView(Views.OVERVIEW)));
                 break;
             default: throw new IllegalStateException();
         }
