@@ -13,8 +13,8 @@
         </TextField>
         <HBox alignment="CENTER_RIGHT" fillHeight="true" prefHeight="30.0" prefWidth="600.0" spacing="15.0" VBox.vgrow="NEVER">
             <children>
-                <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" onAction="#cancel" prefWidth="79.0" text="%Cancel" />
-                <Button fx:id="sendBtn" defaultButton="true" mnemonicParsing="false" onAction="#send" prefWidth="79.0" text="%Send" />
+                <Button fx:id="cancelBtn" cancelButton="true" mnemonicParsing="false" onAction="#cancel" minWidth="80.0" text="%Cancel" />
+                <Button fx:id="sendBtn" defaultButton="true" mnemonicParsing="false" onAction="#send" minWidth="80.0" text="%Send" />
             </children>
         </HBox>
     </children>
