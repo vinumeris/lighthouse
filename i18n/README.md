@@ -2,12 +2,21 @@
 
 Lighthouse now supports localization using GNU GetText. It's an open source tool, and you will need it for adding or modifying translations.
 
+# The easy way
+
+Use Transifex:
+
+https://www.transifex.com/projects/p/lighthouse-app/resource/lighthousepot/
+
+# The hard way
+
 On a Ubuntu / Debian based Linux distro, you can install it with `sudo apt-get install gettext`
 
 To extract strings for translation from source code, go to the root folder of Lighthouse and issue this command:
 
-    find client/ -name '*.java' -or -name '*.kt'  | xargs xgettext -k_ -cTRANS --language=Java --from-code UTF-8 -o i18n/lighthouse.pot
-
+    ./extract-strings.js
+    
+You will need the jjs and xgettext commands on your path (jjs comes from JDK8+).
 
 How to add a new language:
 
@@ -27,6 +36,5 @@ How to add a new language:
 
     `mvn clean package -Dmaven.test.skip=true`
 
-If you now change your locale to this language and launch Lighthouse, it will use your translations.
-
-**Good news:** this is the hard way. An on-line translation project will be created soon, making translation contributions easy and user friendly. A link to the project will be added here.
+If you now change your locale to this language and launch Lighthouse, it will use your translations. You can also use
+the -Duser.language=xx option to force usage of a particular locale.
