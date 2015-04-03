@@ -51,7 +51,7 @@ import static lighthouse.utils.MoreBindings.*;
 public class ProjectActivity extends HBox implements Activity {
     private static final Logger log = LoggerFactory.getLogger(ProjectActivity.class);
 
-    private static final String BLOCK_EXPLORER_SITE = "https://blockchain.info/tx/%s";
+    private static final String BLOCK_EXPLORER_SITE = "https://insight.bitpay.com/tx/%s";
     private static final String BLOCK_EXPLORER_SITE_TESTNET = "https://www.biteasy.com/testnet/transactions/%s";
 
     @FXML Label projectTitle;
