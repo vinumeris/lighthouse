@@ -61,11 +61,10 @@ public class OverviewActivity : VBox(), Activity {
     private val numInitialBoxes: Int
 
     init {
-        with (FXMLLoader(getResource("activities/overview.fxml"), I18nUtil.translations)) {
-            setRoot(this)
-            setController(this)
-            load<Any>()
-        }
+        val loader = FXMLLoader(getResource("activities/overview.fxml"), I18nUtil.translations)
+        loader.setRoot(this)
+        loader.setController(this)
+        loader.load<Any>()
 
         numInitialBoxes = getChildren().size()
 
