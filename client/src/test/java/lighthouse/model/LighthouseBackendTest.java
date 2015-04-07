@@ -531,10 +531,10 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         // The dependency TX doesn't really have to be a dependency at the moment, it could be anything so we lazily
         // just make an unrelated fake tx to check the ordering of things.
-        Transaction depTx = FakeTxBuilder.createFakeTx(params, Coin.COIN, address);
+        Transaction depTx = FakeTxBuilder.createFakeTx(params, Coin.COIN, wallet.currentReceiveAddress());
         pledge = pledge.toBuilder().setTransactions(0, ByteString.copyFrom(depTx.bitcoinSerialize()))
-                                   .addTransactions(ByteString.copyFrom(pledgeTx.bitcoinSerialize()))
-                                   .build();
+                .addTransactions(ByteString.copyFrom(pledgeTx.bitcoinSerialize()))
+                .build();
 
         InboundMessageQueuer p1 = connectPeer(1);
         InboundMessageQueuer p2 = connectPeer(2, supportingVer);
@@ -594,7 +594,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         // The dependency TX doesn't really have to be a dependency at the moment, it could be anything so we lazily
         // just make an unrelated fake tx to check the ordering of things.
-        Transaction depTx = FakeTxBuilder.createFakeTx(params, Coin.COIN, address);
+        Transaction depTx = FakeTxBuilder.createFakeTx(params, Coin.COIN, wallet.currentReceiveAddress());
         pledge = pledge.toBuilder().setTransactions(0, ByteString.copyFrom(depTx.bitcoinSerialize()))
                 .addTransactions(ByteString.copyFrom(pledgeTx.bitcoinSerialize()))
                 .build();
@@ -863,9 +863,11 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
     }
 
     private void doGetUTXOAnswer(InboundMessageQueuer p, TransactionOutput... outputs) throws InterruptedException, BlockStoreException {
+        long[] heights = new long[outputs.length];
+        Arrays.fill(heights, UTXOsMessage.MEMPOOL_HEIGHT);
         inbound(p, new UTXOsMessage(params,
                 Lists.newArrayList(outputs),
-                new long[]{UTXOsMessage.MEMPOOL_HEIGHT},
+                heights,
                 blockStore.getChainHead().getHeader().getHash(),
                 blockStore.getChainHead().getHeight()));
     }

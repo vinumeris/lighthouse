@@ -1,18 +1,18 @@
 package lighthouse.threading;
 
-import com.google.common.util.concurrent.Uninterruptibles;
-import javafx.application.Platform;
-import lighthouse.protocol.LHUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.util.concurrent.*;
+import javafx.application.*;
+import lighthouse.protocol.*;
+import org.bitcoinj.core.*;
+import org.slf4j.*;
 
-import java.time.Duration;
+import java.time.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
+import java.util.concurrent.atomic.*;
+import java.util.function.*;
 
-import static com.google.common.base.Preconditions.checkState;
-import static lighthouse.protocol.LHUtils.checkedGet;
+import static com.google.common.base.Preconditions.*;
+import static lighthouse.protocol.LHUtils.*;
 
 /** An extended executor interface that supports thread affinity assertions and short circuiting. */
 public interface AffinityExecutor extends Executor {
@@ -102,8 +102,12 @@ public interface AffinityExecutor extends Executor {
         public final ScheduledThreadPoolExecutor service;
 
         public ServiceAffinityExecutor(String threadName) {
+            Context bcjContext = Context.get();
             service = new ScheduledThreadPoolExecutor(1, runnable -> {
-                Thread thread = new Thread(runnable);
+                Thread thread = new Thread(() -> {
+                    Context.propagate(bcjContext);
+                    runnable.run();
+                });
                 thread.setDaemon(true);
                 thread.setName(threadName);
                 whichThread.set(thread);
