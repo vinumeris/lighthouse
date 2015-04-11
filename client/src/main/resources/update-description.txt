@@ -1,2 +1,4 @@
-Faster sync, bug fixes, email addresses in projects.
-Attempt to sync the block chain from faster peers. Another fix for image corruption.
+Czech and German translations, new server.
+Added lightlist.io to the server list. The project view now resembles a web page. Some other minor bug fixes and visual tweaks.
+
+Switched to using Insight instead of blockchain.info as the block explorer, as Insight seems to be faster.
