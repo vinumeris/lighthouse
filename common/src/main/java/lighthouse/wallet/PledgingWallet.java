@@ -123,7 +123,8 @@ public class PledgingWallet extends Wallet {
                 Project p = new Project(project);
                 TransactionOutput output = p.getOutputs().get(0).duplicateDetached();
                 LHProtos.Pledge pledgeForProject = contractOuts.get(output);
-                wallet.projects.put(p, pledgeForProject);
+                if (pledgeForProject != null)
+                    wallet.projects.put(p, pledgeForProject);
             }
             for (LHProtos.Pledge pledge : ext.getRevokedPledgesList()) {
                 wallet.revokedPledges.put(hashFromPledge(pledge), pledge);
