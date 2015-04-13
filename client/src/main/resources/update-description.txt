@@ -1,4 +1,4 @@
-Czech and German translations, new server.
-Added lightlist.io to the server list. The project view now resembles a web page. Some other minor bug fixes and visual tweaks.
+Bug fixes, new language translations.
+Spanish, German and Czech translations. Thanks to Carlos, Julian and digital-dreamer.
 
-Switched to using Insight instead of blockchain.info as the block explorer, as Insight seems to be faster.
+Added lightlist.io to the server list. The project view now resembles a web page. Some other minor bug fixes and visual tweaks. Switched to using Insight instead of blockchain.info as the block explorer, as Insight seems to be faster.
