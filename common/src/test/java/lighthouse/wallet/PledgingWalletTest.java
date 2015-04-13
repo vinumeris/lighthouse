@@ -39,9 +39,7 @@ public class PledgingWalletTest {
     }
 
     private PledgingWallet roundtripWallet(PledgingWallet wallet) throws UnreadableWalletException {
-        final Protos.Wallet proto = wallet.serialize();
-        System.err.println(proto);
-        return PledgingWallet.deserialize(proto);
+        return PledgingWallet.deserialize(wallet.serialize());
     }
 
     @Test
@@ -149,18 +147,27 @@ public class PledgingWalletTest {
         assertEquals(1, wallet.getPledges().size());
         assertEquals(500_000 - REFERENCE_DEFAULT_MIN_TX_FEE.longValue(), wallet.getBalance().longValue());
 
-        LHProtos.Pledge proto = wallet.getPledges().iterator().next();
+        // Stub confirms.
+        objects.receiveViaBlock(stubTx);
+
+        // Simulate app reload
+        PledgingWallet newWallet = roundtripWallet(wallet);
+        objects = new WalletTestObjects(() -> newWallet);
+        wallet = (PledgingWallet) objects.wallet;
+        System.err.println(wallet);
+        LHProtos.Pledge[] revokedPledge = new LHProtos.Pledge[1];
+        wallet.addOnRevokeHandler(p -> revokedPledge[0] = p, Threading.SAME_THREAD);
+
+        LHProtos.Pledge proto = wallet.getPledgeFor(project);
+        assertNotNull(proto);
         // Get the pledge stub outpoint.
         Transaction pledgeTx = new Transaction(params, proto.getTransactions(1).toByteArray());
         TransactionOutPoint stubOp = pledgeTx.getInput(0).getOutpoint();
 
-        LHProtos.Pledge[] revokedPledge = new LHProtos.Pledge[1];
-        wallet.addOnRevokeHandler(p -> revokedPledge[0] = p, Threading.SAME_THREAD);
-
+        // And revoke...
         ListenableFuture<Transaction> revocation = wallet.revokePledge(proto, null).broadcast.future();
         assertFalse(revocation.isDone());
-        MockTransactionBroadcaster.TxFuturePair pair = objects.broadcaster.waitForTxFuture();
-        pair.succeed();
+        objects.broadcaster.waitForTxFuture().succeed();
         Transaction tx = revocation.get();
         assertEquals(0, wallet.getPledges().size());
         assertEquals(1_000_000 - REFERENCE_DEFAULT_MIN_TX_FEE.add(REFERENCE_DEFAULT_MIN_TX_FEE).longValue(),

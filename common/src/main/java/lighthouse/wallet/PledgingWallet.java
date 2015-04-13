@@ -103,25 +103,26 @@ public class PledgingWallet extends Wallet {
             for (LHProtos.Pledge pledge : ext.getPledgesList()) {
                 final List<ByteString> txns = pledge.getTransactionsList();
                 // The pledge must be the only tx.
-                Transaction tx = new Transaction(wallet.params, txns.get(txns.size() - 1).toByteArray());
-                if (tx.getInputs().size() != 1) {
-                    log.error("Pledge TX does not seem to have the right form: {}", tx);
+                Transaction pledgeTx = new Transaction(wallet.params, txns.get(txns.size() - 1).toByteArray());
+                if (pledgeTx.getInputs().size() != 1) {
+                    log.error("Pledge TX does not seem to have the right form: {}", pledgeTx);
                     continue;
                 }
                 // Find the stub output that the pledge spends.
-                final TransactionOutPoint op = tx.getInput(0).getOutpoint();
+                final TransactionOutPoint op = pledgeTx.getInput(0).getOutpoint();
                 final Transaction transaction = wallet.transactions.get(op.getHash());
                 checkNotNull(transaction);
                 TransactionOutput output = transaction.getOutput((int) op.getIndex());
                 checkNotNull(output);
                 // Record the contract output it pledges to.
-                contractOuts.put(tx.getOutput(0), pledge);
+                contractOuts.put(pledgeTx.getOutput(0).duplicateDetached(), pledge);
                 log.info("Loaded pledge {}", LHUtils.hashFromPledge(pledge));
                 wallet.pledges.put(output, pledge);
             }
             for (LHProtos.Project project : ext.getProjectsList()) {
                 Project p = new Project(project);
-                LHProtos.Pledge pledgeForProject = contractOuts.get(p.getOutputs().get(0));
+                TransactionOutput output = p.getOutputs().get(0).duplicateDetached();
+                LHProtos.Pledge pledgeForProject = contractOuts.get(output);
                 wallet.projects.put(p, pledgeForProject);
             }
             for (LHProtos.Pledge pledge : ext.getRevokedPledgesList()) {
