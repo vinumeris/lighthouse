@@ -111,6 +111,7 @@ public class PledgingWallet extends Wallet {
                 // Find the stub output that the pledge spends.
                 final TransactionOutPoint op = pledgeTx.getInput(0).getOutpoint();
                 final Transaction transaction = wallet.transactions.get(op.getHash());
+                // TODO: if transaction == null here then the wallet has been reset and this is an orphan pledge.
                 checkNotNull(transaction);
                 TransactionOutput output = transaction.getOutput((int) op.getIndex());
                 checkNotNull(output);
@@ -145,6 +146,9 @@ public class PledgingWallet extends Wallet {
                     new Transaction(params, pledge.getTransactions(0).toByteArray()),
                     pledge.getPledgeDetails().getTotalInputValue(),
                     mapPledgeProject.get(pledge)));
+        }
+        for (Project project : projects.keySet()) {
+            builder.append(String.format("Project: %s%n", project.getTitle()));
         }
         return builder.toString();
     }

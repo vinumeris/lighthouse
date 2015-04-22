@@ -367,6 +367,8 @@ public class Main extends Application {
         // we give to the app kit is currently an exception and runs on a library thread. It'll get fixed in
         // a future version.
         Threading.USER_THREAD = Platform::runLater;
+
+        // TODO: This is blocking! Rework startup so all this stuff is properly in the background again.
         // Bring up a dedicated P2P connection group for Bitcoin XT nodes only. It'll be used for getutxo and nothing
         // else. Syncing to the network, Bloom filtering, etc, will be done by the WAK peer group. It's just easier
         // to do it this way than try to always maintain the correct balance of peers in a single PeerGroup, which
