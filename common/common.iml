@@ -17,7 +17,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.gnu.gettext:libintl:0.18.2" level="project" />
     <orderEntry type="library" name="Maven: com.madgag.spongycastle:core:1.51.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:2.5.0" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.11" level="project" />
@@ -25,6 +24,8 @@
     <orderEntry type="library" name="Maven: org.javatuples:javatuples:1.2" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:2.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.github.stephenc.jcip:jcip-annotations:1.0-1" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:0.11.91.1" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-runtime:0.11.91.1" level="project" />
     <orderEntry type="library" name="Maven: org.bitcoinj:bitcoinj-core:0.13-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: net.jcip:jcip-annotations:1.0" level="project" />
     <orderEntry type="library" name="Maven: com.lambdaworks:scrypt:1.4.0" level="project" />
