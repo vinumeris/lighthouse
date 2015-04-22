@@ -13,6 +13,7 @@ import net.jcip.annotations.*;
 import org.bitcoinj.core.*;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.params.*;
+import org.bitcoinj.script.*;
 import org.slf4j.*;
 import org.spongycastle.crypto.params.*;
 
@@ -296,7 +297,10 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                 // that this works even if we never make any pledge ourselves, for example because we are a server.
                 // We ask the wallet to track it instead of doing this ourselves because the wallet knows how to do
                 // things like watch out for double spends and track chain depth.
-                wallet.addWatchedScripts(mapList(project.getOutputs(), TransactionOutput::getScriptPubKey));
+                List<Script> scripts = mapList(project.getOutputs(), TransactionOutput::getScriptPubKey);
+                for (Script script : scripts)
+                    script.setCreationTimeSeconds(project.getProtoDetails().getTime());
+                wallet.addWatchedScripts(scripts);
                 if (project.getPaymentURL() != null && mode == Mode.CLIENT) {
                     log.info("Checking project against server: {}", project);
                     refreshProjectStatusFromServer(project, null);

@@ -333,7 +333,7 @@ public class PledgingWallet extends Wallet {
     // Returns a spendable output of exactly the given value.
     @Nullable
     private TransactionOutput findAvailableStub(Coin value) {
-        CoinSelection selection = coinSelector.select(value, calculateAllSpendCandidates(true));
+        CoinSelection selection = coinSelector.select(value, calculateAllSpendCandidates());
         if (selection.valueGathered.compareTo(value) < 0)
             return null;
         return findOutputOfValue(value, selection.gathered);
