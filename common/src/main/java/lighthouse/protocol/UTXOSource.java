@@ -1,11 +1,10 @@
 package lighthouse.protocol;
 
-import org.bitcoinj.core.TransactionOutPoint;
-import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.core.*;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
+import java.util.concurrent.*;
 
 public interface UTXOSource {
-    public CompletableFuture<List<TransactionOutput>> getUTXOs(List<TransactionOutPoint> outPoints);
+    CompletableFuture<List<TransactionOutput>> getUTXOs(List<TransactionOutPoint> outPoints);
 }

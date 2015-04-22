@@ -17,24 +17,24 @@ import static lighthouse.protocol.LHUtils.*;
 /** An extended executor interface that supports thread affinity assertions and short circuiting. */
 public interface AffinityExecutor extends Executor {
     /** Returns true if the current thread is equal to the thread this executor is backed by. */
-    public boolean isOnThread();
+    boolean isOnThread();
     /** Throws an IllegalStateException if the current thread is equal to the thread this executor is backed by. */
-    public void checkOnThread();
+    void checkOnThread();
     /** If isOnThread() then runnable is invoked immediately, otherwise the closure is queued onto the backing thread. */
-    public void executeASAP(LHUtils.UncheckedRunnable runnable);
+    void executeASAP(LHUtils.UncheckedRunnable runnable);
 
     /**
      * Runs the given function on the executor, blocking until the result is available. Be careful not to deadlock this
      * way! Make sure the executor can't possibly be waiting for the calling thread.
      */
-    public default <T> T fetchFrom(Supplier<T> fetcher) {
+    default <T> T fetchFrom(Supplier<T> fetcher) {
         if (isOnThread())
             return fetcher.get();
         else
             return checkedGet(CompletableFuture.supplyAsync(fetcher, this));
     }
 
-    public abstract static class BaseAffinityExecutor implements AffinityExecutor {
+    abstract class BaseAffinityExecutor implements AffinityExecutor {
         protected final Thread.UncaughtExceptionHandler exceptionHandler;
 
         protected BaseAffinityExecutor() {
@@ -70,7 +70,7 @@ public interface AffinityExecutor extends Executor {
         public abstract void execute(Runnable command);
     }
 
-    public static AffinityExecutor UI_THREAD = new BaseAffinityExecutor() {
+    AffinityExecutor UI_THREAD = new BaseAffinityExecutor() {
         @Override
         public boolean isOnThread() {
             return Platform.isFxApplicationThread();
@@ -82,7 +82,7 @@ public interface AffinityExecutor extends Executor {
         }
     };
 
-    public static AffinityExecutor SAME_THREAD = new BaseAffinityExecutor() {
+    AffinityExecutor SAME_THREAD = new BaseAffinityExecutor() {
         @Override
         public boolean isOnThread() {
             return true;
@@ -94,7 +94,7 @@ public interface AffinityExecutor extends Executor {
         }
     };
 
-    public static class ServiceAffinityExecutor extends BaseAffinityExecutor {
+    class ServiceAffinityExecutor extends BaseAffinityExecutor {
         private static final Logger log = LoggerFactory.getLogger(ServiceAffinityExecutor.class);
 
         protected AtomicReference<Thread> whichThread = new AtomicReference<>(null);
@@ -158,7 +158,7 @@ public interface AffinityExecutor extends Executor {
      * An executor useful for unit tests: allows the current thread to block until a command arrives from another
      * thread, which is then executed. Inbound closures/commands stack up until they are cleared by looping.
      */
-    public static class Gate extends BaseAffinityExecutor {
+    class Gate extends BaseAffinityExecutor {
         private final Thread thisThread = Thread.currentThread();
         private final LinkedBlockingQueue<Runnable> commandQ = new LinkedBlockingQueue<>();
         private final boolean alwaysQueue;

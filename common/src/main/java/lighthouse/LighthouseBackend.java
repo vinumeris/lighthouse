@@ -55,7 +55,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
 
     private int minPeersForUTXOQuery = 2;
 
-    public static enum Mode {
+    public enum Mode {
         CLIENT,
         SERVER
     }
@@ -65,7 +65,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
      * Is the project currently open for pledges or did it complete successfully? In future we might have EXPIRED here
      * too for deadlined contracts. DiskManager just keeps track of this, doesn't actually calculate the correct answer.
      */
-    public static enum ProjectState {
+    public enum ProjectState {
         OPEN,
         ERROR,
         CLAIMED,

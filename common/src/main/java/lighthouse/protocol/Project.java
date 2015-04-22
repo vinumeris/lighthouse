@@ -451,9 +451,8 @@ public class Project {
 
         Project project = (Project) o;
 
-        if (!projectReq.equals(project.projectReq)) return false;
+        return projectReq.equals(project.projectReq);
 
-        return true;
     }
 
     @Override

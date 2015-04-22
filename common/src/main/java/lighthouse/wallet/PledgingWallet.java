@@ -37,13 +37,13 @@ public class PledgingWallet extends Wallet {
     @GuardedBy("this") private final Map<Sha256Hash, LHProtos.Pledge> revokedPledges;
 
     public interface OnPledgeHandler {
-        public void onPledge(Project project, LHProtos.Pledge data);
+        void onPledge(Project project, LHProtos.Pledge data);
     }
     public interface OnRevokeHandler {
-        public void onRevoke(LHProtos.Pledge pledge);
+        void onRevoke(LHProtos.Pledge pledge);
     }
     public interface OnClaimHandler {
-        public void onClaim(LHProtos.Pledge pledge, Transaction claimTX);
+        void onClaim(LHProtos.Pledge pledge, Transaction claimTX);
     }
 
     private CopyOnWriteArrayList<ListenerRegistration<OnPledgeHandler>> onPledgeHandlers = new CopyOnWriteArrayList<>();
@@ -150,8 +150,8 @@ public class PledgingWallet extends Wallet {
     }
 
     public interface PledgeSupplier {
-        public LHProtos.Pledge getData();
-        public LHProtos.Pledge commit(boolean andBroadcastDeps);
+        LHProtos.Pledge getData();
+        LHProtos.Pledge commit(boolean andBroadcastDeps);
     }
 
     public class PendingPledge implements PledgeSupplier {

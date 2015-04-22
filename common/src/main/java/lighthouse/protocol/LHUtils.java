@@ -124,11 +124,11 @@ public class LHUtils {
 
     //region Generic Java 8 enhancements
     public interface UncheckedRun<T> {
-        public T run() throws Throwable;
+        T run() throws Throwable;
     }
 
     public interface UncheckedRunnable {
-        public void run() throws Throwable;
+        void run() throws Throwable;
     }
 
     public static <T> T unchecked(UncheckedRun<T> run) {

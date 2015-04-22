@@ -574,7 +574,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // And the pledge was saved to disk named after the hash of the pledge contents.
         final Sha256Hash pledgeHash = Sha256Hash.hash(pledge.toByteArray());
         final List<Path> dirFiles = mapList(listDir(AppDirectory.dir()), Path::getFileName);
-        assertTrue(dirFiles.contains(Paths.get(pledgeHash.toString() + DiskManager.PLEDGE_FILE_EXTENSION)));
+        assertTrue(dirFiles.contains(Paths.get(pledgeHash + DiskManager.PLEDGE_FILE_EXTENSION)));
     }
 
     @Test
@@ -632,7 +632,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // Pledge NOT saved to disk.
         final Sha256Hash pledgeHash = Sha256Hash.hash(pledge.toByteArray());
         final List<Path> dirFiles = mapList(listDir(AppDirectory.dir()), Path::getFileName);
-        assertFalse(dirFiles.contains(Paths.get(pledgeHash.toString() + DiskManager.PLEDGE_FILE_EXTENSION)));
+        assertFalse(dirFiles.contains(Paths.get(pledgeHash + DiskManager.PLEDGE_FILE_EXTENSION)));
     }
 
     @Test
