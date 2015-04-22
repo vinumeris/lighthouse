@@ -105,7 +105,7 @@ public class FileOpenRequests {
             @Override
             public void handleOpenFilesAction(com.sun.glass.ui.Application app, long time, String[] files) {
                 for (String strPath : files) {
-                    if (strPath.equals("com.intellij.rt.execution.application.AppMain"))
+                    if (strPath.equals("com.intellij.rt.execution.application.AppMain") || strPath.contains(".jar:"))
                         continue;   // Only happens in dev environment.
                     Main.log.info("OS is requesting that we open " + strPath);
                     Platform.runLater(() -> {
