@@ -91,6 +91,16 @@ public class MainWindow {
     public void onBitcoinSetup() {
         checkGuiThread();
         bitcoinUIModel.setWallet(Main.wallet);
+
+        if (Main.wallet.getExtensions().isEmpty()) {
+            // TODO: i18n this after next release
+            informationalAlert("Error loading wallet",
+                            "The Lighthouse specific wallet data failed to load properly. Your money is safe, but the " +
+                            "application may not recognise that you have pledged to projects. Please email contact@vinumeris.com " +
+                            "and request assistance. You should withdraw your funds using the 'empty wallet' button, which will " +
+                            "revoke any pledges you have made.");
+        }
+
         addressControl.addressProperty().bind(bitcoinUIModel.addressProperty());
         balance.textProperty().bind(EasyBind.map(bitcoinUIModel.balanceProperty(), coin -> MonetaryFormat.BTC.noCode().format(coin).toString()));
         // Don't let the user click send money when the wallet is empty.
