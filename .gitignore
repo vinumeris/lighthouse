@@ -6,5 +6,7 @@ deploy
 updates
 *.iml
 client/client.iml
+common/common.iml
+server/server.iml
 package/macosx/Info.plist
 win-build.ps1
