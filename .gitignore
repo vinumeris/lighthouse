@@ -1,4 +1,6 @@
 .idea
+.tx
+client/src/main/resources/lighthouse/locale
 *.wallet
 *.spvchain
 target/

@@ -1,0 +1,759 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# lightlist.io <lightlist.io@gmail.com>, 2015
+msgid ""
+msgstr ""
+"Project-Id-Version: Lighthouse\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-03-29 23:05+0200\n"
+"PO-Revision-Date: 2015-04-03 00:54+0000\n"
+"Last-Translator: lightlist.io <lightlist.io@gmail.com>\n"
+"Language-Team: German (http://www.transifex.com/projects/p/lighthouse-app/language/de/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. TRANS: %s = payment URL
+msgid "Server path not valid for Lighthouse protocol: %s"
+msgstr "Serverpfad ungültig für Lighthouse Protokoll: %s"
+
+#. TRANS: %s = transaction output
+msgid "Output type is not pay to address/p2sh: %s"
+msgstr "Output type ist nicht 'pay to address'/'p2sh': %s"
+
+msgid "Copy to clipboard"
+msgstr "In die Zwischenablage kopieren"
+
+#. TRANS: %s = goal amount in BTC
+#, c-format
+msgid "PLEDGED OF %s BTC GOAL"
+msgstr "VOM ZIELBETRAG %s ZUGESAGT"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "Copy description"
+msgstr "Beschreibung kopieren"
+
+msgid "View technical details"
+msgstr "Technische Details anzeigen"
+
+msgid "PLEDGERS"
+msgstr "Spender"
+
+msgid "FUNDED"
+msgstr "vom Spendenziel erreicht"
+
+msgid "Export as CSV ..."
+msgstr "Als CSV exportieren ..."
+
+msgid "No pledges yet!"
+msgstr "Noch keine Spenden-Zusagen"
+
+msgid ""
+"Project is not on the server yet: email the project file to the operator"
+msgstr "Das Projekt ist noch nicht auf dem Server: Bitte schicke die Projektdatei an den Serverbetreiber"
+
+msgid ""
+"Bitcoin P2P network returned inconsistent answers, please contact support"
+msgstr "Das Bitcoin P2P Netzwerk kann sich nicht einigen, bitte kontaktiere den Support"
+
+msgid "Server error: Timed out"
+msgstr "Server Fehler: Zeitüberschreitung"
+
+msgid "Internal error: "
+msgstr "Interner Fehler:"
+
+#. TRANS: %s = error message
+msgid "Error: %s"
+msgstr "Fehler: %s"
+
+msgid "Fully funded"
+msgstr "Spendenziel erreicht"
+
+msgid "Pledge"
+msgstr "Spende zusagen"
+
+msgid "Revoke"
+msgstr "Spende widerrufen"
+
+msgid "Claim"
+msgstr "Transaktion anforden"
+
+msgid "View claim transaction"
+msgstr "Transaktion anzeigen"
+
+msgid "View more"
+msgstr "Mehr anzeigen"
+
+msgid "Anonymous"
+msgstr "Unbekannt"
+
+msgid "Unable to edit"
+msgstr "Bearbeiten nicht möglich"
+
+msgid ""
+"You cannot edit a project that has already started gathering pledges, as "
+"otherwise existing pledges could be invalidated and participants could get "
+"confused. If you would like to change this project either create a new one, "
+"or request revocation of existing pledges."
+msgstr "Ein Projekt, für das schon Spendenzusagen eingegangen sind, kann nicht mehr geändert werden, andernfalls würden diese ungültig und die Teilnehmer verwirrt werden. Falls du das Projekt trotzdem ändern willst. kannst de entweder ein neues erstellen oder um den Widerruf der Spendenzusagen bitten."
+
+msgid "Description copied to clipboard"
+msgstr "Die Beschreibung wurde in die Zwischenablage kopiert."
+
+msgid "Unable to fetch email addresses"
+msgstr "Die Email Adressen konnten nicht geladen werden."
+
+#. TRANS: %s = error message
+msgid "Could not fetch project status from server: %s"
+msgstr "Der Projektstatus konnte nicht vom Server geladen werden: %s"
+
+msgid "Export pledges to CSV file"
+msgstr "Zusagen in als CSV Datei exportieren"
+
+msgid "Export succeeded"
+msgstr "Exportieren erfolgreich"
+
+msgid ""
+"Pledges are stored in a CSV file, which can be loaded with any spreadsheet "
+"application. Amounts are specified in satoshis."
+msgstr "Zusagen sind in einer CSV Datei gespeichert die mit einer Tabellen Software geladen werden kann. Beträge sind als Satoshis angegeben."
+
+msgid "Export failed"
+msgstr "Exportieren fehlgeschlagen"
+
+#. TRANS: %s = error message
+msgid "Lighthouse was unable to save pledge data to the selected file: %s"
+msgstr "Lighthouse konnte die Zusagen nicht in die angegebene Datei speichern: %s"
+
+msgid "Read more ..."
+msgstr "Mehr lesen ..."
+
+msgid "Copy address to clipboard"
+msgstr "Adresse in die Zwischenablage kopieren"
+
+msgid "Show a barcode scannable with a mobile phone for this address"
+msgstr "Diese Adresse als Handy-lesbaren Barcode anzeigen."
+
+msgid "Address copied to clipboard"
+msgstr "Adresse wurde in die Zwischenablage kopiert"
+
+msgid "QR code"
+msgstr "QR code"
+
+#. TRANS: %s = amount in BTC
+msgid "%s BTC raised so far"
+msgstr "%s BTC bereits zugesagt"
+
+msgid "Loading ..."
+msgstr "Lade ..."
+
+msgid "You created this project"
+msgstr "Du hast dieses Projekt erstellt"
+
+msgid "Already running"
+msgstr "Bereits am laufen"
+
+msgid "This application is already running and cannot be started twice."
+msgstr "Diese Anwendung ist bereits am laufen und kann nicht zweimal ausgeführt werden."
+
+msgid "Local Bitcoin node not usable"
+msgstr "Lokale Bitcoin node nicht nutzbar"
+
+#. TRANS: %s = app name
+msgid ""
+"You have a Bitcoin (Core) node running on your computer, but it doesn't have"
+" the protocol support %s needs. %s will still work but will use the peer to "
+"peer network instead, so you won't get upgraded security. Try installing "
+"Bitcoin XT, which is a modified version of Bitcoin Core that has the "
+"upgraded protocol support."
+msgstr "Eine Bitcoin (Core) node läuft auf deinem Computer, aber sie hat nicht die Protokollunterstützung die %s braucht. %s wird trotzdem funktionieren, aber stattdessen das Peer-to-Peer Netzwerk benutzen, deswegen wird die Sicherheit nicht erhöht sein. Versuche Bitcoin XT zu installieren, was eine modifizierte Version von Bitcoin Core mit der verbesserten Protokollunterstützung."
+
+msgid "View pledge"
+msgstr "Zusage anzeigen"
+
+msgid "Save to file"
+msgstr "In Datei speichern"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "pledged by"
+msgstr "zugesagt von"
+
+msgid "on"
+msgstr "auf"
+
+msgid "No attached message"
+msgstr "Keine Nachricht angehängt"
+
+msgid "Confirm"
+msgstr "Bestätigen"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Password"
+msgstr "Passwort"
+
+msgid "Bad password"
+msgstr "Schlechtes Passwort"
+
+msgid "The password you entered is empty or too short."
+msgstr "Das eingegebene Passwort ist zu kurz"
+
+msgid "Wrong password"
+msgstr "Falsches Passwort"
+
+msgid ""
+"Please try entering your password again, carefully checking for typos or "
+"spelling errors."
+msgstr "Bitte das Passwort erneut eingeben und auf Schreibfehler achten."
+
+msgid "Create new project"
+msgstr "Neues Projekt erstellen"
+
+msgid "Edit project"
+msgstr "Projekt bearbeiten"
+
+#. TRANS: %d = maximum number of pledges
+msgid ""
+"You can collect a maximum of %d pledges, due to limits in the Bitcoin "
+"protocol."
+msgstr "Du kannst maximal %s Zusagen sammeln. Dies ist eine Limitierung des Bitcoin Protokolls."
+
+msgid "Project name"
+msgstr "Projekt Name"
+
+msgid "Goal amount"
+msgstr "Zielbetrag"
+
+msgid "Min pledge"
+msgstr "Min Zusage"
+
+msgid "Address"
+msgstr "Adresse"
+
+msgid "Drop a custom image or click here to open"
+msgstr "Du kannst per drap&drop oder per anklicken ein Bild hinzufügen"
+
+msgid "Cover image"
+msgstr "Titelbild"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid "Preview formatted text"
+msgstr "Formatierten Text anzeigen"
+
+msgid "Email address"
+msgstr "Email Adresse"
+
+msgid "Next"
+msgstr "Weiter"
+
+msgid "Example: Building a lighthouse"
+msgstr "Bespiel: Einen Leuchtturm bauen"
+
+msgid "You can format text using Markdown syntax."
+msgstr "Du kannst den Text mit Markdown formatieren"
+
+msgid "How can supporters get in touch with you?"
+msgstr "Wie koennen dich deine Unterstützer erreichen?"
+
+msgid "Title conflict"
+msgstr "Titel konflikt"
+
+msgid ""
+"You already have a project with that title. Please choose another. If you "
+"are trying to create a different version, consider putting the date or a "
+"number in the title so people can distinguish them."
+msgstr "Es gibt schon ein Projekt mit diesem Titel, bitte wähle einen anderen. Falls du eine andere Version erstellen willst, kannst du das Datum oder eine Versionsnummer in den Titel schreiben, damit andere es unterscheiden können."
+
+msgid "Select an image file"
+msgstr "Ein Bild auswaehlen"
+
+msgid "Images (JPG/PNG/GIF)"
+msgstr "Bilder (JPG/PNG/GIF)"
+
+msgid "Image load failed"
+msgstr "Bild konnte nicht geladen werden"
+
+#. TRANS: %s = error message
+msgid "Could not download the image from the remote server: %s"
+msgstr "Das Bild konnte nicht von dem Server geladen werden: %s"
+
+#. TRANS: %s = image URL
+msgid "Download of %s"
+msgstr "%s herunterladen"
+
+msgid "Image too large"
+msgstr "Bildgrösse überschritten"
+
+msgid ""
+"Please make sure your image is smaller than 5mb, any larger is excessive."
+msgstr "Bitte wähle eine Bild das kleiner als 5mb ist"
+
+msgid "Failed to load image"
+msgstr "Das Bild konnte nicht geladen werden"
+
+msgid "https://help.github.com/articles/markdown-basics/"
+msgstr "https://help.github.com/articles/markdown-basics/"
+
+msgid "Amount"
+msgstr "Betrag"
+
+msgid "Maximum amount possible"
+msgstr "Maximaler Betrag"
+
+msgid "Minimum amount possible"
+msgstr "Minimaler Betrag"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Message to project owner (optional)"
+msgstr "Nachricht an den Projekt Ersteller (optional)"
+
+msgid "Name and message will be public."
+msgstr "Name und Nachricht sind öffentlich sichtbar"
+
+msgid "Name, email and message will be public."
+msgstr "Name, Email Adresse und Nachricht werden öffentlich sichtbar sein"
+
+#. TRANS: %s = example BTC amount limit
+msgid "e.g. %s"
+msgstr "z.B. %s"
+
+msgid "Target address"
+msgstr "Zieladresse"
+
+msgid "Server URL"
+msgstr "Server URL"
+
+msgid "Min pledge size"
+msgstr "Min Spendenzusage"
+
+msgid "Auth key"
+msgstr "Auth Schlüssel"
+
+msgid "Network parameters"
+msgstr "Netzwerk Parameter"
+
+msgid "Creation time"
+msgstr "Erstelldatum"
+
+msgid "Serverless project"
+msgstr "Serverloses Projekt"
+
+msgid "Project details"
+msgstr "Projekt Details"
+
+msgid "Wallet settings"
+msgstr "Wallet Einstellungen"
+
+msgid "Remove password"
+msgstr "Passwort entfernen"
+
+msgid ""
+"These are your wallet words. Write them down along with the creation date, "
+"and you can get your money back even if you lose all your wallet backup "
+"files. Just type the details back in below to restore!"
+msgstr "Das ist die Wallet Wortliste. Schreib sie zusammen mit dem Erstellungsdatum auf, um die Wallet später wieder herzustellen, selbst wenn du alle Backupdateien verloren hast. Zur Wiederherstellung einfach die Details hier unten eingeben."
+
+msgid "Created on:"
+msgstr "Erstellt:"
+
+msgid "Set password"
+msgstr "Passwort setzen"
+
+msgid "Restore from words"
+msgstr "Von Wörtern wiederherstellen"
+
+msgid "Wallet is not empty"
+msgstr "Wallet ist nicht leer"
+
+msgid ""
+"You must empty this wallet out before attempting to restore an older one, as"
+" mixing wallets together can lead to invalidated backups."
+msgstr "Diese Wallet muss erst geleert werden, bevor versucht werden kann. eine alte wieder herzustellen. Das Vermischen von Wallets kann zu ungültigen Backups führen."
+
+msgid "Wallet is encrypted"
+msgstr "Wallet ist verschlüsselt"
+
+msgid ""
+"After restore, the wallet will no longer be encrypted and you must set a new"
+" password."
+msgstr "Nach der Wiederherstellung wird die Wallet nicht mehr verschlüsselt sein, weshalb ein neues Passwort ausgewählt werden muss."
+
+msgid "Wallet restore in progress"
+msgstr "Wallet Wiederherstellung im Vorgang"
+
+msgid ""
+"Your wallet will now be resynced from the Bitcoin network. This can take a "
+"long time for old wallets."
+msgstr "Deine Wallet wird jetzt nochmals mit dem Bitcoin Netzwerk synchronisiert. Für ältere Wallets kann dies eine lange Zeit in Anspruch nehmen. "
+
+msgid "Wallet decrypted"
+msgstr "Wallet entschlüsselt"
+
+msgid "A password will no longer be required to send money or edit settings."
+msgstr "Um Geld zu verschicken oder Einstellungen zu ändern ist kein Passwort mehr nötig."
+
+msgid "Always use this version"
+msgstr "Immer diese Version verwenden"
+
+msgid "Application updates"
+msgstr "Software updates"
+
+msgid "Version change"
+msgstr "Versionsänderungen"
+
+msgid ""
+"You will be switched to always track the latest version. The app will now "
+"restart."
+msgstr "Umstellung um immer die aktuellste Version zu benutzen. Die Anwendung startet jetzt neu."
+
+#. TRANS: %d = version number
+msgid ""
+"You will be switched to always use version %d. The app will now restart."
+msgstr "Umstellung um immer die Version %d zu benutzen. Die Anwendung startet jetzt neu."
+
+msgid "Now submit your project for hosting:"
+msgstr "Bitte sende dein Projekt jetzt zum Server Betreiber:"
+
+msgid "Information"
+msgstr "Information"
+
+msgid "Connecting to server ..."
+msgstr "Verbindung zum Server wird hergestellt ..."
+
+msgid "Upload"
+msgstr "Hochladen"
+
+#. TRANS: %s = error message
+msgid "Connection failed: %s"
+msgstr "Verbindung fehlgeschlagen: %s"
+
+msgid "Connected, uploading ..."
+msgstr "Verbunden, lade hoch ..."
+
+#. TRANS: %d = error code number, %s = error message
+msgid "Server said %d %s"
+msgstr "Server sagt %d %s"
+
+msgid "Upload failed"
+msgstr "Hochladen fehlgeschlagen"
+
+#. TRANS: %s = error message
+msgid ""
+"%s. This probably indicates either a problem with your internet connection "
+"or a configuration issue with the server. You could try again later."
+msgstr "%s. Das bedeutet entweder ein Problem mit der Internetverbindung oder mit der Konfiguration des Servers. Probiere es später noch einmal."
+
+msgid ""
+"Setting a password on your wallet makes it safer against viruses and theft. "
+"You will need to enter your password whenever money is sent."
+msgstr "Ein Passwort für deine Wallet macht sie sicherer gegen Viren und Diebstahl. Es muss jedes mal eingegeben werden, wenn du Geld verschickt wird. "
+
+msgid "Enter password"
+msgstr "Passwort eingeben"
+
+msgid "Repeat password"
+msgstr "Passwort wiederholen"
+
+msgid "Passwords do not match"
+msgstr "Passwörter sind unterschiedlich"
+
+msgid "Try re-typing your chosen passwords."
+msgstr "Bitte gebe dein gewähltes Passwort nochmals ein."
+
+msgid "Password too short"
+msgstr "Passwort zu kurz"
+
+msgid "You need to pick a password at least five characters or longer."
+msgstr "Das Passwort muss mindestens fünf Zeichen lang sein."
+
+msgid "Wallet encrypted"
+msgstr "Wallet verschlüsselt"
+
+msgid "You can remove the password at any time from the settings screen."
+msgstr "Du kannst das Passwort jederzeit in den Einstellungen wieder entfernen."
+
+msgid ""
+"This operation incurs a small miners fee because it requires making a "
+"Bitcoin transaction."
+msgstr "Dieser Vorgang benötigt eine kleine Gebühr für die Miner, weil er eine Bitcoin Transaktion notwendig macht."
+
+msgid "Revoke pledge"
+msgstr "Zusage zurückziehen"
+
+msgid "Claim pledges"
+msgstr "Transaktion ausführen"
+
+msgid ""
+"Claiming a project sends all the pledged money to the project's goal "
+"address. "
+msgstr "Die Transaktion schickt alle Spendenzusagen an die Zieladresse des Projektes."
+
+msgid "Revoking a pledge returns the money to your wallet. "
+msgstr "Der Widerruf einer Spendenzusage schicktt das Geld wieder in deine Wallet zurück."
+
+msgid "Unable to claim"
+msgstr "Zurückziehen der Spendenzusage fehlgeschlagen"
+
+msgid "One or more pledges have been revoked whilst you were waiting."
+msgstr "Eine oder mehrere Spendenzusagen wurden widerrufen während du gewartet hast."
+
+msgid "Transaction acceptance issue"
+msgstr "Die Transaktion wurde nicht akzeptiert"
+
+#. TRANS: %s = error message
+msgid "The Bitcoin network has rejected the claim: %s"
+msgstr "Das Bitcoin Netzwerk hat die Transaktion zurückgewiesen: %s"
+
+msgid "Too much money"
+msgstr "Zu viel Geld"
+
+#. TRANS: %s = difference in BTC
+msgid ""
+"You have gathered pledges that add up to more than the goal. The excess "
+"cannot be redeemed in the current version of the software and would end up "
+"being paid completely to miners fees. Please remove some pledges and try to "
+"hit the goal amount exactly. There is %s too much."
+msgstr "Die Spendenzusagen belaufen sich auf mehr als der Zielbetrag. Der Überschuss kann in der aktuellen Version nicht eingelöst werden und würde komplett als Gebühr an die Miner gehen. Bitte entferne paar Spendenzusagen und versuche den Zielbetrag genau zu erreichen. %s ist zu viel."
+
+msgid "Cannot claim pledges"
+msgstr "Die Transaktion konnte nicht ausgeführt werden"
+
+msgid ""
+"Closing the contract requires paying Bitcoin network fees, but you don't "
+"have enough money in the wallet. Add more money and try again."
+msgstr "Zum Abschluss des Vertrages ist eine Gebühr für das Bitcoin Netzwerk notwendig, aber es ist nicht genug Geld in der Wallet. Schicke etwas mehr Geld dahin und versuche es erneut. "
+
+#. TRANS: %s = error message
+msgid "The Bitcoin network has rejected the revocation transaction: %s"
+msgstr "Das Bitcoin Netzwerk hat die Widerruftransaktion zurück gerufen: %s"
+
+msgid "Cannot revoke pledge"
+msgstr "Das zurückziehen der Spendenzusage ist fehlgeschlagen"
+
+msgid ""
+"Revoking a pledge requires making another Bitcoin transaction on the block "
+"chain, but you don't have sufficient funds to pay the required fee. Add more"
+" money and try again."
+msgstr "Zum Abschluss des Vertrages ist eine Gebühr für das Bitcoin Netzwerk notwendig, aber es ist nicht genug Geld in der Wallet. Schicke etwas mehr Geld dahin und versuche es erneut. "
+
+msgid "Drag to a folder, email or chat window. Or ..."
+msgstr "Ziehe die Datei in einen Ordner, Email oder Chat Fenster. Oder..."
+
+msgid ""
+"The folder you save the project to will be watched, and any pledges found "
+"there will be automatically loaded."
+msgstr "Der Ordner in dem du die Projekt Datei speicherst wird nach Spenden Zusagen gescannt. Wenn du welche erhälst, speicher sie in dem gleichen Ordner und sie tauchen automatisch auf."
+
+msgid "Export pledge"
+msgstr "Spendenzusage exportieren"
+
+msgid "Export project"
+msgstr "Projekt exportieren"
+
+#. TRANS: %1$s = pledger's name, %2$s = project name, %3$s = file extension
+msgid "Pledge by %1$s for %2$s%3$s"
+msgstr "Spendenzusage von %1$s für %2$s%3$s"
+
+msgid "Save pledge to a file"
+msgstr "Spendenzusage als Datei speichern"
+
+msgid "Save project to a file"
+msgstr "Projekt als Datei speichern"
+
+msgid "Failed to save file"
+msgstr "Speichern fehlgeschlagen"
+
+msgid "Send to address:"
+msgstr "An diese Adresse senden:"
+
+msgid "Send"
+msgstr "Senden"
+
+msgid "Empty wallet"
+msgstr "Wallet leeren"
+
+msgid "Could not empty the wallet"
+msgstr "Die Wallet konnte nicht geleert werden"
+
+msgid ""
+"You may have too little money left in the wallet to make a transaction."
+msgstr "Du hast zu wenig Geld in der Wallet um eine Transaktion zu machen."
+
+#. TRANS: %d = number of peers
+msgid "Broadcasting ... seen by %d peers"
+msgstr "Verschicke Transaktion ... von %s peers gesehen"
+
+msgid "Change type"
+msgstr "Typ ändern"
+
+msgid "Select type"
+msgstr "Typ wählen"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Back"
+msgstr "Zurück"
+
+msgid ""
+"A server collects and monitors pledges on your behalf. You can use a "
+"community run server or run your own."
+msgstr "Der Server sammelt und überwacht Spendenzusagen für dich. Du kannst einen öffentlichen benutzen oder selber einen betreiben.  "
+
+msgid "Server name"
+msgstr "Server Name"
+
+msgid "Server instructions"
+msgstr "Server Anweisungen"
+
+msgid "Server assisted"
+msgstr "Server unterstützt"
+
+msgid "Fully decentralised"
+msgstr "Komplett dezentralisiert"
+
+msgid ""
+"This style of project does not require any server. Backers will be given a pledge file that they must get back to you via email, shared folder, instant messaging etc. People will not be able to see how much money was raised so far unless they download the pledge files themselves.\n"
+"\n"
+"Fully decentralised can be an appropriate choice when you are fund raising from a group of friends or will be managing the pledges in some other way. It's less convenient but doesn't require any infrastructure."
+msgstr "Diese Projektart benötigt keinen Server. Unterstützer bekommen eine Datei der Spendenzusage, die diese an dich via E-mail, Onlinespeicherplatz, Messaging, etc schicken müssen. Andere können nicht sehen wie viel Geld schon gesammelt worden ist, außer sie laden die Dateien der Spendenzusagen selber herunter.\n\nKomplett dezentralisiert kann eine gute Wahl sein wenn du Geld von Freunden einsammelst oder die Spendenzusagen auf andere Weise managst. Diese Art ist unbequemlicher, aber benötigt keine Infrastruktur."
+
+msgid "You must pick a server."
+msgstr "Bitte wähle einen Server."
+
+msgid "The server name is not considered valid."
+msgstr "Der Server Name ist ungültig."
+
+msgid "Folder watching"
+msgstr "Ordner überwachen"
+
+msgid ""
+"The folder to which you save your project file will be watched for pledge "
+"files. When you receive them from backers, just put them in the same "
+"directory and they will appear."
+msgstr "Der Ordner in dem du die Projekt Datei speicherst wird nach Spenden Zusagen gescannt. Wenn du welche erhälst, speicher sie in dem gleichen Ordner und sie tauchen automatisch auf."
+
+msgid "Select a directory to store the project and pledges"
+msgstr "Wähle einen Ordner um die Projekt und Zusagen Dateien zu speichern."
+
+msgid "Could not save project"
+msgstr "Projekt konnte nicht gespeichert werden"
+
+#. TRANS: %s = error message
+msgid "An error was encountered whilst trying to save the project: %s"
+msgstr "Beim Speichern des Projektes ist ein Fehler aufgetreten: %s"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Action"
+msgstr "Aktion"
+
+msgid "Unfortunately, we screwed up and the app crashed. Sorry about that!"
+msgstr "Die Software ist abgestürzt. Sorry!"
+
+msgid "Submission via email. Project must be legal under Swiss and UK law."
+msgstr "Per Email einsenden. Das Projekt muss nach schweitzer und UK Recht legal sein."
+
+msgid "Submission via email. Project must be legal under US law."
+msgstr "Per Email einsenden. Das Projekt muss nach US Recht legal sein."
+
+msgid "Submission via email. Project must be legal under New Zealand law."
+msgstr "Per Email einsenden. Das Projekt muss nach neuseeländischem Recht legal sein."
+
+msgid "Submission via the web. Project must be legal under US law."
+msgstr "Per Webseite hochladen. Das Projekt muss nach US Recht legal sein."
+
+msgid "Send money out of the wallet"
+msgstr "Geld von der Wallet senden"
+
+msgid "Make paper backup and encrypt your wallet"
+msgstr "Papier Backup erstellen oder Wallet verschlüsseln"
+
+msgid "YOUR ADDRESS"
+msgstr "DEINE ADRESSE"
+
+msgid "Set up wallet"
+msgstr "Wallet einrichten"
+
+msgid "YOUR BALANCE"
+msgstr "DEIN KONTOSTAND"
+
+msgid "Create project"
+msgstr "Projekt erstellen"
+
+msgid "Import project"
+msgstr "Projekt importieren"
+
+msgid "You can also drop an existing project file here."
+msgstr "Eine bestehende Projektdatei kann auch hier abgelegt werden "
+
+msgid "Select a bitcoin project file to import"
+msgstr "Bitte eine Bitcoin Projektdatei auswählen"
+
+msgid "Project/contract files"
+msgstr "Projekt- und Vertragsdateien"
+
+msgid "Import failed"
+msgstr "Import fehlgeschlagen"
+
+#. TRANS: %1$s = app name, %2$s = error message
+msgid ""
+"Could not copy the dropped pledge into the %1$s application directory: %2$s"
+msgstr "Konnte die abgelegte Datei nicht ins %1$s Verzeichnis der Anwendung kopieren: %2$s"
+
+msgid "Failed to import project"
+msgstr "Import des Projektes fehlgeschlagen."
+
+#. TRANS: %s = error message
+msgid "Could not read project file: %s"
+msgstr "Konnte Projektdatei nicht einlesen: %s"
+
+msgid ""
+"You are offline. You will not be able to use the app until you go online and"
+" restart."
+msgstr "Keine Internetverbindung. Bitte Verbindung zum Internet herstellen und die Anwendung neu starten."
+
+msgid "Initialising Tor"
+msgstr "TOR vorbereiten"
+
+msgid "Downloading software update"
+msgstr "Downloading Softwareupdate"
+
+msgid "Restart"
+msgstr "Neustarten"
+
+msgid "Please restart the app to upgrade to the new version."
+msgstr "Bitte die App neu starten, um auf die neue Version upzugraden."
+
+msgid "Online update failed"
+msgstr "Onlineupdate fehlgeschlagen"
+
+#. TRANS: %s = error message
+msgid ""
+"An error was encountered whilst attempting to download or apply an online "
+"update: %s"
+msgstr "Es trat ein Fehler beim Versuch auf, ein Onlineupdate herunter zu laden oder zu installieren"
+
+msgid "Synchronising with the Bitcoin network"
+msgstr "Synchronisieren mit dem Bitcoin Netzwerk "
+
+msgid "You don't have any bitcoins in this wallet"
+msgstr "Du hast keine bitcoins in dieser Wallet."
+
+msgid "Send some money to this address first"
+msgstr "Sende zuerst etwas Geld an diese Adresse"

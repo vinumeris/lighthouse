@@ -1,0 +1,760 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Automatically generated, 2015
+# digitaldreamer <digitaldreamer@email.cz>, 2015
+msgid ""
+msgstr ""
+"Project-Id-Version: Lighthouse\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-03-29 23:05+0200\n"
+"PO-Revision-Date: 2015-03-29 21:18+0000\n"
+"Last-Translator: Mike Hearn <hearn@vinumeris.com>\n"
+"Language-Team: Czech (http://www.transifex.com/projects/p/lighthouse-app/language/cs/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: cs\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#. TRANS: %s = payment URL
+msgid "Server path not valid for Lighthouse protocol: %s"
+msgstr "Tato cesta serveru není pro protokol Lighthouse platná: %s"
+
+#. TRANS: %s = transaction output
+msgid "Output type is not pay to address/p2sh: %s"
+msgstr "Typ výstupu není platba na adresu/p2sh: %s"
+
+msgid "Copy to clipboard"
+msgstr "Zkopírovat do clipboardu"
+
+#. TRANS: %s = goal amount in BTC
+#, c-format
+msgid "PLEDGED OF %s BTC GOAL"
+msgstr "PŘISLÍBENO Z POTŘEBNÝCH %s BTC"
+
+msgid "Edit"
+msgstr "Editovat"
+
+msgid "Copy description"
+msgstr "Zkopírovat popis"
+
+msgid "View technical details"
+msgstr "Zobrazit technické podrobnosti"
+
+msgid "PLEDGERS"
+msgstr "PŘISPĚVATELŮ"
+
+msgid "FUNDED"
+msgstr "CÍLOVÉ ČÁSTKY"
+
+msgid "Export as CSV ..."
+msgstr "Exportovat jako CSV..."
+
+msgid "No pledges yet!"
+msgstr "Nikdo zatím nic nepřislíbil."
+
+msgid ""
+"Project is not on the server yet: email the project file to the operator"
+msgstr "Projekt zatím není na serveru. Pošlete prosím soubor projektu emailem provozovateli serveru."
+
+msgid ""
+"Bitcoin P2P network returned inconsistent answers, please contact support"
+msgstr "P2P síť Bitcoin vrátila protichůdné odpovědi, obraťte se prosím na technickou podporu"
+
+msgid "Server error: Timed out"
+msgstr "Chyba serveru: příliš dlouho neodpovídá"
+
+msgid "Internal error: "
+msgstr "Vnitřní chyba: "
+
+#. TRANS: %s = error message
+msgid "Error: %s"
+msgstr "Chyba: %s"
+
+msgid "Fully funded"
+msgstr "Plně financováno"
+
+msgid "Pledge"
+msgstr "Přislíbit"
+
+msgid "Revoke"
+msgstr "Odvolat"
+
+msgid "Claim"
+msgstr "Vybrat peníze"
+
+msgid "View claim transaction"
+msgstr "Zobrazit transakci výběru"
+
+msgid "View more"
+msgstr "Zobrazit více"
+
+msgid "Anonymous"
+msgstr "Anonym"
+
+msgid "Unable to edit"
+msgstr "Editace není možná"
+
+msgid ""
+"You cannot edit a project that has already started gathering pledges, as "
+"otherwise existing pledges could be invalidated and participants could get "
+"confused. If you would like to change this project either create a new one, "
+"or request revocation of existing pledges."
+msgstr "Nemůžete editovat projekt, který již začal sbírat přísliby. Tím by se tyto přísliby stali neplatnými, a přispěvatele by to zmátlo. Pokud chcete projekt změnit, můžete buď vytvořit nový, nebo požádat o odvolání existujících příslibů."
+
+msgid "Description copied to clipboard"
+msgstr "Popis byl zkopírován do clipboardu"
+
+msgid "Unable to fetch email addresses"
+msgstr "Nelze načíst emailové adresy"
+
+#. TRANS: %s = error message
+msgid "Could not fetch project status from server: %s"
+msgstr "Nepodařilo se načíst stav projektu ze serveru: %s"
+
+msgid "Export pledges to CSV file"
+msgstr "Exportovat přísliby jako soubor CSV"
+
+msgid "Export succeeded"
+msgstr "Export proběhl úspěšně"
+
+msgid ""
+"Pledges are stored in a CSV file, which can be loaded with any spreadsheet "
+"application. Amounts are specified in satoshis."
+msgstr "Přísliby byly uloženy do souboru ve formátu CSV, který lze snadno nahrát do kteréhokoli tabulkového procesoru. Částky jsou uvedeny v satoshi."
+
+msgid "Export failed"
+msgstr "Exportování se nezdařilo"
+
+#. TRANS: %s = error message
+msgid "Lighthouse was unable to save pledge data to the selected file: %s"
+msgstr "Lighthouse nedokázal uložit data příslibu do zvoleného souboru: %s"
+
+msgid "Read more ..."
+msgstr "Více..."
+
+msgid "Copy address to clipboard"
+msgstr "Zkopírovat adresu do clipboardu"
+
+msgid "Show a barcode scannable with a mobile phone for this address"
+msgstr "Zobrazit \"čárový kód\" pro tuto adresu, který lze vyfotit mobilním telefonem"
+
+msgid "Address copied to clipboard"
+msgstr "Adresa byla zkopírována do clipboardu"
+
+msgid "QR code"
+msgstr "QR kód"
+
+#. TRANS: %s = amount in BTC
+msgid "%s BTC raised so far"
+msgstr "Zatím se vybralo %s BTC"
+
+msgid "Loading ..."
+msgstr "Načítám..."
+
+msgid "You created this project"
+msgstr "Tento projekt jste vytvořil(a) vy"
+
+msgid "Already running"
+msgstr "Aplikace již běží"
+
+msgid "This application is already running and cannot be started twice."
+msgstr "Tato aplikace již na vašem počítači jednou běží, a nelze ji spustit dvakrát."
+
+msgid "Local Bitcoin node not usable"
+msgstr "Lokální Bitcoinový software je nepoužitelný"
+
+#. TRANS: %s = app name
+msgid ""
+"You have a Bitcoin (Core) node running on your computer, but it doesn't have"
+" the protocol support %s needs. %s will still work but will use the peer to "
+"peer network instead, so you won't get upgraded security. Try installing "
+"Bitcoin XT, which is a modified version of Bitcoin Core that has the "
+"upgraded protocol support."
+msgstr "Na vašem počítači běží jádro Bitcoin, nepodporuje ale protokol, který %s potřebuje. %s bude fungovat i tak, ale bude se muset spoléhat na P2P síť, a přijdete tak o vyšší úroveň zabezpečení. Zkuste nainstalovat Bitcoin XT, což je upravená verze jádra Bitcoin, která podporuje potřebný protokol."
+
+msgid "View pledge"
+msgstr "Zobrazení příslibu"
+
+msgid "Save to file"
+msgstr "Uložit do souboru"
+
+msgid "Close"
+msgstr "Zavřít"
+
+msgid "pledged by"
+msgstr "které přislíbil(a)"
+
+msgid "on"
+msgstr "dne"
+
+msgid "No attached message"
+msgstr "Žádná přiložená zpráva"
+
+msgid "Confirm"
+msgstr "Potvrdit"
+
+msgid "Cancel"
+msgstr "Zrušit"
+
+msgid "Password"
+msgstr "Heslo"
+
+msgid "Bad password"
+msgstr "Neplatné heslo"
+
+msgid "The password you entered is empty or too short."
+msgstr "Heslo, které jste zadal(a), je buď prázdné, nebo příliš krátké."
+
+msgid "Wrong password"
+msgstr "Nesprávné heslo"
+
+msgid ""
+"Please try entering your password again, carefully checking for typos or "
+"spelling errors."
+msgstr "Zkuste prosím své heslo zadat znovu, a dávejte pozor na chyby a překlepy."
+
+msgid "Create new project"
+msgstr "Vytvořit nový projekt"
+
+msgid "Edit project"
+msgstr "Editovat projekt"
+
+#. TRANS: %d = maximum number of pledges
+msgid ""
+"You can collect a maximum of %d pledges, due to limits in the Bitcoin "
+"protocol."
+msgstr "Kvůli omezením protokolu Bitcoin můžete posbírat nejvýše %d příslibů."
+
+msgid "Project name"
+msgstr "Název"
+
+msgid "Goal amount"
+msgstr "Cílová částka"
+
+msgid "Min pledge"
+msgstr "Min. příslib"
+
+msgid "Address"
+msgstr "Adresa"
+
+msgid "Drop a custom image or click here to open"
+msgstr "Přetáhněte sem obrázek, nebo klikněte pro otevření"
+
+msgid "Cover image"
+msgstr "Obrázek"
+
+msgid "Description"
+msgstr "Popis"
+
+msgid "Preview formatted text"
+msgstr "Náhled formátovaného textu"
+
+msgid "Email address"
+msgstr "Email"
+
+msgid "Next"
+msgstr "Další"
+
+msgid "Example: Building a lighthouse"
+msgstr "Např.: Stavba majáku"
+
+msgid "You can format text using Markdown syntax."
+msgstr "K formátování textu můžete používat Markdown."
+
+msgid "How can supporters get in touch with you?"
+msgstr "Jak vás mohou lidé kontaktovat?"
+
+msgid "Title conflict"
+msgstr "Konflikt názvů"
+
+msgid ""
+"You already have a project with that title. Please choose another. If you "
+"are trying to create a different version, consider putting the date or a "
+"number in the title so people can distinguish them."
+msgstr "Projekt s tímto názvem již máte. Zvolte prosím jiný název. Pokud se snažíte vytvořit novou verzi, zkuste dát do názvu datum nebo číslo, aby lidé mohli projekty rozlišit."
+
+msgid "Select an image file"
+msgstr "Zvolte soubor obrázku"
+
+msgid "Images (JPG/PNG/GIF)"
+msgstr "Obrázky (JPG/PNG/GIF)"
+
+msgid "Image load failed"
+msgstr "Načítání obrázku selhalo"
+
+#. TRANS: %s = error message
+msgid "Could not download the image from the remote server: %s"
+msgstr "Nepodařilo se stáhnout obrázek ze vzdáleného serveru: %s"
+
+#. TRANS: %s = image URL
+msgid "Download of %s"
+msgstr "Stahování %s"
+
+msgid "Image too large"
+msgstr "Obrázek je příliš velký"
+
+msgid ""
+"Please make sure your image is smaller than 5mb, any larger is excessive."
+msgstr "Zkontrolujte prosím, že velikost vašeho obrázku nepřesahuje 5MB."
+
+msgid "Failed to load image"
+msgstr "Načítání obrázku se nezdařilo"
+
+msgid "https://help.github.com/articles/markdown-basics/"
+msgstr "http://www.edgering.org/markdown/"
+
+msgid "Amount"
+msgstr "Částka"
+
+msgid "Maximum amount possible"
+msgstr "Nejvyšší možná částka"
+
+msgid "Minimum amount possible"
+msgstr "Nejnižší možná částka"
+
+msgid "Name"
+msgstr "Jméno"
+
+msgid "Message to project owner (optional)"
+msgstr "Zpráva pro autora projektu (nepovinné)"
+
+msgid "Name and message will be public."
+msgstr "Jméno a zpráva budou veřejné."
+
+msgid "Name, email and message will be public."
+msgstr "Jméno, email a zpráva budou veřejné."
+
+#. TRANS: %s = example BTC amount limit
+msgid "e.g. %s"
+msgstr "např. %s"
+
+msgid "Target address"
+msgstr "Cílová adresa"
+
+msgid "Server URL"
+msgstr "URL adresa serveru"
+
+msgid "Min pledge size"
+msgstr "Min. výše příslibu"
+
+msgid "Auth key"
+msgstr "Autorizační klíč"
+
+msgid "Network parameters"
+msgstr "Parametry sítě"
+
+msgid "Creation time"
+msgstr "Čas vytvoření"
+
+msgid "Serverless project"
+msgstr "Tento projekt nepoužívá server"
+
+msgid "Project details"
+msgstr "Podrobnosti o projektu"
+
+msgid "Wallet settings"
+msgstr "Nastavení peněženky"
+
+msgid "Remove password"
+msgstr "Odstranit heslo"
+
+msgid ""
+"These are your wallet words. Write them down along with the creation date, "
+"and you can get your money back even if you lose all your wallet backup "
+"files. Just type the details back in below to restore!"
+msgstr "Toto jsou tajná slova vaší peněženky. Zapište si je, spolu s datem vytvoření, a budete vždy moci obnovit přístup ke svým penězům, i v případě ztráty všech souborů se zálohami. K obnovení stačí znovu vyplnit tyto údaje do tohoto okna a kliknout na tlačítko Obnovit pomocí slov."
+
+msgid "Created on:"
+msgstr "Vytvořeno:"
+
+msgid "Set password"
+msgstr "Nastavit heslo"
+
+msgid "Restore from words"
+msgstr "Obnovit pomocí slov"
+
+msgid "Wallet is not empty"
+msgstr "Peněženka není prázdná"
+
+msgid ""
+"You must empty this wallet out before attempting to restore an older one, as"
+" mixing wallets together can lead to invalidated backups."
+msgstr "Musíte vyprázdnit svou současnou peněženku předtím, než budete obnovovat starou. Smíchání dvou peněženek dohromady by mohlo pokazit zálohy."
+
+msgid "Wallet is encrypted"
+msgstr "Peněženka je zašifrovaná"
+
+msgid ""
+"After restore, the wallet will no longer be encrypted and you must set a new"
+" password."
+msgstr "Po obnovení již peněženka nebude zašifrovaná, a bude třeba znovu nastavit heslo."
+
+msgid "Wallet restore in progress"
+msgstr "Probíhá obnovování peněženky"
+
+msgid ""
+"Your wallet will now be resynced from the Bitcoin network. This can take a "
+"long time for old wallets."
+msgstr "Vaše peněženka bude nyní znovu synchronizována se sítí Bitcoin. Pokud je peněženka hodně stará, může to nějakou dobu trvat."
+
+msgid "Wallet decrypted"
+msgstr "Peněženka dešifrována"
+
+msgid "A password will no longer be required to send money or edit settings."
+msgstr "Pro posílání peněz a změny nastavení již nebude vyžadováno ověření heslem."
+
+msgid "Always use this version"
+msgstr "Vždy používat tuto verzi"
+
+msgid "Application updates"
+msgstr "Aktualizace pro aplikaci"
+
+msgid "Version change"
+msgstr "Změna verze"
+
+msgid ""
+"You will be switched to always track the latest version. The app will now "
+"restart."
+msgstr "Od teď bude vždy použita nejnovější verze. Aplikace se nyní restartuje."
+
+#. TRANS: %d = version number
+msgid ""
+"You will be switched to always use version %d. The app will now restart."
+msgstr "Od teď bude vždy používána verze %d. Aplikace se nyní restartuje."
+
+msgid "Now submit your project for hosting:"
+msgstr "Nyní prosím odešlete svůj projekt k hostování na:"
+
+msgid "Information"
+msgstr "Informace"
+
+msgid "Connecting to server ..."
+msgstr "Připojuji se k serveru..."
+
+msgid "Upload"
+msgstr "Odeslat"
+
+#. TRANS: %s = error message
+msgid "Connection failed: %s"
+msgstr "Připojení selhalo: %s"
+
+msgid "Connected, uploading ..."
+msgstr "Připojeno, odesílám..."
+
+#. TRANS: %d = error code number, %s = error message
+msgid "Server said %d %s"
+msgstr "Server říká %d %s"
+
+msgid "Upload failed"
+msgstr "Odesílání se nezdařilo"
+
+#. TRANS: %s = error message
+msgid ""
+"%s. This probably indicates either a problem with your internet connection "
+"or a configuration issue with the server. You could try again later."
+msgstr "%s. Toto může znamenat problém s vaším připojením k Internetu, nebo chybu v nastavení serveru. Můžete to zkusit znovu později."
+
+msgid ""
+"Setting a password on your wallet makes it safer against viruses and theft. "
+"You will need to enter your password whenever money is sent."
+msgstr "S heslem bude vaše peněženka lépe chráněna proti počítačovým virům a zlodějům. Heslo budete muset zadat při každé platbě."
+
+msgid "Enter password"
+msgstr "Zadejte heslo"
+
+msgid "Repeat password"
+msgstr "Heslo znovu"
+
+msgid "Passwords do not match"
+msgstr "Hesla nejsou stejná"
+
+msgid "Try re-typing your chosen passwords."
+msgstr "Zkuste své heslo napsat znovu."
+
+msgid "Password too short"
+msgstr "Heslo je příliš krátké"
+
+msgid "You need to pick a password at least five characters or longer."
+msgstr "Heslo musí být alespoň 5 znaků dlouhé."
+
+msgid "Wallet encrypted"
+msgstr "Peněženka zašifrována"
+
+msgid "You can remove the password at any time from the settings screen."
+msgstr "Heslo můžete kdykoli zase odstranit v okně Nastavení peněženky."
+
+msgid ""
+"This operation incurs a small miners fee because it requires making a "
+"Bitcoin transaction."
+msgstr "Tato operace vyžaduje provedení Bitcoinové transakce, a je proto třeba zaplatit malý poplatek minerům, kteří ji zpracují."
+
+msgid "Revoke pledge"
+msgstr "Odvolat příslib"
+
+msgid "Claim pledges"
+msgstr "Vybrat přísliby"
+
+msgid ""
+"Claiming a project sends all the pledged money to the project's goal "
+"address. "
+msgstr "Vybráním peněz přesunete přislíbené peníze na cílovou adresu projektu."
+
+msgid "Revoking a pledge returns the money to your wallet. "
+msgstr "Odvolání příslibu vrátí peníze zpět do vaší peněženky."
+
+msgid "Unable to claim"
+msgstr "Přísliby nelze vybrat"
+
+msgid "One or more pledges have been revoked whilst you were waiting."
+msgstr "Během vašeho čekání nejméně jeden přispěvatel odvolal svůj příslib."
+
+msgid "Transaction acceptance issue"
+msgstr "Problém s přijetím transakce"
+
+#. TRANS: %s = error message
+msgid "The Bitcoin network has rejected the claim: %s"
+msgstr "Síť Bitcoin odmítla přijmout transakci výběru: %s"
+
+msgid "Too much money"
+msgstr "Příliš mnoho peněz"
+
+#. TRANS: %s = difference in BTC
+msgid ""
+"You have gathered pledges that add up to more than the goal. The excess "
+"cannot be redeemed in the current version of the software and would end up "
+"being paid completely to miners fees. Please remove some pledges and try to "
+"hit the goal amount exactly. There is %s too much."
+msgstr "Posbírané přísliby překračují cílovou částku. V současné verzi softwaru není možné vybrat tento přebytek, připadl by celý minerům. Odstraňte prosím nějaké přísliby, a pokuste se dostat na cílovou částku. Nyní je překročena o %s."
+
+msgid "Cannot claim pledges"
+msgstr "Nelze vybrat přísliby"
+
+msgid ""
+"Closing the contract requires paying Bitcoin network fees, but you don't "
+"have enough money in the wallet. Add more money and try again."
+msgstr "K vyslání této transakce do sítě Bitcoin je třeba zaplatit poplatek minerům, a ve vaší peněžence na to není potřebná částka. Převeďte si prosím nějaké Bitcoiny do této peněženky a zkuste to znovu."
+
+#. TRANS: %s = error message
+msgid "The Bitcoin network has rejected the revocation transaction: %s"
+msgstr "Síť Bitcoin odmítla přijmout transakci odvolání: %s"
+
+msgid "Cannot revoke pledge"
+msgstr "Nelze odvolat příslib"
+
+msgid ""
+"Revoking a pledge requires making another Bitcoin transaction on the block "
+"chain, but you don't have sufficient funds to pay the required fee. Add more"
+" money and try again."
+msgstr "Odvolání příslibu vyžaduje vložení nové transakce do sítě Bitcoin, nyní však nemáte v peněžence dost peněz ani na zaplacení poplatku za vložení. Přidejte více peněz a zkuste to znovu."
+
+msgid "Drag to a folder, email or chat window. Or ..."
+msgstr "Toto můžete přetáhnout do adresáře, emailu, nebo..."
+
+msgid ""
+"The folder you save the project to will be watched, and any pledges found "
+"there will be automatically loaded."
+msgstr "Adresář, do kterého uložíte soubor projektu, bude sledován, a pokud se v něm objeví soubory příslibů, budou automaticky načteny."
+
+msgid "Export pledge"
+msgstr "Exportovat příslib"
+
+msgid "Export project"
+msgstr "Exportovat projekt"
+
+#. TRANS: %1$s = pledger's name, %2$s = project name, %3$s = file extension
+msgid "Pledge by %1$s for %2$s%3$s"
+msgstr "Příslib od %1$s pro %2$s%3$s"
+
+msgid "Save pledge to a file"
+msgstr "Uložit příslib do souboru"
+
+msgid "Save project to a file"
+msgstr "Uložit projekt do souboru"
+
+msgid "Failed to save file"
+msgstr "Ukládání souboru se nezdařilo"
+
+msgid "Send to address:"
+msgstr "Poslat na adresu:"
+
+msgid "Send"
+msgstr "Odeslat"
+
+msgid "Empty wallet"
+msgstr "Vyprázdnit peněženku"
+
+msgid "Could not empty the wallet"
+msgstr "Peněženku nelze vyprázdnit"
+
+msgid ""
+"You may have too little money left in the wallet to make a transaction."
+msgstr "Možná v ní máte tak málo peněz, že to nestačí na provedení transakce."
+
+#. TRANS: %d = number of peers
+msgid "Broadcasting ... seen by %d peers"
+msgstr "Vysílám transakci... vidělo ji %d uzlů"
+
+msgid "Change type"
+msgstr "Změnit typ projektu"
+
+msgid "Select type"
+msgstr "Zvolte typ projektu"
+
+msgid "Save"
+msgstr "Uložit"
+
+msgid "Back"
+msgstr "Zpět"
+
+msgid ""
+"A server collects and monitors pledges on your behalf. You can use a "
+"community run server or run your own."
+msgstr "Server za vás sbírá a sleduje přísliby. Můžete použít společný server, nebo si založit svůj vlastní."
+
+msgid "Server name"
+msgstr "Jméno serveru"
+
+msgid "Server instructions"
+msgstr "Instrukce serveru"
+
+msgid "Server assisted"
+msgstr "S podporou serveru"
+
+msgid "Fully decentralised"
+msgstr "Zcela decentralizovaný"
+
+msgid ""
+"This style of project does not require any server. Backers will be given a pledge file that they must get back to you via email, shared folder, instant messaging etc. People will not be able to see how much money was raised so far unless they download the pledge files themselves.\n"
+"\n"
+"Fully decentralised can be an appropriate choice when you are fund raising from a group of friends or will be managing the pledges in some other way. It's less convenient but doesn't require any infrastructure."
+msgstr "Tento typ projektu nepotřebuje žádný server. Přispěvatelé vytvoří soubor příslibu, který vám musí poslat emailem. Lidé ale nebudou moci sledovat, kolik peněz se zatím vybralo, pokud si soubory příslibů sami nestáhnou.\n\nPlně decentralizovaný režim je vhodný pro případ, že vybíráte peníze mezi svými přáteli, nebo pokud spravujete soubory příslibů jiným způsobem. Není to tak pohodlné, ale není k tomu potřeba žádná infrastruktura."
+
+msgid "You must pick a server."
+msgstr "Je třeba zvolit server."
+
+msgid "The server name is not considered valid."
+msgstr "Jméno serveru je neplatné."
+
+msgid "Folder watching"
+msgstr "Sledování adresáře zapnuto"
+
+msgid ""
+"The folder to which you save your project file will be watched for pledge "
+"files. When you receive them from backers, just put them in the same "
+"directory and they will appear."
+msgstr "Z adresáře, do které uložíte soubor projektu, budou automaticky načítány soubory příslibů. Až vám tedy přispěvatelé tyto soubory pošlou, uložte je do stejného adresáře, a přísliby se objeví zde."
+
+msgid "Select a directory to store the project and pledges"
+msgstr "Zvolte adresář, ve kterém bude uložen projekt a přísliby"
+
+msgid "Could not save project"
+msgstr "Projekt nelze uložit"
+
+#. TRANS: %s = error message
+msgid "An error was encountered whilst trying to save the project: %s"
+msgstr "Při ukládání projektu došlo k chybě: %s"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Action"
+msgstr "Akce"
+
+msgid "Unfortunately, we screwed up and the app crashed. Sorry about that!"
+msgstr "Došlo k chybě a aplikace spadla. Omlouváme se."
+
+msgid "Submission via email. Project must be legal under Swiss and UK law."
+msgstr "Odesílání emailem. Projekt musí být legální podle švýcarských a britských zákonů."
+
+msgid "Submission via email. Project must be legal under US law."
+msgstr "Odesílání emailem. Projekt musí být legální podle amerických zákonů."
+
+msgid "Submission via email. Project must be legal under New Zealand law."
+msgstr "Odesílání emailem. Projekt musí být legální podle novozélandských zákonů."
+
+msgid "Submission via the web. Project must be legal under US law."
+msgstr "Odesílání po webu. Projekt musí být legální podle amerických zákonů."
+
+msgid "Send money out of the wallet"
+msgstr "Převést peníze z této peněženky jinam"
+
+msgid "Make paper backup and encrypt your wallet"
+msgstr "Šifrování peněženky a vytvoření papírové peněženky"
+
+msgid "YOUR ADDRESS"
+msgstr "VAŠE ADRESA"
+
+msgid "Set up wallet"
+msgstr "Nastavení peněženky"
+
+msgid "YOUR BALANCE"
+msgstr "VÁŠ ZŮSTATEK"
+
+msgid "Create project"
+msgstr "Vytvořit projekt"
+
+msgid "Import project"
+msgstr "Importovat projekt"
+
+msgid "You can also drop an existing project file here."
+msgstr "Můžete sem také přetáhnout soubor projektu."
+
+msgid "Select a bitcoin project file to import"
+msgstr "Zvolte soubor projektu, který chcete importovat"
+
+msgid "Project/contract files"
+msgstr "Soubory projektů"
+
+msgid "Import failed"
+msgstr "Importování se nezdařilo"
+
+#. TRANS: %1$s = app name, %2$s = error message
+msgid ""
+"Could not copy the dropped pledge into the %1$s application directory: %2$s"
+msgstr "Kopírování příslibu do adresáře aplikace %1$s se nezdařilo: %2$s"
+
+msgid "Failed to import project"
+msgstr "Importování projektu se nezdařilo"
+
+#. TRANS: %s = error message
+msgid "Could not read project file: %s"
+msgstr "Soubor projektu nelze načíst: %s"
+
+msgid ""
+"You are offline. You will not be able to use the app until you go online and"
+" restart."
+msgstr "Váš počítač teď není připojen k Internetu, a tato aplikace bez něj nemůže fungovat. Prosím připojte se a restartujte aplikaci."
+
+msgid "Initialising Tor"
+msgstr "Připravuji připojení do sítě Tor"
+
+msgid "Downloading software update"
+msgstr "Stahuji aktualizaci softwaru"
+
+msgid "Restart"
+msgstr "Restartovat"
+
+msgid "Please restart the app to upgrade to the new version."
+msgstr "Pro aktualizaci na novou verzi prosím restartujte tuto aplikaci"
+
+msgid "Online update failed"
+msgstr "On-line aktualizace selhala"
+
+#. TRANS: %s = error message
+msgid ""
+"An error was encountered whilst attempting to download or apply an online "
+"update: %s"
+msgstr "Při pokusu stáhnout a nainstalovat aktualizaci došlo k chybě: %s"
+
+msgid "Synchronising with the Bitcoin network"
+msgstr "Synchronizuji data se sítí Bitcoin"
+
+msgid "You don't have any bitcoins in this wallet"
+msgstr "Nemáte žádné bitcoiny ve své peněžence"
+
+msgid "Send some money to this address first"
+msgstr "Pošlete si prosím nějaké peníze na tuto adresu"
