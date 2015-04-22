@@ -137,6 +137,7 @@ public class MainWindow {
             emptyWalletBtn.setDisable(true);
             return;
         }
+        balance.setStyle("-fx-text-fill: grey");
         TorClient torClient = Main.bitcoin.peerGroup().getTorClient();
         if (torClient != null) {
             SimpleDoubleProperty torProgress = new SimpleDoubleProperty(-1);
@@ -169,6 +170,7 @@ public class MainWindow {
                     GuiUtils.runOnGuiThreadAfter(500, () -> {
                         syncItem.cancel();
                         syncItem = null;
+                        balance.setStyle("-fx-text-fill: black");
                     });
                 }
             } else if (syncItem == null) {
