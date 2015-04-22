@@ -272,15 +272,15 @@
     -fx-font-weight: normal;
 }
 
-.reddit-ad {
+.ad-slot {
     -fx-border-color: #ffffff;
     -fx-border-radius: 6;
     -fx-border-style: dashed;
     -fx-background-radius: 6;
-    -fx-background-color: #ffffff33;
-    -fx-padding: 30px;
     -fx-cursor: hand;
+    -fx-opacity: 0.8;
 }
-.reddit-ad:hover {
-    -fx-background-color: #ffffffcc;
+.reddit-ad {
+    -fx-padding: 30px;
+    -fx-background-color: #ffffff33;
 }

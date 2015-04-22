@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <fx:root xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" type="VBox" spacing="20" VBox.vgrow="ALWAYS" alignment="CENTER" styleClass="content-vbox" onDragOver="#dragOver" onDragDropped="#dragDropped">
@@ -16,10 +17,17 @@
                 <Label text="%You can also drop an existing project file here."/>
             </children>
         </VBox>
-        <VBox alignment="CENTER" maxWidth="650" styleClass="reddit-ad" onMouseClicked="#onRedditAdClicked">
-            <ImageView fitWidth="290" fitHeight="90">
-                <Image url="@../reddit-ad.png"/>
+        <Pane minHeight="40.0"/>
+        <VBox alignment="CENTER" maxWidth="650" styleClass="ad-slot" onMouseClicked="#onLightlistAdClicked">
+            <ImageView fx:id="lightlistAd" fitWidth="650" fitHeight="150">
+                <Image url="@../lightlist-ad.png"/>
+                <effect><ColorAdjust/></effect>
             </ImageView>
+        </VBox>
+        <VBox fx:id="redditAd" alignment="CENTER" maxWidth="650" styleClass="ad-slot, reddit-ad" onMouseClicked="#onRedditAdClicked">
+                <ImageView fitWidth="290" fitHeight="90">
+                    <Image url="@../reddit-ad.png"/>
+                </ImageView>
         </VBox>
         <Pane minHeight="320.0"/>
     </children>

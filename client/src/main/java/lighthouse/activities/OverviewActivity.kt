@@ -5,6 +5,8 @@ import de.jensd.fx.fontawesome.AwesomeIcon
 import javafx.animation.*
 import javafx.application.Platform
 import javafx.beans.InvalidationListener
+import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleLongProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.WritableValue
@@ -16,10 +18,16 @@ import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.control.Label
+import javafx.scene.effect.ColorAdjust
+import javafx.scene.image.ImageView
 import javafx.scene.input.DragEvent
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.TransferMode
+import javafx.scene.layout.Background
+import javafx.scene.layout.BackgroundFill
+import javafx.scene.layout.CornerRadii
 import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import javafx.stage.FileChooser
 import javafx.util.Duration
 import lighthouse.LighthouseBackend
@@ -39,6 +47,7 @@ import lighthouse.utils.I18nUtil
 import lighthouse.utils.I18nUtil.tr
 import lighthouse.utils.easing.EasingMode
 import lighthouse.utils.easing.ElasticInterpolator
+import lighthouse.utils.later
 import org.bitcoinj.core.Sha256Hash
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -51,7 +60,9 @@ import java.nio.file.Path
  * Also can have adverts for stuff in the Lighthouse edition.
  */
 public class OverviewActivity : VBox(), Activity {
-    FXML var addProjectIcon: Label? = null
+    FXML var addProjectIcon: Label = later()
+    FXML var lightlistAd: ImageView = later()
+    FXML var redditAd: VBox = later()
 
     private val projects: ObservableList<Project> = Main.backend.mirrorProjects(AffinityExecutor.UI_THREAD)
     private val projectStates: ObservableMap<String, LighthouseBackend.ProjectStateInfo> = Main.backend.mirrorProjectStates(AffinityExecutor.UI_THREAD)
@@ -67,6 +78,18 @@ public class OverviewActivity : VBox(), Activity {
         loader.load<Any>()
 
         numInitialBoxes = getChildren().size()
+
+        GuiUtils.roundCorners(lightlistAd, 12.0)
+
+        // Make lightlist ad light up on hover
+        val brightness = Bindings.`when`(lightlistAd.hoverProperty()).then(0.3).otherwise(0.0)
+        GuiUtils.animatedBind(lightlistAd, (lightlistAd.getEffect() as ColorAdjust).brightnessProperty(), brightness)
+
+        // Make reddit ad background fade more opaque (lighter) on hover
+        val opacity = Bindings.`when`(redditAd.hoverProperty()).then(0.9).otherwise(0.5)
+        val animatedOpacity = SimpleDoubleProperty()
+        animatedOpacity.addListener { observable -> redditAd.setBackground(Background(BackgroundFill(Color(1.0, 1.0, 1.0, animatedOpacity.get()), CornerRadii(6.0), null))) }
+        GuiUtils.animatedBind(redditAd, animatedOpacity, opacity)
 
         AwesomeDude.setIcon(addProjectIcon, AwesomeIcon.FILE_ALT, "50pt; -fx-text-fill: white" /* lame hack */)
 
@@ -256,6 +279,12 @@ public class OverviewActivity : VBox(), Activity {
     public fun onRedditAdClicked(event: MouseEvent) {
         log.info("reddit ad clicked")
         Main.instance.getHostServices().showDocument("https://www.reddit.com/r/LighthouseProjects")
+    }
+
+    FXML
+    public fun onLightlistAdClicked(event: MouseEvent) {
+        log.info("lightlist.io ad clicked")
+        Main.instance.getHostServices().showDocument("https://www.lightlist.io/")
     }
 
     private val log = LoggerFactory.getLogger(javaClass<OverviewActivity>())
