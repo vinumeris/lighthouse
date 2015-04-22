@@ -23,6 +23,9 @@
     public static void realMain(java.lang.String[]);
 }
 
+# Preserve all translations
+-keep class lighthouse.locale.* { *; }
+
 # Preserve all entrypoints that are invoked via FXML (i.e. reflection) and are marked as such.
 -keepclassmembers class * {
     @javafx.fxml.FXML *;
