@@ -15,10 +15,10 @@
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" valignment="TOP" vgrow="NEVER" />
+                        <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" valignment="TOP" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="NEVER" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="NEVER" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="TOP" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" valignment="TOP" vgrow="ALWAYS" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
                     </rowConstraints>
@@ -28,58 +28,62 @@
                     <children>
                         <Label text="%Project name" GridPane.rowIndex="1" />
                         <TextField fx:id="titleEdit" promptText="%Example: Building a lighthouse" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label fx:id="emailAddressLabel" text="%Email address" GridPane.rowIndex="2" />
+                        <TextField fx:id="emailEdit" promptText="%How can supporters get in touch with you?" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="3">
+                            <children>
+                                <Label maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="%Description" />
+                                <Label fx:id="descriptionHelpButton" onMouseClicked="#showMarkdownHelp" text="?">
+                                    <padding>
+                                        <Insets left="10.0" />
+                                    </padding>
+                                    <cursor>
+                                        <Cursor fx:constant="HAND" />
+                                    </cursor>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <VBox alignment="TOP_RIGHT" maxHeight="1.7976931348623157E308" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.vgrow="ALWAYS">
+                            <children>
+                                <TextArea fx:id="descriptionEdit" maxHeight="1.7976931348623157E308" minHeight="20.0" prefWidth="200.0" promptText="%You can format text using Markdown syntax." wrapText="true" VBox.vgrow="ALWAYS" />
+                                <Label fx:id="previewTextLabel" onMouseClicked="#onPreviewTextClicked" style="-fx-font-weight: normal;" styleClass="link-label" text="%Preview formatted text" />
+                            </children>
+                        </VBox>
                         <Label text="%Goal amount" GridPane.rowIndex="4" />
                         <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                             <children>
                                 <TextField fx:id="goalAmountEdit" alignment="CENTER_RIGHT" style="-fx-graphic: url('icon.png')" text="0.0" HBox.hgrow="ALWAYS" />
                                 <Label minWidth="-Infinity" styleClass="btc-label-block" text="BTC" />
-                        <Label minWidth="-Infinity" text="%Min pledge">
-                           <padding>
-                              <Insets left="15.0" />
-                           </padding>
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Label>
-                        <TextField fx:id="minPledgeEdit" alignment="CENTER_RIGHT" />
-                        <Label minWidth="-Infinity" styleClass="btc-label-block" text="BTC" />
+                                <Label minWidth="-Infinity" text="%Min pledge">
+                                    <padding>
+                                        <Insets left="15.0" />
+                                    </padding>
+                                    <HBox.margin>
+                                        <Insets />
+                                    </HBox.margin>
+                                </Label>
+                                <TextField fx:id="minPledgeEdit" alignment="CENTER_RIGHT" />
+                                <Label minWidth="-Infinity" styleClass="btc-label-block" text="BTC" />
                             </children>
                         </HBox>
                         <Label text="%Address" GridPane.rowIndex="5" />
                         <TextField fx:id="addressEdit" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                        <StackPane onDragDropped="#imageSelectorDropped" onDragOver="#imageSelectorDragOver" onMouseClicked="#imageSelectorClicked" GridPane.columnIndex="1">
+                        <Label text="%Cover image" />
+                        <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.hgrow="NEVER">
                             <children>
-                                <ImageView fx:id="coverImageView" fitHeight="160.0" fitWidth="432.0" pickOnBounds="true" styleClass="cover-image">
-                                    <image>
-                                        <Image url="@../default-cover-image.png" />
-                                    </image>
-                                </ImageView>
-                                <Label fx:id="coverImageLabel" styleClass="image-overlay-label" text="%Drop a custom image or click here to open" />
-                                <Label fx:id="coverPhotoSiteLink" onMouseClicked="#openCoverPhotoFinder" style="-fx-padding: 10; -fx-background-color: #ffffffdd" styleClass="link-label" text="coverphotoz.com" StackPane.alignment="BOTTOM_RIGHT" />
+                                <StackPane maxWidth="-Infinity" onDragDropped="#imageSelectorDropped" onDragOver="#imageSelectorDragOver" onMouseClicked="#imageSelectorClicked" StackPane.alignment="TOP_RIGHT">
+                                    <children>
+                                        <ImageView fx:id="coverImageView" fitHeight="160.0" fitWidth="432.0" pickOnBounds="true" styleClass="cover-image">
+                                            <image>
+                                                <Image url="@../default-cover-image.png" />
+                                            </image>
+                                        </ImageView>
+                                        <Label fx:id="coverImageLabel" styleClass="image-overlay-label" text="%Drop a custom image or click here to open" />
+                                        <Label fx:id="coverPhotoSiteLink" onMouseClicked="#openCoverPhotoFinder" style="-fx-padding: 10; -fx-background-color: #ffffffdd" styleClass="link-label" text="coverphotoz.com" StackPane.alignment="BOTTOM_RIGHT" />
+                                    </children>
+                                </StackPane>
                             </children>
                         </StackPane>
-                        <Label text="%Cover image" />
-                  <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="3">
-                     <children>
-                        <Label maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="%Description" />
-                        <Label fx:id="descriptionHelpButton" onMouseClicked="#showMarkdownHelp" text="?">
-                           <padding>
-                              <Insets left="10.0" />
-                           </padding>
-                           <cursor>
-                              <Cursor fx:constant="HAND" />
-                           </cursor>
-                        </Label>
-                     </children>
-                  </HBox>
-                  <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                     <children>
-                        <TextArea fx:id="descriptionEdit" prefWidth="200.0" promptText="%You can format text using Markdown syntax." styleClass="create-project-textarea" wrapText="true" />
-                        <Label fx:id="previewTextLabel" onMouseClicked="#onPreviewTextClicked" style="-fx-font-weight: normal;" styleClass="link-label" text="%Preview formatted text" />
-                     </children>
-                  </VBox>
-                  <Label fx:id="emailAddressLabel" text="%Email address" GridPane.rowIndex="2" />
-                  <TextField fx:id="emailEdit" promptText="%How can supporters get in touch with you?" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     </children>
                     <VBox.margin>
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
