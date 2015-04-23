@@ -395,7 +395,7 @@ public class Main extends Application {
                 walletLoadedLatch.countDown();
 
                 if (params == RegTestParams.get()) {
-                    vPeerGroup.setMinBroadcastConnections(1);
+                    vPeerGroup.setMinBroadcastConnections(2);
                     vPeerGroup.setUseLocalhostPeerWhenPossible(false);
                 }
             }
