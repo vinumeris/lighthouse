@@ -485,7 +485,9 @@ public class Main extends Application {
     }
 
     public static void restartBitcoinJ(DeterministicSeed seed) {
+        Context ctx = Context.get();
         new Thread(() -> {
+            Context.propagate(ctx);
             Main.bitcoin.stopAsync();
             Main.bitcoin.awaitTerminated();
             uncheck(() -> Main.instance.initBitcoin(seed));

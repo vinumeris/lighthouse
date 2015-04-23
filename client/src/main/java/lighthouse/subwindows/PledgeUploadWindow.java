@@ -10,6 +10,7 @@ import lighthouse.*;
 import lighthouse.protocol.*;
 import lighthouse.utils.*;
 import lighthouse.wallet.*;
+import org.bitcoinj.core.*;
 import org.slf4j.*;
 
 import java.io.*;
@@ -43,10 +44,12 @@ public class PledgeUploadWindow {
     }
 
     private void startUpload(Project project, PledgingWallet.PendingPledge pledge) {
+        Context ctx = Context.get();
         uploadTask = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
                 try {
+                    Context.propagate(ctx);
                     URI url = project.getPaymentURL();
                     checkState(url != null);
                     log.info("Uploading pledge to {}", url);
