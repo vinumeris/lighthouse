@@ -213,7 +213,7 @@ public class PledgingWallet extends Wallet {
                 }
             }
             log.info("Pledge has {} txns", data.getTransactionsCount());
-            Coin prevBalance = getBalance();
+            Coin prevBalance = getBalance(BalanceType.AVAILABLE_SPENDABLE);
             updateForPledge(data, project, stub);
             saveNow();
             for (ListenerRegistration<OnPledgeHandler> handler : onPledgeHandlers) {
@@ -221,7 +221,7 @@ public class PledgingWallet extends Wallet {
             }
             lock.lock();
             try {
-                queueOnCoinsSent(pledge, prevBalance, getBalance());
+                queueOnCoinsSent(pledge, prevBalance, getBalance(BalanceType.AVAILABLE_SPENDABLE));
                 maybeQueueOnWalletChanged();
             } finally {
                 lock.unlock();
@@ -274,7 +274,7 @@ public class PledgingWallet extends Wallet {
         if (stub == null) {
             final Address stubAddr = currentReceiveKey().toAddress(getParams());
             SendRequest req;
-            if (value.equals(getBalance()))
+            if (value.equals(getBalance(BalanceType.AVAILABLE_SPENDABLE)))
                 req = SendRequest.emptyWallet(stubAddr);
             else
                 req = SendRequest.to(stubAddr, value);

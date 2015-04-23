@@ -45,7 +45,7 @@ public class PledgeWindow extends InnerWindow {
             // as excess would go to miners fees.
             Coin coin = valueOrNull(str);
             boolean valid = coin != null && coin.compareTo(max) <= 0 && coin.compareTo(min) >= 0;
-            minersFeeLabel.setVisible(valid && !coin.equals(Main.wallet.getBalance()));
+            minersFeeLabel.setVisible(valid && !coin.equals(Main.wallet.getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE)));
             return valid;
         });
         ValidationLink emailLink = new ValidationLink(emailEdit, str -> str.matches("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$"));
@@ -72,7 +72,7 @@ public class PledgeWindow extends InnerWindow {
         // Note that we don't subtract the fee here because if the user pledges their entire balance, we should not
         // require a dependency tx as all outputs can be included in the pledge.
         // TODO: Make sure that it actually works this way when we sent multiple payments to the app.
-        this.max = Coin.valueOf(Math.min(limit.value, Main.wallet.getBalance().value));
+        this.max = Coin.valueOf(Math.min(limit.value, Main.wallet.getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE).value));
         checkState(!max.isNegative());
         this.min = min;
         log.info("Max {}    Min {}", max, min);

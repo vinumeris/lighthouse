@@ -387,7 +387,7 @@ public class ProjectActivity extends HBox implements Activity {
         final Project p = project.get();
         switch (mode.get()) {
             case OPEN_FOR_PLEDGES:
-                if (Main.wallet.getBalance().value == 0)
+                if (Main.wallet.getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE).value == 0)
                     Main.instance.mainWindow.tellUserToSendSomeMoney();
                 else
                     makePledge(p);

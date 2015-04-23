@@ -8,6 +8,7 @@ import javafx.fxml.*;
 import javafx.scene.control.*;
 import lighthouse.*;
 import lighthouse.utils.*;
+import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.*;
 import org.bitcoinj.wallet.*;
 import org.slf4j.*;
@@ -126,7 +127,7 @@ public class WalletSettingsController {
     public void restoreClicked(ActionEvent event) {
         // Don't allow a restore unless this wallet is presently empty. We don't want to end up with two wallets, too
         // much complexity, even though WalletAppKit will keep the current one as a backup file in case of disaster.
-        if (Main.bitcoin.wallet().getBalance().value > 0) {
+        if (Main.bitcoin.wallet().getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE).value > 0) {
             informationalAlert(tr("Wallet is not empty"),
                     tr("You must empty this wallet out before attempting to restore an older one, as mixing wallets " +
                             "together can lead to invalidated backups."));

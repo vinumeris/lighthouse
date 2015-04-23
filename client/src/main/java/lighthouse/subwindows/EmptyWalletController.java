@@ -29,7 +29,7 @@ public class EmptyWalletController {
 
     // Called by FXMLLoader
     public void initialize() {
-        checkState(!Main.bitcoin.wallet().getBalance().isZero());
+        checkState(!Main.bitcoin.wallet().getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE).isZero());
         new BitcoinAddressValidator(Main.params, address, sendBtn);
     }
 
