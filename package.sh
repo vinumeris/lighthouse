@@ -9,12 +9,18 @@ fi
 # Extract the version number.
 ver=$( sed -n 's/^.*final int VERSION = //p' client/src/main/java/lighthouse/Main.java )
 ver="${ver:0:${#ver}-1}"
+dest=updates/builds/$ver.jar
+
+# Check it has not been already built
+if [ -e $dest ]; then
+    echo "$dest already exists: delete it if this is really what you meant to do"
+    exit 1
+fi
 
 echo "Building version $ver..."
 mvn -q -U clean package -DskipTests
 [ ! -e updates ] && mkdir -p updates/builds
 
-dest=updates/builds/$ver.jar
 
 echo "Running ProGuard to delete dead code and shrink JAR ..."
 java -jar ~/.m2/repository/net/sf/proguard/proguard-base/5.0/proguard-base-5.0.jar @client/proguard.pro
@@ -31,7 +37,6 @@ echo "& 'C:\Program Files (x86)\Java\jdk1.8.0_31\bin\javapackager.exe' -deploy -
 
 if [[ "$1" != "--nosign" ]]; then
     echo "Generating online update site"
-    rm updates/site/* || true
     java -jar tools/updatefx.jar --url=https://s3-eu-west-1.amazonaws.com/vinumeris/lighthouse/updates --gzip-from=7 updates
 fi
 
