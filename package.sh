@@ -37,7 +37,7 @@ echo "& 'C:\Program Files (x86)\Java\jdk1.8.0_31\bin\javapackager.exe' -deploy -
 
 if [[ "$1" != "--nosign" ]]; then
     echo "Generating online update site"
-    java -jar tools/updatefx.jar --url=https://s3-eu-west-1.amazonaws.com/vinumeris/lighthouse/updates --gzip-from=7 updates
+    java -jar tools/updatefx.jar --url=https://s3-eu-west-1.amazonaws.com/vinumeris/lighthouse/updates --gzip-from=7 --ver=$ver updates
 fi
 
 if [[ $1 == "--package" ]]; then
