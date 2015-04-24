@@ -1,4 +1,0 @@
-Bug fixes, new language translations.
-Spanish, German, Portugese and Czech translations. Thanks to Carlos, Julian, Rodrigo and digital-dreamer.
-
-Added lightlist.io to the server list. The project view now resembles a web page. Bug fixes, chain sync speed improvements and visual tweaks. Switched to using Insight instead of blockchain.info as the block explorer, as Insight seems to be faster.
