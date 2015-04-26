@@ -30,7 +30,7 @@
                         <Font size="44.0" />
                     </font>
                 </TextField>
-            <Label fx:id="minersFeeLabel" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" style="-fx-text-fill: silver;" text="-%s miners fee" textAlignment="CENTER">
+            <Label fx:id="minersFeeLabel" alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" style="-fx-text-fill: silver;" text="%-%s miners fee" textAlignment="CENTER">
                <VBox.margin>
                   <Insets bottom="10.0" />
                </VBox.margin>
