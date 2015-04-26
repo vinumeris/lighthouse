@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-29 23:05+0200\n"
+"POT-Creation-Date: 2015-04-26 20:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -759,4 +759,8 @@ msgid "You don't have any bitcoins in this wallet"
 msgstr ""
 
 msgid "Send some money to this address first"
+msgstr ""
+
+#, c-format
+msgid "-%s miners fee"
 msgstr ""
