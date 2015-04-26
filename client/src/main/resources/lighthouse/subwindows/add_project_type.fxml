@@ -58,7 +58,7 @@
                   </TextFlow>
                </children>
             </GridPane>
-            <RadioButton fx:id="fullyDecentralised" mnemonicParsing="false" text="Fully decentralised" toggleGroup="$a">
+            <RadioButton fx:id="fullyDecentralised" mnemonicParsing="false" text="%Fully decentralised" toggleGroup="$a">
                <VBox.margin>
                   <Insets left="-27.0" />
                </VBox.margin>
