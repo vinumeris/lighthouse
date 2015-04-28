@@ -24,6 +24,8 @@ import org.bitcoinj.utils.*;
 import org.fxmisc.easybind.*;
 import org.slf4j.*;
 
+import java.net.*;
+
 import static javafx.beans.binding.Bindings.*;
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.GuiUtils.*;
@@ -195,7 +197,7 @@ public class MainWindow {
             ((HBox)menuBtn.getParent()).getChildren().remove(menuBtn);
             return;
         }
-        updater = new Updater(Main.instance.updatesURL, Main.APP_NAME, Main.VERSION, Main.unadjustedAppDir,
+        updater = new Updater(URI.create(Main.instance.updatesURL), Main.APP_NAME, Main.unadjustedAppDir,
                 UpdateFX.findCodePath(Main.class), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD);
 
         if (Main.offline) return;

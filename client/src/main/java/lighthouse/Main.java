@@ -58,12 +58,10 @@ public class Main extends Application {
     // UpdateFX stuff. Version is incremented monotonically after a new version is released.
     public static final int VERSION = 29;
 
-    public static final String UPDATES_BASE_URL = "https://www.vinumeris.com/lighthouse/updates";
+    // index.2 == signed with the TREZOR key
+    public static final String UPDATES_BASE_URL = "https://www.vinumeris.com/lighthouse/updates/index.2";
     public static final List<ECPoint> UPDATE_SIGNING_KEYS = Crypto.decode(
-            // Two keys during temporary transition from a key that was not password protected to one that is.
-            // At release the old key will be removed.
-            "02A3CDE5D0EDC281637C67AA67C0CB009EA6573E0F101C6E018ACB91393C08C129",   // old
-            "02AA4D7E966BFA942D3BEABD2049A49DB6AE92C417D8837C328BC02F8B50411A97"    // new
+            "020044E154894596A94EF649DC203358C27A310DDBE4D22646AC56BC8FB0BFBAFB"
     );
     public static final int UPDATE_SIGNING_THRESHOLD = 1;
 
