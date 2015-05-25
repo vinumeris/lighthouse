@@ -634,6 +634,7 @@ public class Main extends Application {
             if (window != null)
                 window.setOnCloseClicked(pair::done);
 
+            log.info("Showing window {} / {}", name, title != null ? title : "(untitled)");
             pair.show();
             return pair;
         } catch (IOException e) {
