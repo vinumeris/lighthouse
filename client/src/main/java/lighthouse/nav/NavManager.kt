@@ -48,8 +48,7 @@ public class NavManager(public val scrollPane: ScrollPane, val initial: Activity
 
         // TODO: Have to delay this to work around bug in pre 8u20 JFX. Once everyone is on 8u40 remove.
         Platform.runLater() {
-            val m = Main.instance.scene.getAccelerators()   // TODO: inline m once new kotlin is out
-            m[backShortcut] = Runnable { back() }
+            Main.instance.scene.getAccelerators()[backShortcut] = Runnable { back() }
         }
     }
 

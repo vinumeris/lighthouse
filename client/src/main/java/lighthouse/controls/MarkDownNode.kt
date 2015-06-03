@@ -29,7 +29,7 @@ import java.util.function.Consumer
 import kotlin.platform.platformStatic as static
 
 public class MarkDownNode : VBox() {
-    public var urlOpener: Consumer<String> = Consumer<String> {}
+    public var urlOpener: Consumer<String> = Consumer {}
     public val text: StringProperty = SimpleStringProperty()
 
     public fun setText(new: String) {
@@ -46,8 +46,8 @@ public class MarkDownNode : VBox() {
 
     fun preTransform(text: String): String {
         // A few simple regex based transforms to try and handle pre-Markdown formatted projects.
-        return text.replaceAll("•", "*").replaceAll("(=+) (.*) =+\n") {
-            "#".repeat(it.group(1).length()) + it.group(2)
+        return text.replace("•", "*").replace("(=+) (.*) =+\n".toRegex()) {
+            "#".repeat(it.groups[1]!!.value.length()) + it.groups[2]
         }
     }
 
@@ -71,7 +71,7 @@ public class MarkDownNode : VBox() {
         getStylesheets().setAll(javaClass.getResource("markdown.css").toExternalForm())
     }
     
-    public trait DefaultVisitor : org.pegdown.ast.Visitor {
+    public interface DefaultVisitor : org.pegdown.ast.Visitor {
         override fun visit(node: AnchorLinkNode) {}
         override fun visit(node: AbbreviationNode) {}
         override fun visit(node: AutoLinkNode) {}
@@ -302,7 +302,7 @@ public class MarkDownNode : VBox() {
         // Ignore
         override fun visit(node: DefinitionListNode) = node.accept(this)
         override fun visit(node: QuotedNode) {
-            when (node.getType()) {
+            when (node.getType()!!) {
                 QuotedNode.Type.DoubleAngle -> {
                     text("«")
                     descend(node)
@@ -324,7 +324,7 @@ public class MarkDownNode : VBox() {
         override fun visit(node: RootNode) = descend(node)
 
         override fun visit(node: SimpleNode) {
-            when (node.getType()) {
+            when (node.getType()!!) {
                 SimpleNode.Type.Apostrophe -> text("\u2019")
                 SimpleNode.Type.Ellipsis -> text("\u2026")
                 SimpleNode.Type.Emdash -> text("\u2014")
