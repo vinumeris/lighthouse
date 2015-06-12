@@ -11,4 +11,5 @@ client/client.iml
 common/common.iml
 server/server.iml
 package/macosx/Info.plist
+package/windows/Lighthouse.iss
 win-build.ps1
