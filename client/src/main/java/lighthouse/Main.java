@@ -110,7 +110,8 @@ public class Main extends Application {
         logger = java.util.logging.Logger.getLogger("");
         final FileHandler handler;
         try {
-            handler = new FileHandler(AppDirectory.dir().resolve("log.txt").toString(), true);
+            // Three log files of three megabytes each. 9mb total logs, rotating. Should be more than enough.
+            handler = new FileHandler(AppDirectory.dir().resolve("log.txt").toString(), 1024 * 1024 * 3, 3, true);
             handler.setEncoding("UTF-8");
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -318,7 +319,7 @@ public class Main extends Application {
         return pane;
     }
 
-    private boolean firstRun = true;
+    private boolean initialUILoad = true;
     private void loadMainWindow() {
         try {
             refreshStylesheets(scene);
@@ -345,9 +346,9 @@ public class Main extends Application {
             // When the app has just loaded fade out. If we're doing development and force refreshing the UI with a
             // hotkey, don't fade, it just slows me down.
             final Node node = uiStack.getChildren().get(1);
-            if (firstRun) {
+            if (initialUILoad) {
                 fadeOutAndRemove(Duration.millis(slowGFX ? UI_ANIMATION_TIME_MSEC * 2 : UI_ANIMATION_TIME_MSEC), uiStack, node);
-                firstRun = false;
+                initialUILoad = false;
             } else {
                 uiStack.getChildren().remove(node);
             }
