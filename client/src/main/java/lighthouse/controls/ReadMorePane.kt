@@ -22,7 +22,7 @@ import lighthouse.utils.easing.ElasticInterpolator
  * Control that wraps another control and hides most of it until the Read more ... link is clicked, when it animates
  * itself into the right size.
  */
-[suppress("UNCHECKED_CAST")]    // Hack around Kotlin compiler bug
+@suppress("UNCHECKED_CAST")    // Hack around Kotlin compiler bug
 public class ReadMorePane() : StackPane() {
     init {
         setMinHeight(65.0)
