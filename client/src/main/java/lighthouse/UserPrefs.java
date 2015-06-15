@@ -20,14 +20,19 @@ public class UserPrefs {
     private Properties prefs;
     private final Path path;
 
+    public final boolean prefsFileFound;
+
     public UserPrefs() {
         this.prefs = new Properties();
         path = AppDirectory.dir().resolve("settings.txt");
+        boolean found = false;
         try (InputStream stream = Files.newInputStream(path)) {
             prefs.load(stream);
+            found = true;
         } catch (IOException e) {
-            log.error("Could not load user prefs, using defaults.");
+            log.info("Could not load user prefs, using defaults.");
         }
+        prefsFileFound = found;
     }
 
     private void store() {

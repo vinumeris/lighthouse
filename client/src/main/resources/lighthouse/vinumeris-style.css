@@ -200,3 +200,14 @@
     -fx-background-insets: 1;
     -fx-background-radius: 5;
 }
+
+.thin-progress-bar > .bar {
+    -fx-padding: 8;
+}
+.thin-progress-bar > .track {
+    -fx-background-color: #bce7f5;
+    -fx-background-insets: 3 3 4 3;
+    /*-fx-background-radius: 0.583em; *//* 7 */
+    -fx-background-radius: 2;
+    -fx-padding: 8;
+}

@@ -20,6 +20,7 @@ import javafx.scene.shape.*;
 import javafx.scene.text.*;
 import javafx.stage.*;
 import javafx.util.*;
+import kotlin.*;
 import lighthouse.controls.*;
 import lighthouse.files.AppDirectory;
 import lighthouse.protocol.*;
@@ -90,6 +91,8 @@ public class Main extends Application {
     public static Path unadjustedAppDir;   // ignoring which network we're on.
 
     public static boolean offline = false;
+    public static boolean firstRun = false;
+
     private PeerGroup xtPeers;
 
     public static void main(String[] args) throws IOException {
@@ -156,9 +159,23 @@ public class Main extends Application {
         CrashFX.setup();
         // Set up the basic window with an empty UI stack, and put a quick splash there.
         reached("JFX initialised");
+        // We have to load prefs before splash because we want to avoid resizing/moving the window after we display it.
         prefs = new UserPrefs();
+        firstRun = !prefs.prefsFileFound;
         initGUI(stage);
-        stage.show();
+
+        if (firstRun) {
+            // We haven't been used on this computer/user account before. Do an initial online update to ensure the
+            // user is always on the freshest version and avoid us needing to rebuild the downloadable binaries for
+            // every single update.
+            performInitialAutoUpdate(filesToOpen);
+        } else {
+            stage.show();
+            startAppLoad(filesToOpen);
+        }
+    }
+
+    public void startAppLoad(List<Path> filesToOpen) {
         Runnable setup = () -> {
             uncheck(() -> initBitcoin(null));   // This will happen mostly async.
             loadMainWindow();
@@ -175,6 +192,41 @@ public class Main extends Application {
         };
         // Give the splash time to render (lame hack as it turns out we can easily stall the splash rendering otherwise).
         runOnGuiThreadAfter(300, setup);
+    }
+
+    private void performInitialAutoUpdate(List<Path> filesToOpen) {
+        // Put widgets on screen to track the initial update
+        VBox vBox = (VBox) ((StackPane) uiStack.getChildren().get(0)).getChildren().get(0);
+        ProgressBar bar = new ProgressBar(-1);
+        bar.getStyleClass().add("thin-progress-bar");
+        bar.setPrefWidth(400.0);
+        Label label = new Label(tr("Doing initial update check"));
+        vBox.getChildren().addAll(bar, label);
+        mainStage.show();
+
+        new OnlineUpdateChecks((state, checks) -> {
+            checkGuiThread();
+            switch (state) {
+                case WE_ARE_FRESH:
+                    log.info("Initial online update check showed that we are up to date");
+                    startAppLoad(filesToOpen);
+                    break;
+                case DOWNLOADING:
+                    bar.progressProperty().bind(checks.getProgress());
+                    label.setText(UpdateCheckStrings.DOWNLOADING_SOFTWARE_UPDATE);
+                    break;
+                case AWAITING_APP_RESTART:
+                    // Create the prefs file as a signal when we restart that it's not the first run anymore.
+                    prefs.storeStageSettings(mainStage);
+                    Main.restart();
+                    break;
+                case FAILED:
+                    // Error was already shown to user in modal dialog box and logged.
+                    Platform.exit();
+                    break;
+            }
+            return Unit.INSTANCE$;
+        }).start();
     }
 
     private boolean parseCommandLineArgs() {
@@ -293,8 +345,10 @@ public class Main extends Application {
         // Create the scene with a StackPane so we can overlay things on top of the main UI.
         final Node loadingUI = createLoadingUI();
         uiStack = new StackPane(loadingUI);
+
         scene = new Scene(uiStack);
         scene.getAccelerators().put(KeyCombination.valueOf("Shortcut+S"), () -> Platform.runLater(this::loadMainWindow));
+        refreshStylesheets(scene);
         stage.setTitle(APP_NAME);
         stage.setMinWidth(800);
         stage.setMinHeight(600);
@@ -313,7 +367,13 @@ public class Main extends Application {
     }
 
     private Node createLoadingUI() {
-        StackPane pane = new StackPane(new Label("Crowdfunding app"));
+        VBox vBox = new VBox(new Label("Crowdfunding app"));
+        vBox.setPrefWidth(Double.MAX_VALUE);
+        vBox.setPrefHeight(Double.MAX_VALUE);
+        vBox.setAlignment(Pos.CENTER);
+        vBox.setFillWidth(true);
+        vBox.setSpacing(10.0);
+        StackPane pane = new StackPane(vBox);
         pane.setPadding(new Insets(20));
         pane.setStyle("-fx-background-color: white");
         return pane;
@@ -322,8 +382,6 @@ public class Main extends Application {
     private boolean initialUILoad = true;
     private void loadMainWindow() {
         try {
-            refreshStylesheets(scene);
-
             // Load the main window.
             FXMLLoader loader = new FXMLLoader(getResource("main.fxml"), I18nUtil.translations);
             Pane ui = LHUtils.stopwatched("Loading main.fxml", loader::load);

@@ -5,13 +5,14 @@ import com.vinumeris.updatefx.*;
 import de.jensd.fx.fontawesome.*;
 import javafx.animation.*;
 import javafx.application.*;
-import javafx.beans.*;
 import javafx.beans.property.*;
 import javafx.collections.*;
 import javafx.event.*;
 import javafx.fxml.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import kotlin.*;
+import kotlin.jvm.functions.Function2;
 import lighthouse.activities.*;
 import lighthouse.controls.*;
 import lighthouse.model.*;
@@ -25,7 +26,7 @@ import org.fxmisc.easybind.*;
 import org.slf4j.*;
 
 import static javafx.beans.binding.Bindings.*;
-import static lighthouse.protocol.LHUtils.*;
+import static lighthouse.UpdateCheckStrings.*;
 import static lighthouse.utils.GuiUtils.*;
 import static lighthouse.utils.I18nUtil.*;
 
@@ -195,52 +196,34 @@ public class MainWindow {
             ((HBox)menuBtn.getParent()).getChildren().remove(menuBtn);
             return;
         }
-        updater = new Updater(Main.instance.updatesURL, Main.APP_NAME, Main.VERSION, Main.unadjustedAppDir,
-                UpdateFX.findCodePath(Main.class), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD);
 
         if (Main.offline) return;
 
-        if (!Main.instance.updatesURL.equals(Main.UPDATES_BASE_URL))
-            updater.setOverrideURLs(true);    // For testing.
-
-        // Only bother to show the user a notification if we're actually going to download an update.
-        updater.progressProperty().addListener(new InvalidationListener() {
-            private boolean shown = false;
+        OnlineUpdateChecks checker = new OnlineUpdateChecks(new Function2<UpdateState, OnlineUpdateChecks, Unit>() {
+            // Only bother to show the user a notification if we're actually going to download an update.
+            private NotificationBarPane.Item downloadingItem;
 
             @Override
-            public void invalidated(Observable x) {
-                if (shown) return;
-                NotificationBarPane.Item downloadingItem = Main.instance.notificationBar.displayNewItem(
-                        tr("Downloading software update"), updater.progressProperty());
-                updater.setOnSucceeded(ev -> {
-                    UpdateFXWindow.saveCachedIndex(unchecked(updater::get).updates);
-                    Button restartButton = new Button(tr("Restart"));
-                    restartButton.setOnAction(ev2 -> Main.restart());
-                    NotificationBarPane.Item newItem = Main.instance.notificationBar.createItem(
-                            tr("Please restart the app to upgrade to the new version."), restartButton);
-                    Main.instance.notificationBar.items.replaceAll(item -> item == downloadingItem ? newItem : item);
-                });
-                updater.setOnFailed(ev -> {
-                    downloadingItem.cancel();
-                    log.error("Online update check failed", updater.getException());
-                    // At this point the user has seen that we're trying to download something so tell them if it went
-                    // wrong.
-                    if (Main.params != RegTestParams.get())
-                        GuiUtils.informationalAlert(tr("Online update failed"),
-                                // TRANS: %s = error message
-                                tr("An error was encountered whilst attempting to download or apply an online update: %s"),
-                                updater.getException());
-                });
-                shown = true;
+            public Unit invoke(UpdateState state, OnlineUpdateChecks updater) {
+                switch (state) {
+                    case DOWNLOADING:
+                        downloadingItem = Main.instance.notificationBar.displayNewItem(DOWNLOADING_SOFTWARE_UPDATE, updater.getProgress());
+                        break;
+                    case AWAITING_APP_RESTART:
+                        Button btn = new Button(RESTART);
+                        btn.setOnAction(ev2 -> Main.restart());
+                        NotificationBarPane.Item newItem = Main.instance.notificationBar.createItem(PLEASE_RESTART_NOW, btn);
+                        Main.instance.notificationBar.items.replaceAll(item -> item == downloadingItem ? newItem : item);
+                        break;
+                    case FAILED:
+                        downloadingItem.cancel();
+                        break;
+                }
+                return null;
             }
         });
-        // Save the updates list to disk so we can still display the updates screen even if we're offline.
-        updater.setOnSucceeded(ev -> UpdateFXWindow.saveCachedIndex(unchecked(updater::get).updates));
-        // Don't bother the user if update check failed: assume some temporary server error that can be fixed silently.
-        updater.setOnFailed(ev -> log.error("Online update check failed", updater.getException()));
-        Thread thread = new Thread(updater, "Online update check");
-        thread.setDaemon(true);
-        thread.start();
+
+        MainWindow.updater = checker.getUpdater();   // TODO: Refactor this
     }
 
     public void showBitcoinSyncMessage() {
