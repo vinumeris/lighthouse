@@ -8,6 +8,7 @@ import lighthouse.utils.GuiUtils
 import lighthouse.utils.I18nUtil
 import org.bitcoinj.params.RegTestParams
 import org.slf4j.LoggerFactory
+import java.net.URI
 
 public enum class UpdateState {
     UNSTARTED,
@@ -43,7 +44,7 @@ public class OnlineUpdateChecks(val onStateChanged: (UpdateState, OnlineUpdateCh
     val exception: Throwable get() = updater.getException()
 
     init {
-        updater = Updater(Main.instance.updatesURL, Main.APP_NAME, Main.VERSION, Main.unadjustedAppDir,
+        updater = Updater(URI.create(Main.instance.updatesURL), Main.APP_NAME, Main.unadjustedAppDir,
                 UpdateFX.findCodePath(javaClass<Main>()), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD)
 
         if (Main.instance.updatesURL != Main.UPDATES_BASE_URL)
