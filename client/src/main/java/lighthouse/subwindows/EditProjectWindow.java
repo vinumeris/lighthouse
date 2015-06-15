@@ -73,7 +73,7 @@ public class EditProjectWindow {
     public static void openForCreate() {
         ProjectModel projectModel = new ProjectModel(Main.wallet);
         // Pick a random server as the default suggestion, to load balance across them more effectively.
-        projectModel.serverName.set(ServerList.pickRandom().hostName);  // By default.
+        projectModel.serverName.set(ServerList.INSTANCE$.pickRandom().getHostName());  // By default.
         open(projectModel, tr("Create new project"), false);
     }
 

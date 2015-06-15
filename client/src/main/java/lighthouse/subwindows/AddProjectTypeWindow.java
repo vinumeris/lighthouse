@@ -66,7 +66,7 @@ public class AddProjectTypeWindow {
         serverNameCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
             ServerList.Entry entry = ServerList.hostnameToServer.get(newValue);
             if (entry != null) {
-                serverInstructionsLabel.setText(entry.instructions);
+                serverInstructionsLabel.setText(entry.getInstructions());
             } else {
                 serverInstructionsLabel.setText("");
             }
