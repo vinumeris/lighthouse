@@ -161,7 +161,7 @@ public class Main extends Application {
         reached("JFX initialised");
         // We have to load prefs before splash because we want to avoid resizing/moving the window after we display it.
         prefs = new UserPrefs();
-        firstRun = !prefs.prefsFileFound;
+        firstRun = !prefs.getPrefsFileFound();
         initGUI(stage);
 
         if (firstRun) {
