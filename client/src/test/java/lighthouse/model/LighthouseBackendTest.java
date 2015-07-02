@@ -130,7 +130,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         backend.setMaxJitterSeconds(0);
 
         // Wait to start up.
-        backend.executor.fetchFrom(() -> null);
+        backend.getExecutor().fetchFrom(() -> null);
     }
 
     @After
@@ -245,8 +245,8 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // Is now loaded from disk.
         assertEquals(1, statuses.size());
         assertNotNull(statuses.get(project));
-        assertTrue(statuses.get(project).inProgress);
-        assertNull(statuses.get(project).error);
+        assertTrue(statuses.get(project).getInProgress());
+        assertNull(statuses.get(project).getError());
         // Doing request to server.
         gate.waitAndRun();
         HttpExchange exchange = httpReqs.take();
@@ -254,15 +254,15 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         gate.waitAndRun();
         // Error shows up in map.
         assertEquals(1, statuses.size());
-        assertFalse(statuses.get(project).inProgress);
-        final Throwable error = statuses.get(project).error;
+        assertFalse(statuses.get(project).getInProgress());
+        final Throwable error = statuses.get(project).getError();
         assertNotNull(error);
         assertEquals(java.io.FileNotFoundException.class, error.getClass());
         // Try again ...
         backend.refreshProjectStatusFromServer(project);
         gate.waitAndRun();
         assertEquals(1, statuses.size());
-        assertTrue(statuses.get(project).inProgress);
+        assertTrue(statuses.get(project).getInProgress());
         gate.waitAndRun();
         exchange = httpReqs.take();
         sendServerStatus(exchange, scrubbedPledge);
@@ -429,7 +429,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         gate.waitAndRun();
         assertEquals(1, statuses.size());
-        assertTrue(statuses.get(project).inProgress);
+        assertTrue(statuses.get(project).getInProgress());
 
         // App finds a few peers that support getutxos and queries all of them.
         GetUTXOsMessage getutxos1, getutxos2, getutxos3;
@@ -460,8 +460,8 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         gate.waitAndRun();
         assertEquals(1, statuses.size());
-        assertFalse(statuses.get(project).inProgress);
-        assertTrue(statuses.get(project).error instanceof Ex.InconsistentUTXOAnswers);
+        assertFalse(statuses.get(project).getInProgress());
+        assertTrue(statuses.get(project).getError() instanceof Ex.InconsistentUTXOAnswers);
     }
 
     public void writePledgeToDisk(Path dropDir, LHProtos.Pledge pledge) throws IOException {
@@ -683,7 +683,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         assertEquals(2, pledges.size());
 
         ObservableMap<String, LighthouseBackend.ProjectStateInfo> states = backend.mirrorProjectStates(gate);
-        assertEquals(LighthouseBackend.ProjectState.OPEN, states.get(project.getID()).state);
+        assertEquals(LighthouseBackend.ProjectState.OPEN, states.get(project.getID()).getState());
 
         Transaction contract = project.completeContract(ImmutableSet.of(pledge1, pledge2));
         inbound(p1, InventoryMessage.with(contract));
@@ -697,8 +697,8 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         gate.waitAndRun();
 
-        assertEquals(LighthouseBackend.ProjectState.CLAIMED, states.get(project.getID()).state);
-        assertEquals(contract.getHash(), states.get(project.getID()).claimedBy);
+        assertEquals(LighthouseBackend.ProjectState.CLAIMED, states.get(project.getID()).getState());
+        assertEquals(contract.getHash(), states.get(project.getID()).getClaimedBy());
         assertTrue(Files.exists(AppDirectory.dir().resolve(DiskManager.PROJECT_STATUS_FILENAME)));
 
         assertEquals(2, pledges.size());
@@ -711,7 +711,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
         pledges = backend.mirrorOpenPledges(project, gate);
         assertEquals(2, pledges.size());
-        assertEquals(LighthouseBackend.ProjectState.CLAIMED, backend.mirrorProjectStates(gate).get(project.getID()).state);
+        assertEquals(LighthouseBackend.ProjectState.CLAIMED, backend.mirrorProjectStates(gate).get(project.getID()).getState());
 
         // TODO: Craft a test that verifies double spending of the claim is handled properly.
     }
@@ -793,7 +793,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         gate.waitAndRun();   // statuses (start lookup)
         gate.waitAndRun();   // statuses (error result)
         //noinspection ConstantConditions
-        assertEquals(VerificationException.DuplicatedOutPoint.class, statuses.get(project).error.getClass());
+        assertEquals(VerificationException.DuplicatedOutPoint.class, statuses.get(project).getError().getClass());
     }
 
     @Test

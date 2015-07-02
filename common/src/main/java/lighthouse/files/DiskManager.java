@@ -307,7 +307,7 @@ public class DiskManager {
         Path path = AppDirectory.dir().resolve(PROJECT_STATUS_FILENAME);
         List<String> lines = new ArrayList<>();
         for (Map.Entry<String, LighthouseBackend.ProjectStateInfo> entry : projectStates.entrySet()) {
-            String val = entry.getValue().state == LighthouseBackend.ProjectState.OPEN ? "OPEN" : checkNotNull(entry.getValue().claimedBy).toString();
+            String val = entry.getValue().getState() == LighthouseBackend.ProjectState.OPEN ? "OPEN" : checkNotNull(entry.getValue().getClaimedBy()).toString();
             lines.add(entry.getKey() + "=" + val);
         }
         uncheck(() -> Files.write(path, lines));

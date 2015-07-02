@@ -143,7 +143,7 @@ public class ProjectActivity extends HBox implements Activity {
             final long goalAmount = project.get().getGoalAmount().value;
 
             //    - Bind the amount pledged to the label.
-            pledgedValue = LighthouseBackend.bindTotalPledgedProperty(pledges);
+            pledgedValue = LighthouseBackend.Companion.bindTotalPledgedProperty(pledges);
             raisedAmountLabel.textProperty().bind(createStringBinding(() -> Coin.valueOf(pledgedValue.get()).toPlainString(), pledgedValue));
 
             numPledgersLabel.textProperty().bind(Bindings.size(pledges).asString());
@@ -269,17 +269,17 @@ public class ProjectActivity extends HBox implements Activity {
         if (notifyBarItem != null)
             notifyBarItem.cancel();
         final LighthouseBackend.CheckStatus status = checkStatus.get();
-        if (status != null && status.error != null) {
-            String msg = status.error.getLocalizedMessage();
-            if (status.error instanceof FileNotFoundException)
+        if (status != null && status.getError() != null) {
+            String msg = status.getError().getLocalizedMessage();
+            if (status.getError() instanceof FileNotFoundException)
                 msg = tr("Project is not on the server yet: email the project file to the operator");
-            else if (status.error instanceof Ex.InconsistentUTXOAnswers)
+            else if (status.getError() instanceof Ex.InconsistentUTXOAnswers)
                 msg = tr("Bitcoin P2P network returned inconsistent answers, please contact support");
-            else if (status.error instanceof TimeoutException)
+            else if (status.getError() instanceof TimeoutException)
                 msg = tr("Server error: Timed out");
             else //noinspection ConstantConditions
                 if (msg == null)
-                    msg = tr("Internal error: ") + status.error.getClass().getName();
+                    msg = tr("Internal error: ") + status.getError().getClass().getName();
             else
                 // TRANS: %s = error message
                 msg = String.format(tr("Error: %s"), msg);
@@ -328,7 +328,7 @@ public class ProjectActivity extends HBox implements Activity {
     private void setModeFor(Project project, long value) {
         priorMode = mode.get();
         Mode newMode = Mode.OPEN_FOR_PLEDGES;
-        if (projectStates.get(project.getID()).state == LighthouseBackend.ProjectState.CLAIMED) {
+        if (projectStates.get(project.getID()).getState() == LighthouseBackend.ProjectState.CLAIMED) {
             newMode = Mode.CLAIMED;
         } else {
             if (Main.wallet.getPledgedAmountFor(project) > 0)
@@ -408,8 +408,8 @@ public class ProjectActivity extends HBox implements Activity {
 
     private void viewClaim(Project p) {
         LighthouseBackend.ProjectStateInfo info = projectStates.get(p.getID());
-        checkState(info.state == LighthouseBackend.ProjectState.CLAIMED);
-        String url = String.format(Main.params == TestNet3Params.get() ? BLOCK_EXPLORER_SITE_TESTNET : BLOCK_EXPLORER_SITE, info.claimedBy);
+        checkState(info.getState() == LighthouseBackend.ProjectState.CLAIMED);
+        String url = String.format(Main.params == TestNet3Params.get() ? BLOCK_EXPLORER_SITE_TESTNET : BLOCK_EXPLORER_SITE, info.getClaimedBy());
         log.info("Opening {}", url);
         Main.instance.getHostServices().showDocument(url);
     }

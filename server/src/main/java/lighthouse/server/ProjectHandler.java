@@ -47,7 +47,7 @@ public class ProjectHandler implements HttpHandler {
     public ProjectHandler(LighthouseBackend backend) {
         this.backend = backend;
         // This might change in future so alias it to keep assertions simple.
-        this.executor = backend.executor;
+        this.executor = backend.getExecutor();
         this.projectStates = backend.mirrorProjectStates(executor);
         this.checkStates = backend.mirrorCheckStatuses(executor);
     }
@@ -145,7 +145,7 @@ public class ProjectHandler implements HttpHandler {
 
         LighthouseBackend.CheckStatus checkStatus = checkStates.get(project);
         if (checkStatus != null) {
-            Throwable checkError = checkStatus.error;
+            Throwable checkError = checkStatus.getError();
             if (checkError != null) {
                 log.error("Replying with 500 due to check error", checkError);
                 byte[] bits = ("Error when checking project: " + checkError).getBytes();
@@ -184,8 +184,8 @@ public class ProjectHandler implements HttpHandler {
         long totalPledged = addPledgesToStatus(status, authenticated, getPledgesFor(project));
 
         LighthouseBackend.ProjectStateInfo info = projectStates.get(project.getID());
-        if (info.claimedBy != null) {
-            status.setClaimedBy(ByteString.copyFrom(info.claimedBy.getBytes()));
+        if (info.getClaimedBy() != null) {
+            status.setClaimedBy(ByteString.copyFrom(info.getClaimedBy().getBytes()));
         }
 
         status.setValuePledgedSoFar(totalPledged);

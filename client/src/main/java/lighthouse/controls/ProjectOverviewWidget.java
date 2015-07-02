@@ -114,7 +114,7 @@ public class ProjectOverviewWidget extends HBox {
     }
 
     public void onCheckStatusChanged(@Nullable LighthouseBackend.CheckStatus checkStatus) {
-        isLoading.set(checkStatus != null && checkStatus.inProgress);
+        isLoading.set(checkStatus != null && checkStatus.getInProgress());
     }
 
     private ExportWindow.DragData dragData;
