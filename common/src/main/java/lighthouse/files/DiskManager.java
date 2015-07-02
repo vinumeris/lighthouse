@@ -295,7 +295,7 @@ public class DiskManager {
             if (val.equals("OPEN")) {
                 projectStates.put(key, new LighthouseBackend.ProjectStateInfo(LighthouseBackend.ProjectState.OPEN, null));
             } else {
-                Sha256Hash claimedBy = new Sha256Hash(val);   // Treat as hex string.
+                Sha256Hash claimedBy = Sha256Hash.wrap(val);   // Treat as hex string.
                 log.info("Project {} is marked as claimed by {}", key, claimedBy);
                 projectStates.put(key, new LighthouseBackend.ProjectStateInfo(LighthouseBackend.ProjectState.CLAIMED, claimedBy));
             }

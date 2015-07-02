@@ -275,8 +275,8 @@ public class LHUtils {
     /** Either hashes the given pledge protobuf or returns the hash it claims to have been originally. */
     public static Sha256Hash hashFromPledge(LHProtos.Pledge pledge) {
         if (pledge.getPledgeDetails().hasOrigHash())
-            return new Sha256Hash(pledge.getPledgeDetails().getOrigHash().toByteArray());
+            return Sha256Hash.wrap(pledge.getPledgeDetails().getOrigHash().toByteArray());
         else
-            return Sha256Hash.hash(pledge.toByteArray());
+            return Sha256Hash.of(pledge.toByteArray());
     }
 }

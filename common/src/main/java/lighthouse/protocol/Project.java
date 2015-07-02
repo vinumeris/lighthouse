@@ -70,7 +70,7 @@ public class Project {
     }
 
     public Project(LHProtos.Project proto) throws PaymentProtocolException, InvalidProtocolBufferException {
-        hash = Sha256Hash.hash(proto.toByteArray());
+        hash = Sha256Hash.of(proto.toByteArray());
         // "Cast" it to a regular BIP70 payment request, possibly losing data along the way, but that's OK
         // because we only want to do this to reuse the existing APIs.
         Protos.PaymentRequest paymentRequest = Protos.PaymentRequest.parseFrom(proto.toByteString());

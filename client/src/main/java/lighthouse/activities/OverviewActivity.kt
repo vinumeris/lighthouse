@@ -139,7 +139,7 @@ public class OverviewActivity : VBox(), Activity {
 
     public fun importPledge(file: File) {
         try {
-            val hash = Sha256Hash.hashFileContents(file)
+            val hash = Sha256Hash.of(file)
             Files.copy(file.toPath(), AppDirectory.dir().resolve(hash.toString() + DiskManager.PLEDGE_FILE_EXTENSION))
         } catch (e: IOException) {
             GuiUtils.informationalAlert(tr("Import failed"), // TRANS: %1$s = app name, %2$s = error message

@@ -574,7 +574,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
                         if (status.hasClaimedBy()) {
                             if (diskManager.getProjectState(project).state != ProjectState.CLAIMED) {
                                 diskManager.setProjectState(project, new ProjectStateInfo(ProjectState.CLAIMED,
-                                        new Sha256Hash(status.getClaimedBy().toByteArray())));
+                                        Sha256Hash.wrap(status.getClaimedBy().toByteArray())));
                             }
                             log.info("Project is claimed ({} pledges)", getPledgesFor(project).size());
                         }
@@ -671,8 +671,8 @@ public class LighthouseBackend extends AbstractBlockChainListener {
             // to scrap the directory watching crap for projects entirely. This hack fails if the project you're
             // importing is a later version of a project you already have - the bottom section of the UI might go
             // walkies until the next restart!
-            Sha256Hash theirHash = Sha256Hash.hashFileContents(file.toFile());
-            Sha256Hash ourHash = Sha256Hash.hashFileContents(destPath.toFile());
+            Sha256Hash theirHash = Sha256Hash.of(file.toFile());
+            Sha256Hash ourHash = Sha256Hash.of(destPath.toFile());
             if (theirHash.equals(ourHash)) {
                 log.info("Attempted import of a project we already have, skipping");
                 return;
@@ -871,7 +871,7 @@ public class LighthouseBackend extends AbstractBlockChainListener {
         try {
             // Can be on any thread.
             final byte[] bits = pledge.toByteArray();
-            Sha256Hash hash = Sha256Hash.hash(bits);
+            Sha256Hash hash = Sha256Hash.of(bits);
             // This file name is not very helpful for sysadmins. Perhaps if we scrub the metadata enough we can make a
             // better one, e.g. with the users contact details in.
             String filename = hash + DiskManager.PLEDGE_FILE_EXTENSION;
