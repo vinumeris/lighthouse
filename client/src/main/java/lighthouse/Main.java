@@ -25,6 +25,7 @@ import lighthouse.controls.*;
 import lighthouse.files.AppDirectory;
 import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
+import lighthouse.threading.*;
 import lighthouse.utils.*;
 import lighthouse.utils.ipc.*;
 import lighthouse.wallet.*;
@@ -164,7 +165,7 @@ public class Main extends Application {
         firstRun = !prefs.getPrefsFileFound();
         initGUI(stage);
 
-        if (firstRun) {
+        if (firstRun && params != RegTestParams.get()) {
             // We haven't been used on this computer/user account before. Do an initial online update to ensure the
             // user is always on the freshest version and avoid us needing to rebuild the downloadable binaries for
             // every single update.
@@ -215,14 +216,12 @@ public class Main extends Application {
                     bar.progressProperty().bind(checks.getProgress());
                     label.setText(UpdateCheckStrings.DOWNLOADING_SOFTWARE_UPDATE);
                     break;
+                case FAILED:
+                    // Error already shown to the user, so just restart with the current version.
                 case AWAITING_APP_RESTART:
                     // Create the prefs file as a signal when we restart that it's not the first run anymore.
                     prefs.storeStageSettings(mainStage);
                     Main.restart();
-                    break;
-                case FAILED:
-                    // Error was already shown to user in modal dialog box and logged.
-                    Platform.exit();
                     break;
             }
             return Unit.INSTANCE$;
@@ -448,7 +447,7 @@ public class Main extends Application {
             @Override
             protected void onSetupCompleted() {
                 wallet = (PledgingWallet) bitcoin.wallet();
-                backend = new LighthouseBackend(CLIENT, vPeerGroup, xtPeers, vChain, wallet);
+                backend = new LighthouseBackend(CLIENT, vPeerGroup, xtPeers, vChain, wallet, new AffinityExecutor.ServiceAffinityExecutor("backend"));
 
                 reached("onSetupCompleted");
                 walletLoadedLatch.countDown();
@@ -529,12 +528,18 @@ public class Main extends Application {
 
     public boolean waitForInit() {
         log.info("Waiting for bitcoin load ...");
-        Uninterruptibles.awaitUninterruptibly(walletLoadedLatch);
-        if (Main.backend != null) {
-            log.info("Waiting for backend init ...");
-            Main.backend.waitForInit();
-            return true;
-        } else {
+
+        try {
+            Uninterruptibles.awaitUninterruptibly(walletLoadedLatch);
+            if (Main.backend != null) {
+                log.info("Waiting for backend init ...");
+                Main.backend.waitForInit();
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            CrashWindow.open(e);
             return false;
         }
     }

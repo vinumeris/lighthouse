@@ -2,37 +2,44 @@ package lighthouse
 
 import com.google.common.base.Preconditions.checkArgument
 import com.google.common.base.Preconditions.checkState
+import com.google.common.base.Splitter
 import com.google.common.base.Throwables.getRootCause
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import javafx.beans.InvalidationListener
 import javafx.beans.property.LongProperty
 import javafx.beans.property.SimpleLongProperty
-import javafx.collections.*
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
+import javafx.collections.ObservableMap
+import javafx.collections.ObservableSet
 import lighthouse.files.AppDirectory
-import lighthouse.files.DiskManager
 import lighthouse.protocol.*
-import lighthouse.protocol.LHUtils.checkedGet
 import lighthouse.protocol.LHUtils.futureOfFutures
 import lighthouse.protocol.LHUtils.hashFromPledge
 import lighthouse.protocol.LHUtils.pledgeToTx
 import lighthouse.threading.AffinityExecutor
 import lighthouse.threading.ObservableMirrors
 import lighthouse.utils.asCoin
+import lighthouse.utils.hash
 import lighthouse.utils.plus
+import lighthouse.utils.projectID
 import lighthouse.wallet.PledgingWallet
 import net.jcip.annotations.GuardedBy
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.deferred
+import nl.komponents.kovenant.jvm.asDispatcher
 import org.bitcoinj.core.*
 import org.bitcoinj.params.RegTestParams
 import org.slf4j.LoggerFactory
 import org.spongycastle.crypto.params.KeyParameter
-import java.io.BufferedOutputStream
+import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import java.time.Duration
 import java.util.ArrayList
 import java.util.HashMap
@@ -56,16 +63,19 @@ import java.util.function.BiFunction
  * LighthouseBackend is used in both the GUI app and on the server. In the server case the wallet will typically be
  * empty and projects/pledges are stored on disk only. Ideally, it's connected to a local Bitcoin Core node.
  */
-public class LighthouseBackend(
+public class LighthouseBackend public constructor(
         public val mode: LighthouseBackend.Mode,
         private val regularP2P: PeerGroup,
         private val xtP2P: PeerGroup,
         chain: AbstractBlockChain,
         private val wallet: PledgingWallet,
-        private val diskManager: DiskManager,
         public val executor: AffinityExecutor.ServiceAffinityExecutor
 ) : AbstractBlockChainListener() {
     companion object {
+        public val PROJECT_STATUS_FILENAME: String = "project-status.txt"
+        public val PROJECT_FILE_EXTENSION: String = ".lighthouse-project"
+        public val PLEDGE_FILE_EXTENSION: String = ".lighthouse-pledge"
+
         private val log = LoggerFactory.getLogger(javaClass<LighthouseBackend>())
 
         /** Returns a property calculated from the given list, with no special mirroring setup.  */
@@ -87,42 +97,11 @@ public class LighthouseBackend(
         }
 
         private val BLOCK_PROPAGATION_TIME_SECS = 30    // 90th percentile block propagation times ~15 secs
-        private val TX_PROPAGATION_TIME_SECS = 5  // 90th percentile tx propagation times ~3 secs
-
-        private fun savePledge(pledge: LHProtos.Pledge): LHProtos.Pledge {
-            try {
-                // Can be on any thread.
-                val bits = pledge.toByteArray()
-                val hash = Sha256Hash.of(bits)
-                // This file name is not very helpful for sysadmins. Perhaps if we scrub the metadata enough we can make a
-                // better one, e.g. with the users contact details in.
-                val filename = hash.toString() + DiskManager.PLEDGE_FILE_EXTENSION
-                // Use a temp file and rename to disallow allow partially visible pledges.
-                val path = AppDirectory.dir().resolve(filename + ".tmp")
-                BufferedOutputStream(Files.newOutputStream(path)).use { stream ->
-                    log.info("Saving pledge to disk as {}", filename)
-                    stream.write(bits)
-                }
-                Files.move(path, AppDirectory.dir().resolve(filename))
-                return pledge
-            } catch (e: IOException) {
-                throw RuntimeException(e)
-            }
-
-        }
-    }
-
-    private val initialized = CompletableFuture<Boolean>()
-    private var minPeersForUTXOQuery = 2
-
-    public enum class Mode {
-        CLIENT,
-        SERVER
     }
 
     /**
      * Is the project currently open for pledges or did it complete successfully? In future we might have EXPIRED here
-     * too for deadlined contracts. DiskManager just keeps track of this, doesn't actually calculate the correct answer.
+     * too for deadlined contracts.
      */
     public enum class ProjectState {
         OPEN,
@@ -130,6 +109,15 @@ public class LighthouseBackend(
         CLAIMED,
 
         UNKNOWN  // Used only for offline mode
+    }
+    public data class ProjectStateInfo(public val state: ProjectState, public val claimedBy: Sha256Hash?)
+
+    private val initialized = CompletableFuture<Boolean>()
+    private var minPeersForUTXOQuery = 2
+
+    public enum class Mode {
+        CLIENT,
+        SERVER
     }
 
     public class CheckStatus private constructor(public val inProgress: Boolean, public val error: Throwable?) {
@@ -140,7 +128,7 @@ public class LighthouseBackend(
             public fun withError(error: Throwable): CheckStatus = CheckStatus(false, error)
         }
     }
-    private val checkStatuses: ObservableMap<Project, CheckStatus>
+    private val checkStatuses = FXCollections.observableHashMap<Project, CheckStatus>()
 
     // Non-revoked pledges either:
     //  - Fetched from the remote server, which is inherently trusted as it's run by the person you're
@@ -148,86 +136,201 @@ public class LighthouseBackend(
     //  - Checked against the P2P network, which is only semi-trusted but in practice should
     //    work well enough to just keep our UI consistent, which is all we use it for.
     //  - From the users wallet, which are trusted because we created it.
-    private val pledges: MutableMap<Project, ObservableSet<LHProtos.Pledge>>
+    private val pledges = hashMapOf<Project, ObservableSet<LHProtos.Pledge>>()
 
     GuardedBy("this")
-    private val projectsByUrlPath: MutableMap<String, Project>
+    private val projectsByUrlPath = hashMapOf<String, Project>()
 
-    // TODO: Get rid of this c'tor
-    jvmOverloads public constructor(mode: LighthouseBackend.Mode, regularP2P: PeerGroup, xtP2P: PeerGroup, chain: AbstractBlockChain, wallet: PledgingWallet, executor: AffinityExecutor.ServiceAffinityExecutor = AffinityExecutor.ServiceAffinityExecutor("LighthouseBackend")) :
-        this(mode, regularP2P, xtP2P, chain, wallet, DiskManager(wallet.getParams(), executor), executor) {}
+    private val projects = FXCollections.observableArrayList<Project>()
+    private val projectsMap: MutableMap<Sha256Hash, Project> = linkedMapOf()
+    private val projectStates: ObservableMap<Sha256Hash, ProjectStateInfo> = FXCollections.observableMap(linkedMapOf())
 
     init {
-        this.pledges = HashMap<Project, ObservableSet<LHProtos.Pledge>>()
-        this.checkStatuses = FXCollections.observableHashMap<Project, CheckStatus>()
-        this.projectsByUrlPath = HashMap<String, Project>()
+        Kovenant.context {
+            workerContext.dispatcher = executor.asDispatcher()
+        }
 
         if (wallet.getParams() === RegTestParams.get()) {
             setMinPeersForUTXOQuery(1)
             setMaxJitterSeconds(1)
         }
 
-        diskManager.observeProjects { change ->
-            onDiskProjectAdded(change)
-        }
-
-        // Run initialisation later (not ASAP). This is needed because the disk manager may itself be waiting to fully
-        // start up. This odd initialisation sequence is to simplify the addition of event handlers: the backend and
-        // disk manager classes can be created and wired together, but if this is done from the AffinityExecutor thread
-        // then nothing will happen immediately, meaning that set/list-changed handlers will run for newly loaded data.
-        // This can simplify code elsewhere.
+        // Run initialisation later (not ASAP). This is a holdover from a previous version of the code.
+        // TODO: Make loading and initialization explicit and split in two, so we can start up faster.
         executor.execute {
-            chain.addListener(this, executor)
+            try {
+                chain.addListener(this, executor)
 
-            // Load pledges found in the wallet.
-            for (pledge in wallet.getPledges()) {
-                val project = diskManager.getProjectById(pledge.getPledgeDetails().getProjectId())
-                if (project != null) {
-                    getPledgesFor(project).add(pledge)
-                } else {
-                    log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.getPledgeDetails().getProjectId())
+                loadData()
+
+                // Load pledges found in the wallet.
+                for (pledge in wallet.getPledges()) {
+                    val project = projectsMap[pledge.projectID]
+                    if (project != null)
+                        getPledgesFor(project).add(pledge)
+                    else
+                        log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.projectID)
                 }
-            }
-            wallet.addOnPledgeHandler(object : PledgingWallet.OnPledgeHandler {
-                override fun onPledge(project: Project, pledge: LHProtos.Pledge) {
-                    val pledgesFor = getPledgesFor(project)
-                    pledgesFor.add(pledge)
-                }
-            }, executor)
-            wallet.addOnRevokeHandler(object : PledgingWallet.OnRevokeHandler {
-                override fun onRevoke(pledge: LHProtos.Pledge) {
-                    val project = diskManager.getProjectById(pledge.getPledgeDetails().getProjectId())
+
+                wallet.addOnPledgeHandler(executor) { project, pledge -> getPledgesFor(project).add(pledge) }
+                wallet.addOnRevokeHandler(executor) { pledge ->
+                    val project = projectsMap[pledge.projectID]
                     if (project != null) {
                         getPledgesFor(project).remove(pledge)
                     } else {
-                        log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.getPledgeDetails().getProjectId())
+                        log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.projectID)
                     }
                 }
-            }, executor)
+                // Make sure we can spot projects being claimed.
+                wallet.addEventListener(object : AbstractWalletEventListener() {
+                    override fun onCoinsReceived(wallet: Wallet, tx: Transaction, prevBalance: Coin, newBalance: Coin) {
+                        checkPossibleClaimTX(tx)
+                    }
+                }, executor)
 
-            // Make sure we can spot projects being claimed.
-            wallet.addEventListener(object : AbstractWalletEventListener() {
-                override fun onCoinsReceived(wallet: Wallet, tx: Transaction, prevBalance: Coin, newBalance: Coin) {
-                    checkPossibleClaimTX(tx)
-                }
-            }, executor)
-
-            for (tx in wallet.getTransactions(false)) {
-                val project = diskManager.getProjectFromClaim(tx)
-                if (project != null) {
-                    log.info("Loading stored claim {}", tx.getHash())
+                for (tx in wallet.getTransactions(false)) {
+                    log.info("Loading stored claim ${tx.getHash()}")
+                    val project = getProjectFromClaim(tx) ?: continue
                     addClaimConfidenceListener(executor, tx, project)
                 }
+
+                projectsMap.values().forEach { checkProject(it) }
+
+                // Let us find revocations by using a direct Bloom filter provider. We could watch out for claims in this
+                // way too, but we want the wallet to monitor confidence of claims, and don't care about revocations as much.
+                installBloomFilterProvider()
+
+                log.info("Backend initialized ...")
+                initialized.complete(true)
+            } catch (e: Throwable) {
+                log.error("Backend init failed", e)
+                initialized.completeExceptionally(e)
             }
-
-            // Let us find revocations by using a direct Bloom filter provider. We could watch out for claims in this
-            // way too, but we want the wallet to monitor confidence of claims, and don't care about revocations as much.
-            installBloomFilterProvider()
-            refreshBloomFilter()
-
-            log.info("Backend initialized ...")
-            initialized.complete(true)
         }
+    }
+
+    private fun checkProject(project: Project) {
+        // Don't attempt to check the server when we ARE the server!
+        if (project.isServerAssisted() && mode === Mode.CLIENT) {
+            log.info("Load: checking project against server: $project")
+            refreshProjectStatusFromServer(project)
+        } else {
+            log.info("Load: checking project against P2P network: $project")
+            val pledges = getPledgesFor(project).filterNot { wallet.getPledges().contains(it) || wallet.wasPledgeRevoked(it) }.toSet()
+            checkPledgesAgainstP2PNetwork(project, pledges)
+        }
+    }
+
+    private fun loadData() {
+        val appdir = AppDirectory.dir().toFile()
+        // Load the project files. We do not know yet what order they appear on screen, so we cannot
+        // optimise by loading the ones the user would see first! This should be fixed in a future version.
+        // However, we could load them in parallel to speed things up.
+        loadProjectFiles(appdir)
+
+        // Load the "statuses file". This gives us the basic data we need to render the UI and preserve a consistent
+        // ordering across restarts regardless of what the filesystem gives us.
+        val path = AppDirectory.dir().resolve(PROJECT_STATUS_FILENAME)
+        if (Files.exists(path))
+            loadProjectStatuses(path)
+        projectStates.addListener(InvalidationListener { saveProjectStatuses(path) })
+
+        // Load the pledges and match them up to known projects.
+        loadPledges(appdir)
+    }
+
+    private fun loadProjectFiles(appdir: File) {
+        appdir.listFiles {
+            it.toString() endsWith PROJECT_FILE_EXTENSION && it.isFile()
+        }?.map {
+            tryLoadProject(it)
+        }?.filterNotNull()?.forEach { project ->
+            insertProject(project)
+        }
+    }
+
+    private fun insertProject(project: Project) {
+        executor.checkOnThread()
+        projects.add(project)
+        // Assume new projects are open: we have no other way to tell for now: would require a block explorer
+        // lookup to detect that the project came and went already. But we do remember even if the project
+        // is deleted and came back.
+        projectStates[project.hash] = ProjectStateInfo(ProjectState.OPEN, null)
+        // Ensure we can look up a Project when we receive an HTTP request.
+        if (project.isServerAssisted() && mode == Mode.SERVER)
+            projectsByUrlPath[project.getPaymentURL().getPath()] = project
+        projectsMap[project.hash] = project
+        configureWalletToSpotClaimsFor(project)
+    }
+
+    private fun saveProjectStatuses(path: Path) {
+        executor.executeASAP {
+            log.info("Saving project statuses")
+            val lines = arrayListOf<String>()
+            for (entry in projectStates.entrySet()) {
+                val v = if (entry.getValue().state == ProjectState.OPEN) "OPEN" else entry.getValue().claimedBy.toString()
+                lines.add("${entry.getKey()}=$v")
+            }
+            Files.write(path, lines)
+        }
+    }
+
+    private fun loadProjectStatuses(path: Path) {
+        // Parse the file that contains "project_hash = OPEN | claimed_by_hash" pairs.
+        // This file is a hack left over from the mad rush to beta. We should replace it with a mini SQLite or
+        // something similar.
+        path.toFile().forEachLine { line ->
+            if (!line.startsWith("#")) {
+                val parts = Splitter.on("=").splitToList(line)
+                val key = Sha256Hash.wrap(parts[0])
+                val value = parts[1]
+                if (value == "OPEN") {
+                    projectStates[key] = ProjectStateInfo(ProjectState.OPEN, null)
+                } else {
+                    val claimedBy = Sha256Hash.wrap(value)
+                    projectStates[key] = ProjectStateInfo(ProjectState.CLAIMED, claimedBy)
+                    log.info("Project $key is marked as claimed by $claimedBy")
+                }
+            }
+        }
+    }
+
+    private fun loadPledges(appdir: File) {
+        appdir.listFiles {
+            it.toString() endsWith PLEDGE_FILE_EXTENSION
+        }?.map {
+            tryLoadPledge(it)
+        }?.filterNotNull()?.forEach {
+            val p = projectsMap[it.projectID]
+            if (p == null) {
+                log.warn("Found pledge we don't have the project for: ${it.hash}")
+            } else {
+                getPledgesFor(p).add(it)
+            }
+        }
+    }
+
+    private fun tryLoadPledge(it: File, ignoreErrors: Boolean = true): LHProtos.Pledge? = try {
+        it.inputStream().use { LHProtos.Pledge.parseFrom(it) }
+    } catch(e: Exception) {
+        log.error("Failed to load pledge from $it")
+        if (ignoreErrors) null else throw e
+    }
+
+    private fun tryLoadProject(it: File, ignoreErrors: Boolean = true): Project? = try {
+        val project = it.inputStream().use { stream -> Project(LHProtos.Project.parseFrom(stream)) }
+        if (project.getParams() == wallet.getParams()) {
+            project
+        } else {
+            log.warn("Ignoring project with mismatched params: $it")
+            null
+        }
+    } catch (e: Exception) {
+        log.error("Project file $it could not be read, ignoring: ${e.getMessage()}")
+        if (ignoreErrors)
+            null
+        else
+            throw e
     }
 
     private fun addClaimConfidenceListener(executor: AffinityExecutor, transaction: Transaction, project: Project) {
@@ -254,7 +357,7 @@ public class LighthouseBackend(
         // level, or the user can just use whatever the destination wallet is to find out when they've got the money
         // to a high enough degree of confidence.
         executor.checkOnThread()
-        val project = diskManager.getProjectFromClaim(tx) ?: return
+        val project = getProjectFromClaim(tx) ?: return
         log.info("Found claim tx {} with {} inputs for project {}", tx.getHash(), tx.getInputs().size(), project)
         tx.verify()   // Already done but these checks are fast, can't hurt to repeat.
         // We could check that the inputs are all (but one) signed with SIGHASH_ANYONECANPAY here, but it seems
@@ -279,116 +382,43 @@ public class LighthouseBackend(
             log.info("Claim seen by {}/{} peers", seenBy, numWaitingFor)
             if (seenBy < numWaitingFor)
                 return false
-            if (conf.getDepthInBlocks() > 3)
-                return true  // Don't care about watching this anymore.
-            if (diskManager.getProjectState(project).state !== ProjectState.CLAIMED) {
-                log.info("Claim propagated or mined")
-                diskManager.setProjectState(project, ProjectStateInfo(ProjectState.CLAIMED, transaction.getHash()))
-            }
         }
 
         if (type == TransactionConfidence.ConfidenceType.PENDING || type == TransactionConfidence.ConfidenceType.BUILDING) {
             if (conf.getDepthInBlocks() > 3)
-                return true
-            if (diskManager.getProjectState(project).state !== ProjectState.CLAIMED) {
+                return true  // Don't care about watching this anymore.
+            if (projectStates[project.hash]!!.state !== ProjectState.CLAIMED) {
                 log.info("Claim propagated or mined")
-                diskManager.setProjectState(project, ProjectStateInfo(ProjectState.CLAIMED, transaction.getHash()))
+                projectStates[project.hash] = ProjectStateInfo(ProjectState.CLAIMED, transaction.getHash())
             }
-        } else if (type == TransactionConfidence.ConfidenceType.DEAD) {
-            log.warn("Claim double spent! Overridden by {}", conf.getOverridingTransaction())
-            diskManager.setProjectState(project, ProjectStateInfo(ProjectState.ERROR, null))
+            return false
         }
+
+        if (type == TransactionConfidence.ConfidenceType.DEAD) {
+            log.warn("Claim double spent! Overridden by {}", conf.getOverridingTransaction())
+            projectStates[project.hash] = ProjectStateInfo(ProjectState.ERROR, null)
+        }
+
         return false  // Don't remove listener.
     }
 
+    public fun getProjectFromClaim(claim: Transaction): Project? {
+        executor.checkOnThread()
+        return projectsMap.values().firstOrNull { project -> LHUtils.compareOutputsStructurally(claim, project) }
+    }
+
     public fun waitForInit() {
-        checkedGet<Boolean, RuntimeException>(initialized)
+        initialized.get()
     }
 
-    private fun onDiskProjectAdded(change: ListChangeListener.Change<out Project>) {
-        executor.checkOnThread()
-        while (change.next()) {
-            log.info("Change: {}", change)
-            if (change.wasUpdated()) {
-                // Sometimes we get such updates from the Linux kernel even when all we did was create a file on disk
-                // in a directory that's already being monitored due to another project.
-                log.info("Project updated: {}", change.getAddedSubList().get(0))
-                continue
-            }
-
-            if (change.wasAdded()) {
-                checkState(change.getAddedSize() == 1)   // DiskManager doesn't batch.
-                val project = change.getAddedSubList().get(0)
-                log.info("New project found on disk: {}", project)
-                if (mode === Mode.SERVER) {
-                    var cont = false
-                    synchronized (this) {
-                        val url = project.getPaymentURL()
-                        if (url == null) {
-                            log.error("Project found that has no payment URL: cannot work like this!")
-                            // continue            KT-1436 Support non-local break and continue
-                            cont = true
-                        } else {
-                            projectsByUrlPath.put(url.getPath(), project)
-                        }
-                    }
-                    if (cont) continue
-                }
-                // Make sure we keep an eye on the project output scripts so we can spot claim transactions, note
-                // that this works even if we never make any pledge ourselves, for example because we are a server.
-                // We ask the wallet to track it instead of doing this ourselves because the wallet knows how to do
-                // things like watch out for double spends and track chain depth.
-                val scripts = project.getOutputs().map { it.getScriptPubKey() }
-                scripts.forEach { it.setCreationTimeSeconds(project.getProtoDetails().getTime()) }
-                wallet.addWatchedScripts(scripts)
-                if (project.getPaymentURL() != null && mode === Mode.CLIENT) {
-                    log.info("Checking project against server: {}", project)
-                    refreshProjectStatusFromServer(project, null)
-                } else {
-                    log.info("Checking newly found project against P2P network: {}", project)
-                    val unverifiedPledges = diskManager.getPledgesOrCreate(project)
-                    unverifiedPledges.addListener(SetChangeListener<LHProtos.Pledge> {
-                        diskPledgesChanged(it, project)
-                    })
-                    checkPledgesAgainstP2PNetwork(project, unverifiedPledges)
-                }
-            }
-        }
-    }
-
-    private fun diskPledgesChanged(change: SetChangeListener.Change<out LHProtos.Pledge>, project: Project) {
-        executor.checkOnThread()
-        if (change.wasRemoved()) {
-            val walletPledge = wallet.getPledgeFor(project)
-            val removedPledge = change.getElementRemoved()
-            if (walletPledge != null && walletPledge == removedPledge) {
-                // Pledge file was removed from disk, but we may have another copy in the wallet, in this case the disk
-                // copy is redundant and if the user or project owner blows it away (e.g. via a shared dropbox), no harm
-                // done. Maybe we should auto-restore it to remind the user that they have to revoke it properly, or
-                // show them a message?
-                log.info("Pledge in wallet was removed from disk, ignoring.")
-            } else {
-                // Bye bye .... even if the pledge was claimed, we're about to lose our knowlege of it because the
-                // user removed it from disk, so we can't keep track of it reliably afterwards anyway.
-                log.info("Pledge on disk disappeared.")
-                pledges[project]!!.remove(removedPledge)
-                // If the project was in error because of this pledge (e.g. it was a duplicate), kick off a recheck.
-                if (checkStatuses[project]?.error != null)
-                    checkPledgesAgainstP2PNetwork(project, pledges[project]!!)
-            }
-        }
-        if (change.wasAdded()) {
-            val added = change.getElementAdded()
-            if (isPledgeKnown(added)) {
-                log.info("Saw pledge appear on disk that we already knew about: {}", LHUtils.hashFromPledge(added))
-            } else {
-                log.info("New pledge found on disk for {}", project)
-                // Jitter to give the dependency txns time to propagate in case somehow our source of pledges
-                // is faster than the P2P network (e.g. local network drive or in regtesting mode).
-                // TODO: This delay is pointless when we reach here during startup.
-                jitteredExecute(Runnable { checkPledgeAgainstP2PNetwork(project, added) }, TX_PROPAGATION_TIME_SECS)
-            }
-        }
+    private fun configureWalletToSpotClaimsFor(project: Project) {
+        // Make sure we keep an eye on the project output scripts so we can spot claim transactions, note
+        // that this works even if we never make any pledge ourselves, for example because we are a server.
+        // We ask the wallet to track it instead of doing this ourselves because the wallet knows how to do
+        // things like watch out for double spends and track chain depth.
+        val scripts = project.getOutputs().map { it.getScriptPubKey() }
+        scripts.forEach { it.setCreationTimeSeconds(project.getProtoDetails().getTime()) }
+        wallet.addWatchedScripts(scripts)
     }
 
     private fun isPledgeKnown(pledge: LHProtos.Pledge): Boolean {
@@ -410,7 +440,7 @@ public class LighthouseBackend(
      */
     private fun checkPledgeAgainstP2PNetwork(project: Project, pledge: LHProtos.Pledge): CompletableFuture<Set<LHProtos.Pledge>> {
         executor.checkOnThread()
-        val both = HashSet(diskManager.getPledgesOrCreate(project))
+        val both = HashSet(getPledgesFor(project))
         both.add(pledge)
         return checkPledgesAgainstP2PNetwork(project, both)
     }
@@ -436,33 +466,27 @@ public class LighthouseBackend(
             }
         }
         executor.executeASAP {
-            val state = diskManager.getProjectState(project)
-            if (state?.state == ProjectState.CLAIMED && (project.getPaymentURL() == null || mode == Mode.SERVER)) {
-                // Serverless project.
-                val contract = wallet.getTransaction(state.claimedBy)
+            val state = projectStates[project.hash]
+            if (state?.state == ProjectState.CLAIMED && (!project.isServerAssisted() || mode == Mode.SERVER)) {
+                // Serverless project or we are the server.
+                val contract = wallet.getTransaction(state!!.claimedBy)  // KT-7290
                 if (contract == null) {
                     log.error("Serverless project marked as claimed but contract not found in wallet! Assuming all pledges were taken.")
                     syncPledges(project, pledges, ArrayList(pledges))
                     result.complete(pledges)
                 } else {
-                    log.info("Project '{}' is claimed by {}, skipping network check as all pledges would be taken", project.getTitle(), contract.getHash())
-                    val appearedInClaim = ArrayList<LHProtos.Pledge>()
-                    for (pledge in pledges) {
-                        if (LHUtils.pledgeAppearsInClaim(project, pledge, contract))
-                            appearedInClaim.add(pledge)
-                    }
+                    log.info("Project '${project.getTitle()}' is claimed by ${contract.getHash()}, skipping network check as all pledges would be taken")
+                    val appearedInClaim = pledges.filter { LHUtils.pledgeAppearsInClaim(project, it, contract) }
                     syncPledges(project, pledges, appearedInClaim)
                     result.complete(HashSet(appearedInClaim))
                 }
             } else {
-                log.info("Checking {} pledge(s) against P2P network for '{}'", pledges.size(), project)
+                log.info("Checking ${pledges.size()} pledge(s) against P2P network for '$project'")
                 markAsInProgress(project)
                 val peerFuture = xtP2P.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION.toLong())
                 if (!peerFuture.isDone()) {
                     log.info("Waiting to find {} peers that support getutxo", minPeersForUTXOQuery)
-                    for (peer in xtP2P.getConnectedPeers()) {
-                        log.info("Connected to: {}", peer)
-                    }
+                    for (peer in xtP2P.getConnectedPeers()) log.info("Connected to: {}", peer)
                 }
                 Futures.addCallback(peerFuture, object : FutureCallback<List<Peer>> {
                     override fun onSuccess(allPeers: List<Peer>) {
@@ -606,9 +630,8 @@ public class LighthouseBackend(
                         // here we mark all of them. This is due to the difference between serverless and server assisted
                         // projects (serverless can have open pledges even after a claim).
                         if (status.hasClaimedBy()) {
-                            if (diskManager.getProjectState(project).state !== ProjectState.CLAIMED) {
-                                diskManager.setProjectState(project, ProjectStateInfo(ProjectState.CLAIMED, Sha256Hash.wrap(status.getClaimedBy().toByteArray())))
-                            }
+                            if (projectStates[project]?.state !== ProjectState.CLAIMED)
+                                projectStates[project.hash] = ProjectStateInfo(ProjectState.CLAIMED, Sha256Hash.wrap(status.getClaimedBy().toByteArray()))
                             log.info("Project is claimed ({} pledges)", getPledgesFor(project).size())
                         }
                         // Status contains a new list of pledges. We should update our own observable list by touching it
@@ -679,48 +702,107 @@ public class LighthouseBackend(
         }
     }
 
-    /** Returns a new read-only set that has changes applied using the given executor.  */
-    public fun mirrorProjects(executor: AffinityExecutor): ObservableList<Project> = diskManager.mirrorProjects(executor)
+    /** Returns a new read-only list that has changes applied using the given executor.  */
+    public fun mirrorProjects(executor: AffinityExecutor): ObservableList<Project> = executor.fetchFrom { ObservableMirrors.mirrorList(projects, executor) }
 
     throws(IOException::class)
-    public fun saveProject(project: Project): Project = diskManager.saveProject(project.getProto(), project.getTitle())
-
-    throws(IOException::class)
-    public fun importProjectFrom(file: Path) {
-        // TODO: Simplify this right down. Just rip out the directory watching for projects entirely.
-        // Can be on any thread here. Do file IO on calling thread so IO error handling is easier.
-        if (!Files.isRegularFile(file))
-            throw IOException("Irregular file: " + file)
-        val destPath = AppDirectory.dir().resolve(file.getFileName())
-
-        if (Files.exists(destPath)) {
-            // Temp hack to fix a bug on Windows before beta. Do nothing if the file is identical to one we already
-            // imported. Otherwise main UI gets a bit messed up. This is a dumb workaround though, the real fix is
-            // to scrap the directory watching crap for projects entirely. This hack fails if the project you're
-            // importing is a later version of a project you already have - the bottom section of the UI might go
-            // walkies until the next restart!
-            val theirHash = Sha256Hash.of(file.toFile())
-            val ourHash = Sha256Hash.of(destPath.toFile())
-            if (theirHash == ourHash) {
-                log.info("Attempted import of a project we already have, skipping")
-                return
-            }
+    public fun saveProject(project: Project): Project {
+        val filename = project.getSuggestedFileName()
+        val path = AppDirectory.dir().resolve(filename).toFile()
+        log.info("Saving project to $path")
+        path.writeBytes(project.getProto().toByteArray())
+        executor.execute {
+            insertProject(project)
         }
+        return project
+    }
 
-        val tmpPath = Paths.get("$destPath.tmp")
-        // Copy and rename to avoid superfluous directory change notifications.
-        Files.copy(file, tmpPath, StandardCopyOption.REPLACE_EXISTING)
-        Files.move(tmpPath, destPath, StandardCopyOption.REPLACE_EXISTING)
-        // Hack: wait a while so the directory watcher can process the changes from the above file move, before
-        // adding a new directory to watch, which can result in reconstruction of the dir watcher and lost notifications.
-        executor.executeIn(Duration.ofSeconds(3)) {
-            watchDirectoryForPledges(file.getParent())
+    public fun editProject(new: Project, old: Project): Project {
+        if (new.hash == old.hash)
+            return new
+
+        // Overwrite the original file in our app dir.
+        val file = AppDirectory.dir().resolve(old.getSuggestedFileName()).toFile()
+        log.info("Overwriting project at $file")
+        file.writeBytes(new.getProto().toByteArray())
+        executor.execute {
+            projectStates[new.hash] = projectStates[old.hash]
+            // Leave the old project state in the table for now: it simplifies the UI update process.
+            if (mode == Mode.SERVER) {
+                // Ensure we can look up a Project when we receive an HTTP request.
+                if (old.isServerAssisted())
+                    projectsByUrlPath.remove(old.getPaymentURL().getPath())
+                if (new.isServerAssisted())
+                    projectsByUrlPath[new.getPaymentURL().getPath()] = new
+            }
+            projectsMap.remove(old.hash)
+            projectsMap[new.hash] = new
+            val scripts = old.getOutputs().map { it.getScriptPubKey() }
+            scripts.forEach { it.setCreationTimeSeconds(old.getProtoDetails().getTime()) }
+            wallet.removeWatchedScripts(scripts)
+            configureWalletToSpotClaimsFor(new)
+            projects[projects.indexOf(old)] = new
+        }
+        return new
+    }
+
+    throws(IOException::class)
+    public fun importProjectFrom(path: Path) {
+        // Try loading the project first to ensure it's valid, throws exception if not.
+        val project = tryLoadProject(path.toFile(), ignoreErrors = false)!!
+        val destPath = AppDirectory.dir().resolve(path.getFileName())
+        val destFile = destPath.toFile()
+        // path can equal destFile when we're in server mode.
+        if (path.toAbsolutePath() != destPath.toAbsolutePath()) {
+            if (destFile.exists()) {
+                val theirHash = Sha256Hash.of(path.toFile())
+                val ourHash = Sha256Hash.of(destFile)
+                if (theirHash == ourHash) {
+                    log.info("Attempted import of a project we already have, skipping")
+                    return
+                }
+            }
+            path.toFile().copyTo(destFile)
+        }
+        executor.execute {
+            insertProject(project)
+            checkProject(project)
         }
     }
 
-    public fun watchDirectoryForPledges(dir: Path) {
-        checkArgument(Files.isDirectory(dir))
-        diskManager.addPledgePath(dir)
+    /**
+     * Copies the given pledge path into the app directory, checks it, and loads it. Returns a future for when the
+     * pledge check is complete. Meant to be used from the GUI only.
+     */
+    public fun importPledgeFrom(path: Path): Promise<LHProtos.Pledge, Throwable> {
+        val deferred = deferred<LHProtos.Pledge, Throwable>()
+
+        async a@ {
+            val pledge = tryLoadPledge(path.toFile(), ignoreErrors = false)!!
+            if (isPledgeKnown(pledge))
+                return@a pledge
+            val project = projectsMap[pledge.projectID] ?: throw Ex.UnknownProject()
+
+            check(!project.isServerAssisted() && mode == Mode.CLIENT)
+
+            val destFile = AppDirectory.dir().resolve("${pledge.hash}${PLEDGE_FILE_EXTENSION}").toFile();
+            if (destFile.exists())
+                return@a pledge
+
+            // TODO: Make this call use Kovenant too.
+            checkPledgeAgainstP2PNetwork(project, pledge).handle { p, error ->
+                if (error != null) {
+                    deferred.reject(error)
+                } else {
+                    destFile.writeBytes(pledge.toByteArray())
+                    deferred.resolve(pledge)
+                }
+            }
+        } fail { error ->
+            deferred.reject(error)
+        }
+
+        return deferred.promise
     }
 
     /**
@@ -734,15 +816,9 @@ public class LighthouseBackend(
             ObservableMirrors.mirrorSet(getPledgesFor(forProject), executor)
         }
 
-    private fun getPledgesFor(forProject: Project): ObservableSet<LHProtos.Pledge> {
-        executor.checkOnThread()
-        return pledges.getOrPut(forProject) {
-            FXCollections.observableSet<LHProtos.Pledge>()
-        }
-    }
+    private fun getPledgesFor(forProject: Project) = pledges.getOrPut(forProject) { FXCollections.observableSet<LHProtos.Pledge>() }
 
     /** Returns a reactive property that sums up the total value of all open pledges.  */
-    SuppressWarnings("unchecked")
     public fun makeTotalPledgedProperty(project: Project, executor: AffinityExecutor): LongProperty =
             bindTotalPledgedProperty(mirrorOpenPledges(project, executor))
 
@@ -767,7 +843,7 @@ public class LighthouseBackend(
             // Don't bother with pointless/noisy server requeries until we're caught up with the chain tip.
             if (block!!.getHeight() > regularP2P.getMostCommonChainHeight() - 2) {
                 log.info("New block found, refreshing pledges")
-                diskManager.getProjects().filterNot { it.getPaymentURL() != null }.forEach { jitteredServerRequery(it) }
+                projects.filter { it.isServerAssisted() }.forEach { jitteredServerRequery(it) }
             }
         }
     }
@@ -791,7 +867,7 @@ public class LighthouseBackend(
     }
 
     /**
-     * Used by the server when a pledge arrives via HTTP[S].
+     * Used by the server when a pledge arrives via HTTPS.
 
      * Does some fast stateless checks the given pledge on the calling thread and then hands off to the backend
      * thread. The backend broadcasts the pledge's dependencies, if any, and then does a revocation check. Once all
@@ -860,6 +936,16 @@ public class LighthouseBackend(
         return result
     }
 
+    private fun savePledge(pledge: LHProtos.Pledge) {
+        val bits = pledge.toByteArray()
+        val hash = Sha256Hash.of(bits)
+        // This file name is not very helpful for sysadmins. Perhaps if we scrub the metadata enough we can make a
+        // better one, e.g. with the users contact details in.
+        val filename = hash.toString() + PLEDGE_FILE_EXTENSION
+        val path = AppDirectory.dir().resolve(filename)
+        path.toFile().writeBytes(bits)
+    }
+
     private fun broadcastDependenciesOf(pledge: LHProtos.Pledge): CompletableFuture<LHProtos.Pledge> {
         checkArgument(pledge.getTransactionsCount() > 1)
         val result = CompletableFuture<LHProtos.Pledge>()
@@ -893,44 +979,36 @@ public class LighthouseBackend(
         this.minPeersForUTXOQuery = minPeersForUTXOQuery
     }
 
-    public class ProjectStateInfo(public val state: ProjectState, public val claimedBy: Sha256Hash?)
-
     /** Map of project ID to project state info  */
-    public fun mirrorProjectStates(runChangesIn: AffinityExecutor): ObservableMap<String, ProjectStateInfo> {
-        return diskManager.mirrorProjectStates(runChangesIn)
+    public fun mirrorProjectStates(runChangesIn: AffinityExecutor): ObservableMap<Sha256Hash, ProjectStateInfo> {
+        return ObservableMirrors.mirrorMap(projectStates, runChangesIn)
     }
 
-    synchronized public fun getProjectFromURL(uri: URI): Project = projectsByUrlPath[uri.getPath()]!!
+    synchronized public fun getProjectFromURL(uri: URI): Project? = projectsByUrlPath[uri.getPath()]
 
     private inner class BloomFilterManager : AbstractPeerEventListener(), PeerFilterProvider {
         private var allPledges: Map<TransactionOutPoint, LHProtos.Pledge>? = null
 
         // Methods in logical sequence of how they are used/called.
 
-        override fun getEarliestKeyCreationTime(): Long {
-            return Utils.currentTimeSeconds()   // Unused
-        }
+        override fun getEarliestKeyCreationTime(): Long = Utils.currentTimeSeconds()   // Unused
 
         override fun beginBloomFilterCalculation() {
             allPledges = executor.fetchFrom { getAllOpenPledgedOutpoints() }
         }
 
-        override fun getBloomFilterElementCount(): Int {
-            return allPledges!!.size()
-        }
+        override fun getBloomFilterElementCount() = allPledges!!.size()
 
         override fun getBloomFilter(size: Int, falsePositiveRate: Double, nTweak: Long): BloomFilter {
             val filter = BloomFilter(size, falsePositiveRate, nTweak)
             for (pledge in allPledges!!.keySet()) {
                 filter.insert(pledge.bitcoinSerialize())
             }
-            log.debug("Calculated Bloom filter for detecting revocations and claims")
+            log.info("Bloom filter calculated")
             return filter
         }
 
-        override fun isRequiringUpdateAllBloomFilter(): Boolean {
-            return false
-        }
+        override fun isRequiringUpdateAllBloomFilter() = false
 
         override fun endBloomFilterCalculation() {
             allPledges = null
@@ -970,7 +1048,7 @@ public class LighthouseBackend(
 
     private fun whichPledgesAreRevokedBy(t: Transaction): List<LHProtos.Pledge> {
         val result = ArrayList<LHProtos.Pledge>()
-        val project = diskManager.getProjectFromClaim(t)
+        val project = getProjectFromClaim(t)
         val inputs = t.getInputs()
         val outpointsToPledges = getAllOpenPledgedOutpoints()
         for (i in inputs.indices) {
@@ -1007,9 +1085,9 @@ public class LighthouseBackend(
         executor.service.submit {
             regularP2P.removePeerFilterProvider(manager)
             regularP2P.removeEventListener(manager)
-            diskManager.shutdown()
-            executor.service.shutdown()
         }.get()
+        executor.service.shutdown()
+        executor.service.awaitTermination(10, TimeUnit.SECONDS)
     }
 
     public fun refreshBloomFilter() {
@@ -1030,5 +1108,4 @@ public class LighthouseBackend(
         }
         return result
     }
-
 }

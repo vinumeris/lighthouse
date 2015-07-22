@@ -140,8 +140,8 @@ public interface AffinityExecutor extends Executor {
             return service.schedule(command::call, time.toMillis(), TimeUnit.MILLISECONDS);
         }
 
-        public void executeIn(Duration time, Runnable runnable) {
-            service.schedule(() -> {
+        public ScheduledFuture<?> executeIn(Duration time, Runnable runnable) {
+            return service.schedule(() -> {
                 try {
                     runnable.run();
                 } catch (Throwable e) {

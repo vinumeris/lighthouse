@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="413.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lighthouse.subwindows.ExportWindow">
@@ -20,19 +18,4 @@
             </children>
         </VBox>
     </center>
-   <bottom>
-      <HBox fx:id="folderWatchExplainer" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="20.0" style="-fx-background-color: #f2f2f2;" BorderPane.alignment="CENTER">
-         <children>
-            <ImageView fitHeight="79.0" fitWidth="79.0" opacity="0.45" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@../light-bulb-icon.png" />
-               </image>
-            </ImageView>
-            <Label text="%The folder you save the project to will be watched, and any pledges found there will be automatically loaded." wrapText="true" />
-         </children>
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
-      </HBox>
-   </bottom>
 </BorderPane>

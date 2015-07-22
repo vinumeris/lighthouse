@@ -3,6 +3,9 @@ package lighthouse.wallet;
 import com.google.common.collect.*;
 import com.google.common.util.concurrent.*;
 import com.google.protobuf.*;
+import kotlin.*;
+import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
 import lighthouse.protocol.*;
 import net.jcip.annotations.*;
 import org.bitcoinj.core.*;
@@ -36,9 +39,6 @@ public class PledgingWallet extends Wallet {
     // See the wallet-extension.proto file for a discussion of why we track these.
     @GuardedBy("this") private final Map<Sha256Hash, LHProtos.Pledge> revokedPledges;
 
-    public interface OnPledgeHandler {
-        void onPledge(Project project, LHProtos.Pledge data);
-    }
     public interface OnRevokeHandler {
         void onRevoke(LHProtos.Pledge pledge);
     }
@@ -46,9 +46,9 @@ public class PledgingWallet extends Wallet {
         void onClaim(LHProtos.Pledge pledge, Transaction claimTX);
     }
 
-    private CopyOnWriteArrayList<ListenerRegistration<OnPledgeHandler>> onPledgeHandlers = new CopyOnWriteArrayList<>();
-    private CopyOnWriteArrayList<ListenerRegistration<OnRevokeHandler>> onRevokeHandlers = new CopyOnWriteArrayList<>();
-    private CopyOnWriteArrayList<ListenerRegistration<OnClaimHandler>> onClaimedHandlers = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<ListenerRegistration<Function2<Project, LHProtos.Pledge, Unit>>> onPledgeHandlers = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<ListenerRegistration<Function1<LHProtos.Pledge, Unit>>> onRevokeHandlers = new CopyOnWriteArrayList<>();
+    private CopyOnWriteArrayList<ListenerRegistration<Function2<LHProtos.Pledge, Transaction, Unit>>> onClaimedHandlers = new CopyOnWriteArrayList<>();
 
     public PledgingWallet(NetworkParameters params, KeyChainGroup keyChainGroup) {
         super(params, keyChainGroup);
@@ -216,9 +216,7 @@ public class PledgingWallet extends Wallet {
             Coin prevBalance = getBalance(BalanceType.AVAILABLE_SPENDABLE);
             updateForPledge(data, project, stub);
             saveNow();
-            for (ListenerRegistration<OnPledgeHandler> handler : onPledgeHandlers) {
-                handler.executor.execute(() -> handler.listener.onPledge(project, data));
-            }
+            onPledgeHandlers.forEach(it -> it.executor.execute(() -> it.listener.invoke(project, data)));
             lock.lock();
             try {
                 queueOnCoinsSent(pledge, prevBalance, getBalance(BalanceType.AVAILABLE_SPENDABLE));
@@ -405,9 +403,7 @@ public class PledgingWallet extends Wallet {
                 log.info("Pledge has {} txns", proto.getTransactionsCount());
                 updateForRevoke(result, proto, stub);
                 saveNow();
-                for (ListenerRegistration<OnRevokeHandler> handler : onRevokeHandlers) {
-                    handler.executor.execute(() -> handler.listener.onRevoke(proto));
-                }
+                onRevokeHandlers.forEach(it -> it.executor.execute(() -> it.listener.invoke(proto)));
                 lock.lock();
                 try {
                     maybeQueueOnWalletChanged();
@@ -508,15 +504,15 @@ public class PledgingWallet extends Wallet {
         return getAuthKeyFromIndexOrPubKey(project.getAuthKey(),  project.getAuthKeyIndex()) != null;
     }
 
-    public void addOnPledgeHandler(OnPledgeHandler onPledgeHandler, Executor executor) {
+    public void addOnPledgeHandler(Executor executor, Function2<Project, LHProtos.Pledge, Unit> onPledgeHandler) {
         onPledgeHandlers.add(new ListenerRegistration<>(onPledgeHandler, executor));
     }
 
-    public void addOnRevokeHandler(OnRevokeHandler onRevokeHandler, Executor executor) {
+    public void addOnRevokeHandler(Executor executor, Function1<LHProtos.Pledge, Unit> onRevokeHandler) {
         onRevokeHandlers.add(new ListenerRegistration<>(onRevokeHandler, executor));
     }
 
-    public void addOnClaimHandler(OnClaimHandler onClaimHandler, Executor executor) {
+    public void addOnClaimHandler(Executor executor, Function2<LHProtos.Pledge, Transaction, Unit> onClaimHandler) {
         onClaimedHandlers.add(new ListenerRegistration<>(onClaimHandler, executor));
     }
 
@@ -559,15 +555,11 @@ public class PledgingWallet extends Wallet {
                         checkNotNull(project);
                         if (compareOutputsStructurally(tx, project)) {
                             log.info("... by a tx matching the project's outputs: claimed!");
-                            for (ListenerRegistration<OnClaimHandler> handler : onClaimedHandlers) {
-                                handler.executor.execute(() -> handler.listener.onClaim(pledge, tx));
-                            }
+                            onClaimedHandlers.forEach(it -> it.executor.execute(() -> it.listener.invoke(pledge, tx)));
                         } else {
                             log.warn("... by a tx we don't recognise: cloned wallet? Deleting pledge.");
                             updateForRevoke(tx, pledge, entry.getKey());
-                            for (ListenerRegistration<OnRevokeHandler> handler : onRevokeHandlers) {
-                                handler.executor.execute(() -> handler.listener.onRevoke(pledge));
-                            }
+                            onRevokeHandlers.forEach(it -> it.executor.execute(() -> it.listener.invoke(pledge)));
                             saveNow();
                         }
                     }

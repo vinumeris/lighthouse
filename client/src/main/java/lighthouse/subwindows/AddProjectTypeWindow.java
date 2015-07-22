@@ -2,14 +2,12 @@ package lighthouse.subwindows;
 
 import com.google.common.base.*;
 import com.google.common.net.*;
-import com.vinumeris.crashfx.*;
 import javafx.application.Platform;
 import javafx.collections.*;
 import javafx.event.*;
 import javafx.fxml.*;
 import javafx.scene.control.*;
 import javafx.scene.text.*;
-import javafx.stage.*;
 import lighthouse.*;
 import lighthouse.model.*;
 import lighthouse.protocol.*;
@@ -17,8 +15,8 @@ import lighthouse.utils.*;
 import org.slf4j.*;
 
 import java.io.*;
-import java.nio.file.*;
 
+import static com.google.common.base.Preconditions.*;
 import static lighthouse.utils.GuiUtils.*;
 import static lighthouse.utils.I18nUtil.*;
 
@@ -110,30 +108,8 @@ public class AddProjectTypeWindow {
             final LHProtos.ProjectDetails detailsProto = model.getDetailsProto().build();
             log.info("Saving: {}", detailsProto.getExtraDetails().getTitle());
             try {
-                Project project;
-                if (detailsProto.hasPaymentUrl()) {
-                    // User has to explicitly export it somewhere (not watched) so they can get it to the server.
-                    project = Main.backend.saveProject(model.getProject());
-                    ExportWindow.openForProject(project);
-                } else {
-                    GuiUtils.informationalAlert(tr("Folder watching"),
-                            tr("The folder to which you save your project file will be watched for pledge files. When you receive them from backers, just put them in the same directory and they will appear."));
-                    // Request directory first then save, so the animations are right.
-                    DirectoryChooser chooser = new DirectoryChooser();
-                    chooser.setTitle(tr("Select a directory to store the project and pledges"));
-                    platformFiddleChooser(chooser);
-                    File dir = chooser.showDialog(Main.instance.mainStage);
-                    if (dir == null)
-                        return;
-                    final Path dirPath = dir.toPath();
-                    project = model.getProject();
-                    // Make sure we don't try and run too many animations simultaneously.
-                    final Project fp = project;
-                    overlayUI.runAfterFade(ev -> {
-                        saveAndWatchDirectory(fp, dirPath);
-                    });
-                    overlayUI.done();
-                }
+                Project project = editing ? Main.backend.editProject(model.getProject(), checkNotNull(model.originalProject)) : Main.backend.saveProject(model.getProject());
+                ExportWindow.openForProject(project);
             } catch (IOException e) {
                 log.error("Could not save project", e);
                 informationalAlert(tr("Could not save project"),
@@ -142,18 +118,6 @@ public class AddProjectTypeWindow {
                         Throwables.getRootCause(e));
             }
         });
-    }
-
-    private void saveAndWatchDirectory(Project project, Path dirPath) {
-        try {
-            Path file = dirPath.resolve(project.getSuggestedFileName());
-            try (OutputStream stream = new BufferedOutputStream(Files.newOutputStream(file))) {
-                project.getProto().writeTo(stream);
-            }
-            Main.backend.importProjectFrom(file);
-        } catch (IOException e) {
-            CrashFX.propagate(e);
-        }
     }
 
     @FXML

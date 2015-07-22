@@ -31,7 +31,7 @@ public class ProjectHandler implements HttpHandler {
 
     private final LighthouseBackend backend;
     private final AffinityExecutor executor;
-    private final ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;
+    private final ObservableMap<Sha256Hash, LighthouseBackend.ProjectStateInfo> projectStates;
     private final ObservableMap<Project, LighthouseBackend.CheckStatus> checkStates;
 
     private final Map<Project, ObservableSet<LHProtos.Pledge>> pledges = new HashMap<>();
@@ -183,7 +183,7 @@ public class ProjectHandler implements HttpHandler {
 
         long totalPledged = addPledgesToStatus(status, authenticated, getPledgesFor(project));
 
-        LighthouseBackend.ProjectStateInfo info = projectStates.get(project.getID());
+        LighthouseBackend.ProjectStateInfo info = projectStates.get(project.getIDHash());
         if (info.getClaimedBy() != null) {
             status.setClaimedBy(ByteString.copyFrom(info.getClaimedBy().getBytes()));
         }

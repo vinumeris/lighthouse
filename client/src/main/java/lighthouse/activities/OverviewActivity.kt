@@ -27,7 +27,6 @@ import lighthouse.Main
 import lighthouse.MainWindow
 import lighthouse.controls.ProjectOverviewWidget
 import lighthouse.files.AppDirectory
-import lighthouse.files.DiskManager
 import lighthouse.nav.Activity
 import lighthouse.protocol.Project
 import lighthouse.subwindows.EditProjectWindow
@@ -39,6 +38,7 @@ import lighthouse.utils.I18nUtil
 import lighthouse.utils.I18nUtil.tr
 import lighthouse.utils.easing.EasingMode
 import lighthouse.utils.easing.ElasticInterpolator
+import lighthouse.utils.hash
 import org.bitcoinj.core.Sha256Hash
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -54,7 +54,7 @@ public class OverviewActivity : VBox(), Activity {
     FXML var addProjectIcon: Label? = null
 
     private val projects: ObservableList<Project> = Main.backend.mirrorProjects(AffinityExecutor.UI_THREAD)
-    private val projectStates: ObservableMap<String, LighthouseBackend.ProjectStateInfo> = Main.backend.mirrorProjectStates(AffinityExecutor.UI_THREAD)
+    private val projectStates: ObservableMap<Sha256Hash, LighthouseBackend.ProjectStateInfo> = Main.backend.mirrorProjectStates(AffinityExecutor.UI_THREAD)
     // A map indicating the status of checking each project against the network (downloading, found an error, done, etc)
     // This is mirrored into the UI thread from the backend.
     private val checkStates: ObservableMap<Project, LighthouseBackend.CheckStatus> = Main.backend.mirrorCheckStatuses(AffinityExecutor.UI_THREAD)
@@ -93,7 +93,7 @@ public class OverviewActivity : VBox(), Activity {
     fun importClicked(event: ActionEvent) {
         val chooser = FileChooser()
         chooser.setTitle(tr("Select a bitcoin project file to import"))
-        chooser.getExtensionFilters().add(FileChooser.ExtensionFilter(tr("Project/contract files"), "*" + DiskManager.PROJECT_FILE_EXTENSION))
+        chooser.getExtensionFilters().add(FileChooser.ExtensionFilter(tr("Project/contract files"), "*" + LighthouseBackend.PROJECT_FILE_EXTENSION))
         platformFiddleChooser(chooser)
         val file = chooser.showOpenDialog(Main.instance.mainStage) ?: return
         log.info("Import clicked: $file")
@@ -106,7 +106,8 @@ public class OverviewActivity : VBox(), Activity {
         if (event.getGestureSource() != null)
             return    // Coming from us.
         for (file in event.getDragboard().getFiles()) {
-            if (file.toString().endsWith(DiskManager.PROJECT_FILE_EXTENSION) || file.toString().endsWith(DiskManager.PLEDGE_FILE_EXTENSION)) {
+            val s = file.toString()
+            if (s.endsWith(LighthouseBackend.PROJECT_FILE_EXTENSION) || s.endsWith(LighthouseBackend.PLEDGE_FILE_EXTENSION)) {
                 accept = true
                 break
             }
@@ -130,8 +131,8 @@ public class OverviewActivity : VBox(), Activity {
         GuiUtils.checkGuiThread()
         log.info("Opening {}", file)
         when {
-            file.toString().endsWith(DiskManager.PROJECT_FILE_EXTENSION) -> importProject(file)
-            file.toString().endsWith(DiskManager.PLEDGE_FILE_EXTENSION) -> importPledge(file)
+            file.toString().endsWith(LighthouseBackend.PROJECT_FILE_EXTENSION) -> importProject(file)
+            file.toString().endsWith(LighthouseBackend.PLEDGE_FILE_EXTENSION) -> importPledge(file)
 
             else -> log.error("Unknown file type open requested: should not happen: " + file)
         }
@@ -140,7 +141,7 @@ public class OverviewActivity : VBox(), Activity {
     public fun importPledge(file: File) {
         try {
             val hash = Sha256Hash.of(file)
-            Files.copy(file.toPath(), AppDirectory.dir().resolve(hash.toString() + DiskManager.PLEDGE_FILE_EXTENSION))
+            Files.copy(file.toPath(), AppDirectory.dir().resolve(hash.toString() + LighthouseBackend.PLEDGE_FILE_EXTENSION))
         } catch (e: IOException) {
             GuiUtils.informationalAlert(tr("Import failed"), // TRANS: %1$s = app name, %2$s = error message
                     tr("Could not copy the dropped pledge into the %1\$s application directory: %2\$s"), Main.APP_NAME, e)
@@ -154,21 +155,18 @@ public class OverviewActivity : VBox(), Activity {
     public fun importProject(file: Path) {
         try {
             Main.backend.importProjectFrom(file)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             GuiUtils.informationalAlert(tr("Failed to import project"), // TRANS: %s = error message
                     tr("Could not read project file: %s"), e.getMessage())
         }
 
     }
 
-    // Triggered by the project disk model being adjusted.
+    // Triggered by the projects list being touched by the backend.
     private fun updateExistingProject(index: Int, newProject: Project) {
         log.info("Update at index $index")
-        val uiIndex = getChildren().size() - 1   // from size to index
-                       - numInitialBoxes   // the vbox for buttons at the bottom
-                       - index
-        if (uiIndex < 0)
-            return   // This can happen if the project which is updated is not even on screen yet; Windows fucks up sometimes and tells us this so just ignore it.
+        val uiIndex = getChildren().size() - 1 - numInitialBoxes - index
+        check(uiIndex >= 0)
         getChildren().set(uiIndex, buildProjectWidget(newProject))
     }
 
@@ -246,7 +244,7 @@ public class OverviewActivity : VBox(), Activity {
         return animation
     }
 
-    private fun getProjectState(p: Project) = projectStates.get(p.getID())?.state ?: LighthouseBackend.ProjectState.OPEN
+    private fun getProjectState(p: Project) = projectStates[p.hash]?.state ?: LighthouseBackend.ProjectState.OPEN
 
     override fun onStart() {}
 

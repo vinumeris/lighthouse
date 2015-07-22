@@ -12,7 +12,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.stage.*;
 import lighthouse.*;
-import lighthouse.files.*;
 import lighthouse.protocol.*;
 import lighthouse.utils.*;
 import lighthouse.wallet.*;
@@ -29,7 +28,6 @@ import static lighthouse.utils.I18nUtil.*;
 public class ExportWindow {
     private static final Logger log = LoggerFactory.getLogger(ExportWindow.class);
 
-    @FXML HBox folderWatchExplainer;
     @FXML StackPane dragArea;
     @FXML Label moneyIcon;
     @FXML Button saveButton;
@@ -50,17 +48,12 @@ public class ExportWindow {
         ExportWindow window = Main.instance.<ExportWindow>overlayUI("subwindows/export.fxml", tr("Export pledge")).controller;
         window.project = project;
         window.pledge = pledge;
-        ((BorderPane)window.folderWatchExplainer.getParent()).setBottom(null);
     }
 
     public static void openForProject(Project project) {
         log.info("Open ExportWindow for saving project '{}'", project.getTitle());
         ExportWindow window = Main.instance.<ExportWindow>overlayUI("subwindows/export.fxml", tr("Export project")).controller;
         window.project = project;
-        // Don't show "will watch directory" explainer for server assisted projects.
-        if (project.getPaymentURL() != null) {
-            ((BorderPane)window.folderWatchExplainer.getParent()).setBottom(null);
-        }
     }
 
     public static DataFormat PLEDGE_MIME_TYPE = new DataFormat(LHUtils.PLEDGE_MIME_TYPE);
@@ -122,7 +115,7 @@ public class ExportWindow {
         if (pledge != null) {
             // TRANS: %1$s = pledger's name, %2$s = project name, %3$s = file extension
             final String FILE_NAME = tr("Pledge by %1$s for %2$s%3$s");
-            return String.format(FILE_NAME, Main.demoName == null ? System.getProperty("user.name") : Main.demoName, project.getTitle(), DiskManager.PLEDGE_FILE_EXTENSION);
+            return String.format(FILE_NAME, Main.demoName == null ? System.getProperty("user.name") : Main.demoName, project.getTitle(), LighthouseBackend.PLEDGE_FILE_EXTENSION);
         } else {
             return project.getSuggestedFileName();
         }

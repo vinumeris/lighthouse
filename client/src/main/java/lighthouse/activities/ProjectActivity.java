@@ -1,5 +1,6 @@
 package lighthouse.activities;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.*;
 import com.google.common.collect.*;
 import javafx.animation.*;
@@ -19,6 +20,7 @@ import javafx.scene.image.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.*;
+import kotlin.*;
 import lighthouse.*;
 import lighthouse.controls.*;
 import lighthouse.nav.*;
@@ -74,7 +76,7 @@ public class ProjectActivity extends HBox implements Activity {
     private UIBindings bindings;
     private LongProperty pledgedValue;
     private ObjectBinding<LighthouseBackend.CheckStatus> checkStatus;
-    private ObservableMap<String, LighthouseBackend.ProjectStateInfo> projectStates;  // project id -> status
+    private ObservableMap<Sha256Hash, LighthouseBackend.ProjectStateInfo> projectStates;  // project id -> status
     private ObservableMap<Project, LighthouseBackend.CheckStatus> statusMap;
     @Nullable private NotificationBarPane.Item notifyBarItem;
     @Nullable private Sha256Hash myPledgeHash;
@@ -247,9 +249,11 @@ public class ProjectActivity extends HBox implements Activity {
         // If a cloned wallet double spends our pledge, the backend can notice this before the wallet does.
         // Because the decision on what the button action should be depends on whether the wallet thinks it's pledged,
         // we have to watch out for this and update the mode here.
-        Main.wallet.addOnRevokeHandler(pledge -> setModeFor(p, pledgedValue.get()), Platform::runLater);
+        Main.wallet.addOnRevokeHandler(Platform::runLater, pledge -> {
+            setModeFor(p, pledgedValue.get()); return Unit.INSTANCE$;
+        });
 
-        if (p.getPaymentURL() != null) {
+        if (p.isServerAssisted()) {
             Platform.runLater(() -> {
                 Main.instance.scene.getAccelerators().put(KeyCombination.keyCombination("Shortcut+R"), () -> Main.backend.refreshProjectStatusFromServer(p));
             });
@@ -328,7 +332,7 @@ public class ProjectActivity extends HBox implements Activity {
     private void setModeFor(Project project, long value) {
         priorMode = mode.get();
         Mode newMode = Mode.OPEN_FOR_PLEDGES;
-        if (projectStates.get(project.getID()).getState() == LighthouseBackend.ProjectState.CLAIMED) {
+        if (projectStates.get(project.getIDHash()).getState() == LighthouseBackend.ProjectState.CLAIMED) {
             newMode = Mode.CLAIMED;
         } else {
             if (Main.wallet.getPledgedAmountFor(project) > 0)
@@ -407,7 +411,7 @@ public class ProjectActivity extends HBox implements Activity {
     }
 
     private void viewClaim(Project p) {
-        LighthouseBackend.ProjectStateInfo info = projectStates.get(p.getID());
+        LighthouseBackend.ProjectStateInfo info = projectStates.get(p.getIDHash());
         checkState(info.getState() == LighthouseBackend.ProjectState.CLAIMED);
         String url = String.format(Main.params == TestNet3Params.get() ? BLOCK_EXPLORER_SITE_TESTNET : BLOCK_EXPLORER_SITE, info.getClaimedBy());
         log.info("Opening {}", url);

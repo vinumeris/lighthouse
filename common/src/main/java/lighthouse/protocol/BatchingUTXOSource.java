@@ -1,17 +1,13 @@
 package lighthouse.protocol;
 
-import org.bitcoinj.core.TransactionOutPoint;
-import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.core.Utils;
+import org.bitcoinj.core.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * A UTXOSource that overlays a real source, but queues up queries until told it can proceed and then queries all of
- * them at once. This is useful because the p2p protocol can only manage one in flight query at once.
+ * them at once.
  */
 public class BatchingUTXOSource implements UTXOSource, Runnable {
     private int totalOutpoints = 0;

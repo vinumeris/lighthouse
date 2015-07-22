@@ -66,4 +66,7 @@ public class Ex extends RuntimeException {
         }
     }
     public static class GoalExceeded extends Ex {}
+
+    public static class UnknownProject extends Ex {
+    }
 }

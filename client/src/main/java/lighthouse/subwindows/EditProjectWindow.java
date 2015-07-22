@@ -82,7 +82,7 @@ public class EditProjectWindow {
     }
 
     public static void openForEdit(Project project) {
-        open(new ProjectModel(project.getProtoDetails().toBuilder()), tr("Edit project"), true);
+        open(new ProjectModel(project), tr("Edit project"), true);
     }
 
     public static void openForEdit(ProjectModel project) {

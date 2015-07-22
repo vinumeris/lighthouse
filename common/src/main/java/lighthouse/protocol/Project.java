@@ -3,7 +3,7 @@ package lighthouse.protocol;
 import com.google.common.base.*;
 import com.google.common.collect.*;
 import com.google.protobuf.*;
-import lighthouse.files.*;
+import lighthouse.*;
 import lighthouse.wallet.*;
 import org.bitcoin.protocols.payments.Protos;
 import org.bitcoinj.core.*;
@@ -105,6 +105,8 @@ public class Project {
         this.authKey = this.projectReq.getExtraDetails().getAuthKey().toByteArray();
     }
 
+
+
     public static LHProtos.ProjectDetails.Builder makeDetails(NetworkParameters params, String title, String memo, Address to, Coin value, DeterministicKey authKey, int lookaheadSize) {
         LHProtos.ProjectDetails.Builder details = LHProtos.ProjectDetails.newBuilder();
         final long now = Utils.currentTimeSeconds();
@@ -140,6 +142,14 @@ public class Project {
      */
     public String getID() {
         return hash.toString();
+    }
+
+    public Sha256Hash getIDHash() {
+        return hash;
+    }
+
+    public boolean isServerAssisted() {
+        return getPaymentURL() != null;
     }
 
     /** Returns a human-readable title for the project. */
@@ -465,7 +475,7 @@ public class Project {
     }
 
     public static String getSuggestedFileName(String title) {
-        return LHUtils.titleToUrlString(title) + DiskManager.PROJECT_FILE_EXTENSION;
+        return LHUtils.titleToUrlString(title) + LighthouseBackend.PROJECT_FILE_EXTENSION;
     }
 
     public Coin getMinPledgeAmount() {

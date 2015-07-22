@@ -3,6 +3,7 @@ package lighthouse.server;
 import com.google.common.collect.*;
 import com.sun.net.httpserver.*;
 import joptsimple.*;
+import kotlin.*;
 import lighthouse.*;
 import lighthouse.files.*;
 import lighthouse.protocol.*;
@@ -110,6 +111,22 @@ public class PledgeServer {
         server.setExecutor(executor);
         LighthouseBackend backend = new LighthouseBackend(SERVER, kit.peerGroup(), xtPeers, kit.chain(), (PledgingWallet) kit.wallet(), executor);
         backend.setMinPeersForUTXOQuery(minPeersSupportingGetUTXO);
+
+        DirectoryWatcher.watch(appDir, executor, (path, kind) -> {
+            if (path.toString().endsWith(LighthouseBackend.PROJECT_FILE_EXTENSION)) {
+                try {
+                    if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        backend.importProjectFrom(path);
+                    } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+                        // TODO: Unload.
+                    }
+                } catch (IOException e) {
+                    log.error("Failed to load project from {}", path);
+                }
+            }
+            return Unit.INSTANCE$;
+        });
+
         server.createContext(LHUtils.HTTP_PATH_PREFIX, new ProjectHandler(backend));
         server.createContext("/", exchange -> {
             log.warn("404 Not Found: {}", exchange.getRequestURI());

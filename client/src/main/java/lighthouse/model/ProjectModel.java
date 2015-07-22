@@ -8,6 +8,8 @@ import lighthouse.wallet.*;
 import org.bitcoinj.core.*;
 import org.bitcoinj.script.*;
 
+import javax.annotation.*;
+
 import static lighthouse.protocol.LHUtils.*;
 import static lighthouse.utils.I18nUtil.*;
 
@@ -28,6 +30,8 @@ public class ProjectModel {
 
     private LHProtos.ProjectDetails.Builder proto;
 
+    // Pointer to the original Project object that this model is based on, if editing.
+    @Nullable public final Project originalProject;
 
     public static final int ESTIMATED_INPUT_SIZE = Script.SIG_SIZE + 35 /* bytes for a compressed pubkey */ + 32 /* hash */ + 4;
     public static final int MAX_NUM_INPUTS = (Transaction.MAX_STANDARD_TX_SIZE - 64) /* for output */ / ESTIMATED_INPUT_SIZE;
@@ -37,8 +41,17 @@ public class ProjectModel {
                 wallet.getKeychainLookaheadSize()));
     }
 
+    public ProjectModel(Project editing) {
+        this(editing.getProtoDetails().toBuilder(), editing);
+    }
+
     public ProjectModel(LHProtos.ProjectDetails.Builder liveProto) {
+        this(liveProto, null);
+    }
+
+    public ProjectModel(LHProtos.ProjectDetails.Builder liveProto, @Nullable Project editing) {
         this.proto = liveProto;
+        this.originalProject = editing;
         final LHProtos.Project.Builder wrapper = LHProtos.Project.newBuilder().setSerializedPaymentDetails(liveProto.build().toByteString());
         Project project = unchecked(() -> new Project(wrapper.build()));
         title.set(project.getTitle());

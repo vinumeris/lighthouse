@@ -179,6 +179,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <kotlin.version>0.12.200</kotlin.version>
+        <kotlin.version>0.12.613</kotlin.version>
     </properties>
 </project>
