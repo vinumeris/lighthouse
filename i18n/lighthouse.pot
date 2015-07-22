@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-26 20:34+0200\n"
+"POT-Creation-Date: 2015-07-22 14:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -763,4 +763,16 @@ msgstr ""
 
 #, c-format
 msgid "-%s miners fee"
+msgstr ""
+
+msgid "Import pledge"
+msgstr ""
+
+msgid "Pledge files"
+msgstr ""
+
+msgid "Could not import pledge"
+msgstr ""
+
+msgid "Doing initial update check"
 msgstr ""

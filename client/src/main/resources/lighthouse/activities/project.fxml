@@ -10,7 +10,7 @@
 <?import javafx.scene.text.*?>
 <?import lighthouse.controls.*?>
 <?import java.lang.*?>
-<fx:root prefWidth="846.0" type="HBox" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefWidth="846.0" type="HBox" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <VBox fx:id="root" maxHeight="Infinity" maxWidth="Infinity" minWidth="-Infinity" prefHeight="565.0" prefWidth="595.0" style="-fx-background-color: white;" HBox.hgrow="ALWAYS">
             <children>
@@ -74,7 +74,7 @@
                         <VBox fx:id="rightVBox" spacing="10.0" HBox.hgrow="ALWAYS">
                             <children>
                                 <ReadMorePane minHeight="250">
-                                    <MarkDownNode fx:id="description" style="-fx-text-fill: black; -fx-padding: 5 0 0 0"/>
+                                    <MarkDownNode fx:id="description" style="-fx-text-fill: black; -fx-padding: 5 0 0 0" />
                                 </ReadMorePane>
                                 <PieChart fx:id="pieChart" labelLineLength="10.0" labelsVisible="false" legendVisible="false" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="300.0" startAngle="90" styleClass="pledges-piechart">
                                     <effect>
@@ -158,6 +158,11 @@
                     </children>
                 </Pane>
                 <VBox maxHeight="1.7976931348623157E308" style="-fx-background-color: white; -fx-border-color: lightgray; -fx-border-width: 0 0 0 1;" styleClass="fat-buttons" VBox.vgrow="ALWAYS">
+                    <Button fx:id="importPledgeButton" defaultButton="true" layoutX="31.0" layoutY="30.0" maxWidth="Infinity" minHeight="50" mnemonicParsing="false" onAction="#importPledgeClicked" prefHeight="46.0" text="%Import pledge">
+                        <VBox.margin>
+                            <Insets bottom="0.0" left="20.0" right="20.0" top="20.0" />
+                        </VBox.margin>
+                    </Button>
                     <Button fx:id="actionButton" defaultButton="true" maxWidth="Infinity" minHeight="50" mnemonicParsing="false" onAction="#actionClicked" prefHeight="46.0">
                         <VBox.margin>
                             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

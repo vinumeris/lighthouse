@@ -68,6 +68,7 @@ public class ProjectActivity extends HBox implements Activity {
     @FXML Label percentFundedLabel;
     @FXML Button editButton;
     @FXML Label copyDescriptionLink;
+    @FXML Button importPledgeButton;
 
     public final ObjectProperty<Project> project = new SimpleObjectProperty<>();
 
@@ -200,6 +201,10 @@ public class ProjectActivity extends HBox implements Activity {
                         checkStatus.isNotNull().and(mode.isNotEqualTo(Mode.PLEDGED))
                 )
         );
+
+        boolean needBtn = !project.get().isServerAssisted();
+        importPledgeButton.setVisible(needBtn);
+        importPledgeButton.setManaged(needBtn);
         updateInfoBar();
     }
 
@@ -606,5 +611,25 @@ public class ProjectActivity extends HBox implements Activity {
                 // TRANS: %s = error message
                 tr("Lighthouse was unable to save pledge data to the selected file: %s"), e.getLocalizedMessage());
         }
+    }
+
+    @FXML
+    public void importPledgeClicked(ActionEvent event) {
+        log.info("Import pledge clicked");
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(tr("Import pledge"));
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(tr("Pledge files"), "*" + LighthouseBackend.PLEDGE_FILE_EXTENSION));
+        GuiUtils.platformFiddleChooser(chooser);
+        File file = chooser.showOpenDialog(Main.instance.mainStage);
+        if (file == null) {
+            log.info(".... but user cancelled");
+            return;
+        }
+        log.info("Importing pledge from {}", file);
+        Main.backend.importPledgeFrom(file.toPath()).fail(ex -> {
+            log.error("Importing pledge failed", ex);
+            informationalAlert(tr("Could not import pledge"), ex.getMessage());
+            return Unit.INSTANCE$;
+        });
     }
 }
