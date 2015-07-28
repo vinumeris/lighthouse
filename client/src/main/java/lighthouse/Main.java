@@ -426,18 +426,6 @@ public class Main extends Application {
         // a future version.
         Threading.USER_THREAD = Platform::runLater;
 
-        // TODO: This is blocking! Rework startup so all this stuff is properly in the background again.
-        // Bring up a dedicated P2P connection group for Bitcoin XT nodes only. It'll be used for getutxo and nothing
-        // else. Syncing to the network, Bloom filtering, etc, will be done by the WAK peer group. It's just easier
-        // to do it this way than try to always maintain the correct balance of peers in a single PeerGroup, which
-        // doesn't have great support for saying e.g. I want 1/3rd of peers to match this criteria and the other 2/3rds
-        // can be anything.
-        if (xtPeers == null) {
-            xtPeers = connectXTPeers();
-        } else {
-            // Can be because bitcoinj appkit is being restarted for seed word restore.
-        }
-
         // Create the app kit. It won't do any heavyweight initialization until after we start it.
         bitcoin = new WalletAppKit(params, AppDirectory.dir().toFile(), APP_NAME) {
             {
@@ -447,6 +435,13 @@ public class Main extends Application {
             @Override
             protected void onSetupCompleted() {
                 wallet = (PledgingWallet) bitcoin.wallet();
+                // Bring up a dedicated P2P connection group for Bitcoin XT nodes only. It'll be used for getutxo and nothing
+                // else. Syncing to the network, Bloom filtering, etc, will be done by the WAK peer group. It's just easier
+                // to do it this way than try to always maintain the correct balance of peers in a single PeerGroup, which
+                // doesn't have great support for saying e.g. I want 1/3rd of peers to match this criteria and the other 2/3rds
+                // can be anything.
+                if (xtPeers == null)
+                    xtPeers = connectXTPeers();
                 backend = new LighthouseBackend(CLIENT, vPeerGroup, xtPeers, vChain, wallet, new AffinityExecutor.ServiceAffinityExecutor("backend"));
 
                 reached("onSetupCompleted");
@@ -462,14 +457,14 @@ public class Main extends Application {
             informationalAlert(tr("Already running"),
                     tr("This application is already running and cannot be started twice."));
             bitcoin = null;
-            if (!Main.offline)
+            if (!Main.offline && xtPeers != null)
                 xtPeers.stopAsync();
             walletLoadedLatch.countDown();
             Platform.exit();
             return;
         }
         if (params == RegTestParams.get()) {
-            InetAddress local = unchecked((UncheckedRun<InetAddress>) /* cast is ij bug workaround */ InetAddress::getLocalHost);
+            InetAddress local = unchecked(InetAddress::getLocalHost);
             bitcoin.setPeerNodes(
                     new PeerAddress(local, RegTestParams.get().getPort()),
                     new PeerAddress(local, RegTestParams.get().getPort() + 1)
