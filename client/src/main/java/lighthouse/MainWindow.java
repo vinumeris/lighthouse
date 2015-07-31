@@ -5,6 +5,7 @@ import com.vinumeris.updatefx.*;
 import de.jensd.fx.fontawesome.*;
 import javafx.animation.*;
 import javafx.application.*;
+import javafx.beans.*;
 import javafx.beans.property.*;
 import javafx.collections.*;
 import javafx.event.*;
@@ -67,11 +68,7 @@ public class MainWindow {
 
         AwesomeDude.setIcon(menuBtn, AwesomeIcon.BARS);
 
-        // Wait for the backend to start up so we can populate the projects list without seeing laggards drop in
-        // from the top, as otherwise the backend could still be loading projects by the time we're done loading
-        // the UI.
-        if (!Main.instance.waitForInit())
-            return;  // Backend didn't start up e.g. app is already running.
+        log.info("Proceeding with UI setup!");
 
         overviewActivity = new OverviewActivity();
         navManager = new NavManager(contentScrollPane, overviewActivity);
@@ -104,8 +101,7 @@ public class MainWindow {
 
         addressControl.addressProperty().bind(bitcoinUIModel.addressProperty());
         balance.textProperty().bind(EasyBind.map(bitcoinUIModel.balanceProperty(), coin -> MonetaryFormat.BTC.noCode().format(coin).toString()));
-        // Don't let the user click send money when the wallet is empty.
-        emptyWalletBtn.disableProperty().bind(bitcoinUIModel.balanceProperty().isEqualTo(Coin.ZERO));
+        configureEmptyWalletButton();
 
         if (Main.params != MainNetParams.get()) {
             networkIndicatorLabel.setVisible(true);
@@ -117,6 +113,8 @@ public class MainWindow {
                 networkIndicatorLabel.setText("?");
         }
 
+        configureOfflineNotification();
+
         // Don't do startup processing if the UI is being hot reloaded ...
         if (firstTime) {
             firstTime = false;
@@ -125,6 +123,37 @@ public class MainWindow {
             doOnlineUpdateCheck();
             maybeShowReleaseNotes();
         }
+    }
+
+    public void configureOfflineNotification() {
+        synchronized (Main.bitcoin.getOffline()) {
+            Main.bitcoin.getOffline().addListener(new InvalidationListener() {
+                private NotificationBarPane.Item item;
+
+                @Override
+                public void invalidated(Observable ob) {
+                    Platform.runLater(() -> {
+                        if (Main.bitcoin.isOffline()) {
+                            item = Main.instance.notificationBar.displayNewItem(tr("You are offline. You will not be able to use the app until you go online and restart."));
+                            emptyWalletBtn.disableProperty().unbind();
+                            emptyWalletBtn.setDisable(true);
+                        } else {
+                            if (item != null) {
+                                item.cancel();
+                                item = null;
+                            }
+                            emptyWalletBtn.setDisable(false);
+                            configureEmptyWalletButton();
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    public void configureEmptyWalletButton() {
+        // Don't let the user click send money when the wallet is empty.
+        emptyWalletBtn.disableProperty().bind(bitcoinUIModel.balanceProperty().isEqualTo(Coin.ZERO));
     }
 
     private void maybeShowReleaseNotes() {
@@ -142,14 +171,10 @@ public class MainWindow {
     }
 
     private void setupBitcoinSyncNotification() {
-        if (Main.offline) {
-            Main.instance.notificationBar.displayNewItem(tr("You are offline. You will not be able to use the app until you go online and restart."));
-            emptyWalletBtn.disableProperty().unbind();
-            emptyWalletBtn.setDisable(true);
+        if (Main.bitcoin.isOffline())
             return;
-        }
         balance.setStyle("-fx-text-fill: grey");
-        TorClient torClient = Main.bitcoin.peerGroup().getTorClient();
+        TorClient torClient = Main.bitcoin.getPeers().getTorClient();
         if (torClient != null) {
             SimpleDoubleProperty torProgress = new SimpleDoubleProperty(-1);
             String torMsg = tr("Initialising Tor");
@@ -175,7 +200,8 @@ public class MainWindow {
             showBitcoinSyncMessage();
         }
         bitcoinUIModel.syncProgressProperty().addListener(x -> {
-            if (bitcoinUIModel.syncProgressProperty().get() >= 1.0) {
+            double progress = bitcoinUIModel.syncProgressProperty().get();
+            if (progress >= 1.0) {
                 if (syncItem != null) {
                     // Hack around JFX progress animator leak bug.
                     GuiUtils.runOnGuiThreadAfter(500, () -> {
@@ -184,7 +210,7 @@ public class MainWindow {
                         balance.setStyle("-fx-text-fill: black");
                     });
                 }
-            } else if (syncItem == null) {
+            } else if (syncItem == null && progress < 1.0) {
                 showBitcoinSyncMessage();
             }
         });
@@ -197,7 +223,7 @@ public class MainWindow {
             return;
         }
 
-        if (Main.offline) return;
+        if (Main.bitcoin.isOffline()) return;
 
         OnlineUpdateChecks checker = new OnlineUpdateChecks(new Function2<UpdateState, OnlineUpdateChecks, Unit>() {
             // Only bother to show the user a notification if we're actually going to download an update.

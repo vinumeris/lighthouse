@@ -134,6 +134,12 @@ public class WalletSettingsController {
             return;
         }
 
+        if (Main.bitcoin.isOffline()) {
+            informationalAlert(tr("You are offline"),
+                    tr("You cannot restore your wallet from seed words when offline. Go online and restart the app first."));
+            return;
+        }
+
         if (aesKey != null) {
             // This is weak. We should encrypt the new seed here.
             informationalAlert(tr("Wallet is encrypted"),
@@ -148,7 +154,8 @@ public class WalletSettingsController {
         long birthday = datePicker.getValue().atStartOfDay().toEpochSecond(ZoneOffset.UTC);
         DeterministicSeed seed = new DeterministicSeed(Splitter.on(' ').splitToList(wordsArea.getText()), null, "", birthday);
         // Shut down bitcoinj and restart it with the new seed.
-        Main.restartBitcoinJ(seed);
+        Main.bitcoin.restoreFromSeed(seed);
+        MainWindow.bitcoinUIModel.setWallet(Main.bitcoin.getWallet());
     }
 
     @FXML

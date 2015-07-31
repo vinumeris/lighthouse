@@ -52,9 +52,6 @@ import java.util.function.BiConsumer
 import java.util.function.BiFunction
 
 /**
- * Exposes observable data about pledges and projects that is based on combining the output of a wallet and
- * DiskProjectsManager (local folders) with (when used from the app) data queried from remote project servers.
-
  * LighthouseBackend is a bit actor-ish: it uses its own thread which owns almost all internal state. Other
  * objects it owns can sometimes use their own threads, but results are always marshalled onto the LighthouseBackend
  * thread before the Observable collections are modified. This design assists with avoiding locking and keeping
@@ -66,7 +63,7 @@ import java.util.function.BiFunction
 public class LighthouseBackend public constructor(
         public val mode: LighthouseBackend.Mode,
         private val regularP2P: PeerGroup,
-        private val xtP2P: PeerGroup,
+        private val xtPeers: PeerGroup,
         chain: AbstractBlockChain,
         private val wallet: PledgingWallet,
         public val executor: AffinityExecutor.ServiceAffinityExecutor
@@ -144,23 +141,21 @@ public class LighthouseBackend public constructor(
     private val projects = FXCollections.observableArrayList<Project>()
     private val projectsMap: MutableMap<Sha256Hash, Project> = linkedMapOf()
     private val projectStates: ObservableMap<Sha256Hash, ProjectStateInfo> = FXCollections.observableMap(linkedMapOf())
+    private val params = wallet.getParams()
 
     init {
         Kovenant.context {
             workerContext.dispatcher = executor.asDispatcher()
         }
 
-        if (wallet.getParams() === RegTestParams.get()) {
+        if (params === RegTestParams.get()) {
             setMinPeersForUTXOQuery(1)
             setMaxJitterSeconds(1)
         }
 
-        // Run initialisation later (not ASAP). This is a holdover from a previous version of the code.
-        // TODO: Make loading and initialization explicit and split in two, so we can start up faster.
-        executor.execute {
+        executor.fetchFrom {
             try {
-                chain.addListener(this, executor)
-
+                val startupTime = System.nanoTime()
                 loadData()
 
                 // Load pledges found in the wallet.
@@ -189,24 +184,30 @@ public class LighthouseBackend public constructor(
                 }, executor)
 
                 for (tx in wallet.getTransactions(false)) {
-                    log.info("Loading stored claim ${tx.getHash()}")
                     val project = getProjectFromClaim(tx) ?: continue
+                    log.info("Loading stored claim ${tx.getHash()} for $project")
                     addClaimConfidenceListener(executor, tx, project)
                 }
-
-                projectsMap.values().forEach { checkProject(it) }
 
                 // Let us find revocations by using a direct Bloom filter provider. We could watch out for claims in this
                 // way too, but we want the wallet to monitor confidence of claims, and don't care about revocations as much.
                 installBloomFilterProvider()
+                chain.addListener(this, executor)
 
-                log.info("Backend initialized ...")
+                log.info("Backend initialized in ${(System.nanoTime() - startupTime) / 1000000} msec...")
                 initialized.complete(true)
+
+                // Checking of project statuses against the network will be kicked off in the start method, called
+                // after we hauled the UI onto the screen.
             } catch (e: Throwable) {
                 log.error("Backend init failed", e)
                 initialized.completeExceptionally(e)
             }
         }
+    }
+
+    public fun start() {
+        projectsMap.values().forEach { checkProject(it) }
     }
 
     private fun checkProject(project: Project) {
@@ -319,7 +320,7 @@ public class LighthouseBackend public constructor(
 
     private fun tryLoadProject(it: File, ignoreErrors: Boolean = true): Project? = try {
         val project = it.inputStream().use { stream -> Project(LHProtos.Project.parseFrom(stream)) }
-        if (project.getParams() == wallet.getParams()) {
+        if (project.getParams() == params) {
             project
         } else {
             log.warn("Ignoring project with mismatched params: $it")
@@ -483,10 +484,10 @@ public class LighthouseBackend public constructor(
             } else {
                 log.info("Checking ${pledges.size()} pledge(s) against P2P network for '$project'")
                 markAsInProgress(project)
-                val peerFuture = xtP2P.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION.toLong())
+                val peerFuture = xtPeers.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION.toLong())
                 if (!peerFuture.isDone()) {
                     log.info("Waiting to find {} peers that support getutxo", minPeersForUTXOQuery)
-                    for (peer in xtP2P.getConnectedPeers()) log.info("Connected to: {}", peer)
+                    for (peer in xtPeers.getConnectedPeers()) log.info("Connected to: {}", peer)
                 }
                 Futures.addCallback(peerFuture, object : FutureCallback<List<Peer>> {
                     override fun onSuccess(allPeers: List<Peer>) {
@@ -959,7 +960,7 @@ public class LighthouseBackend public constructor(
                     result.completeExceptionally(Ex.TooManyDependencies(txnBytes.size()))
                 } else {
                     log.info("Broadcasting {} provided pledge dependencies", txnBytes.size())
-                    txnBytes.map { Transaction(wallet.getParams(), it.toByteArray()) }.forEach {
+                    txnBytes.map { Transaction(params, it.toByteArray()) }.forEach {
                         // Wait for each broadcast in turn. In the local node case this will complete immediately. In the
                         // case of remote nodes (maybe we should forbid this later), it may block for a few seconds whilst
                         // the transactions propagate.
@@ -1057,7 +1058,7 @@ public class LighthouseBackend public constructor(
             // Irrelevant input.
             log.info("Broadcast tx {} input {} matches pledge {}", t.getHash(), i, LHUtils.hashFromPledge(pledge))
             if (project != null) {
-                val tx = pledgeToTx(wallet.getParams(), pledge)
+                val tx = pledgeToTx(params, pledge)
                 if (LHUtils.compareOutputsStructurally(tx, project)) {
                     // This transaction is a claim for a project we know about, and this input is claiming a pledge
                     // for that project, so skip. We must still process other inputs because they may revoke other
@@ -1074,9 +1075,10 @@ public class LighthouseBackend public constructor(
         return result
     }
 
-    private val manager = BloomFilterManager()
+    private var manager: BloomFilterManager? = null
 
     private fun installBloomFilterProvider() {
+        manager = BloomFilterManager()
         regularP2P.addPeerFilterProvider(manager)
         regularP2P.addEventListener(manager, executor)
     }
@@ -1100,7 +1102,7 @@ public class LighthouseBackend public constructor(
         for (pledges in this.pledges.values()) {
             for (pledge in pledges) {
                 if (pledge.getPledgeDetails().hasOrigHash()) continue   // Can't watch for revocations of scrubbed pledges.
-                val tx = LHUtils.pledgeToTx(wallet.getParams(), pledge)
+                val tx = LHUtils.pledgeToTx(params, pledge)
                 for (input in tx.getInputs()) {
                     result.put(input.getOutpoint(), pledge)
                 }
