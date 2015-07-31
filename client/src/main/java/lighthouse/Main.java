@@ -159,7 +159,7 @@ public class Main extends Application {
         firstRun = !prefs.getPrefsFileFound();
         initGUI(stage);
 
-        if (firstRun && params != RegTestParams.get()) {
+        if (firstRun && params != RegTestParams.get() && updatesURL != null) {
             // We haven't been used on this computer/user account before. Do an initial online update to ensure the
             // user is always on the freshest version and avoid us needing to rebuild the downloadable binaries for
             // every single update.
