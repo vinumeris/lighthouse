@@ -109,7 +109,7 @@ public class UpdateFXWindow {
     }
 
     public void setUpdater(Updater updater) {
-        if (updater.isDone() || Main.offline)
+        if (updater.isDone() || Main.bitcoin.isOffline())
             processUpdater(updater);
         else
             updater.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
@@ -122,7 +122,7 @@ public class UpdateFXWindow {
         updates.add(null);  // Sentinel for "latest"
         UpdateSummary s = null;
         try {
-            if (!Main.offline)
+            if (!Main.bitcoin.isOffline())
                 s = Futures.getUnchecked(updater);
         } catch (Exception e) {
             log.warn("Failed to get online updates index, trying to fall back to disk cache: {}", e.getMessage());

@@ -174,7 +174,7 @@ public class OverviewActivity : VBox(), Activity {
         val state = SimpleObjectProperty(getProjectState(project))
 
         val projectWidget: ProjectOverviewWidget
-        if (Main.offline) {
+        if (Main.bitcoin.isOffline()) {
             state.set(LighthouseBackend.ProjectState.UNKNOWN)
             projectWidget = ProjectOverviewWidget(project, SimpleLongProperty(0), state)
         } else {

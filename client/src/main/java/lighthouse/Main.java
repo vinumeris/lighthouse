@@ -1,7 +1,6 @@
 package lighthouse;
 
 import com.google.common.base.*;
-import com.google.common.util.concurrent.*;
 import com.vinumeris.crashfx.*;
 import com.vinumeris.updatefx.*;
 import javafx.animation.*;
@@ -30,10 +29,8 @@ import lighthouse.utils.*;
 import lighthouse.utils.ipc.*;
 import lighthouse.wallet.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.kits.*;
 import org.bitcoinj.params.*;
 import org.bitcoinj.utils.*;
-import org.bitcoinj.wallet.*;
 import org.bouncycastle.math.ec.*;
 import org.slf4j.Logger;
 import org.slf4j.*;
@@ -68,7 +65,7 @@ public class Main extends Application {
     public static final int UPDATE_SIGNING_THRESHOLD = 1;
 
     public static NetworkParameters params;
-    public static volatile WalletAppKit bitcoin;
+    public static BitcoinBackend bitcoin;
     public static PledgingWallet wallet;
     public static Main instance;
     public static String demoName;
@@ -87,14 +84,11 @@ public class Main extends Application {
 
     private boolean useTor;
     private boolean slowGFX;
-    @Nullable private PeerAddress[] cmdLineRequestedIPs;
+    @Nullable private List<String> cmdLineRequestedIPs;
     public String updatesURL = UPDATES_BASE_URL;
     public static Path unadjustedAppDir;   // ignoring which network we're on.
 
-    public static boolean offline = false;
     public static boolean firstRun = false;
-
-    private PeerGroup xtPeers;
 
     public static void main(String[] args) throws IOException {
         // Startup sequence: we use UpdateFX to allow for automatic online updates when the app is running. UpdateFX
@@ -178,18 +172,36 @@ public class Main extends Application {
 
     public void startAppLoad(List<Path> filesToOpen) {
         Runnable setup = () -> {
-            uncheck(() -> initBitcoin(null));   // This will happen mostly async.
-            loadMainWindow();
-            if (isMac()) {
-                FileOpenRequests.handleMacFileOpenRequests();
-            } else {
-                for (Path path : filesToOpen) {
-                    Platform.runLater(() -> {
-                        MainWindow.overviewActivity.handleOpenedFile(path.toFile());
-                    });
+            try {
+                if (!initBitcoin())
+                    return;
+                loadMainWindow();
+
+                if (isMac()) {
+                    FileOpenRequests.handleMacFileOpenRequests();
+                } else {
+                    for (Path path : filesToOpen) {
+                        Platform.runLater(() -> {
+                            MainWindow.overviewActivity.handleOpenedFile(path.toFile());
+                        });
+                    }
                 }
+
+                runOnGuiThreadAfter(500, WalletSetPasswordController::estimateKeyDerivationTime);
+
+                // And now start up the network code and backend (trigger project checks) as the last step.
+                DownloadProgressTracker downloadProgressTracker = MainWindow.bitcoinUIModel.getDownloadListener();
+                new Thread("Bitcoin startup thread") {
+                    @Override
+                    public void run() {
+                        bitcoin.start(downloadProgressTracker);
+                        backend.start();
+                    }
+                }.start();
+            } catch (Exception e) {
+                log.error("Startup exception", e);
+                CrashWindow.open(e);
             }
-            runOnGuiThreadAfter(500, WalletSetPasswordController::estimateKeyDerivationTime);
         };
         // Give the splash time to render (lame hack as it turns out we can easily stall the splash rendering otherwise).
         runOnGuiThreadAfter(300, setup);
@@ -286,20 +298,9 @@ public class Main extends Application {
             }
         }
 
-        String cmdLineIps = getParameters().getNamed().get("connect");
-        if (cmdLineIps != null) {
-            List<String> ips = Splitter.on(',').splitToList(cmdLineIps);
-            cmdLineRequestedIPs = new PeerAddress[ips.size()];
-            for (int i = 0; i < ips.size(); i++) {
-                String ip = ips.get(i);
-                try {
-                    log.info("Resolving {} for usage", ip);
-                    cmdLineRequestedIPs[i] = new PeerAddress(InetAddress.getByName(ip), params.getPort());
-                } catch (UnknownHostException e) {
-                    log.error("Unrecognised IP/DNS address, ignoring: " + ip);
-                }
-            }
-        }
+        String ips = getParameters().getNamed().get("connect");
+        if (ips != null)
+            cmdLineRequestedIPs = Splitter.on(',').splitToList(ips);
         return true;
     }
 
@@ -393,9 +394,6 @@ public class Main extends Application {
 
             mainUI = notificationBar;
             mainWindow = controller;
-            Uninterruptibles.awaitUninterruptibly(walletLoadedLatch);
-            if (bitcoin == null)
-                return;
             mainUI.setCache(true);
             reached("Showing main UI");
             uiStack.getChildren().add(0, mainUI);
@@ -418,97 +416,24 @@ public class Main extends Application {
         }
     }
 
-    public void initBitcoin(@Nullable DeterministicSeed restoreFromSeed) throws IOException {
-        walletLoadedLatch = new CountDownLatch(1);
+    public boolean initBitcoin() {
         // Tell bitcoinj to run event handlers on the JavaFX UI thread. This keeps things simple and means
         // we cannot forget to switch threads when adding event handlers. Unfortunately, the DownloadListener
         // we give to the app kit is currently an exception and runs on a library thread. It'll get fixed in
         // a future version.
         Threading.USER_THREAD = Platform::runLater;
-
-        // Create the app kit. It won't do any heavyweight initialization until after we start it.
-        bitcoin = new WalletAppKit(params, AppDirectory.dir().toFile(), APP_NAME) {
-            {
-                walletFactory = PledgingWallet::new;
-            }
-
-            @Override
-            protected void onSetupCompleted() {
-                wallet = (PledgingWallet) bitcoin.wallet();
-                // Bring up a dedicated P2P connection group for Bitcoin XT nodes only. It'll be used for getutxo and nothing
-                // else. Syncing to the network, Bloom filtering, etc, will be done by the WAK peer group. It's just easier
-                // to do it this way than try to always maintain the correct balance of peers in a single PeerGroup, which
-                // doesn't have great support for saying e.g. I want 1/3rd of peers to match this criteria and the other 2/3rds
-                // can be anything.
-                if (xtPeers == null)
-                    xtPeers = connectXTPeers();
-                backend = new LighthouseBackend(CLIENT, vPeerGroup, xtPeers, vChain, wallet, new AffinityExecutor.ServiceAffinityExecutor("backend"));
-
-                reached("onSetupCompleted");
-                walletLoadedLatch.countDown();
-
-                if (params == RegTestParams.get()) {
-                    vPeerGroup.setMinBroadcastConnections(2);
-                    vPeerGroup.setUseLocalhostPeerWhenPossible(false);
-                }
-            }
-        };
-        if (bitcoin.isChainFileLocked()) {
+        Context ctx = new Context(params);
+        try {
+            bitcoin = new BitcoinBackend(ctx, APP_NAME, "" + VERSION, cmdLineRequestedIPs, useTor);
+            wallet = bitcoin.getWallet();
+            backend = new LighthouseBackend(CLIENT, bitcoin.getPeers(), bitcoin.getXtPeers(), bitcoin.getChain(), bitcoin.getWallet(), new AffinityExecutor.ServiceAffinityExecutor("backend"));
+            return true;
+        } catch (ChainFileLockedException ex) {
             informationalAlert(tr("Already running"),
                     tr("This application is already running and cannot be started twice."));
-            bitcoin = null;
-            if (!Main.offline && xtPeers != null)
-                xtPeers.stopAsync();
-            walletLoadedLatch.countDown();
             Platform.exit();
-            return;
+            return false;
         }
-        if (params == RegTestParams.get()) {
-            InetAddress local = unchecked(InetAddress::getLocalHost);
-            bitcoin.setPeerNodes(
-                    new PeerAddress(local, RegTestParams.get().getPort()),
-                    new PeerAddress(local, RegTestParams.get().getPort() + 1)
-            );
-        }
-        bitcoin.setBlockingStartup(false)
-               .setDownloadListener(MainWindow.bitcoinUIModel.getDownloadListener())
-               .setUserAgent(APP_NAME, "" + VERSION)
-               .restoreWalletFromSeed(restoreFromSeed);
-
-        if (cmdLineRequestedIPs != null) {
-            bitcoin.setPeerNodes(cmdLineRequestedIPs);
-        }
-
-        if (useTor && params != RegTestParams.get())
-            bitcoin.useTor();
-
-        reached("Starting bitcoin init");
-        bitcoin.addListener(new Service.Listener() {
-            @Override
-            public void failed(Service.State from, Throwable failure) {
-                bitcoin = null;
-                walletLoadedLatch.countDown();
-                CrashWindow.open(failure);
-            }
-        }, Threading.SAME_THREAD);
-        bitcoin.startAsync();
-    }
-
-    public PeerGroup connectXTPeers() {
-        // Assume google.com is the most reliable DNS name in the world.
-        boolean isOffline = new InetSocketAddress("google.com", 80).getAddress() == null;
-        if (isOffline) {
-            log.warn("User appears to be offline");
-            offline = true;
-        }
-        return LHUtils.connectXTPeers(params, isOffline, () -> {
-            informationalAlert(tr("Local Bitcoin node not usable"),
-                    // TRANS: %s = app name
-                    tr("You have a Bitcoin (Core) node running on your computer, but it doesn't have the protocol support %s needs. %s will still " +
-                            "work but will use the peer to peer network instead, so you won't get upgraded security. " +
-                            "Try installing Bitcoin XT, which is a modified version of Bitcoin Core that has the upgraded protocol support."),
-                    APP_NAME, APP_NAME);
-        });
     }
 
     private void refreshStylesheets(Scene scene) {
@@ -521,38 +446,8 @@ public class Main extends Application {
 
     private ImageView stopClickPane = new ImageView();
 
-    public boolean waitForInit() {
-        log.info("Waiting for bitcoin load ...");
-
-        try {
-            Uninterruptibles.awaitUninterruptibly(walletLoadedLatch);
-            if (Main.backend != null) {
-                log.info("Waiting for backend init ...");
-                Main.backend.waitForInit();
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception e) {
-            CrashWindow.open(e);
-            return false;
-        }
-    }
-
     public static void restart() {
         uncheck(UpdateFX::restartApp);
-    }
-
-    public static void restartBitcoinJ(DeterministicSeed seed) {
-        Context ctx = Context.get();
-        new Thread(() -> {
-            Context.propagate(ctx);
-            Main.bitcoin.stopAsync();
-            Main.bitcoin.awaitTerminated();
-            uncheck(() -> Main.instance.initBitcoin(seed));
-            Main.instance.waitForInit();
-            Platform.runLater(Main.instance.mainWindow::onBitcoinSetup);
-        }, "Restart thread").start();
     }
 
     public class OverlayUI<T> {
@@ -704,12 +599,10 @@ public class Main extends Application {
     @Override
     public void stop() throws Exception {
         prefs.storeStageSettings(mainStage);
-        if (bitcoin != null && bitcoin.isRunning()) {
+        if (bitcoin != null) {
             try {
                 backend.shutdown();
-                xtPeers.stopAsync();
-                bitcoin.stopAsync();
-                bitcoin.awaitTerminated();
+                bitcoin.stop();
             } catch (Exception e) {
                 // Don't care.
             }

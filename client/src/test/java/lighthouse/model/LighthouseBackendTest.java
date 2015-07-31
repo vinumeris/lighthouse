@@ -124,6 +124,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         backend = new LighthouseBackend(client, peerGroup, peerGroup, blockChain, pledgingWallet, executor);
         backend.setMinPeersForUTXOQuery(1);
         backend.setMaxJitterSeconds(0);
+        backend.start();
 
         // Wait to start up.
         backend.getExecutor().fetchFrom(() -> null);
@@ -275,8 +276,9 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         // it knows they are the same and doesn't duplicate.
         projectModel.serverName.set("localhost");
         project = projectModel.getProject();
+        Transaction tx = FakeTxBuilder.createFakeTx(params, Coin.COIN, new ECKey());
         final LHProtos.Pledge pledge = LHProtos.Pledge.newBuilder()
-                .addTransactions(ByteString.copyFromUtf8("not a real tx"))
+                .addTransactions(ByteString.copyFrom(tx.bitcoinSerialize()))
                 .setPledgeDetails(LHProtos.PledgeDetails.newBuilder()
                         .setTotalInputValue(Coin.COIN.value)
                         .setProjectId(project.getID())
@@ -296,6 +298,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread 2");
         writeProjectToDisk();
         backend = new LighthouseBackend(CLIENT, peerGroup, peerGroup, blockChain, pledgingWallet, executor);
+        backend.start();
 
         // Let's watch out for pledges from the server.
         ObservableSet<LHProtos.Pledge> pledges = backend.mirrorOpenPledges(project, gate);

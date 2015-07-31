@@ -90,27 +90,15 @@ public class PledgeServer {
            .awaitRunning();
         log.info("bitcoinj initialised");
 
-        PeerGroup xtPeers;
-        if (params != RegTestParams.get()) {
-            // Don't start up fully until we're properly set up. Eventually this can go away.
-            log.info("Waiting to find {} peer(s) that supports getutxo", minPeersSupportingGetUTXO);
-            xtPeers = LHUtils.connectXTPeers(params, false /* server is never offline */, () -> {
-                log.warn("Your local Bitcoin node is not running Bitcoin XT, which is a patchset based on Bitcoin Core required for pledge checking.");
-                log.warn("Please get Bitcoin XT from https://github.com/bitcoinxt/bitcoinxt to use your local node. It is fully compatible.");
-            });
-            xtPeers.waitForPeersWithServiceMask(minPeersSupportingGetUTXO, GetUTXOsMessage.SERVICE_FLAGS_REQUIRED).get();
-        } else {
-            // In regtest mode we don't use a separate xt peers pool.
-            xtPeers = kit.peerGroup();
-        }
-
         // This app is mostly single threaded. It handles all requests and state changes on a single thread.
         // Speed should ideally not be an issue, as the backend blocks only rarely. If it's a problem then
         // we'll have to split the backend thread from the http server thread.
         AffinityExecutor.ServiceAffinityExecutor executor = new AffinityExecutor.ServiceAffinityExecutor("server");
         server.setExecutor(executor);
-        LighthouseBackend backend = new LighthouseBackend(SERVER, kit.peerGroup(), xtPeers, kit.chain(), (PledgingWallet) kit.wallet(), executor);
+        // TODO: Fix to use BitcoinBackend
+        LighthouseBackend backend = new LighthouseBackend(SERVER, kit.peerGroup(), kit.peerGroup(), kit.chain(), (PledgingWallet) kit.wallet(), executor);
         backend.setMinPeersForUTXOQuery(minPeersSupportingGetUTXO);
+        backend.start();
 
         DirectoryWatcher.watch(appDir, executor, (path, kind) -> {
             if (path.toString().endsWith(LighthouseBackend.PROJECT_FILE_EXTENSION)) {
