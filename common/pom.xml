@@ -23,7 +23,7 @@
                         </goals>
                         <configuration>
                             <sourceDirs>
-                                <source>src/main/java</source>
+                                <source>common/src/main/java</source>
                             </sourceDirs>
                         </configuration>
                     </execution>
@@ -35,7 +35,7 @@
                         </goals>
                         <configuration>
                             <sourceDirs>
-                                <source>src/test/java</source>
+                                <source>common/src/test/java</source>
                             </sourceDirs>
                         </configuration>
                     </execution>
