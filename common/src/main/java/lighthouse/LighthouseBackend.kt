@@ -419,7 +419,10 @@ public class LighthouseBackend public constructor(
         // things like watch out for double spends and track chain depth.
         val scripts = project.getOutputs().map { it.getScriptPubKey() }
         scripts.forEach { it.setCreationTimeSeconds(project.getProtoDetails().getTime()) }
-        wallet.addWatchedScripts(scripts)
+        val toAdd = scripts.toArrayList()
+        toAdd.removeAll(wallet.getWatchedScripts())
+        if (toAdd.isNotEmpty())
+            wallet.addWatchedScripts(toAdd)
     }
 
     private fun isPledgeKnown(pledge: LHProtos.Pledge): Boolean {
