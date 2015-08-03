@@ -134,7 +134,8 @@ public class MainWindow {
                 public void invalidated(Observable ob) {
                     Platform.runLater(() -> {
                         if (Main.bitcoin.isOffline()) {
-                            item = Main.instance.notificationBar.displayNewItem(tr("You are offline. You will not be able to use the app until you go online and restart."));
+                            item = Main.instance.notificationBar.displayNewItem(
+                                    tr("You are offline. You will not be able to use the app until you go online and restart."));
                             emptyWalletBtn.disableProperty().unbind();
                             emptyWalletBtn.setDisable(true);
                         } else {
@@ -171,8 +172,6 @@ public class MainWindow {
     }
 
     private void setupBitcoinSyncNotification() {
-        if (Main.bitcoin.isOffline())
-            return;
         balance.setStyle("-fx-text-fill: grey");
         TorClient torClient = Main.bitcoin.getPeers().getTorClient();
         if (torClient != null) {
@@ -196,8 +195,6 @@ public class MainWindow {
                     });
                 }
             });
-        } else {
-            showBitcoinSyncMessage();
         }
         bitcoinUIModel.syncProgressProperty().addListener(x -> {
             double progress = bitcoinUIModel.syncProgressProperty().get();

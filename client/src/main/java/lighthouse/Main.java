@@ -195,7 +195,8 @@ public class Main extends Application {
                     @Override
                     public void run() {
                         bitcoin.start(downloadProgressTracker);
-                        backend.start();
+                        if (!bitcoin.isOffline())
+                            backend.start();
                     }
                 }.start();
             } catch (Exception e) {
