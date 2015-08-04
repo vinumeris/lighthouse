@@ -26,6 +26,14 @@ import java.util.concurrent.TimeUnit
 
 public class ChainFileLockedException : Exception()
 
+interface IBitcoinBackend {
+    public val wallet: PledgingWallet
+    public val store: BlockStore
+    public val chain: BlockChain
+    public val peers: PeerGroup
+    public val xtPeers: PeerGroup
+}
+
 /**
  * Class that does similar things to WalletAppKit, but more customised for our needs.
  */
@@ -33,15 +41,15 @@ public class BitcoinBackend @throws(ChainFileLockedException::class) constructor
                                                                                  val appName: String,
                                                                                  val appVersion: String,
                                                                                  val cmdLineRequestedIPs: List<String>?,
-                                                                                 val useTor: Boolean) {
+                                                                                 val useTor: Boolean) : IBitcoinBackend {
     private val log = LoggerFactory.getLogger(javaClass)
 
     public val params: NetworkParameters = context.getParams()
-    public var wallet: PledgingWallet
-    public var store: BlockStore
-    public var chain: BlockChain
-    public var peers: PeerGroup
-    public var xtPeers: PeerGroup
+    public override var wallet: PledgingWallet
+    public override var store: BlockStore
+    public override var chain: BlockChain
+    public override var peers: PeerGroup
+    public override var xtPeers: PeerGroup
 
     public val localNodeUnusable: SimpleBooleanProperty = SimpleBooleanProperty()
     public val offline: SimpleBooleanProperty = SimpleBooleanProperty()
@@ -54,11 +62,11 @@ public class BitcoinBackend @throws(ChainFileLockedException::class) constructor
         walletFile = AppDirectory.dir().resolve("$appName.wallet").toFile()
         // Deleted chain file means, reset and try again.
         val shouldReplayWallet = walletFile.exists() and !chainFile.exists()
-        wallet = createOrLoadWallet(walletFile, shouldReplayWallet)
-        store = initializeChainStore(chainFile)
-        chain = BlockChain(context, wallet, store)
-        peers = createPeerGroup()
-        xtPeers = createXTPeers()
+        $wallet = createOrLoadWallet(walletFile, shouldReplayWallet)
+        $store = initializeChainStore(chainFile)
+        $chain = BlockChain(context, wallet, store)
+        $peers = createPeerGroup()
+        $xtPeers = createXTPeers()
     }
 
     private fun createXTPeers(): PeerGroup {
@@ -209,9 +217,9 @@ public class BitcoinBackend @throws(ChainFileLockedException::class) constructor
             log.info("Starting XT peer group")
             xtPeers.start()
         }
+        running = true
         log.info("Starting block chain download")
         peers.startBlockChainDownload(downloadListener)
-        running = true
     }
 
     public fun isOffline(): Boolean = synchronized(offline) { offline.get() }

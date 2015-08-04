@@ -17,11 +17,12 @@ import org.bitcoinj.store.*;
 import org.bitcoinj.testing.*;
 import org.bitcoinj.utils.*;
 import org.javatuples.*;
+import org.jetbrains.annotations.*;
 import org.junit.*;
 import org.spongycastle.crypto.params.*;
 import org.spongycastle.crypto.signers.*;
 
-import javax.annotation.*;
+import javax.annotation.Nullable;
 import java.io.*;
 import java.math.*;
 import java.net.*;
@@ -51,6 +52,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
 
     private LHProtos.Pledge injectedPledge;
     private Path tmpDir, appDir;
+    private IBitcoinBackend mockBitcoinBackend;
 
     public LighthouseBackendTest() {
         super(ClientType.BLOCKING_CLIENT_MANAGER);
@@ -121,7 +123,36 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
     public void initCoreState(LighthouseBackend.Mode client) {
         gate = new AffinityExecutor.Gate();
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread");
-        backend = new LighthouseBackend(client, peerGroup, peerGroup, blockChain, pledgingWallet, executor);
+
+        mockBitcoinBackend = new IBitcoinBackend() {
+            @NotNull
+            @Override
+            public PeerGroup getXtPeers() {
+                return peerGroup;
+            }
+
+            @NotNull @Override
+            public PeerGroup getPeers() {
+                return peerGroup;
+            }
+
+            @NotNull @Override
+            public BlockChain getChain() {
+                return blockChain;
+            }
+
+            @NotNull @Override
+            public BlockStore getStore() {
+                return blockStore;
+            }
+
+            @NotNull @Override
+            public PledgingWallet getWallet() {
+                return pledgingWallet;
+            }
+        };
+
+        backend = new LighthouseBackend(client, params, mockBitcoinBackend, executor);
         backend.setMinPeersForUTXOQuery(1);
         backend.setMaxJitterSeconds(0);
         backend.start();
@@ -297,7 +328,7 @@ public class LighthouseBackendTest extends TestWithPeerGroup {
         executor.service.awaitTermination(5, TimeUnit.SECONDS);
         executor = new AffinityExecutor.ServiceAffinityExecutor("test thread 2");
         writeProjectToDisk();
-        backend = new LighthouseBackend(CLIENT, peerGroup, peerGroup, blockChain, pledgingWallet, executor);
+        backend = new LighthouseBackend(CLIENT, params, mockBitcoinBackend, executor);
         backend.start();
 
         // Let's watch out for pledges from the server.

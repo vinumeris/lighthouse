@@ -8,9 +8,7 @@ import lighthouse.*;
 import lighthouse.files.*;
 import lighthouse.protocol.*;
 import lighthouse.threading.*;
-import lighthouse.wallet.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.kits.*;
 import org.bitcoinj.params.*;
 import org.bitcoinj.utils.*;
 import org.slf4j.Logger;
@@ -65,39 +63,27 @@ public class PledgeServer {
         Path appDir = AppDirectory.initAppDir("lighthouse-server");   // Create dir if necessary.
 
         setupLogging(appDir, options.has(logToConsole));
-        writePidFile(appDir, pidFileFlag.value(options));
 
-        WalletAppKit kit = new WalletAppKit(params, appDir.toFile(), "lighthouse-server") {
-            {
-                walletFactory = PledgingWallet::new;
-            }
-        };
-        if (kit.isChainFileLocked()) {
-            log.error("App is already running. Please terminate the other instance or use a different directory (--dir=...)");
+        Context bitcoinContext = new Context(params);
+        BitcoinBackend bitcoin;
+        try {
+            bitcoin = new BitcoinBackend(bitcoinContext, "Lighthouse Server", "2.0", null, false);
+            bitcoin.start(new DownloadProgressTracker());
+        } catch (ChainFileLockedException e) {
+            log.error("This server is already running");
+            return;
+        } catch (Exception e) {
+            log.error("Failed to start bitcoinj", e);
             return;
         }
-        int minPeersSupportingGetUTXO = 2;   // Increase when the feature eventually rolls out to the network.
-        if (options.has("local-node") || params == RegTestParams.get()) {
-            kit.connectToLocalHost();
-            minPeersSupportingGetUTXO = 1;  // Only local matters.
-        }
-        // Eventually take this out when getutxo is merged, released and people have upgraded.
-        kit.setBlockingStartup(true)
-           .setAutoSave(true)
-           .setAutoStop(true)
-           .setUserAgent("Lighthouse Server", "1.0")
-           .startAsync()
-           .awaitRunning();
-        log.info("bitcoinj initialised");
+        writePidFile(appDir, pidFileFlag.value(options));
 
         // This app is mostly single threaded. It handles all requests and state changes on a single thread.
         // Speed should ideally not be an issue, as the backend blocks only rarely. If it's a problem then
         // we'll have to split the backend thread from the http server thread.
         AffinityExecutor.ServiceAffinityExecutor executor = new AffinityExecutor.ServiceAffinityExecutor("server");
         server.setExecutor(executor);
-        // TODO: Fix to use BitcoinBackend
-        LighthouseBackend backend = new LighthouseBackend(SERVER, kit.peerGroup(), kit.peerGroup(), kit.chain(), (PledgingWallet) kit.wallet(), executor);
-        backend.setMinPeersForUTXOQuery(minPeersSupportingGetUTXO);
+        LighthouseBackend backend = new LighthouseBackend(SERVER, params, bitcoin, executor);
         backend.start();
 
         DirectoryWatcher.watch(appDir, executor, (path, kind) -> {

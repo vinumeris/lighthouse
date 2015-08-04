@@ -38,7 +38,8 @@ import lighthouse.utils.I18nUtil
 import lighthouse.utils.I18nUtil.tr
 import lighthouse.utils.easing.EasingMode
 import lighthouse.utils.easing.ElasticInterpolator
-import lighthouse.utils.hash
+import lighthouse.utils.ui
+import nl.komponents.kovenant.async
 import org.bitcoinj.core.Sha256Hash
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -70,20 +71,39 @@ public class OverviewActivity : VBox(), Activity {
 
         AwesomeDude.setIcon(addProjectIcon, AwesomeIcon.FILE_ALT, "50pt; -fx-text-fill: white" /* lame hack */)
 
-        for (project in projects)
-            getChildren().add(0, buildProjectWidget(project))
+        // 4 projects is enough to fill the window on most screens.
+        val PRERENDER = 4
 
-        projects.addListener(ListChangeListener<Project> { change ->
-            while (change.next()) when {
-                change.wasReplaced() -> updateExistingProject(change.getFrom(), change.getAddedSubList().get(0))
+        val pr = projects.reverse()
+        val immediate = pr.take(PRERENDER)
+        val later = pr.drop(PRERENDER)
 
-                change.wasAdded() -> slideInNewProject(change.getAddedSubList().get(0))
+        fun addWidget(w: ProjectOverviewWidget) = getChildren().add(getChildren().size() - numInitialBoxes, w)
 
-                change.wasRemoved() ->
-                    // Cannot animate project remove yet.
-                    getChildren().remove(getChildren().size() - 1 - numInitialBoxes - change.getFrom())
-            }
-        })
+        // Attempting to parallelize this didn't work: when interpreted it takes ~500msec to load a project.
+        // When compiled it is 10x faster. So we're already blasting away on the other CPU cores to compile
+        // this and if we do all builds in parallel, we end up slower not faster because every load takes 500msec :(
+        for (project in immediate)
+            addWidget(buildProjectWidget(project))
+
+        // And do the rest in the background
+        async(ui) {
+            later.map { buildProjectWidget(it) }
+        } success {
+            for (widget in it) addWidget(widget)
+
+            projects.addListener(ListChangeListener<Project> { change ->
+                while (change.next()) when {
+                    change.wasReplaced() -> updateExistingProject(change.getFrom(), change.getAddedSubList().get(0))
+
+                    change.wasAdded() -> slideInNewProject(change.getAddedSubList().get(0))
+
+                    change.wasRemoved() ->
+                        // Cannot animate project remove yet.
+                        getChildren().remove(getChildren().size() - 1 - numInitialBoxes - change.getFrom())
+                }
+            })
+        }
     }
 
     FXML
@@ -174,6 +194,7 @@ public class OverviewActivity : VBox(), Activity {
         val state = SimpleObjectProperty(getProjectState(project))
 
         val projectWidget: ProjectOverviewWidget
+        // TODO: Fix this offline handling.
         if (Main.bitcoin.isOffline()) {
             state.set(LighthouseBackend.ProjectState.UNKNOWN)
             projectWidget = ProjectOverviewWidget(project, SimpleLongProperty(0), state)
@@ -244,7 +265,7 @@ public class OverviewActivity : VBox(), Activity {
         return animation
     }
 
-    private fun getProjectState(p: Project) = projectStates[p.hash]?.state ?: LighthouseBackend.ProjectState.OPEN
+    private fun getProjectState(p: Project) = projectStates[p.getIDHash()]?.state ?: LighthouseBackend.ProjectState.OPEN
 
     override fun onStart() {}
 

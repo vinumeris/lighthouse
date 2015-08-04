@@ -18,6 +18,7 @@ import lighthouse.activities.*;
 import lighthouse.controls.*;
 import lighthouse.model.*;
 import lighthouse.nav.*;
+import lighthouse.protocol.*;
 import lighthouse.subwindows.*;
 import lighthouse.utils.*;
 import org.bitcoinj.core.*;
@@ -61,6 +62,7 @@ public class MainWindow {
 
     // Called by FXMLLoader.
     public void initialize() {
+        Main.reached("MainWindow.initialize()");
         AwesomeDude.setIcon(emptyWalletBtn, AwesomeIcon.SIGN_OUT, "12pt", ContentDisplay.LEFT);
         Tooltip.install(emptyWalletBtn, new Tooltip(tr("Send money out of the wallet")));
         AwesomeDude.setIcon(setupWalletBtn, AwesomeIcon.LOCK, "12pt", ContentDisplay.LEFT);
@@ -68,9 +70,8 @@ public class MainWindow {
 
         AwesomeDude.setIcon(menuBtn, AwesomeIcon.BARS);
 
-        log.info("Proceeding with UI setup!");
 
-        overviewActivity = new OverviewActivity();
+        LHUtils.stopwatch("Build overview activity", () -> overviewActivity = new OverviewActivity());
         navManager = new NavManager(contentScrollPane, overviewActivity);
 
         // Slide back button in/out.

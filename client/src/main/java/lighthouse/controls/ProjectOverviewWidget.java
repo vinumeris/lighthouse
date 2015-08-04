@@ -1,6 +1,7 @@
 package lighthouse.controls;
 
 import de.jensd.fx.fontawesome.*;
+import javafx.application.*;
 import javafx.beans.binding.*;
 import javafx.beans.property.*;
 import javafx.beans.value.*;
@@ -106,11 +107,19 @@ public class ProjectOverviewWidget extends HBox {
 
         progressLine.visibleProperty().bind(pixelWidth.greaterThan(0.0));
         progressCircle.visibleProperty().bind(progressLine.visibleProperty());
-        Tooltip tooltip = new Tooltip();
-        // TODO: Maybe use Adam's BtcFormat class here instead.
-        // TRANS: %s = amount in BTC
-        tooltip.textProperty().bind(new ReactiveCoinFormatter(tr("%s BTC raised so far"), MonetaryFormat.BTC, pledgedAmount));
-        Tooltip.install(progressCircle, tooltip);
+
+        // Creating a tooltip is only possible on the FX thread, annoyingly enough.
+        Platform.runLater(() -> {
+            Tooltip tooltip = new Tooltip();
+            // TODO: Maybe use Adam's BtcFormat class here instead.
+            // TRANS: %s = amount in BTC
+            tooltip.textProperty().bind(new ReactiveCoinFormatter(tr("%s BTC raised so far"), MonetaryFormat.BTC, pledgedAmount));
+            Tooltip.install(progressCircle, tooltip);
+
+            Tooltip tt = new Tooltip(tr("You created this project"));
+            tt.getStyleClass().add("default-font");
+            ownershipIcon.setTooltip(tt);
+        });
     }
 
     public void onCheckStatusChanged(@Nullable LighthouseBackend.CheckStatus checkStatus) {

@@ -24,7 +24,6 @@ import lighthouse.utils.asCoin
 import lighthouse.utils.hash
 import lighthouse.utils.plus
 import lighthouse.utils.projectID
-import lighthouse.wallet.PledgingWallet
 import net.jcip.annotations.GuardedBy
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
@@ -62,10 +61,8 @@ import java.util.function.BiFunction
  */
 public class LighthouseBackend public constructor(
         public val mode: LighthouseBackend.Mode,
-        private val regularP2P: PeerGroup,
-        private val xtPeers: PeerGroup,
-        chain: AbstractBlockChain,
-        private val wallet: PledgingWallet,
+        public val params: NetworkParameters,
+        private val bitcoin: IBitcoinBackend,
         public val executor: AffinityExecutor.ServiceAffinityExecutor
 ) : AbstractBlockChainListener() {
     companion object {
@@ -141,59 +138,61 @@ public class LighthouseBackend public constructor(
     private val projects = FXCollections.observableArrayList<Project>()
     private val projectsMap: MutableMap<Sha256Hash, Project> = linkedMapOf()
     private val projectStates: ObservableMap<Sha256Hash, ProjectStateInfo> = FXCollections.observableMap(linkedMapOf())
-    private val params = wallet.getParams()
+    private val kctx = Kovenant.createContext { workerContext.dispatcher = executor.asDispatcher() }
 
     init {
-        Kovenant.context {
-            workerContext.dispatcher = executor.asDispatcher()
-        }
-
         if (params === RegTestParams.get()) {
             setMinPeersForUTXOQuery(1)
             setMaxJitterSeconds(1)
         }
 
+        val startupTime = System.nanoTime()
+
+        // This is here just to satisfy thread affinity asserts.
         executor.fetchFrom {
             try {
-                val startupTime = System.nanoTime()
                 loadData()
 
-                // Load pledges found in the wallet.
-                for (pledge in wallet.getPledges()) {
-                    val project = projectsMap[pledge.projectID]
-                    if (project != null)
-                        getPledgesFor(project).add(pledge)
-                    else
-                        log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.projectID)
-                }
-
-                wallet.addOnPledgeHandler(executor) { project, pledge -> getPledgesFor(project).add(pledge) }
-                wallet.addOnRevokeHandler(executor) { pledge ->
-                    val project = projectsMap[pledge.projectID]
-                    if (project != null) {
-                        getPledgesFor(project).remove(pledge)
-                    } else {
-                        log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.projectID)
+                with(bitcoin) {
+                    // Load pledges found in the wallet.
+                    for (pledge in wallet.getPledges()) {
+                        val project = projectsMap[pledge.projectID]
+                        if (project != null)
+                            getPledgesFor(project).add(pledge)
+                        else
+                            log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.projectID)
                     }
-                }
-                // Make sure we can spot projects being claimed.
-                wallet.addEventListener(object : AbstractWalletEventListener() {
-                    override fun onCoinsReceived(wallet: Wallet, tx: Transaction, prevBalance: Coin, newBalance: Coin) {
-                        checkPossibleClaimTX(tx)
+
+                    wallet.addOnPledgeHandler(executor) { project, pledge -> getPledgesFor(project).add(pledge) }
+                    wallet.addOnRevokeHandler(executor) { pledge ->
+                        val project = projectsMap[pledge.projectID]
+                        if (project != null) {
+                            getPledgesFor(project).remove(pledge)
+                        } else {
+                            log.error("Found a pledge in the wallet but could not find the corresponding project: {}", pledge.projectID)
+                        }
                     }
-                }, executor)
+                    // Make sure we can spot projects being claimed.
+                    wallet.addEventListener(object : AbstractWalletEventListener() {
+                        override fun onCoinsReceived(wallet: Wallet, tx: Transaction, prevBalance: Coin, newBalance: Coin) {
+                            checkPossibleClaimTX(tx)
+                        }
+                    }, executor)
 
-                for (tx in wallet.getTransactions(false)) {
-                    val project = getProjectFromClaim(tx) ?: continue
-                    log.info("Loading stored claim ${tx.getHash()} for $project")
-                    addClaimConfidenceListener(executor, tx, project)
+                    for (tx in wallet.getTransactions(false)) {
+                        if (tx.getOutputs().size() != 1) continue    // Optimization: short-circuit: not a claim.
+                        val project = getProjectFromClaim(tx) ?: continue
+                        log.info("Loading stored claim ${tx.getHash()} for $project")
+                        addClaimConfidenceListener(executor, tx, project)
+                    }
+
+                    // Let us find revocations by using a direct Bloom filter provider. We could watch out for claims in this
+                    // way too, but we want the wallet to monitor confidence of claims, and don't care about revocations as much.
+                    installBloomFilterProvider()
+                    chain.addListener(this@LighthouseBackend, executor)
                 }
 
-                // Let us find revocations by using a direct Bloom filter provider. We could watch out for claims in this
-                // way too, but we want the wallet to monitor confidence of claims, and don't care about revocations as much.
-                installBloomFilterProvider()
-                chain.addListener(this, executor)
-
+                // And signal success.
                 log.info("Backend initialized in ${(System.nanoTime() - startupTime) / 1000000} msec...")
                 initialized.complete(true)
 
@@ -217,6 +216,7 @@ public class LighthouseBackend public constructor(
             refreshProjectStatusFromServer(project)
         } else {
             log.info("Load: checking project against P2P network: $project")
+            val wallet = bitcoin!!.wallet
             val pledges = getPledgesFor(project).filterNot { wallet.getPledges().contains(it) || wallet.wasPledgeRevoked(it) }.toSet()
             checkPledgesAgainstP2PNetwork(project, pledges)
         }
@@ -376,7 +376,7 @@ public class LighthouseBackend public constructor(
         if (type == TransactionConfidence.ConfidenceType.PENDING) {
             val seenBy = conf.numBroadcastPeers()
             // This logic taken from bitcoinj's TransactionBroadcast class.
-            val numConnected = regularP2P.getConnectedPeers().size()
+            val numConnected = bitcoin!!.peers.getConnectedPeers().size()
             val numToBroadcastTo = Math.max(1, Math.round(Math.ceil(numConnected / 2.0))).toInt()
             val numWaitingFor = Math.ceil((numConnected - numToBroadcastTo) / 2.0).toInt()
 
@@ -420,20 +420,14 @@ public class LighthouseBackend public constructor(
         val scripts = project.getOutputs().map { it.getScriptPubKey() }
         scripts.forEach { it.setCreationTimeSeconds(project.getProtoDetails().getTime()) }
         val toAdd = scripts.toArrayList()
-        toAdd.removeAll(wallet.getWatchedScripts())
+
+        toAdd.removeAll(bitcoin.wallet.getWatchedScripts())
         if (toAdd.isNotEmpty())
-            wallet.addWatchedScripts(toAdd)
+            bitcoin.wallet.addWatchedScripts(toAdd)
     }
 
     private fun isPledgeKnown(pledge: LHProtos.Pledge): Boolean {
         executor.checkOnThread()
-        if (mode === Mode.CLIENT) {
-            // We have to double check against wallet.getPledges here, because during startup the disk manager queues
-            // up "new pledge found" events BEFORE we add pledges from the wallet into pledges, etc.
-            if (wallet.getPledges().contains(pledge) || wallet.wasPledgeRevoked(pledge)) {
-                return true
-            }
-        }
         pledges.values().forEach { if (it.contains(pledge)) return true }
         return false
     }
@@ -473,7 +467,7 @@ public class LighthouseBackend public constructor(
             val state = projectStates[project.hash]
             if (state?.state == ProjectState.CLAIMED && (!project.isServerAssisted() || mode == Mode.SERVER)) {
                 // Serverless project or we are the server.
-                val contract = wallet.getTransaction(state!!.claimedBy)  // KT-7290
+                val contract = bitcoin.wallet.getTransaction(state!!.claimedBy)  // KT-7290
                 if (contract == null) {
                     log.error("Serverless project marked as claimed but contract not found in wallet! Assuming all pledges were taken.")
                     syncPledges(project, pledges, ArrayList(pledges))
@@ -487,10 +481,10 @@ public class LighthouseBackend public constructor(
             } else {
                 log.info("Checking ${pledges.size()} pledge(s) against P2P network for '$project'")
                 markAsInProgress(project)
-                val peerFuture = xtPeers.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION.toLong())
+                val peerFuture = bitcoin.xtPeers.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION.toLong())
                 if (!peerFuture.isDone()) {
                     log.info("Waiting to find {} peers that support getutxo", minPeersForUTXOQuery)
-                    for (peer in xtPeers.getConnectedPeers()) log.info("Connected to: {}", peer)
+                    for (peer in bitcoin.xtPeers.getConnectedPeers()) log.info("Connected to: {}", peer)
                 }
                 Futures.addCallback(peerFuture, object : FutureCallback<List<Peer>> {
                     override fun onSuccess(allPeers: List<Peer>) {
@@ -614,7 +608,7 @@ public class LighthouseBackend public constructor(
         val future = CompletableFuture<LHProtos.ProjectStatus>()
         executor.execute {
             markAsInProgress(project)
-            project.getStatus(wallet, aesKey).whenCompleteAsync(BiConsumer { status, ex ->
+            project.getStatus(bitcoin.wallet, aesKey).whenCompleteAsync(BiConsumer { status, ex ->
                 if (ex != null) {
                     markAsErrored(project, ex)
                     future.completeExceptionally(ex)
@@ -677,7 +671,7 @@ public class LighthouseBackend public constructor(
             //
             // Also remove if this is a scrubbed version of a pledge we already have i.e. because we created it, uploaded it
             // and are now seeing it come back to us.
-            newlyOpen = newlyOpen.filterNot { wallet.wasPledgeRevoked(it) || (it.getPledgeDetails().hasOrigHash() && hashes contains hashFromPledge(it)) }.toHashSet()
+            newlyOpen = newlyOpen.filterNot { bitcoin.wallet.wasPledgeRevoked(it) || (it.getPledgeDetails().hasOrigHash() && hashes contains hashFromPledge(it)) }.toHashSet()
         }
         curOpenPledges.addAll(newlyOpen)
         val newlyInvalid = HashSet(testedPledges)
@@ -743,7 +737,7 @@ public class LighthouseBackend public constructor(
             projectsMap[new.hash] = new
             val scripts = old.getOutputs().map { it.getScriptPubKey() }
             scripts.forEach { it.setCreationTimeSeconds(old.getProtoDetails().getTime()) }
-            wallet.removeWatchedScripts(scripts)
+            bitcoin.wallet.removeWatchedScripts(scripts)
             configureWalletToSpotClaimsFor(new)
             projects[projects.indexOf(old)] = new
         }
@@ -781,17 +775,17 @@ public class LighthouseBackend public constructor(
     public fun importPledgeFrom(path: Path): Promise<LHProtos.Pledge, Throwable> {
         val deferred = deferred<LHProtos.Pledge, Throwable>()
 
-        async a@ {
+        async(kctx) {
             val pledge = tryLoadPledge(path.toFile(), ignoreErrors = false)!!
             if (isPledgeKnown(pledge))
-                return@a pledge
+                return@async pledge
             val project = projectsMap[pledge.projectID] ?: throw Ex.UnknownProject()
 
             check(!project.isServerAssisted() && mode == Mode.CLIENT)
 
             val destFile = AppDirectory.dir().resolve("${pledge.hash}${PLEDGE_FILE_EXTENSION}").toFile();
             if (destFile.exists())
-                return@a pledge
+                return@async pledge
 
             // TODO: Make this call use Kovenant too.
             checkPledgeAgainstP2PNetwork(project, pledge).handle { p, error ->
@@ -845,7 +839,7 @@ public class LighthouseBackend public constructor(
 
         if (mode === Mode.CLIENT) {
             // Don't bother with pointless/noisy server requeries until we're caught up with the chain tip.
-            if (block!!.getHeight() > regularP2P.getMostCommonChainHeight() - 2) {
+            if (block!!.getHeight() > bitcoin.peers.getMostCommonChainHeight() - 2) {
                 log.info("New block found, refreshing pledges")
                 projects.filter { it.isServerAssisted() }.forEach { jitteredServerRequery(it) }
             }
@@ -968,7 +962,7 @@ public class LighthouseBackend public constructor(
                         // case of remote nodes (maybe we should forbid this later), it may block for a few seconds whilst
                         // the transactions propagate.
                         log.info("Broadcasting dependency {} with thirty second timeout", it.getHash())
-                        regularP2P.broadcastTransaction(it).future().get(30, TimeUnit.SECONDS)
+                        bitcoin.peers.broadcastTransaction(it).future().get(30, TimeUnit.SECONDS)
                     }
                     result.complete(pledge)
                 }
@@ -1082,21 +1076,25 @@ public class LighthouseBackend public constructor(
 
     private fun installBloomFilterProvider() {
         manager = BloomFilterManager()
-        regularP2P.addPeerFilterProvider(manager)
-        regularP2P.addEventListener(manager, executor)
+        with(bitcoin.peers) {
+            addPeerFilterProvider(manager)
+            addEventListener(manager, executor)
+        }
     }
 
     public fun shutdown() {
         executor.service.submit {
-            regularP2P.removePeerFilterProvider(manager)
-            regularP2P.removeEventListener(manager)
+            with(bitcoin.peers) {
+                removePeerFilterProvider(manager)
+                removeEventListener(manager)
+            }
         }.get()
         executor.service.shutdown()
         executor.service.awaitTermination(10, TimeUnit.SECONDS)
     }
 
     public fun refreshBloomFilter() {
-        regularP2P.recalculateFastCatchupAndFilter(PeerGroup.FilterRecalculateMode.SEND_IF_CHANGED)
+        bitcoin.peers.recalculateFastCatchupAndFilter(PeerGroup.FilterRecalculateMode.SEND_IF_CHANGED)
     }
 
     private fun getAllOpenPledgedOutpoints(): Map<TransactionOutPoint, LHProtos.Pledge> {

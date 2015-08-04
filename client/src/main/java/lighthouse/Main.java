@@ -187,7 +187,7 @@ public class Main extends Application {
                     }
                 }
 
-                runOnGuiThreadAfter(500, WalletSetPasswordController::estimateKeyDerivationTime);
+                runOnGuiThreadAfter(3000, WalletSetPasswordController::estimateKeyDerivationTime);
 
                 // And now start up the network code and backend (trigger project checks) as the last step.
                 DownloadProgressTracker downloadProgressTracker = MainWindow.bitcoinUIModel.getDownloadListener();
@@ -423,16 +423,21 @@ public class Main extends Application {
         // we give to the app kit is currently an exception and runs on a library thread. It'll get fixed in
         // a future version.
         Threading.USER_THREAD = Platform::runLater;
-        Context ctx = new Context(params);
         try {
-            bitcoin = new BitcoinBackend(ctx, APP_NAME, "" + VERSION, cmdLineRequestedIPs, useTor);
+            Context bitcoinCtx = new Context(params);
+            long now = System.currentTimeMillis();
+            bitcoin = new BitcoinBackend(bitcoinCtx, APP_NAME, "" + VERSION, cmdLineRequestedIPs, useTor);
+            log.info("bitcoin init took {}msec", System.currentTimeMillis() - now);
             wallet = bitcoin.getWallet();
-            backend = new LighthouseBackend(CLIENT, bitcoin.getPeers(), bitcoin.getXtPeers(), bitcoin.getChain(), bitcoin.getWallet(), new AffinityExecutor.ServiceAffinityExecutor("backend"));
+            backend = new LighthouseBackend(CLIENT, params, bitcoin, new AffinityExecutor.ServiceAffinityExecutor("backend"));
             return true;
-        } catch (ChainFileLockedException ex) {
+        } catch (ChainFileLockedException e) {
             informationalAlert(tr("Already running"),
                     tr("This application is already running and cannot be started twice."));
             Platform.exit();
+            return false;
+        } catch (Exception e) {
+            CrashWindow.open(e);
             return false;
         }
     }
