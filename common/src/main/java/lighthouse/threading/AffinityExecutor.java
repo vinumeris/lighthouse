@@ -113,7 +113,7 @@ public interface AffinityExecutor extends Executor {
                 whichThread.set(thread);
                 return thread;
             }, (runnable, executor) -> {
-                log.warn("Ignored execution attempt due to shutdown: {}", runnable);
+                // log.error("Ignored execution attempt due to shutdown", new Throwable());
             });
         }
 
