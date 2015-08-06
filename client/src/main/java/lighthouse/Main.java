@@ -33,10 +33,11 @@ import org.bitcoinj.core.*;
 import org.bitcoinj.params.*;
 import org.bitcoinj.utils.*;
 import org.bouncycastle.math.ec.*;
+import org.jetbrains.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.*;
 
-import javax.annotation.*;
+import javax.annotation.Nullable;
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
@@ -351,6 +352,7 @@ public class Main extends Application {
 
         scene = new Scene(uiStack);
         scene.getAccelerators().put(KeyCombination.valueOf("Shortcut+S"), () -> Platform.runLater(this::loadMainWindow));
+        scene.getAccelerators().put(KeyCombination.valueOf("Shortcut+C"), () -> Platform.runLater(() -> refreshStylesheets(scene)));
         refreshStylesheets(scene);
         stage.setTitle(APP_NAME);
         stage.setMinWidth(800);
@@ -385,6 +387,7 @@ public class Main extends Application {
     private boolean initialUILoad = true;
     private void loadMainWindow() {
         try {
+            refreshStylesheets(scene);
             // Load the main window.
             FXMLLoader loader = new FXMLLoader(getResource("main.fxml"), I18nUtil.translations);
             Pane ui = LHUtils.stopwatched("Loading main.fxml", loader::load);
@@ -581,28 +584,33 @@ public class Main extends Application {
             Pane ui = loader.load();
             T controller = loader.getController();
 
-            EmbeddedWindow window = null;
-            if (title != null)
-                ui = window = new EmbeddedWindow(title, ui);
-
-            OverlayUI<T> pair = new OverlayUI<T>(ui, controller);
-            // Auto-magically set the overlayUi member, if it's there.
-            try {
-                if (controller != null)
-                    controller.getClass().getField("overlayUI").set(controller, pair);
-            } catch (IllegalAccessException | NoSuchFieldException ignored) {
-                ignored.printStackTrace();
-            }
-
-            if (window != null)
-                window.setOnCloseClicked(pair::done);
-
-            log.info("Showing window {} / {}", name, title != null ? title : "(untitled)");
-            pair.show();
-            return pair;
+            return overlayUI(title, ui, controller);
         } catch (IOException e) {
             throw new RuntimeException(e);  // Can't happen.
         }
+    }
+
+    @NotNull
+    public <T> OverlayUI<T> overlayUI(@Nullable String title, Pane ui, T controller) {
+        EmbeddedWindow window = null;
+        if (title != null)
+            ui = window = new EmbeddedWindow(title, ui);
+
+        OverlayUI<T> pair = new OverlayUI<T>(ui, controller);
+        // Auto-magically set the overlayUi member, if it's there.
+        try {
+            if (controller != null)
+                controller.getClass().getField("overlayUI").set(controller, pair);
+        } catch (IllegalAccessException | NoSuchFieldException ignored) {
+            ignored.printStackTrace();
+        }
+
+        if (window != null)
+            window.setOnCloseClicked(pair::done);
+
+        log.info("Showing window {}", title != null ? title : "(untitled)");
+        pair.show();
+        return pair;
     }
 
     @Override
