@@ -247,9 +247,9 @@ public class BitcoinBackend @throws(ChainFileLockedException::class) constructor
             if (peers !== xtPeers)
                 xtPeers.stopAsync()
             wallet.saveToFile(walletFile)
-            store.close()
-            running = false
         }
+        store.close()
+        running = false
     }
 
     public fun wallet(): PledgingWallet = wallet

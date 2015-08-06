@@ -15,13 +15,6 @@ public class BitcoinUIModel {
     private SimpleObjectProperty<Coin> balance = new SimpleObjectProperty<>(Coin.ZERO);
     private SimpleDoubleProperty syncProgress = new SimpleDoubleProperty(-1);
 
-    public BitcoinUIModel() {
-    }
-
-    public BitcoinUIModel(Wallet wallet) {
-        setWallet(wallet);
-    }
-
     public void setWallet(Wallet wallet) {
         syncProgress.set(-1);
         wallet.addEventListener(new AbstractWalletEventListener() {

@@ -38,6 +38,7 @@ import lighthouse.utils.I18nUtil
 import lighthouse.utils.I18nUtil.tr
 import lighthouse.utils.easing.EasingMode
 import lighthouse.utils.easing.ElasticInterpolator
+import lighthouse.utils.timeIt
 import lighthouse.utils.ui
 import nl.komponents.kovenant.async
 import org.bitcoinj.core.Sha256Hash
@@ -84,7 +85,7 @@ public class OverviewActivity : VBox(), Activity {
         // When compiled it is 10x faster. So we're already blasting away on the other CPU cores to compile
         // this and if we do all builds in parallel, we end up slower not faster because every load takes 500msec :(
         for (project in immediate)
-            addWidget(buildProjectWidget(project))
+            timeIt("build project widget for ${project.getTitle()}") { addWidget(buildProjectWidget(project)) }
 
         // And do the rest in the background
         async(ui) {

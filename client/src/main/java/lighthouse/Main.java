@@ -1,6 +1,7 @@
 package lighthouse;
 
 import com.google.common.base.*;
+import com.google.common.util.concurrent.*;
 import com.vinumeris.crashfx.*;
 import com.vinumeris.updatefx.*;
 import javafx.animation.*;
@@ -206,6 +207,7 @@ public class Main extends Application {
         };
         // Give the splash time to render (lame hack as it turns out we can easily stall the splash rendering otherwise).
         runOnGuiThreadAfter(300, setup);
+        //setup.run();
     }
 
     private void performInitialAutoUpdate(List<Path> filesToOpen) {
@@ -423,6 +425,7 @@ public class Main extends Application {
         // we give to the app kit is currently an exception and runs on a library thread. It'll get fixed in
         // a future version.
         Threading.USER_THREAD = Platform::runLater;
+        Threading.setPolicy(CycleDetectingLockFactory.Policies.DISABLED);
         try {
             Context bitcoinCtx = new Context(params);
             long now = System.currentTimeMillis();

@@ -216,7 +216,7 @@ public class LighthouseBackend public constructor(
             refreshProjectStatusFromServer(project)
         } else {
             log.info("Load: checking project against P2P network: $project")
-            val wallet = bitcoin!!.wallet
+            val wallet = bitcoin.wallet
             val pledges = getPledgesFor(project).filterNot { wallet.getPledges().contains(it) || wallet.wasPledgeRevoked(it) }.toSet()
             checkPledgesAgainstP2PNetwork(project, pledges)
         }
@@ -376,7 +376,7 @@ public class LighthouseBackend public constructor(
         if (type == TransactionConfidence.ConfidenceType.PENDING) {
             val seenBy = conf.numBroadcastPeers()
             // This logic taken from bitcoinj's TransactionBroadcast class.
-            val numConnected = bitcoin!!.peers.getConnectedPeers().size()
+            val numConnected = bitcoin.peers.getConnectedPeers().size()
             val numToBroadcastTo = Math.max(1, Math.round(Math.ceil(numConnected / 2.0))).toInt()
             val numWaitingFor = Math.ceil((numConnected - numToBroadcastTo) / 2.0).toInt()
 
@@ -1040,9 +1040,6 @@ public class LighthouseBackend public constructor(
         // TODO: Watch out for the confirmation. If no confirmation of the revocation occurs within N hours, alert the user.
         return super.notifyTransactionIsInBlock(txHash, block, blockType, relativityOffset)
     }
-
-    throws(ScriptException::class)
-    override fun isTransactionRelevant(tx: Transaction) = true
 
     private fun whichPledgesAreRevokedBy(t: Transaction): List<LHProtos.Pledge> {
         val result = ArrayList<LHProtos.Pledge>()
