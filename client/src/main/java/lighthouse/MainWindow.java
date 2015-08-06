@@ -208,7 +208,7 @@ public class MainWindow {
                         balance.setStyle("-fx-text-fill: black");
                     });
                 }
-            } else if (syncItem == null && progress < 1.0) {
+            } else if (syncItem == null && progress > 0.0 && progress < 1.0) {
                 showBitcoinSyncMessage();
             }
         });
