@@ -24,9 +24,8 @@ import org.pegdown.Extensions
 import org.pegdown.PegDownProcessor
 import org.pegdown.ast.*
 import org.slf4j.LoggerFactory
-import java.util.LinkedList
+import java.util.*
 import java.util.function.Consumer
-import kotlin.platform.platformStatic as static
 
 public class MarkDownNode : VBox() {
     public var urlOpener: Consumer<String> = Consumer {}
@@ -52,7 +51,7 @@ public class MarkDownNode : VBox() {
     }
 
     public fun renderMarkDown(text: String) {
-        getChildren().clear()
+        children.clear()
         try {
             val processor = PegDownProcessor(Extensions.SMARTYPANTS or Extensions.AUTOLINKS)
             val rootNode = processor.parseMarkdown(text.toCharArray())
@@ -63,12 +62,12 @@ public class MarkDownNode : VBox() {
             // than not crashing.
             log.error("Failed to render Markdown!", t)
             log.error("Failing text was: \n" + text)
-            getChildren().setAll(Text(text))
+            children.setAll(Text(text))
         }
     }
 
     public fun setupCSS() {
-        getStylesheets().setAll(javaClass.getResource("markdown.css").toExternalForm())
+        stylesheets.setAll(javaClass.getResource("markdown.css").toExternalForm())
     }
     
     public interface DefaultVisitor : org.pegdown.ast.Visitor {
@@ -118,28 +117,28 @@ public class MarkDownNode : VBox() {
         private val classes = LinkedList<String>()
 
         public fun descend(node: Node) {
-            for (n in node.getChildren()) n.accept(this)
+            for (n in node.children) n.accept(this)
         }
 
         private val NEWLINE_MATCHER = CharMatcher.`is`('\n')
 
         public fun text(text: String): Text {
             val node = Text(NEWLINE_MATCHER.trimTrailingFrom(text))
-            node.getStyleClass().setAll(classes)
-            cursor.getChildren().add(node)
+            node.styleClass.setAll(classes)
+            cursor.children.add(node)
             return node
         }
 
         inline public fun <reified N : javafx.scene.Node> nodeWithStyles(vararg styles: String): N {
-            val node = javaClass<N>().newInstance()
-            node.getStyleClass().setAll(*styles)
-            node.getStyleClass().addAll(classes)
+            val node = N::class.java.newInstance()
+            node.styleClass.setAll(*styles)
+            node.styleClass.addAll(classes)
             return node
         }
 
         public fun createAndDescend(node: Node, newNode: javafx.scene.layout.Pane, cmd: () -> Unit = {}) {
             val current = cursor
-            current.getChildren().add(newNode)
+            current.children.add(newNode)
             cursor = newNode
             cmd()
             descend(node)
@@ -153,7 +152,7 @@ public class MarkDownNode : VBox() {
         }
 
         override fun visit(node: TextNode) {
-            text(node.getText())
+            text(node.text)
         }
 
         override fun visit(node: SuperNode) {
@@ -164,7 +163,7 @@ public class MarkDownNode : VBox() {
                     } else
                         ""
             )
-            textFlow.setLineSpacing(1.2)
+            textFlow.lineSpacing = 1.2
             createAndDescend(node, textFlow)
         }
 
@@ -173,7 +172,7 @@ public class MarkDownNode : VBox() {
         override fun visit(node: BlockQuoteNode) {
             classes.push("md-blockquote")
             descend(node)
-            cursor.getChildren().last().getStyleClass().remove("md-p")
+            cursor.children.last().styleClass.remove("md-p")
             classes.pop()
         }
 
@@ -183,27 +182,27 @@ public class MarkDownNode : VBox() {
 
         override fun visit(node: VerbatimNode) {
             val textFlow = nodeWithStyles<TextFlow>("md-verbatim")
-            textFlow.getChildren() add mdTextToFXText(node)
+            textFlow.children add mdTextToFXText(node)
             val box = VBox(textFlow)
             VBox.setMargin(textFlow, Insets(0.0, 0.0, 15.0, 0.0))
-            cursor.getChildren() add box
+            cursor.children add box
         }
 
         private fun borderedLabel(node: TextNode, style: String, parent: Pane = cursor): javafx.scene.Node {
             val label = mdTextToFXText(node)
             val wrapper = VBox(label)
-            wrapper.getStyleClass() add style
-            parent.getChildren() add wrapper
+            wrapper.styleClass add style
+            parent.children add wrapper
             return wrapper
         }
 
-        private fun mdTextToFXText(node: TextNode) = Text(NEWLINE_MATCHER.trimTrailingFrom(node.getText()))
+        private fun mdTextToFXText(node: TextNode) = Text(NEWLINE_MATCHER.trimTrailingFrom(node.text))
 
         override fun visit(node: DefinitionNode) = descend(node)
         override fun visit(node: DefinitionTermNode) = descend(node)
 
         override fun visit(node: ExpImageNode) {
-            cursor.getChildren() add ImageView(Image(node.url, true))
+            cursor.children add ImageView(Image(node.url, true))
         }
 
         override fun visit(node: RefImageNode) {
@@ -211,7 +210,7 @@ public class MarkDownNode : VBox() {
         }
 
         override fun visit(node: HeaderNode) {
-            val flow = nodeWithStyles<TextFlow>("md-header", "md-header-${Math.min(5, node.getLevel())}")
+            val flow = nodeWithStyles<TextFlow>("md-header", "md-header-${Math.min(5, node.level)}")
             VBox.setMargin(flow, Insets(0.0, 0.0, 15.0, 0.0))
             createAndDescend(node, flow)
         }
@@ -220,38 +219,38 @@ public class MarkDownNode : VBox() {
         // HTML AND LINKS
         //
 
-        override fun visit(node: AutoLinkNode) = link(node.getText(), node.getText())
+        override fun visit(node: AutoLinkNode) = link(node.text, node.text)
         override fun visit(node: ExpLinkNode) {
-            val child = node.getChildren()[0].getChildren()[0]
+            val child = node.children[0].children[0]
             if (child is TextNode) {
                 val sbLabel = StringBuilder()
-                for (child2 in node.getChildren()[0].getChildren()) {
+                for (child2 in node.children[0].children) {
                     val textNode: TextNode? = child2 as? TextNode
-                    if(textNode != null) sbLabel.append(textNode.getText())
+                    if(textNode != null) sbLabel.append(textNode.text)
                 }
                 link(node.url, sbLabel.toString())
             } else if (child is ExpImageNode) {
                 val imageView = ImageView(Image(child.url, true))
                 imageView.setOnMouseClicked { this@MarkDownNode.urlOpener.accept(child.url) }
-                imageView.setCursor(Cursor.HAND)
-                cursor.getChildren() add imageView
+                imageView.cursor = Cursor.HAND
+                cursor.children add imageView
             } else {
                 log.info("Unknown link child node $child")
             }
         }
-        override fun visit(node: MailLinkNode) = link("mailto:" + node.getText(), node.getText())
+        override fun visit(node: MailLinkNode) = link("mailto:" + node.text, node.text)
         override fun visit(node: RefLinkNode) = log.error("Unimplemented: reference links: $node")
         override fun visit(node: AnchorLinkNode) = log.error("Unimplemented: anchor links: $node")
 
         override fun visit(node: WikiLinkNode) {
-            text(node.getText())
+            text(node.text)
         }
 
 
         private fun link(url: String, text: String) {
             val link = text(text)
-            link.setFill(Color.BLUE)
-            link.getStyleClass().add("md-link")
+            link.fill = Color.BLUE
+            link.styleClass.add("md-link")
             link.setOnMouseClicked { this@MarkDownNode.urlOpener.accept(url) }
         }
 
@@ -280,9 +279,9 @@ public class MarkDownNode : VBox() {
 
         override fun visit(node: ListItemNode) {
             createAndDescend(node, nodeWithStyles<HBox>("md-li")) {
-                cursor.getChildren() add Text(nextBullet())
+                cursor.children add Text(nextBullet())
                 val box = VBox()
-                cursor.getChildren() add box
+                cursor.children add box
                 cursor = box
             }
         }
@@ -302,7 +301,7 @@ public class MarkDownNode : VBox() {
         // Ignore
         override fun visit(node: DefinitionListNode) = node.accept(this)
         override fun visit(node: QuotedNode) {
-            when (node.getType()!!) {
+            when (node.type!!) {
                 QuotedNode.Type.DoubleAngle -> {
                     text("«")
                     descend(node)
@@ -324,7 +323,7 @@ public class MarkDownNode : VBox() {
         override fun visit(node: RootNode) = descend(node)
 
         override fun visit(node: SimpleNode) {
-            when (node.getType()!!) {
+            when (node.type!!) {
                 SimpleNode.Type.Apostrophe -> text("\u2019")
                 SimpleNode.Type.Ellipsis -> text("\u2026")
                 SimpleNode.Type.Emdash -> text("\u2014")
@@ -335,13 +334,13 @@ public class MarkDownNode : VBox() {
                 SimpleNode.Type.Linebreak -> {
                 }
                 SimpleNode.Type.HRule -> {
-                    cursor.getChildren() add Separator()
+                    cursor.children add Separator()
                 }
             }
         }
 
         override fun visit(node: SpecialTextNode) {
-            text(node.getText())
+            text(node.text)
         }
 
         override fun visit(node: StrikeNode) = descend(node)
@@ -354,37 +353,37 @@ public class MarkDownNode : VBox() {
     }
 
     companion object {
-        val log = LoggerFactory.getLogger(javaClass<MarkDownNode>())
+        val log = LoggerFactory.getLogger(MarkDownNode::class.java)
 
-        static public fun printAST(node: Node, offset: Int) {
+        @JvmStatic public fun printAST(node: Node, offset: Int) {
             System.out.print(Strings.repeat(" ", offset))
             System.out.println(node)
-            for (n in node.getChildren()) {
+            for (n in node.children) {
                 printAST(n, offset + 2)
             }
         }
 
-        static public fun countFormattingNodes(ast: Node): Int = (if (isTextNode(ast)) 0 else 1) + ast.getChildren().map { countFormattingNodes(it) }.sum()
+        @JvmStatic public fun countFormattingNodes(ast: Node): Int = (if (isTextNode(ast)) 0 else 1) + ast.children.map { countFormattingNodes(it) }.sum()
 
-        private fun isTextNode(ast: Node) = ast is ParaNode || ast is TextNode || ast is RootNode || ast.javaClass == javaClass<SuperNode>()
+        private fun isTextNode(ast: Node) = ast is ParaNode || ast is TextNode || ast is RootNode || ast.javaClass == SuperNode::class.java
 
-        static public fun openPopup(text: ObservableStringValue, urlOpener: Consumer<String>) {
+        @JvmStatic public fun openPopup(text: ObservableStringValue, urlOpener: Consumer<String>) {
             val node = MarkDownNode()
             node.text.bind(text)
             node.urlOpener = urlOpener
             // For some reason there are graphics glitches if padding is applied to the scrollpane directly. Wrapping
             // in another node makes the rendering errors go away.
             val wrapper = StackPane(node)
-            wrapper.setPadding(Insets(15.0))
+            wrapper.padding = Insets(15.0)
             val scrollPane = ScrollPane(wrapper)
-            scrollPane.setPrefWidth(600.0)
-            scrollPane.setPrefHeight(400.0)
-            scrollPane.setFitToWidth(true)
+            scrollPane.prefWidth = 600.0
+            scrollPane.prefHeight = 400.0
+            scrollPane.isFitToWidth = true
             val scene = Scene(scrollPane)
             val stage = Stage()
-            stage.setScene(scene)
-            stage.setTitle("Preview")
-            stage.setAlwaysOnTop(true)
+            stage.scene = scene
+            stage.title = "Preview"
+            stage.isAlwaysOnTop = true
             stage.show()
         }
     }

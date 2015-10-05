@@ -15,7 +15,6 @@ import java.nio.file.WatchEvent
 import java.time.Duration
 import java.util.concurrent.ScheduledFuture
 import kotlin.concurrent.thread
-import kotlin.platform.platformStatic
 
 /**
  * The Java directory watching API is very low level, almost a direct translation of the underlying OS API's, so we
@@ -23,9 +22,9 @@ import kotlin.platform.platformStatic
  * that can be caused by file copy tools like scp.
  */
 public object DirectoryWatcher {
-    private val log = LoggerFactory.getLogger(javaClass<DirectoryWatcher>())
+    private val log = LoggerFactory.getLogger(DirectoryWatcher::class.java)
 
-    suppress("UNCHECKED_CAST") platformStatic
+    @Suppress("UNCHECKED_CAST") @JvmStatic
     public fun watch(directory: Path, executor: AffinityExecutor.ServiceAffinityExecutor, onChanged: (Path, WatchEvent.Kind<Path>) -> Unit): Thread {
         return thread(start = true, daemon = true, name = "Directory watcher for $directory") {
             log.info("Starting directory watch service for $directory")
@@ -38,7 +37,7 @@ public object DirectoryWatcher {
             try {
                 val watcher = FileSystems.getDefault().newWatchService()
                 directory.register(watcher, arrayOf(ENTRY_DELETE, ENTRY_CREATE, ENTRY_MODIFY), SensitivityWatchEventModifier.HIGH)
-                while (!Thread.currentThread().isInterrupted()) {
+                while (!Thread.currentThread().isInterrupted) {
                     val key = watcher.take()
                     for (event in key.pollEvents()) {
                         val kind = event.kind()

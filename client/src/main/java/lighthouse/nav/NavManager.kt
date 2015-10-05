@@ -19,11 +19,11 @@ public class NavManager(public val scrollPane: ScrollPane, val initial: Activity
     public var currentActivity: Activity = initial
         get
         private set
-    private val stackPane = scrollPane.getContent() as StackPane
+    private val stackPane = scrollPane.content as StackPane
     private val backShortcut = KeyCombination.valueOf("Shortcut+LEFT")
 
     init {
-        stackPane.getChildren().add(initial as Node)
+        stackPane.children.add(initial as Node)
     }
 
     public val isOnInitialActivity: SimpleBooleanProperty = SimpleBooleanProperty(true)
@@ -34,13 +34,13 @@ public class NavManager(public val scrollPane: ScrollPane, val initial: Activity
         check(!(activity identityEquals initial))
 
         currentActivity.onStop()
-        history.push(HistoryItem(scrollPane.getVvalue(), currentActivity, currentActivity as Node))
-        with (stackPane.getChildren()) {
+        history.push(HistoryItem(scrollPane.vvalue, currentActivity, currentActivity as Node))
+        with (stackPane.children) {
             // TODO: Animate this
             remove(currentActivity)
             add(activity)
         }
-        scrollPane.setVvalue(0.0)
+        scrollPane.vvalue = 0.0
         currentActivity = activity
         currentActivity.onStart()
 
@@ -48,19 +48,19 @@ public class NavManager(public val scrollPane: ScrollPane, val initial: Activity
 
         // TODO: Have to delay this to work around bug in pre 8u20 JFX. Once everyone is on 8u40 remove.
         Platform.runLater() {
-            Main.instance.scene.getAccelerators()[backShortcut] = Runnable { back() }
+            Main.instance.scene.accelerators[backShortcut] = Runnable { back() }
         }
     }
 
     public fun back() {
         val prev = history.pop()
         currentActivity.onStop()
-        with (stackPane.getChildren()) {
+        with (stackPane.children) {
             // TODO: Animate this
             remove(currentActivity)
             add(prev.asNode)
         }
-        scrollPane.setVvalue(prev.scroll)
+        scrollPane.vvalue = prev.scroll
         currentActivity = prev.activity
         currentActivity.onStart()
 
@@ -69,7 +69,7 @@ public class NavManager(public val scrollPane: ScrollPane, val initial: Activity
 
         // TODO: Have to delay this to work around bug in pre 8u20 JFX. Once everyone is on 8u40 remove.
         Platform.runLater() {
-            Main.instance.scene.getAccelerators().remove(backShortcut)
+            Main.instance.scene.accelerators.remove(backShortcut)
         }
     }
 }

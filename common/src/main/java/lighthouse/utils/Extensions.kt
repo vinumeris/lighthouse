@@ -13,8 +13,8 @@ fun Coin.minus(other: Coin) = this.subtract(other)
 fun Long.asCoin(): Coin = Coin.valueOf(this)
 
 class ThreadBox<out T>(private val data: T) {
-    synchronized fun use<R>(block: (T) -> R): R = block(data)
-    synchronized fun useWith<R>(block: T.() -> R): R = data.block()
+    @Synchronized fun use<R>(block: (T) -> R): R = block(data)
+    @Synchronized fun useWith<R>(block: T.() -> R): R = data.block()
 }
 
 class UIThreadBox<out T>(private val data: T) {
@@ -38,6 +38,6 @@ class UIThreadBox<out T>(private val data: T) {
 }
 
 val LHProtos.Pledge.hash: Sha256Hash get() = LHUtils.hashFromPledge(this)
-val LHProtos.Pledge.projectID: Sha256Hash get() = Sha256Hash.wrap(getPledgeDetails().getProjectId())
+val LHProtos.Pledge.projectID: Sha256Hash get() = Sha256Hash.wrap(pledgeDetails.projectId)
 
-val Project.hash: Sha256Hash get() = this.getIDHash()
+val Project.hash: Sha256Hash get() = this.idHash

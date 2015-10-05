@@ -32,7 +32,7 @@ public class UpdateCheckStrings {
  * updates.
  */
 public class OnlineUpdateChecks(val onStateChanged: (UpdateState, OnlineUpdateChecks) -> Unit) {
-    private val log = LoggerFactory.getLogger(javaClass<OnlineUpdateChecks>())
+    private val log = LoggerFactory.getLogger(OnlineUpdateChecks::class.java)
 
     val updater: Updater
     var state: UpdateState = UpdateState.UNSTARTED
@@ -41,11 +41,11 @@ public class OnlineUpdateChecks(val onStateChanged: (UpdateState, OnlineUpdateCh
             onStateChanged(value, this)
         }
     val progress: ObservableDoubleValue get() = updater.progressProperty()
-    val exception: Throwable get() = updater.getException()
+    val exception: Throwable get() = updater.exception
 
     init {
         updater = Updater(URI.create(Main.instance.updatesURL), Main.APP_NAME, Main.unadjustedAppDir,
-                UpdateFX.findCodePath(javaClass<Main>()), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD)
+                UpdateFX.findCodePath(Main::class.java), Main.UPDATE_SIGNING_KEYS, Main.UPDATE_SIGNING_THRESHOLD)
 
         if (Main.instance.updatesURL != Main.UPDATES_BASE_URL)
             updater.setOverrideURLs(true)    // For testing.
@@ -66,7 +66,7 @@ public class OnlineUpdateChecks(val onStateChanged: (UpdateState, OnlineUpdateCh
 
         // Don't bother the user if update check failed: assume some temporary server error that can be fixed silently.
         updater.setOnFailed() {
-            log.error("Online update check failed", updater.getException())
+            log.error("Online update check failed", updater.exception)
             if (Main.params !== RegTestParams.get())
                 GuiUtils.informationalAlert(I18nUtil.tr("Online update failed"), // TRANS: %s = error message
                         I18nUtil.tr("An error was encountered whilst attempting to download or apply an online update: %s"), exception)
@@ -78,7 +78,7 @@ public class OnlineUpdateChecks(val onStateChanged: (UpdateState, OnlineUpdateCh
         state = UpdateState.CHECKING
         log.info("Starting online update check")
         val t = Thread(updater, "Online update thread")
-        t.setDaemon(true)
+        t.isDaemon = true
         t.start()
     }
 }

@@ -8,13 +8,13 @@ import java.io.IOException
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
-import java.util.Properties
+import java.util.*
 
 /**
  * Stores user preferences (not many currently). Access from UI thread.
  */
 public class UserPrefs {
-    private val log = LoggerFactory.getLogger(javaClass<UserPrefs>())
+    private val log = LoggerFactory.getLogger(UserPrefs::class.java)
 
     private val prefs = Properties()
     private val path = AppDirectory.dir().resolve("settings.txt").toFile()
@@ -83,26 +83,26 @@ public class UserPrefs {
         val h = readDouble("windowHeight", -1.0)
         val max = prefs.getProperty("windowMaximized", "true").toBoolean()
         if (w != -1.0 && h != -1.0 && x != -1.0 && y != -1.0) {
-            stage.setWidth(w)
-            stage.setHeight(h)
-            stage.setX(x)
-            stage.setY(y)
+            stage.width = w
+            stage.height = h
+            stage.x = x
+            stage.y = y
             if (!LHUtils.isMac())
-                stage.setMaximized(max)
+                stage.isMaximized = max
         } else if (!LHUtils.isMac()) {
             // First run, make maximized, but not on MacOS where the whole notion of window maximization is
             // pathologically messed up and JavaFX has some bugs around it too.
-            stage.setMaximized(true)
+            stage.isMaximized = true
         }
     }
 
     public fun storeStageSettings(stage: Stage) {
-        prefs.setProperty("windowWidth", java.lang.Double.toString(stage.getWidth()))
-        prefs.setProperty("windowHeight", java.lang.Double.toString(stage.getHeight()))
-        prefs.setProperty("windowX", java.lang.Double.toString(stage.getX()))
-        prefs.setProperty("windowY", java.lang.Double.toString(stage.getY()))
-        prefs.setProperty("windowMaximized", java.lang.Boolean.toString(stage.isMaximized()))
-        log.info("Storing stage metrics({})", stage.isMaximized())
+        prefs.setProperty("windowWidth", java.lang.Double.toString(stage.width))
+        prefs.setProperty("windowHeight", java.lang.Double.toString(stage.height))
+        prefs.setProperty("windowX", java.lang.Double.toString(stage.x))
+        prefs.setProperty("windowY", java.lang.Double.toString(stage.y))
+        prefs.setProperty("windowMaximized", java.lang.Boolean.toString(stage.isMaximized))
+        log.info("Storing stage metrics({})", stage.isMaximized)
         store()
     }
 }
