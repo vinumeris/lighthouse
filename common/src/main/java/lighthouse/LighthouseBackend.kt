@@ -22,6 +22,7 @@ import lighthouse.threading.AffinityExecutor
 import lighthouse.threading.ObservableMirrors
 import lighthouse.utils.asCoin
 import lighthouse.utils.hash
+import lighthouse.utils.plus
 import lighthouse.utils.projectID
 import net.jcip.annotations.GuardedBy
 import nl.komponents.kovenant.Kovenant
@@ -421,7 +422,7 @@ public class LighthouseBackend public constructor(
         // We ask the wallet to track it instead of doing this ourselves because the wallet knows how to do
         // things like watch out for double spends and track chain depth.
         val scripts = project.outputs.map { it.scriptPubKey }
-        scripts.forEach { it.creationTimeSeconds = project.getProtoDetails().getTime() }
+        scripts.forEach { it.creationTimeSeconds = project.protoDetails.time }
         val toAdd = scripts.toArrayList()
 
         toAdd.removeAll(bitcoin.wallet.watchedScripts)
@@ -739,7 +740,7 @@ public class LighthouseBackend public constructor(
             projectsMap.remove(old.hash)
             projectsMap[new.hash] = new
             val scripts = old.outputs.map { it.scriptPubKey }
-            scripts.forEach { it.creationTimeSeconds = old.getProtoDetails().getTime() }
+            scripts.forEach { it.creationTimeSeconds = old.protoDetails.time }
             bitcoin.wallet.removeWatchedScripts(scripts)
             configureWalletToSpotClaimsFor(new)
             projects[projects.indexOf(old)] = new

@@ -97,7 +97,7 @@ public class OverviewActivity : VBox(), Activity {
                 while (change.next()) when {
                     change.wasReplaced() -> updateExistingProject(change.from, (change.addedSubList as List<Project>)[0])
 
-                    change.wasAdded() -> slideInNewProject((change.addedSubList as List<Project>)[0])  // TODO: Recheck after upgrading to M14+
+                    change.wasAdded() -> slideInNewProject((change.addedSubList as List<Project>)[0])
 
                     change.wasRemoved() ->
                         // Cannot animate project remove yet.

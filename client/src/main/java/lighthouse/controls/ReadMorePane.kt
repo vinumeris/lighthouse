@@ -36,7 +36,7 @@ public class ReadMorePane() : StackPane() {
                     val wrappedNode = children[0] as Region
 
                     if (wrappedNode.height < prefHeight) {
-                        prefHeight = wrappedNode.getHeight()
+                        prefHeight = wrappedNode.height
                     } else {
                         wrappedNode.minHeight = 0.0
                         val label = Label(tr("Read more ..."))
@@ -64,7 +64,7 @@ public class ReadMorePane() : StackPane() {
 
                             val readMoreClip = Rectangle()
                             readMoreClip.widthProperty() bind widthProperty()
-                            readMoreClip.height = box.getHeight()
+                            readMoreClip.height = box.height
 
                             clipRect.heightProperty().unbind()
                             Timeline(

@@ -37,7 +37,7 @@ public class OnlineUpdateChecks(val onStateChanged: (UpdateState, OnlineUpdateCh
     val updater: Updater
     var state: UpdateState = UpdateState.UNSTARTED
         set(value) {
-            $state = value
+            field = value
             onStateChanged(value, this)
         }
     val progress: ObservableDoubleValue get() = updater.progressProperty()

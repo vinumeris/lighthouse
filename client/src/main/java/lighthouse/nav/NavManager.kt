@@ -30,8 +30,8 @@ public class NavManager(public val scrollPane: ScrollPane, val initial: Activity
 
     public fun navigate(activity: Activity) {
         if (activity !is Node) throw AssertionError()
-        check(!(activity identityEquals currentActivity))
-        check(!(activity identityEquals initial))
+        check(!(activity === currentActivity))
+        check(!(activity === initial))
 
         currentActivity.onStop()
         history.push(HistoryItem(scrollPane.vvalue, currentActivity, currentActivity as Node))

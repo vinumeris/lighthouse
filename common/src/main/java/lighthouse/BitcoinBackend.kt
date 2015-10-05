@@ -47,29 +47,18 @@ public class BitcoinBackend @Throws(ChainFileLockedException::class) constructor
     private val log = LoggerFactory.getLogger(javaClass)
 
     public val params: NetworkParameters = context.params
-    public override var wallet: PledgingWallet
-    public override var store: BlockStore
-    public override var chain: BlockChain
-    public override var peers: PeerGroup
-    public override var xtPeers: PeerGroup
 
+    private val chainFile: File = AppDirectory.dir().resolve("$appName.spvchain").toFile()
+    private val walletFile: File = AppDirectory.dir().resolve("$appName.wallet").toFile()
+
+    public override var wallet: PledgingWallet = createOrLoadWallet(walletFile, walletFile.exists() and !chainFile.exists())
+    public override var store: BlockStore = initializeChainStore(chainFile)
+    public override var chain: BlockChain = BlockChain(context, wallet, store)
+    public override var peers: PeerGroup = createPeerGroup()
+
+    public override var xtPeers: PeerGroup = createXTPeers()
     public val localNodeUnusable: SimpleBooleanProperty = SimpleBooleanProperty()
     public val offline: SimpleBooleanProperty = SimpleBooleanProperty()
-
-    private val walletFile: File
-    private val chainFile: File
-
-    init {
-        chainFile = AppDirectory.dir().resolve("$appName.spvchain").toFile()
-        walletFile = AppDirectory.dir().resolve("$appName.wallet").toFile()
-        // Deleted chain file means, reset and try again.
-        val shouldReplayWallet = walletFile.exists() and !chainFile.exists()
-        $wallet = createOrLoadWallet(walletFile, shouldReplayWallet)
-        $store = initializeChainStore(chainFile)
-        $chain = BlockChain(context, wallet, store)
-        $peers = createPeerGroup()
-        $xtPeers = createXTPeers()
-    }
 
     private fun createXTPeers(): PeerGroup {
         val NUM_XT_PEERS = 4
