@@ -30,6 +30,7 @@ import lighthouse.utils.*;
 import lighthouse.utils.ipc.*;
 import lighthouse.wallet.*;
 import org.bitcoinj.core.*;
+import org.bitcoinj.core.listeners.*;
 import org.bitcoinj.params.*;
 import org.bitcoinj.utils.*;
 import org.bouncycastle.math.ec.*;

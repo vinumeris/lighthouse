@@ -57,7 +57,7 @@ public class ProjectTest {
         toAddress = wallet.freshReceiveAddress();
         details = Project.makeDetails(
                 wallet.getParams(), "My cool project", "A project to make awesome things ... out of Lego!",
-                toAddress, Coin.COIN, wallet.freshAuthKey(), wallet.getKeychainLookaheadSize());
+                toAddress, Coin.COIN, wallet.freshAuthKey(), wallet.getKeyChainGroupLookaheadSize());
         projectBuilder = LHProtos.Project.newBuilder();
         projectBuilder.setSerializedPaymentDetails(details.build().toByteString());
     }
@@ -285,7 +285,7 @@ public class ProjectTest {
     public void authKeys() throws Exception {
         details = Project.makeDetails(
                 wallet.getParams(), "My cool project", "A project to make awesome things ... out of Lego!",
-                toAddress, Coin.COIN, wallet.freshAuthKey(), wallet.getKeychainLookaheadSize());
+                toAddress, Coin.COIN, wallet.freshAuthKey(), wallet.getKeyChainGroupLookaheadSize());
         Project project = new Project(details.build());
         String signature = project.signAsOwner(wallet, "legolegolego", null);
         project.authenticateOwner("legolegolego", signature);

@@ -6,6 +6,8 @@ import javafx.beans.property.SimpleBooleanProperty
 import lighthouse.files.AppDirectory
 import lighthouse.wallet.PledgingWallet
 import org.bitcoinj.core.*
+import org.bitcoinj.core.listeners.AbstractPeerEventListener
+import org.bitcoinj.core.listeners.PeerDataEventListener
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.net.discovery.DnsDiscovery
 import org.bitcoinj.net.discovery.HttpDiscovery
@@ -183,7 +185,7 @@ public class BitcoinBackend @throws(ChainFileLockedException::class) constructor
 
     private fun moveOldWalletToBackup() {
         var counter = 1
-        val newName: File
+        var newName: File
         do {
             newName = File(walletFile.getParent(), "Backup " + counter + " for " + walletFile.getName())
             counter++
@@ -196,9 +198,9 @@ public class BitcoinBackend @throws(ChainFileLockedException::class) constructor
     }
 
     private volatile var running: Boolean = false
-    private var downloadListener: PeerEventListener? = null
+    private var downloadListener: PeerDataEventListener? = null
 
-    public fun start(downloadListener: PeerEventListener) {
+    public fun start(downloadListener: PeerDataEventListener) {
         log.info("Start request received")
         this.downloadListener = downloadListener
         // Assume google.com is the most reliable DNS name in the world.

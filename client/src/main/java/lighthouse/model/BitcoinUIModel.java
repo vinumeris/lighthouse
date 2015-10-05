@@ -4,6 +4,7 @@ package lighthouse.model;
 import javafx.application.*;
 import javafx.beans.property.*;
 import org.bitcoinj.core.*;
+import org.bitcoinj.core.listeners.*;
 
 import java.util.*;
 

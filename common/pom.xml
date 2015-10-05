@@ -83,10 +83,10 @@
         <dependency>
             <groupId>nl.komponents.kovenant</groupId>
             <artifactId>kovenant-jvm</artifactId>
-            <version>[2.3.0,2.4.0)</version>
+            <version>[2.5.0,2.6.0)</version>
         </dependency>
     </dependencies>
     <properties>
-        <kotlin.version>0.12.613</kotlin.version>
+        <kotlin.version>0.13.1514</kotlin.version>
     </properties>
 </project>

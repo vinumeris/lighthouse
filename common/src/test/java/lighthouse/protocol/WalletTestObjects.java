@@ -1,23 +1,17 @@
 package lighthouse.protocol;
 
+import com.google.common.base.*;
 import org.bitcoinj.core.*;
-import org.bitcoinj.crypto.TransactionSignature;
-import org.bitcoinj.params.UnitTestParams;
-import org.bitcoinj.script.ScriptBuilder;
-import org.bitcoinj.store.BlockStoreException;
-import org.bitcoinj.store.MemoryBlockStore;
-import org.bitcoinj.testing.FakeTxBuilder;
-import org.bitcoinj.testing.MockTransactionBroadcaster;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bitcoinj.crypto.*;
+import org.bitcoinj.params.*;
+import org.bitcoinj.script.*;
+import org.bitcoinj.store.*;
+import org.bitcoinj.testing.*;
+import org.slf4j.*;
 
-import org.bitcoinj.core.Coin;
-import java.util.Random;
+import java.util.*;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 /**
  * A set of objects that are useful when writing unit tests that require a wallet.
@@ -38,7 +32,7 @@ public class WalletTestObjects {
     public WalletTestObjects(Supplier<? extends Wallet> walletFactory) {
         try {
             wallet = walletFactory.get();
-            wallet.setKeychainLookaheadSize(2);
+            wallet.setKeyChainGroupLookaheadSize(2);
             checkArgument(wallet.getParams() == UnitTestParams.get());
             params = wallet.getParams();
             store = new MemoryBlockStore(params);

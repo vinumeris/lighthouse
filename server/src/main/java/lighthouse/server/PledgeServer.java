@@ -9,6 +9,7 @@ import lighthouse.files.*;
 import lighthouse.protocol.*;
 import lighthouse.threading.*;
 import org.bitcoinj.core.*;
+import org.bitcoinj.core.listeners.*;
 import org.bitcoinj.params.*;
 import org.bitcoinj.utils.*;
 import org.slf4j.Logger;

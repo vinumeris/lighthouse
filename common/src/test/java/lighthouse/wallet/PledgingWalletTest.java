@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.*;
 import kotlin.*;
 import lighthouse.protocol.*;
 import org.bitcoinj.core.*;
+import org.bitcoinj.core.listeners.*;
 import org.bitcoinj.params.*;
 import org.bitcoinj.store.*;
 import org.bitcoinj.testing.*;
@@ -33,7 +34,7 @@ public class PledgingWalletTest {
         Address toAddress = key.toAddress(params);
         LHProtos.ProjectDetails.Builder details = Project.makeDetails(
                 wallet.getParams(), "My cool project", "A project to make awesome things ... out of Lego!",
-                toAddress, Coin.valueOf(value), wallet.freshAuthKey(), wallet.getKeychainLookaheadSize());
+                toAddress, Coin.valueOf(value), wallet.freshAuthKey(), wallet.getKeyChainGroupLookaheadSize());
         LHProtos.Project.Builder projectBuilder = LHProtos.Project.newBuilder();
         projectBuilder.setSerializedPaymentDetails(details.build().toByteString());
         return projectBuilder.build();

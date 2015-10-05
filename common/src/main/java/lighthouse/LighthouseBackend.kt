@@ -22,7 +22,6 @@ import lighthouse.threading.AffinityExecutor
 import lighthouse.threading.ObservableMirrors
 import lighthouse.utils.asCoin
 import lighthouse.utils.hash
-import lighthouse.utils.plus
 import lighthouse.utils.projectID
 import net.jcip.annotations.GuardedBy
 import nl.komponents.kovenant.Kovenant
@@ -31,6 +30,9 @@ import nl.komponents.kovenant.async
 import nl.komponents.kovenant.deferred
 import nl.komponents.kovenant.jvm.asDispatcher
 import org.bitcoinj.core.*
+import org.bitcoinj.core.listeners.AbstractBlockChainListener
+import org.bitcoinj.core.listeners.OnTransactionBroadcastListener
+import org.bitcoinj.core.listeners.WalletCoinEventListener
 import org.bitcoinj.params.RegTestParams
 import org.slf4j.LoggerFactory
 import org.spongycastle.crypto.params.KeyParameter
@@ -40,9 +42,7 @@ import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.HashSet
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
@@ -173,11 +173,15 @@ public class LighthouseBackend public constructor(
                         }
                     }
                     // Make sure we can spot projects being claimed.
-                    wallet.addEventListener(object : AbstractWalletEventListener() {
+                    wallet.addCoinEventListener(executor, object : WalletCoinEventListener {
+                        override fun onCoinsSent(wallet: Wallet, tx: Transaction, prevBalance: Coin, newBalance: Coin) {
+                        }
+
                         override fun onCoinsReceived(wallet: Wallet, tx: Transaction, prevBalance: Coin, newBalance: Coin) {
                             checkPossibleClaimTX(tx)
                         }
-                    }, executor)
+
+                    })
 
                     for (tx in wallet.getTransactions(false)) {
                         if (tx.getOutputs().size() != 1) continue    // Optimization: short-circuit: not a claim.
@@ -335,10 +339,9 @@ public class LighthouseBackend public constructor(
     }
 
     private fun addClaimConfidenceListener(executor: AffinityExecutor, transaction: Transaction, project: Project) {
-        transaction.getConfidence().addEventListener(object : TransactionConfidence.Listener {
-            private var done = false
-
-            override fun onConfidenceChanged(conf: TransactionConfidence, changeReason: TransactionConfidence.Listener.ChangeReason) {
+        transaction.getConfidence().addEventListener(executor, object : TransactionConfidence.Listener {
+            var done = false
+            override fun onConfidenceChanged(conf: TransactionConfidence, reason: TransactionConfidence.Listener.ChangeReason) {
                 if (!done && checkClaimConfidence(transaction, conf, project)) {
                     // Because an async thread is queuing up events on our thread, we can still get run even after
                     // the event listener has been removed. So just quiet things a bit here.
@@ -346,7 +349,7 @@ public class LighthouseBackend public constructor(
                     transaction.getConfidence().removeEventListener(this)
                 }
             }
-        }, executor)
+        })
     }
 
     private fun checkPossibleClaimTX(tx: Transaction) {
@@ -984,7 +987,7 @@ public class LighthouseBackend public constructor(
 
     synchronized public fun getProjectFromURL(uri: URI): Project? = projectsByUrlPath[uri.getPath()]
 
-    private inner class BloomFilterManager : AbstractPeerEventListener(), PeerFilterProvider {
+    private inner class BloomFilterManager : OnTransactionBroadcastListener, PeerFilterProvider {
         private var allPledges: Map<TransactionOutPoint, LHProtos.Pledge>? = null
 
         // Methods in logical sequence of how they are used/called.
@@ -1075,7 +1078,7 @@ public class LighthouseBackend public constructor(
         manager = BloomFilterManager()
         with(bitcoin.peers) {
             addPeerFilterProvider(manager)
-            addEventListener(manager, executor)
+            addOnTransactionBroadcastListener(executor, manager)
         }
     }
 
@@ -1083,7 +1086,7 @@ public class LighthouseBackend public constructor(
         executor.service.submit {
             with(bitcoin.peers) {
                 removePeerFilterProvider(manager)
-                removeEventListener(manager)
+                removeOnTransactionBroadcastListener(manager)
             }
         }.get()
         executor.service.shutdown()

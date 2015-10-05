@@ -38,7 +38,7 @@ public class ProjectModel {
 
     public ProjectModel(PledgingWallet wallet) {
         this(Project.makeDetails(wallet.getParams(), "", "", wallet.freshReceiveAddress(), Coin.SATOSHI, wallet.freshAuthKey(),
-                wallet.getKeychainLookaheadSize()));
+                wallet.getKeyChainGroupLookaheadSize()));
     }
 
     public ProjectModel(Project editing) {
