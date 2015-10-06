@@ -50,6 +50,8 @@
                 </executions>
             </plugin>
 
+            <!-- disabled temporarily until new UpdateFX is released
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -68,6 +70,8 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
+
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -160,7 +164,7 @@
         <dependency>
             <groupId>org.bitcoinj</groupId>
             <artifactId>orchid</artifactId>
-            <version>1.1.1</version>
+            <version>1.2</version>
         </dependency>
         <dependency>
 	        <groupId>com.lambdaworks</groupId>
