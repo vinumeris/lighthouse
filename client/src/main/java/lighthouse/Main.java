@@ -343,7 +343,6 @@ public class Main extends Application {
     private void initGUI(Stage stage) throws IOException {
         if (GuiUtils.isSoftwarePipeline())
             log.warn("Prism is using software rendering");
-        log.info("Primary screen scale factor is {}", GuiUtils.getPixelScale());
         mainStage = stage;
         Font.loadFont(Main.class.getResource("nanlight-webfont.ttf").toString(), 10);
         Font.loadFont(Main.class.getResource("nanlightbold-webfont.ttf").toString(), 10);

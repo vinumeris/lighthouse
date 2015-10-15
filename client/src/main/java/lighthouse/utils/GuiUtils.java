@@ -27,7 +27,6 @@ import org.slf4j.*;
 
 import javax.annotation.*;
 import java.io.*;
-import java.lang.reflect.*;
 import java.net.*;
 import java.nio.file.Path;
 import java.util.*;
@@ -401,14 +400,5 @@ public class GuiUtils {
 
     public static boolean isSoftwarePipeline() {
         return GraphicsPipeline.getPipeline() instanceof SWPipeline;
-    }
-
-    public static float getPixelScale() {
-        return unchecked(() -> {
-            Screen screen = Screen.getPrimary();
-            Field scale = screen.getClass().getDeclaredField("scale");
-            scale.setAccessible(true);
-            return (Float) scale.get(screen);
-        });
     }
 }
