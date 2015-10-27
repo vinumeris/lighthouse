@@ -422,11 +422,7 @@ public final class LHProtos {
       }
 
       public final boolean isInitialized() {
-        if (!hasScript()) {
-          
-          return false;
-        }
-        return true;
+        return hasScript();
       }
 
       public Builder mergeFrom(
@@ -1238,11 +1234,7 @@ public final class LHProtos {
       }
 
       public final boolean isInitialized() {
-        if (!hasTitle()) {
-          
-          return false;
-        }
-        return true;
+        return hasTitle();
       }
 
       public Builder mergeFrom(
@@ -3143,11 +3135,7 @@ public final class LHProtos {
             return false;
           }
         }
-        if (!getExtraDetails().isInitialized()) {
-          
-          return false;
-        }
-        return true;
+        return getExtraDetails().isInitialized();
       }
 
       public Builder mergeFrom(
@@ -3449,7 +3437,7 @@ public final class LHProtos {
           java.lang.Iterable<? extends lighthouse.protocol.LHProtos.Output> values) {
         if (outputsBuilder_ == null) {
           ensureOutputsIsMutable();
-          super.addAll(values, outputs_);
+          addAll(values, outputs_);
           onChanged();
         } else {
           outputsBuilder_.addAllMessages(values);
@@ -4685,11 +4673,7 @@ public final class LHProtos {
       }
 
       public final boolean isInitialized() {
-        if (!hasSerializedPaymentDetails()) {
-          
-          return false;
-        }
-        return true;
+        return hasSerializedPaymentDetails();
       }
 
       public Builder mergeFrom(
@@ -5494,7 +5478,7 @@ public final class LHProtos {
       public Builder addAllCertificate(
           java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
         ensureCertificateIsMutable();
-        super.addAll(values, certificate_);
+        addAll(values, certificate_);
         onChanged();
         return this;
       }
@@ -6425,11 +6409,7 @@ public final class LHProtos {
           
           return false;
         }
-        if (!hasTimestamp()) {
-          
-          return false;
-        }
-        return true;
+        return hasTimestamp();
       }
 
       public Builder mergeFrom(
@@ -7897,7 +7877,7 @@ public final class LHProtos {
       public Builder addAllTransactions(
           java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
         ensureTransactionsIsMutable();
-        super.addAll(values, transactions_);
+        addAll(values, transactions_);
         onChanged();
         return this;
       }
@@ -8100,7 +8080,7 @@ public final class LHProtos {
           java.lang.Iterable<? extends lighthouse.protocol.LHProtos.Output> values) {
         if (refundToBuilder_ == null) {
           ensureRefundToIsMutable();
-          super.addAll(values, refundTo_);
+          addAll(values, refundTo_);
           onChanged();
         } else {
           refundToBuilder_.addAllMessages(values);
@@ -8857,11 +8837,7 @@ public final class LHProtos {
           
           return false;
         }
-        if (!getPayment().isInitialized()) {
-          
-          return false;
-        }
-        return true;
+        return getPayment().isInitialized();
       }
 
       public Builder mergeFrom(
@@ -10299,7 +10275,7 @@ public final class LHProtos {
           java.lang.Iterable<? extends lighthouse.protocol.LHProtos.Pledge> values) {
         if (pledgesBuilder_ == null) {
           ensurePledgesIsMutable();
-          super.addAll(values, pledges_);
+          addAll(values, pledges_);
           onChanged();
         } else {
           pledgesBuilder_.addAllMessages(values);

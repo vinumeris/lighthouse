@@ -144,7 +144,7 @@ public class BitcoinBackend @Throws(ChainFileLockedException::class) constructor
             }
             return store
         } catch(e: BlockStoreException) {
-            if (e.getMessage()?.contains("locked") ?: false)
+            if (e.message?.contains("locked") ?: false)
                 throw ChainFileLockedException()
             else
                 throw e

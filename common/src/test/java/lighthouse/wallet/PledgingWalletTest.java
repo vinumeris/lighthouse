@@ -158,7 +158,7 @@ public class PledgingWalletTest {
         wallet = (PledgingWallet) objects.wallet;
         System.err.println(wallet);
         LHProtos.Pledge[] revokedPledge = new LHProtos.Pledge[1];
-        wallet.addOnRevokeHandler(Threading.SAME_THREAD, p -> { revokedPledge[0] = p; return Unit.INSTANCE$; });
+        wallet.addOnRevokeHandler(Threading.SAME_THREAD, p -> { revokedPledge[0] = p; return Unit.INSTANCE; });
 
         LHProtos.Pledge proto = wallet.getPledgeFor(project);
         assertNotNull(proto);
@@ -191,7 +191,7 @@ public class PledgingWalletTest {
         objects.sendAmounts(1_000_000);
 
         LHProtos.Pledge[] revokedPledge = new LHProtos.Pledge[1];
-        wallet.addOnRevokeHandler(Threading.SAME_THREAD, p -> { revokedPledge[0] = p; return Unit.INSTANCE$; });
+        wallet.addOnRevokeHandler(Threading.SAME_THREAD, p -> { revokedPledge[0] = p; return Unit.INSTANCE; });
 
         Project project = new Project(makeProject(wallet, 3_000_000));
         LHProtos.Pledge pledge = wallet.createPledge(project, 500_000, null).commit(true);
@@ -242,7 +242,7 @@ public class PledgingWalletTest {
         wallet1.addOnClaimHandler(Threading.SAME_THREAD, (p, tx) -> {
             claimedPledge[0] = p;
             claimTx[0] = tx;
-            return Unit.INSTANCE$;
+            return Unit.INSTANCE;
         });
 
         // We now have two wallets that have made two separate pledges, which is sufficient to complete the project.

@@ -183,6 +183,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <kotlin.version>0.14.449</kotlin.version>
+        <kotlin.version>1.0.0-beta-1038</kotlin.version>
     </properties>
 </project>

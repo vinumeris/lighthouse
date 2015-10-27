@@ -34,10 +34,11 @@ public class NavManager(public val scrollPane: ScrollPane, val initial: Activity
         check(!(activity === initial))
 
         currentActivity.onStop()
-        history.push(HistoryItem(scrollPane.vvalue, currentActivity, currentActivity as Node))
+        val node = currentActivity as Node
+        history.push(HistoryItem(scrollPane.vvalue, currentActivity, node))
         with (stackPane.children) {
             // TODO: Animate this
-            remove(currentActivity)
+            remove(node)
             add(activity)
         }
         scrollPane.vvalue = 0.0
@@ -57,7 +58,7 @@ public class NavManager(public val scrollPane: ScrollPane, val initial: Activity
         currentActivity.onStop()
         with (stackPane.children) {
             // TODO: Animate this
-            remove(currentActivity)
+            removeRaw(currentActivity)
             add(prev.asNode)
         }
         scrollPane.vvalue = prev.scroll

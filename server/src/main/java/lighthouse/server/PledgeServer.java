@@ -99,7 +99,7 @@ public class PledgeServer {
                     log.error("Failed to load project from {}", path);
                 }
             }
-            return Unit.INSTANCE$;
+            return Unit.INSTANCE;
         });
 
         server.createContext(LHUtils.HTTP_PATH_PREFIX, new ProjectHandler(backend));

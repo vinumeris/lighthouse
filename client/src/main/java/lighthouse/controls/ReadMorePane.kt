@@ -49,8 +49,8 @@ public class ReadMorePane() : StackPane() {
                         children.add(box)
 
                         val clipRect = Rectangle()
-                        clipRect.widthProperty()  bind widthProperty()
-                        clipRect.heightProperty() bind heightProperty()
+                        clipRect.widthProperty().bind(widthProperty())
+                        clipRect.heightProperty().bind(heightProperty())
                         wrappedNode.clip = clipRect
 
                         label.setOnMouseClicked {
@@ -63,7 +63,7 @@ public class ReadMorePane() : StackPane() {
                             wrappedNode.clip = clipRect
 
                             val readMoreClip = Rectangle()
-                            readMoreClip.widthProperty() bind widthProperty()
+                            readMoreClip.widthProperty().bind(widthProperty())
                             readMoreClip.height = box.height
 
                             clipRect.heightProperty().unbind()

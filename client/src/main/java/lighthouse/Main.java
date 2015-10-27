@@ -241,7 +241,7 @@ public class Main extends Application {
                     Main.restart();
                     break;
             }
-            return Unit.INSTANCE$;
+            return Unit.INSTANCE;
         }).start();
     }
 

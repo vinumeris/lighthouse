@@ -21,9 +21,9 @@ public enum class UpdateState {
 
 public class UpdateCheckStrings {
     companion object {
-        val DOWNLOADING_SOFTWARE_UPDATE = I18nUtil.tr("Downloading software update")
-        val RESTART = I18nUtil.tr("Restart")
-        val PLEASE_RESTART_NOW = I18nUtil.tr("Please restart the app to upgrade to the new version.")
+        @JvmField val DOWNLOADING_SOFTWARE_UPDATE = I18nUtil.tr("Downloading software update")
+        @JvmField val RESTART = I18nUtil.tr("Restart")
+        @JvmField val PLEASE_RESTART_NOW = I18nUtil.tr("Please restart the app to upgrade to the new version.")
     }
 }
 
@@ -50,7 +50,7 @@ public class OnlineUpdateChecks(val onStateChanged: (UpdateState, OnlineUpdateCh
         if (Main.instance.updatesURL != Main.UPDATES_BASE_URL)
             updater.setOverrideURLs(true)    // For testing.
 
-        updater.progressProperty().addListener { _ ->
+        updater.progressProperty().addListener { obv ->
             if (state == UpdateState.CHECKING) {
                 state = UpdateState.DOWNLOADING
                 updater.setOnSucceeded { state = UpdateState.AWAITING_APP_RESTART }

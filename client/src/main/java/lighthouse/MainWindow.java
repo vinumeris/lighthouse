@@ -13,7 +13,7 @@ import javafx.fxml.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import kotlin.*;
-import kotlin.jvm.functions.Function2;
+import kotlin.jvm.functions.*;
 import lighthouse.activities.*;
 import lighthouse.controls.*;
 import lighthouse.model.*;
@@ -77,7 +77,7 @@ public class MainWindow {
         // Slide back button in/out.
         AwesomeDude.setIcon(backButton, AwesomeIcon.ARROW_CIRCLE_LEFT, "30");
         animatedBind(topBoxLeftArea, topBoxLeftArea.translateXProperty(),
-                when(navManager.getIsOnInitialActivity()).then(-45).otherwise(0),
+                when(navManager.isOnInitialActivity()).then(-45).otherwise(0),
                 Interpolator.EASE_OUT);
     }
 

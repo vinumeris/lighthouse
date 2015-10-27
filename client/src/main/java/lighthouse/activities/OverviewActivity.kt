@@ -68,7 +68,7 @@ public class OverviewActivity : VBox(), Activity {
         loader.setController(this)
         loader.load<Any>()
 
-        numInitialBoxes = children.size()
+        numInitialBoxes = children.size
 
         AwesomeDude.setIcon(addProjectIcon, AwesomeIcon.FILE_ALT, "50pt; -fx-text-fill: white" /* lame hack */)
 
@@ -79,7 +79,7 @@ public class OverviewActivity : VBox(), Activity {
         val immediate = pr.take(PRERENDER)
         val later = pr.drop(PRERENDER)
 
-        fun addWidget(w: ProjectOverviewWidget) = children.add(children.size() - numInitialBoxes, w)
+        fun addWidget(w: ProjectOverviewWidget) = children.add(children.size - numInitialBoxes, w)
 
         // Attempting to parallelize this didn't work: when interpreted it takes ~500msec to load a project.
         // When compiled it is 10x faster. So we're already blasting away on the other CPU cores to compile
@@ -95,13 +95,13 @@ public class OverviewActivity : VBox(), Activity {
 
             projects.addListener(ListChangeListener<Project> { change: ListChangeListener.Change<out Project> ->
                 while (change.next()) when {
-                    change.wasReplaced() -> updateExistingProject(change.from, (change.addedSubList as List<Project>)[0])
+                    change.wasReplaced() -> updateExistingProject(change.from, change.addedSubList[0])
 
-                    change.wasAdded() -> slideInNewProject((change.addedSubList as List<Project>)[0])
+                    change.wasAdded() -> slideInNewProject(change.addedSubList[0])
 
                     change.wasRemoved() ->
                         // Cannot animate project remove yet.
-                        children.remove(children.size() - 1 - numInitialBoxes - change.from)
+                        children.removeAt(children.size - 1 - numInitialBoxes - change.from)
                 }
             })
         }
@@ -178,7 +178,7 @@ public class OverviewActivity : VBox(), Activity {
             Main.backend.importProjectFrom(file)
         } catch (e: Exception) {
             GuiUtils.informationalAlert(tr("Failed to import project"), // TRANS: %s = error message
-                    tr("Could not read project file: %s"), e.getMessage())
+                    tr("Could not read project file: %s"), e.message)
         }
 
     }
@@ -186,7 +186,7 @@ public class OverviewActivity : VBox(), Activity {
     // Triggered by the projects list being touched by the backend.
     private fun updateExistingProject(index: Int, newProject: Project) {
         log.info("Update at index $index")
-        val uiIndex = children.size() - 1 - numInitialBoxes - index
+        val uiIndex = children.size - 1 - numInitialBoxes - index
         check(uiIndex >= 0)
         children.set(uiIndex, buildProjectWidget(newProject))
     }

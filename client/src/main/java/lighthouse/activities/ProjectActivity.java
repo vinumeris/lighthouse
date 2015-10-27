@@ -255,7 +255,7 @@ public class ProjectActivity extends HBox implements Activity {
         // Because the decision on what the button action should be depends on whether the wallet thinks it's pledged,
         // we have to watch out for this and update the mode here.
         Main.wallet.addOnRevokeHandler(Platform::runLater, pledge -> {
-            setModeFor(p, pledgedValue.get()); return Unit.INSTANCE$;
+            setModeFor(p, pledgedValue.get()); return Unit.INSTANCE;
         });
 
         if (p.isServerAssisted()) {
@@ -629,7 +629,7 @@ public class ProjectActivity extends HBox implements Activity {
         Main.backend.importPledgeFrom(file.toPath()).fail(ex -> {
             log.error("Importing pledge failed", ex);
             informationalAlert(tr("Could not import pledge"), ex.getMessage());
-            return Unit.INSTANCE$;
+            return Unit.INSTANCE;
         });
     }
 }

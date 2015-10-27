@@ -13,8 +13,8 @@ public operator fun Coin.minus(other: Coin) = this.subtract(other)
 public fun Long.asCoin(): Coin = Coin.valueOf(this)
 
 class ThreadBox<out T>(private val data: T) {
-    @Synchronized fun use<R>(block: (T) -> R): R = block(data)
-    @Synchronized fun useWith<R>(block: T.() -> R): R = data.block()
+    @Synchronized fun <R> use(block: (T) -> R): R = block(data)
+    @Synchronized fun <R> useWith(block: T.() -> R): R = data.block()
 }
 
 class UIThreadBox<out T>(private val data: T) {
@@ -22,7 +22,7 @@ class UIThreadBox<out T>(private val data: T) {
     fun useWith(block: T.() -> Unit): Unit = if (Platform.isFxApplicationThread()) data.block() else Platform.runLater { data.block() }
 
     /** Does a blocking get from the UI thread - danger of deadlock if not used properly! */
-    fun getWith<R>(block: T.() -> R): R {
+    fun <R> getWith(block: T.() -> R): R {
         if (Platform.isFxApplicationThread())
             return data.block()
         val f = CompletableFuture<R>()

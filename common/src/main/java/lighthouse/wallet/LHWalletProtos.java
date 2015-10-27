@@ -953,7 +953,7 @@ public final class LHWalletProtos {
           java.lang.Iterable<? extends lighthouse.protocol.LHProtos.Pledge> values) {
         if (pledgesBuilder_ == null) {
           ensurePledgesIsMutable();
-          super.addAll(values, pledges_);
+          addAll(values, pledges_);
           onChanged();
         } else {
           pledgesBuilder_.addAllMessages(values);
@@ -1193,7 +1193,7 @@ public final class LHWalletProtos {
           java.lang.Iterable<? extends lighthouse.protocol.LHProtos.Project> values) {
         if (projectsBuilder_ == null) {
           ensureProjectsIsMutable();
-          super.addAll(values, projects_);
+          addAll(values, projects_);
           onChanged();
         } else {
           projectsBuilder_.addAllMessages(values);
@@ -1533,7 +1533,7 @@ public final class LHWalletProtos {
           java.lang.Iterable<? extends lighthouse.protocol.LHProtos.Pledge> values) {
         if (revokedPledgesBuilder_ == null) {
           ensureRevokedPledgesIsMutable();
-          super.addAll(values, revokedPledges_);
+          addAll(values, revokedPledges_);
           onChanged();
         } else {
           revokedPledgesBuilder_.addAllMessages(values);

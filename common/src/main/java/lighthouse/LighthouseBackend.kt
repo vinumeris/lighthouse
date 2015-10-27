@@ -15,14 +15,11 @@ import javafx.collections.ObservableMap
 import javafx.collections.ObservableSet
 import lighthouse.files.AppDirectory
 import lighthouse.protocol.*
-import lighthouse.protocol.LHUtils.futureOfFutures
-import lighthouse.protocol.LHUtils.hashFromPledge
-import lighthouse.protocol.LHUtils.pledgeToTx
+import lighthouse.protocol.LHUtils.*
 import lighthouse.threading.AffinityExecutor
 import lighthouse.threading.ObservableMirrors
 import lighthouse.utils.asCoin
 import lighthouse.utils.hash
-import lighthouse.utils.plus
 import lighthouse.utils.projectID
 import net.jcip.annotations.GuardedBy
 import nl.komponents.kovenant.Kovenant
@@ -67,9 +64,9 @@ public class LighthouseBackend public constructor(
         public val executor: AffinityExecutor.ServiceAffinityExecutor
 ) : AbstractBlockChainListener() {
     companion object {
-        public val PROJECT_STATUS_FILENAME: String = "project-status.txt"
-        public val PROJECT_FILE_EXTENSION: String = ".lighthouse-project"
-        public val PLEDGE_FILE_EXTENSION: String = ".lighthouse-pledge"
+        const public val PROJECT_STATUS_FILENAME: String = "project-status.txt"
+        const public val PROJECT_FILE_EXTENSION: String = ".lighthouse-project"
+        const public val PLEDGE_FILE_EXTENSION: String = ".lighthouse-pledge"
 
         private val log = LoggerFactory.getLogger(LighthouseBackend::class.java)
 
@@ -185,7 +182,7 @@ public class LighthouseBackend public constructor(
                     })
 
                     for (tx in wallet.getTransactions(false)) {
-                        if (tx.outputs.size() != 1) continue    // Optimization: short-circuit: not a claim.
+                        if (tx.outputs.size != 1) continue    // Optimization: short-circuit: not a claim.
                         val project = getProjectFromClaim(tx) ?: continue
                         log.info("Loading stored claim ${tx.hash} for $project")
                         addClaimConfidenceListener(executor, tx, project)
@@ -211,7 +208,7 @@ public class LighthouseBackend public constructor(
     }
 
     public fun start() {
-        projectsMap.values().forEach { checkProject(it) }
+        projectsMap.values.forEach { checkProject(it) }
     }
 
     private fun checkProject(project: Project) {
@@ -247,7 +244,7 @@ public class LighthouseBackend public constructor(
 
     private fun loadProjectFiles(appdir: File) {
         appdir.listFiles {
-            it.toString() endsWith PROJECT_FILE_EXTENSION && it.isFile
+            it.toString().endsWith(PROJECT_FILE_EXTENSION) && it.isFile
         }?.map {
             tryLoadProject(it)
         }?.filterNotNull()?.forEach { project ->
@@ -273,9 +270,9 @@ public class LighthouseBackend public constructor(
         executor.executeASAP {
             log.info("Saving project statuses")
             val lines = arrayListOf<String>()
-            for (entry in projectStates.entrySet()) {
-                val v = if (entry.getValue().state == ProjectState.OPEN) "OPEN" else entry.getValue().claimedBy.toString()
-                lines.add("${entry.getKey()}=$v")
+            for (entry in projectStates.entries) {
+                val v = if (entry.value.state == ProjectState.OPEN) "OPEN" else entry.value.claimedBy.toString()
+                lines.add("${entry.key}=$v")
             }
             Files.write(path, lines)
         }
@@ -303,7 +300,7 @@ public class LighthouseBackend public constructor(
 
     private fun loadPledges(appdir: File) {
         appdir.listFiles {
-            it.toString() endsWith PLEDGE_FILE_EXTENSION
+            it.toString().endsWith(PLEDGE_FILE_EXTENSION)
         }?.map {
             tryLoadPledge(it)
         }?.filterNotNull()?.forEach {
@@ -332,7 +329,7 @@ public class LighthouseBackend public constructor(
             null
         }
     } catch (e: Exception) {
-        log.error("Project file $it could not be read, ignoring: ${e.getMessage()}")
+        log.error("Project file $it could not be read, ignoring: ${e.message}")
         if (ignoreErrors)
             null
         else
@@ -363,7 +360,7 @@ public class LighthouseBackend public constructor(
         // to a high enough degree of confidence.
         executor.checkOnThread()
         val project = getProjectFromClaim(tx) ?: return
-        log.info("Found claim tx {} with {} inputs for project {}", tx.hash, tx.inputs.size(), project)
+        log.info("Found claim tx {} with {} inputs for project {}", tx.hash, tx.inputs.size, project)
         tx.verify()   // Already done but these checks are fast, can't hurt to repeat.
         // We could check that the inputs are all (but one) signed with SIGHASH_ANYONECANPAY here, but it seems
         // overly strict at the moment.
@@ -380,7 +377,7 @@ public class LighthouseBackend public constructor(
         if (type == TransactionConfidence.ConfidenceType.PENDING) {
             val seenBy = conf.numBroadcastPeers()
             // This logic taken from bitcoinj's TransactionBroadcast class.
-            val numConnected = bitcoin.peers.connectedPeers.size()
+            val numConnected = bitcoin.peers.connectedPeers.size
             val numToBroadcastTo = Math.max(1, Math.round(Math.ceil(numConnected / 2.0))).toInt()
             val numWaitingFor = Math.ceil((numConnected - numToBroadcastTo) / 2.0).toInt()
 
@@ -409,7 +406,7 @@ public class LighthouseBackend public constructor(
 
     public fun getProjectFromClaim(claim: Transaction): Project? {
         executor.checkOnThread()
-        return projectsMap.values().firstOrNull { project -> LHUtils.compareOutputsStructurally(claim, project) }
+        return projectsMap.values.firstOrNull { project -> LHUtils.compareOutputsStructurally(claim, project) }
     }
 
     public fun waitForInit() {
@@ -432,7 +429,7 @@ public class LighthouseBackend public constructor(
 
     private fun isPledgeKnown(pledge: LHProtos.Pledge): Boolean {
         executor.checkOnThread()
-        pledges.values().forEach { if (it.contains(pledge)) return true }
+        pledges.values.forEach { if (it.contains(pledge)) return true }
         return false
     }
 
@@ -483,7 +480,7 @@ public class LighthouseBackend public constructor(
                     result.complete(HashSet(appearedInClaim))
                 }
             } else {
-                log.info("Checking ${pledges.size()} pledge(s) against P2P network for '$project'")
+                log.info("Checking ${pledges.size} pledge(s) against P2P network for '$project'")
                 markAsInProgress(project)
                 val peerFuture = bitcoin.xtPeers.waitForPeersOfVersion(minPeersForUTXOQuery, GetUTXOsMessage.MIN_PROTOCOL_VERSION.toLong())
                 if (!peerFuture.isDone) {
@@ -496,16 +493,16 @@ public class LighthouseBackend public constructor(
                         executor.checkOnThread()
                         // Do a fast delete of any peers that claim they don't support NODE_GETUTXOS. We ensure we always
                         // find nodes that support it elsewhere.
-                        val origSize = allPeers.size()
+                        val origSize = allPeers.size
                         val xtPeers = allPeers.filter { it.peerVersionMessage.isGetUTXOsSupported }
                         if (xtPeers.isEmpty()) {
                             val ex = Exception("No nodes of high enough version advertised NODE_GETUTXOS")
-                            log.error(ex.getMessage())
+                            log.error(ex.message)
                             checkStatuses.put(project, CheckStatus.withError(ex))
                             result.completeExceptionally(ex)
                         } else {
-                            if (xtPeers.size() != origSize)
-                                log.info("Dropped {} peers for not supporting NODE_GETUTXOS, now have {}", xtPeers.size() - origSize, xtPeers.size())
+                            if (xtPeers.size != origSize)
+                                log.info("Dropped {} peers for not supporting NODE_GETUTXOS, now have {}", xtPeers.size - origSize, xtPeers.size)
                             doUTXOLookupsForPledges(project, pledges, xtPeers, result)
                         }
                     }
@@ -541,7 +538,7 @@ public class LighthouseBackend public constructor(
         executor.checkOnThread()
         try {
             // The multiplexor issues the same query to multiple peers and verifies they're all consistent.
-            log.info("Querying {} peers", peers.size())
+            log.info("Querying {} peers", peers.size)
             val multiplexor = PeerUTXOMultiplexor(peers)
             // The batcher queues up queries from project.verifyPledge and combines them into a single query, to
             // speed things up and minimise network traffic.
@@ -556,8 +553,8 @@ public class LighthouseBackend public constructor(
             }
 
             val allOutpoints = HashSet<TransactionOutPoint>()
-            val verifiedPledges = ArrayList<LHProtos.Pledge>(futures.size())
-            for (pair in futures zip pledgesInFixedOrder) {
+            val verifiedPledges = ArrayList<LHProtos.Pledge>(futures.size)
+            for (pair in futures.zip(pledgesInFixedOrder)) {
                 val future = pair.first
                 if (!future.isDone) {
                     log.warn("getutxo lookup failed or timed out: {}", future)
@@ -586,7 +583,7 @@ public class LighthouseBackend public constructor(
                     }
                 }
             }
-            log.info("{} of {} pledges verified (were not revoked/claimed)", verifiedPledges.size(), pledges.size())
+            log.info("{} of {} pledges verified (were not revoked/claimed)", verifiedPledges.size, pledges.size)
             syncPledges(project, pledges, verifiedPledges)
             refreshBloomFilter()
             markAsCheckDone(project)
@@ -632,9 +629,9 @@ public class LighthouseBackend public constructor(
                         // here we mark all of them. This is due to the difference between serverless and server assisted
                         // projects (serverless can have open pledges even after a claim).
                         if (status.hasClaimedBy()) {
-                            if (projectStates[project]?.state !== ProjectState.CLAIMED)
+                            if (projectStates[project.hash]?.state !== ProjectState.CLAIMED)
                                 projectStates[project.hash] = ProjectStateInfo(ProjectState.CLAIMED, Sha256Hash.wrap(status.claimedBy.toByteArray()))
-                            log.info("Project is claimed ({} pledges)", getPledgesFor(project).size())
+                            log.info("Project is claimed ({} pledges)", getPledgesFor(project).size)
                         }
                         // Status contains a new list of pledges. We should update our own observable list by touching it
                         // as little as possible. This ensures that as updates flow through to the UI any animations look
@@ -675,7 +672,7 @@ public class LighthouseBackend public constructor(
             //
             // Also remove if this is a scrubbed version of a pledge we already have i.e. because we created it, uploaded it
             // and are now seeing it come back to us.
-            newlyOpen = newlyOpen.filterNot { bitcoin.wallet.wasPledgeRevoked(it) || (it.pledgeDetails.hasOrigHash() && hashes contains hashFromPledge(it)) }.toHashSet()
+            newlyOpen = newlyOpen.filterNot { bitcoin.wallet.wasPledgeRevoked(it) || (it.pledgeDetails.hasOrigHash() && hashes.contains(hashFromPledge(it))) }.toHashSet()
         }
         curOpenPledges.addAll(newlyOpen)
         val newlyInvalid = HashSet(testedPledges)
@@ -691,13 +688,13 @@ public class LighthouseBackend public constructor(
             // TODO: Save server statuses to disk so we can render them offline and so tested vs verified pledges is meaningful.
 
             // Figure out which pledges are no longer being reported, taking into account scrubbing.
-            val removedItems = HashSet(hashes.values())
+            val removedItems = HashSet(hashes.values)
             for (pledge in verifiedPledges) {
                 val orig = hashes.get(hashFromPledge(pledge))
                 if (orig != null)
                     removedItems.remove(orig)
             }
-            if (removedItems.size() > 0) {
+            if (removedItems.size > 0) {
                 log.info("Server no longer reporting some pledges, revoked: {}", removedItems)
                 curOpenPledges.removeAll(removedItems)
             }
@@ -955,12 +952,12 @@ public class LighthouseBackend public constructor(
         executor.executeASAP {
             try {
                 val txnBytes = pledge.transactionsList.subList(0, pledge.transactionsCount - 1)
-                if (txnBytes.size() > 5) {
+                if (txnBytes.size > 5) {
                     // We don't accept ridiculous number of dependency txns. Even this is probably too much.
-                    log.error("Too many dependencies: {}", txnBytes.size())
-                    result.completeExceptionally(Ex.TooManyDependencies(txnBytes.size()))
+                    log.error("Too many dependencies: {}", txnBytes.size)
+                    result.completeExceptionally(Ex.TooManyDependencies(txnBytes.size))
                 } else {
-                    log.info("Broadcasting {} provided pledge dependencies", txnBytes.size())
+                    log.info("Broadcasting {} provided pledge dependencies", txnBytes.size)
                     txnBytes.map { Transaction(params, it.toByteArray()) }.forEach {
                         // Wait for each broadcast in turn. In the local node case this will complete immediately. In the
                         // case of remote nodes (maybe we should forbid this later), it may block for a few seconds whilst
@@ -999,11 +996,11 @@ public class LighthouseBackend public constructor(
             allPledges = executor.fetchFrom { getAllOpenPledgedOutpoints() }
         }
 
-        override fun getBloomFilterElementCount() = allPledges!!.size()
+        override fun getBloomFilterElementCount() = allPledges!!.size
 
         override fun getBloomFilter(size: Int, falsePositiveRate: Double, nTweak: Long): BloomFilter {
             val filter = BloomFilter(size, falsePositiveRate, nTweak)
-            for (pledge in allPledges!!.keySet()) {
+            for (pledge in allPledges!!.keys) {
                 filter.insert(pledge.bitcoinSerialize())
             }
             log.info("Bloom filter calculated")
@@ -1028,7 +1025,7 @@ public class LighthouseBackend public constructor(
         log.debug("Checking {} to see if it's a revocation", t.hash)
         val revoked = whichPledgesAreRevokedBy(t)
         if (revoked.isEmpty()) return
-        for (pledges in this.pledges.values()) {
+        for (pledges in this.pledges.values) {
             pledges.removeAll(revoked)
         }
     }
@@ -1068,8 +1065,8 @@ public class LighthouseBackend public constructor(
             log.info("... and is a revocation")
             result.add(pledge)
         }
-        if (result.size() > 1)
-            log.info("TX {} revoked {} pledges", t.hash, result.size())
+        if (result.size > 1)
+            log.info("TX {} revoked {} pledges", t.hash, result.size)
         return result
     }
 
@@ -1101,7 +1098,7 @@ public class LighthouseBackend public constructor(
     private fun getAllOpenPledgedOutpoints(): Map<TransactionOutPoint, LHProtos.Pledge> {
         executor.checkOnThread()
         val result = HashMap<TransactionOutPoint, LHProtos.Pledge>()
-        for (pledges in this.pledges.values()) {
+        for (pledges in this.pledges.values) {
             for (pledge in pledges) {
                 if (pledge.pledgeDetails.hasOrigHash()) continue   // Can't watch for revocations of scrubbed pledges.
                 val tx = LHUtils.pledgeToTx(params, pledge)

@@ -16,7 +16,7 @@ public object ServerList {
             Entry("lighthouse.bitseattle.com", "https://lighthouse.bitseattle.com/lighthouse-projects/upload/", tr("Submission via the web. Project must be legal under US law."), SubmitType.WEB),
             Entry("server.lightlist.io", "https://www.lightlist.io/projects/new", tr("Submission via the web. Project must be legal under US law."), SubmitType.WEB)
     )
-    val hostnameToServer: Map<String, Entry> = servers.map { Pair(it.hostName, it) }.toMap()
+    @JvmField val hostnameToServer: Map<String, Entry> = servers.map { Pair(it.hostName, it) }.toMap()
 
-    fun pickRandom(): Entry = servers[(Math.random() * servers.size()).toInt()]
+    fun pickRandom(): Entry = servers[(Math.random() * servers.size).toInt()]
 }

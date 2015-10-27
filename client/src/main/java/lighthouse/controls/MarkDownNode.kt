@@ -46,7 +46,7 @@ public class MarkDownNode : VBox() {
     fun preTransform(text: String): String {
         // A few simple regex based transforms to try and handle pre-Markdown formatted projects.
         return text.replace("•", "*").replace("(=+) (.*) =+\n".toRegex()) {
-            "#".repeat(it.groups[1]!!.value.length()) + it.groups[2]
+            "#".repeat(it.groups[1]!!.value.length) + it.groups[2]
         }
     }
 
@@ -182,17 +182,17 @@ public class MarkDownNode : VBox() {
 
         override fun visit(node: VerbatimNode) {
             val textFlow = nodeWithStyles<TextFlow>("md-verbatim")
-            textFlow.children add mdTextToFXText(node)
+            textFlow.children.add(mdTextToFXText(node))
             val box = VBox(textFlow)
             VBox.setMargin(textFlow, Insets(0.0, 0.0, 15.0, 0.0))
-            cursor.children add box
+            cursor.children.add(box)
         }
 
         private fun borderedLabel(node: TextNode, style: String, parent: Pane = cursor): javafx.scene.Node {
             val label = mdTextToFXText(node)
             val wrapper = VBox(label)
-            wrapper.styleClass add style
-            parent.children add wrapper
+            wrapper.styleClass.add(style)
+            parent.children.add(wrapper)
             return wrapper
         }
 
@@ -202,7 +202,7 @@ public class MarkDownNode : VBox() {
         override fun visit(node: DefinitionTermNode) = descend(node)
 
         override fun visit(node: ExpImageNode) {
-            cursor.children add ImageView(Image(node.url, true))
+            cursor.children.add(ImageView(Image(node.url, true)))
         }
 
         override fun visit(node: RefImageNode) {
@@ -233,7 +233,7 @@ public class MarkDownNode : VBox() {
                 val imageView = ImageView(Image(child.url, true))
                 imageView.setOnMouseClicked { this@MarkDownNode.urlOpener.accept(child.url) }
                 imageView.cursor = Cursor.HAND
-                cursor.children add imageView
+                cursor.children.add(imageView)
             } else {
                 log.info("Unknown link child node $child")
             }
@@ -265,23 +265,23 @@ public class MarkDownNode : VBox() {
         private var listCounter = linkedListOf<Int>();  // 0 == bullet, >0 == number
         override fun visit(node: BulletListNode) {
             createAndDescend(node, nodeWithStyles<VBox>("md-p")) {
-                listCounter push 0
+                listCounter.push(0)
             }
             listCounter.pop()
         }
 
         override fun visit(node: OrderedListNode) {
             createAndDescend(node, nodeWithStyles<VBox>("md-p")) {
-                listCounter push 1
+                listCounter.push(1)
             }
             listCounter.pop()
         }
 
         override fun visit(node: ListItemNode) {
             createAndDescend(node, nodeWithStyles<HBox>("md-li")) {
-                cursor.children add Text(nextBullet())
+                cursor.children.add(Text(nextBullet()))
                 val box = VBox()
-                cursor.children add box
+                cursor.children.add(box)
                 cursor = box
             }
         }
@@ -334,7 +334,7 @@ public class MarkDownNode : VBox() {
                 SimpleNode.Type.Linebreak -> {
                 }
                 SimpleNode.Type.HRule -> {
-                    cursor.children add Separator()
+                    cursor.children.add(Separator())
                 }
             }
         }
