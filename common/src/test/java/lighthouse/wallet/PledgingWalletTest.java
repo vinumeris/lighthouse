@@ -1,5 +1,7 @@
 package lighthouse.wallet;
 
+import lighthouse.testing.*;
+
 import com.google.common.collect.*;
 import com.google.common.util.concurrent.*;
 import kotlin.*;
@@ -8,7 +10,6 @@ import org.bitcoinj.core.*;
 import org.bitcoinj.core.listeners.*;
 import org.bitcoinj.params.*;
 import org.bitcoinj.store.*;
-import org.bitcoinj.testing.*;
 import org.bitcoinj.utils.*;
 import org.bitcoinj.wallet.*;
 import org.junit.*;

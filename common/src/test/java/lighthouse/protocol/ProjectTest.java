@@ -15,7 +15,7 @@ import java.util.*;
 
 import static java.util.concurrent.CompletableFuture.*;
 import static lighthouse.protocol.LHUtils.*;
-import static org.bitcoinj.testing.FakeTxBuilder.*;
+import static lighthouse.testing.FakeTxBuilder.*;
 import static org.junit.Assert.*;
 
 public class ProjectTest {
