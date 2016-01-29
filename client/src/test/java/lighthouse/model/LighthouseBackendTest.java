@@ -11,10 +11,10 @@ import lighthouse.files.*;
 import lighthouse.protocol.*;
 import lighthouse.threading.*;
 import lighthouse.wallet.*;
+import lighthouse.testing.*;
 import org.bitcoinj.core.*;
 import org.bitcoinj.core.Message;
 import org.bitcoinj.store.*;
-import org.bitcoinj.testing.*;
 import org.bitcoinj.utils.*;
 import org.javatuples.*;
 import org.jetbrains.annotations.*;
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.*;
 import static java.net.HttpURLConnection.*;
 import static lighthouse.LighthouseBackend.Mode.*;
 import static lighthouse.protocol.LHUtils.*;
-import static org.bitcoinj.testing.FakeTxBuilder.*;
+import static lighthouse.testing.FakeTxBuilder.*;
 import static org.junit.Assert.*;
 
 public class LighthouseBackendTest extends TestWithPeerGroup {

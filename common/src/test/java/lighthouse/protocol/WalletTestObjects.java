@@ -1,12 +1,13 @@
 package lighthouse.protocol;
 
+import lighthouse.testing.*;
+
 import com.google.common.base.*;
 import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.*;
 import org.bitcoinj.params.*;
 import org.bitcoinj.script.*;
 import org.bitcoinj.store.*;
-import org.bitcoinj.testing.*;
 import org.slf4j.*;
 
 import java.util.*;
