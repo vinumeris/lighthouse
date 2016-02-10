@@ -1,12 +1,10 @@
 Lighthouse
 ==========
 
+### Please note: this project is no longer maintained.
+
 Lighthouse is a decentralised, peer to peer crowdfunding application that uses the smart contracts features of the
 Bitcoin protocol. It lets you create projects and pledge to those projects.
-
-Visit the web site:
-
-https://www.vinumeris.com/lighthouse
 
 # get involved
 
